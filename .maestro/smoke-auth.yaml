@@ -1,0 +1,19 @@
+appId: com.ogrencisosyalagi.app
+---
+- launchApp:
+    clearState: true
+    stopApp: true
+
+- extendedWaitUntil:
+    visible: "Kulupler"
+    timeout: 20000
+
+- assertVisible: "Etkinlikler"
+- assertVisible: "Takip Et"
+- tapOn: "Giris Yap"
+- assertVisible: "Hosgeldin"
+- assertVisible: "E-posta Adresi"
+- assertVisible: "Sifre"
+- assertVisible: "Sifremi Unuttum"
+- back
+- assertVisible: "Kulupler"

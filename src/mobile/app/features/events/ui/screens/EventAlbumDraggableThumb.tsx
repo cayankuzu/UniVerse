@@ -1,0 +1,113 @@
+import React from "react";
+import { Play, Image as ImageIcon } from "lucide-react-native";
+import { Image, Pressable, Text, View } from "react-native";
+import { tokens } from "../../../../shared/theme";
+import { THUMB_SIZE } from "../../domain/eventAlbumDragLayout";
+import { isVideoMediaUri } from "../../../../shared/media/mediaVideoUtils";
+import { VideoThumbnailPreview } from "../../../../shared/media/VideoThumbnailPreview";
+
+type Props = {
+  candidateUris?: string[];
+  kind?: "image" | "video";
+  uri: string;
+  index: number;
+  selected: boolean;
+  swapSource?: boolean;
+  disabled?: boolean;
+  onPress: () => void;
+  onLongPress: () => void;
+};
+
+export function EventAlbumDraggableThumb({
+  candidateUris,
+  kind,
+  uri,
+  index,
+  selected,
+  swapSource = false,
+  disabled,
+  onLongPress,
+  onPress,
+}: Props) {
+  const video = kind === "video" || isVideoMediaUri(uri);
+
+  return (
+    <Pressable
+      disabled={disabled}
+      onPress={onPress}
+      onLongPress={onLongPress}
+      delayLongPress={500}
+      hitSlop={4}
+      style={{
+        width: THUMB_SIZE,
+        height: THUMB_SIZE,
+        borderRadius: tokens.radius.lg,
+        overflow: "hidden",
+        borderWidth: selected || swapSource ? 2 : 1,
+        borderColor: swapSource
+          ? tokens.colors.successDark
+          : selected
+            ? tokens.colors.primary
+            : tokens.colors.borderLight,
+        backgroundColor: tokens.colors.border,
+        opacity: disabled ? 0.6 : 1,
+      }}
+    >
+      {video ? (
+        <VideoThumbnailPreview
+          candidateUris={candidateUris}
+          contentFit="cover"
+          priority="eager"
+          style={{ width: "100%", height: "100%" }}
+          uri={uri}
+        />
+      ) : (
+        <Image source={{ uri }} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
+      )}
+      <View
+        style={{
+          position: "absolute",
+          left: 4,
+          bottom: 4,
+          borderRadius: tokens.radius.pill,
+          backgroundColor: tokens.colors.backdrop,
+          paddingHorizontal: 6,
+          paddingVertical: 3,
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 4,
+        }}
+      >
+        {video ? (
+          <Play size={10} color={tokens.colors.surface} fill={tokens.colors.surface} />
+        ) : (
+          <ImageIcon size={10} color={tokens.colors.surface} />
+        )}
+      </View>
+      <View
+        style={{
+          position: "absolute",
+          right: 4,
+          top: 4,
+          borderRadius: tokens.radius.pill,
+          backgroundColor: tokens.colors.backdrop,
+          paddingHorizontal: 5,
+          paddingVertical: 2,
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 3,
+        }}
+      >
+        <Text
+          style={{
+            color: tokens.colors.surface,
+            fontSize: tokens.typography.nano,
+            fontWeight: tokens.fontWeight.bold,
+          }}
+        >
+          {index + 1}
+        </Text>
+      </View>
+    </Pressable>
+  );
+}

@@ -1,0 +1,14 @@
+title = "UniVerse gitleaks config"
+
+[allowlist]
+description = "Allow generated artifacts and reviewed historical migration literals only. Runtime secrets and signing material must not be allowlisted."
+paths = [
+  '''^dist/''',
+  '''^\.expo-export-test/''',
+  '''^supabase/migrations/20260319010000_push_notification_delivery_pipeline\.sql$''',
+  '''^supabase/migrations/20260319030000_push_webhook_secret_header\.sql$''',
+  '''^supabase/migrations/20260326183000_push_dispatch_queue_buffering\.sql$''',
+  '''^supabase/migrations_legacy_archive/20260319010000_push_notification_delivery_pipeline\.sql$''',
+  '''^supabase/migrations_legacy_archive/20260319030000_push_webhook_secret_header\.sql$''',
+  '''^supabase/migrations_legacy_archive/20260326183000_push_dispatch_queue_buffering\.sql$''',
+]

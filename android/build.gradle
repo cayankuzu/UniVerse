@@ -1,0 +1,57 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+  repositories {
+    google()
+    mavenCentral()
+  }
+  dependencies {
+    classpath('com.android.tools.build:gradle')
+    classpath('com.facebook.react:react-native-gradle-plugin')
+    classpath('com.google.gms:google-services:4.4.3')
+    classpath('io.sentry:sentry-android-gradle-plugin:6.1.0')
+    classpath('org.jetbrains.kotlin:kotlin-gradle-plugin')
+  }
+}
+
+allprojects {
+  repositories {
+    google()
+    mavenCentral()
+    maven { url 'https://www.jitpack.io' }
+  }
+}
+
+apply plugin: "expo-root-project"
+apply plugin: "com.facebook.react.rootproject"
+
+gradle.projectsEvaluated {
+  def appProject = project(":app")
+  def appNativeCleanTasks = appProject.tasks.matching { task ->
+    task.name in ["externalNativeBuildCleanDebug", "externalNativeBuildCleanDebugOptimized", "externalNativeBuildCleanRelease"]
+  }
+  def appAutolinkingTask = appProject.tasks.findByName("generateAutolinkingNewArchitectureFiles")
+  def appBundleReleaseTask = appProject.tasks.findByName("bundleRelease")
+
+  def codegenTasks = subprojects
+    .findAll { it.path != ":app" }
+    .collectMany { subproject ->
+      subproject.tasks.matching { task -> task.name == "generateCodegenArtifactsFromSchema" }.toList()
+    }
+
+  if (appAutolinkingTask != null && !codegenTasks.isEmpty()) {
+    appAutolinkingTask.dependsOn(codegenTasks)
+  }
+
+  if (appBundleReleaseTask != null && appAutolinkingTask != null) {
+    appBundleReleaseTask.dependsOn(appAutolinkingTask)
+  }
+
+  subprojects.findAll { it.path != ":app" }.each { subproject ->
+    subproject.tasks.matching { task -> task.name == "clean" }.configureEach { cleanTask ->
+      appNativeCleanTasks.each { nativeCleanTask ->
+        cleanTask.mustRunAfter(nativeCleanTask)
+      }
+    }
+  }
+}

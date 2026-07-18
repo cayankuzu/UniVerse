@@ -1,0 +1,123 @@
+name: release-verify
+
+on:
+  workflow_dispatch:
+    inputs:
+      edge_healthcheck_url:
+        description: "Deployed /make-server-e3557d40/health URL for the target preview or production release."
+        required: true
+        type: string
+      diff_base_sha:
+        description: "Base commit SHA used for changed-line coverage."
+        required: true
+        type: string
+      db_rollout_confirmed:
+        description: "Set true after migrations and DB rollout are complete."
+        required: true
+        type: boolean
+        default: false
+      env_parity_confirmed:
+        description: "Set true after docs/env-parity-checklist.md is completed."
+        required: true
+        type: boolean
+        default: false
+      manual_checklists_confirmed:
+        description: "Set true after manual smoke and release rehearsal checklists are fully closed."
+        required: true
+        type: boolean
+        default: false
+      runbook_approved:
+        description: "Set true after production runbook thresholds and rollback ownership are approved."
+        required: true
+        type: boolean
+        default: false
+      device_signoff_confirmed:
+        description: "Set true after Android phone, large-phone/foldable narrow-window, and iOS phone smoke signoff are recorded for the same release commit."
+        required: true
+        type: boolean
+        default: false
+      sentry_healthcheck_confirmed:
+        description: "Set true after the preview build emits the expected release-health event in Sentry."
+        required: true
+        type: boolean
+        default: false
+      sentry_test_event_confirmed:
+        description: "Set true after the preview build emits a Sentry test crash/event."
+        required: true
+        type: boolean
+        default: false
+      sentry_healthcheck_event:
+        description: "Expected Sentry release-health event label."
+        required: false
+        type: string
+        default: "release-health:preview:app-launch"
+      native_symbols_verified:
+        description: "Set true after native symbol upload is verified in Sentry for the target release."
+        required: true
+        type: boolean
+        default: false
+      media_scanner_confirmed:
+        description: "Set true after the scanner webhook is provisioned and fail-closed tests pass."
+        required: true
+        type: boolean
+        default: false
+  push:
+    tags:
+      - "release-*"
+
+jobs:
+  release-verify:
+    runs-on:
+      - self-hosted
+      - windows
+    env:
+      EXPO_PUBLIC_SENTRY_DSN: ${{ secrets.EXPO_PUBLIC_SENTRY_DSN }}
+      DIFF_COVERAGE_BASE_SHA: ${{ github.event.inputs.diff_base_sha || github.event.before || vars.RELEASE_DIFF_BASE_SHA || '' }}
+      K6_SUPABASE_ANON_KEY: ${{ secrets.K6_SUPABASE_ANON_KEY }}
+      K6_EVENT_ID: ${{ vars.K6_EVENT_ID || '' }}
+      K6_ENABLE_MUTATIONS: ${{ vars.K6_ENABLE_MUTATIONS || 'false' }}
+      K6_NOTIFICATION_ID: ${{ vars.K6_NOTIFICATION_ID || '' }}
+      K6_PHOTO_ID: ${{ vars.K6_PHOTO_ID || '' }}
+      K6_PROFILE_USERNAME: ${{ vars.K6_PROFILE_USERNAME || '' }}
+      K6_TARGET_CLUB_ID: ${{ vars.K6_TARGET_CLUB_ID || '' }}
+      K6_TARGET_PROFILE_ID: ${{ vars.K6_TARGET_PROFILE_ID || '' }}
+      K6_SUPABASE_URL: ${{ secrets.K6_SUPABASE_URL }}
+      K6_TEST_EMAIL: ${{ secrets.K6_TEST_EMAIL }}
+      K6_TEST_PASSWORD: ${{ secrets.K6_TEST_PASSWORD }}
+      RELEASE_DB_ROLLOUT_CONFIRMED: ${{ github.event.inputs.db_rollout_confirmed || vars.RELEASE_DB_ROLLOUT_CONFIRMED || '' }}
+      RELEASE_DEVICE_SIGNOFF_CONFIRMED: ${{ github.event.inputs.device_signoff_confirmed || vars.RELEASE_DEVICE_SIGNOFF_CONFIRMED || '' }}
+      RELEASE_EDGE_HEALTHCHECK_URL: ${{ github.event.inputs.edge_healthcheck_url || vars.RELEASE_EDGE_HEALTHCHECK_URL || '' }}
+      RELEASE_ENV_PARITY_CONFIRMED: ${{ github.event.inputs.env_parity_confirmed || vars.RELEASE_ENV_PARITY_CONFIRMED || '' }}
+      RELEASE_MANUAL_CHECKLISTS_CONFIRMED: ${{ github.event.inputs.manual_checklists_confirmed || vars.RELEASE_MANUAL_CHECKLISTS_CONFIRMED || '' }}
+      RELEASE_MEDIA_SCANNER_CONFIRMED: ${{ github.event.inputs.media_scanner_confirmed || vars.RELEASE_MEDIA_SCANNER_CONFIRMED || '' }}
+      RELEASE_NATIVE_SYMBOLS_VERIFIED: ${{ github.event.inputs.native_symbols_verified || vars.RELEASE_NATIVE_SYMBOLS_VERIFIED || '' }}
+      RELEASE_RUNBOOK_APPROVED: ${{ github.event.inputs.runbook_approved || vars.RELEASE_RUNBOOK_APPROVED || '' }}
+      RELEASE_SENTRY_HEALTHCHECK_CONFIRMED: ${{ github.event.inputs.sentry_healthcheck_confirmed || vars.RELEASE_SENTRY_HEALTHCHECK_CONFIRMED || '' }}
+      RELEASE_SENTRY_HEALTHCHECK_EVENT: ${{ github.event.inputs.sentry_healthcheck_event || vars.RELEASE_SENTRY_HEALTHCHECK_EVENT || 'release-health:preview:app-launch' }}
+      RELEASE_SENTRY_TEST_EVENT_CONFIRMED: ${{ github.event.inputs.sentry_test_event_confirmed || vars.RELEASE_SENTRY_TEST_EVENT_CONFIRMED || '' }}
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+      SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+      SENTRY_DIST_DIR: dist
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Run Release Verify
+        shell: powershell
+        run: |
+          npm run release:verify *>&1 | Tee-Object -FilePath release-verify.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload Release Verification Artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: release-verify-artifacts
+          path: |
+            release-verify.log

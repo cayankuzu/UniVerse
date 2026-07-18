@@ -1,0 +1,34 @@
+# Production Cutover Checklist
+
+- `npm run check` temiz gecmeli.
+- Projection tabanli ekranlarda normal akista legacy edge route cagrisi olmamali.
+- `EXPO_PUBLIC_DISABLE_LEGACY_EDGE_READS=true` release env icinde set edilmeli.
+- `EXPO_PUBLIC_APP_ENV=production`
+- `EXPO_PUBLIC_RELEASE_CHANNEL=production`
+- `EXPO_PUBLIC_SENTRY_DSN` production runtime env icinde set edilmeli.
+- `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` EAS build ortaminda set edilmeli.
+- `ENABLE_LEGACY_EDGE_READS` release ortaminda bos veya `false` kalmali; compat GET endpointleri yalniz rollback icin acilabilmeli.
+- `ENABLE_COMPAT_ROUTES=false`
+- `EXPO_PUBLIC_USE_PROJECTION_SEARCH=true`
+- `EXPO_PUBLIC_USE_PROJECTION_EVENT_DETAIL=true`
+- `EXPO_PUBLIC_USE_PROJECTION_ALBUM=true`
+- `EXPO_PUBLIC_USE_OPTIMISTIC_CREATE_EVENT=true`
+- `EXPO_PUBLIC_USE_OPTIMISTIC_PROFILE_UPDATE=true`
+- `supabase db push` veya migration rollout tamamlanmali.
+- `docs/media-upload-security-runbook.md` deployment sirasi tamamlanmali; health `mediaScannerConfigured=true` raporlamali.
+- Gecerli medya, sahte MIME, checksum uyusmazligi, scanner timeout/5xx ve cleanup retry kanitlari ayni release SHA icin kaydedilmeli.
+- `docs/env-parity-checklist.md` ile staging/production env parity kontrolu tamamlanmali.
+- `supabase/validation/01_hot_path_explain.sql`, `02_summary_parity.sql`, `03_visibility_rls_parity.sql` staging veya prod-benzeri ortamda kosulup raporlanmali.
+- `k6` smoke / sustained / 1000 mix kosulari raporlanmali (`K6_REHEARSAL_PROFILE=full` ile).
+- `npm run loadtest:rehearsal` ile toplu yuk testi akisi calistirilabilmeli.
+- `npm run maestro:test:critical` preview build uzerinde temiz gecmeli.
+- `EXPLAIN ANALYZE` hot-path projection sorgularinda index hit dogrulanmali.
+- Notification badge, block/unblock, follow/membership, create event ve album upload manuel smoke senaryolari tamamlanmali.
+- preview build icinde `release-health:preview:app-launch` ve test crash/event Sentry'de gorunmeli.
+- source map / native symbol upload dogrulanmali.
+- Android telefon smoke ve Android tablet smoke ayni commit icin signoff almali.
+- Android tablet portrait smoke sonucu kayda gecmeli.
+- `docs/manual-smoke-checklist.md` ve `docs/release-rehearsal-checklist.md` son release oncesi eksiksiz kapatilmis olmali.
+- `docs/production-runbook.md` icindeki alarm esikleri ve rollback adimlari operasyon ekibi tarafindan onaylanmali.
+- Compat rollback flag gerekmiyorsa release branch icinde kapali kalmali.
+- Scanner arizasinda fail-open veya `skipped` verdict acilmamali; yeni upload durdurulmali ve quarantine korunmali.

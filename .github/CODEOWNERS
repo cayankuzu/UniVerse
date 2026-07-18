@@ -1,0 +1,13 @@
+# Default ownership keeps all production changes reviewable.
+* @cayankuzu
+
+# Security-sensitive boundaries require explicit owner review.
+/src/mobile/app/app-shell/auth/ @cayankuzu
+/src/mobile/app/platform/security/ @cayankuzu
+/src/mobile/app/platform/storage/ @cayankuzu
+/src/mobile/app/shared/components/AppModalHost.tsx @cayankuzu
+/supabase/functions/server/routes/storage* @cayankuzu
+/supabase/migrations/ @cayankuzu
+/android/ @cayankuzu
+/ios/ @cayankuzu
+/.github/workflows/ @cayankuzu

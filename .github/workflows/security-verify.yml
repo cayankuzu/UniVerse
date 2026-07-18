@@ -1,0 +1,56 @@
+name: security-verify
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - "agent/release-*"
+      - "release/**"
+  workflow_dispatch:
+    inputs:
+      diff_base_sha:
+        description: "Base commit SHA used for changed-line coverage."
+        required: true
+        type: string
+
+jobs:
+  internal-verify:
+    runs-on: ubuntu-latest
+    env:
+      DIFF_COVERAGE_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || inputs.diff_base_sha }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run security:verify:internal
+      - run: npm run lint
+      - run: npm run format:check:all
+      - run: npm run test:coverage
+      - run: npm run guard:diff-coverage:self-test
+      - run: npm run guard:diff-coverage
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2.3.9
+        env:
+          GITLEAKS_CONFIG: .gitleaks.toml
+
+  sast:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+      - uses: returntocorp/semgrep-action@713efdd345f3035192eaa63f56867b88e63e4e5d # v1
+        with:
+          config: auto

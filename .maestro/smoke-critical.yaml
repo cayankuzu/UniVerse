@@ -1,0 +1,15 @@
+appId: com.ogrencisosyalagi.app
+---
+- launchApp:
+    clearState: false
+    stopApp: true
+
+- extendedWaitUntil:
+    visible: "UniVerse"
+    timeout: 20000
+
+- assertVisible: "Ana Sayfa"
+- assertVisible: "Ara"
+- assertVisible: "Profil"
+- assertVisible: "Feed filtreleri"
+- assertVisible: "Bildirimler"

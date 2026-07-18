@@ -1,0 +1,14 @@
+appId: com.ogrencisosyalagi.app
+---
+- launchApp:
+    clearState: false
+    stopApp: true
+
+- extendedWaitUntil:
+    visible: "UniVerse"
+    timeout: 20000
+
+- assertVisible: "Kulupler"
+- assertVisible: "Etkinlikler"
+- assertVisible: "Takip Et"
+- assertVisible: "Giris Yap"
