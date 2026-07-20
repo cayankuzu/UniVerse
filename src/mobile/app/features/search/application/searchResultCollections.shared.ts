@@ -24,17 +24,15 @@ type SearchRawCollections = {
 };
 
 export function resolveSearchRawCollections(params: {
-  searchProjectionItems?: SearchProjectionItem[];
-  type: SearchType;
+  searchProjectionItemsByType?: Record<SearchType, SearchProjectionItem[]>;
 }): SearchRawCollections {
-  const { searchProjectionItems, type } = params;
-  const projectionItems = searchProjectionItems || [];
+  const projectionItems = params.searchProjectionItemsByType;
 
   return {
-    rawAlbums: type === "albums" ? (projectionItems as AlbumPhotoWithMeta[]) : [],
-    rawClubs: type === "clubs" ? (projectionItems as SearchUserResult[]) : [],
-    rawEvents: type === "events" ? (projectionItems as EventWithMeta[]) : [],
-    rawStudents: type === "students" ? (projectionItems as SearchUserResult[]) : [],
+    rawAlbums: (projectionItems?.albums || []) as AlbumPhotoWithMeta[],
+    rawClubs: (projectionItems?.clubs || []) as SearchUserResult[],
+    rawEvents: (projectionItems?.events || []) as EventWithMeta[],
+    rawStudents: (projectionItems?.students || []) as SearchUserResult[],
   };
 }
 

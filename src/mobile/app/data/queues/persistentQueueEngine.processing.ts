@@ -25,6 +25,7 @@ interface ProcessPersistentQueueKindParams<
   readAllEntries: () => Promise<Entry[]>;
   removeEntry: (entryId: string) => Promise<void>;
   processingStatus: Status;
+  retainRetryableErrors: boolean;
 }
 
 function getRetryDelayWithJitterMs(entryId: string, attemptCount: number, baseDelayMs: number) {
@@ -74,27 +75,31 @@ export async function processPersistentQueueKind<
         );
       if (queue.length === 0) break;
 
-      for (const entry of queue) {
-        await waitForInteractionWindow();
+      const processEntry = async (entry: Entry) => {
+        if (params.deferUntilInteractionIdle !== false) {
+          await waitForInteractionWindow();
+        }
         const runningEntry = await params.patchEntry(entry.id, {
           errorMessage: undefined,
           nextProcessAt: null,
           status: params.processingStatus,
         });
-        if (!runningEntry) continue;
+        if (!runningEntry) return;
 
         try {
           const result = await params.handler(runningEntry);
           const nextEntryPatch = await params.onResolved?.(runningEntry, result);
           if (nextEntryPatch) {
             await params.patchEntry(runningEntry.id, nextEntryPatch);
-            continue;
+            return;
           }
           await params.removeEntry(runningEntry.id);
         } catch (error) {
           const nextAttemptCount = runningEntry.attemptCount + 1;
+          const retryable = params.isRetryableError(error);
           const shouldRetry =
-            nextAttemptCount < runningEntry.maxAttempts && params.isRetryableError(error);
+            retryable &&
+            (params.retainRetryableErrors || nextAttemptCount < runningEntry.maxAttempts);
           const nextRetryDelayMs = shouldRetry
             ? getRetryDelayWithJitterMs(
                 runningEntry.id,
@@ -113,9 +118,14 @@ export async function processPersistentQueueKind<
             status: shouldRetry ? params.pendingStatus : params.failedStatus,
             terminalAt: shouldRetry ? null : new Date().toISOString(),
           });
-          if (!nextEntry || shouldRetry) continue;
+          if (!nextEntry || shouldRetry) return;
           await params.onFailed?.(nextEntry, error);
         }
+      };
+
+      const concurrency = Math.max(1, Math.floor(params.maxConcurrentEntries || 1));
+      for (let index = 0; index < queue.length; index += concurrency) {
+        await Promise.all(queue.slice(index, index + concurrency).map(processEntry));
       }
     }
   } finally {

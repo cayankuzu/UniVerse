@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../../app-shell/auth";
@@ -8,6 +8,8 @@ import {
   useOpenProfile,
 } from "../../../app-shell/navigation/hooks/useIntentNavigation";
 import { useTabReselectCounter } from "../../../app-shell/navigation/TabReselectContext";
+import { SwipeableTabPager } from "../../../shared/components/SwipeableTabPager";
+import { useTabScrollMemory } from "../../../shared/hooks/useTabScrollMemory";
 import type { RootStackParamList } from "../../../app-shell/navigation/types";
 import { useSearchResults } from "../application/useSearchResults";
 import { resolveSearchAlbumOpenDecision } from "../application/searchAlbumAccess";
@@ -19,6 +21,8 @@ import { SearchTopPanel } from "./SearchTopPanel";
 import { C } from "./searchHelpers";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Search">;
+const SEARCH_SWIPE_TABS = ["albums", "events", "clubs", "students"] as const;
+type SearchSwipeTab = (typeof SEARCH_SWIPE_TABS)[number];
 
 export function SearchScreen({ navigation }: Props) {
   const { accountType, blockedUsers, userData } = useAuth();
@@ -77,6 +81,27 @@ export function SearchScreen({ navigation }: Props) {
     searchReselectCounter,
     userData,
   });
+  const { getTabScrollRef, recordTabScrollOffset, restoreTabScrollOffset, setTabScrollRef } =
+    useTabScrollMemory<SearchSwipeTab>();
+  const setSearchListRef = useCallback(
+    (
+      pageType: SearchSwipeTab,
+      node: { scrollToOffset: (params: { animated: boolean; offset: number }) => void } | null,
+    ) => {
+      setTabScrollRef(pageType, node);
+    },
+    [setTabScrollRef],
+  );
+  useEffect(() => {
+    listRef.current = getTabScrollRef(type) as unknown as typeof listRef.current;
+    restoreTabScrollOffset(type);
+  }, [getTabScrollRef, listRef, restoreTabScrollOffset, type]);
+  const handleSearchScrollOffsetChange = useCallback(
+    (pageType: SearchSwipeTab, offset: number) => {
+      recordTabScrollOffset(pageType, offset);
+    },
+    [recordTabScrollOffset],
+  );
   const handleOpenProfile = useCallback(
     (value: string | SearchProfileSummarySeed) => {
       if (typeof value !== "string") {
@@ -102,6 +127,13 @@ export function SearchScreen({ navigation }: Props) {
     if (loadingMore) return;
     void loadMore();
   }, [loadMore, loadingMore]);
+  const handleSelectType = useCallback(
+    (nextType: SearchSwipeTab) => {
+      restoreTabScrollOffset(nextType);
+      onSelectType(nextType);
+    },
+    [onSelectType, restoreTabScrollOffset],
+  );
   const handleOpenAlbumCard = useCallback(
     (item: (typeof filteredAlbums)[number], index: number) => {
       const decision = resolveSearchAlbumOpenDecision({
@@ -127,11 +159,40 @@ export function SearchScreen({ navigation }: Props) {
     },
     [setViewerIndex, setViewerType],
   );
+  const renderResults = (pageType: SearchSwipeTab, preview: boolean) => (
+    <SearchResultsContent
+      bottomPadding={bottomPadding}
+      currentError={currentError}
+      currentLoading={currentLoading}
+      emptyText={emptyText}
+      filteredAlbums={filteredAlbums}
+      filteredClubs={filteredClubs}
+      filteredEvents={filteredEvents}
+      filteredStudents={filteredStudents}
+      grid={grid}
+      hasMore={hasMore}
+      loadingMore={loadingMore}
+      numColumns={numColumns}
+      onEndReached={handleEndReached}
+      onListRef={setSearchListRef}
+      onOpenAlbumCard={handleOpenAlbumCard}
+      onOpenEventCard={handleOpenEventCard}
+      onOpenProfile={handleOpenProfile}
+      onRefresh={onRefresh}
+      onScrollOffsetChange={handleSearchScrollOffsetChange}
+      prefetchEventById={prefetchEventById}
+      prefetchProfileByUsername={prefetchProfileByUsername}
+      preview={preview}
+      refreshing={refreshing}
+      type={pageType}
+      viewportPrefetch={viewportPrefetch}
+    />
+  );
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }} edges={["top"]}>
       <SearchTopPanel
         activeFilterCount={activeFilterCount}
-        onSelectType={onSelectType}
+        onSelectType={handleSelectType}
         query={query}
         selectedCategory={selectedCategory}
         selectedFee={selectedFee}
@@ -149,32 +210,14 @@ export function SearchScreen({ navigation }: Props) {
         type={type}
       />
 
-      <SearchResultsContent
-        bottomPadding={bottomPadding}
-        currentError={currentError}
-        currentLoading={currentLoading}
-        emptyText={emptyText}
-        filteredAlbums={filteredAlbums}
-        filteredClubs={filteredClubs}
-        filteredEvents={filteredEvents}
-        filteredStudents={filteredStudents}
-        grid={grid}
-        hasMore={hasMore}
-        listRef={listRef}
-        loadingMore={loadingMore}
-        numColumns={numColumns}
-        onEndReached={handleEndReached}
-        onOpenAlbumCard={handleOpenAlbumCard}
-        onOpenEventCard={handleOpenEventCard}
-        onOpenProfile={handleOpenProfile}
-        onRefresh={onRefresh}
-        onSelectType={onSelectType}
-        pagerEnabled={!showFilters && !viewerType}
-        prefetchEventById={prefetchEventById}
-        prefetchProfileByUsername={prefetchProfileByUsername}
-        refreshing={refreshing}
-        type={type}
-        viewportPrefetch={viewportPrefetch}
+      <SwipeableTabPager
+        activeTab={type}
+        enabled={!showFilters && !viewerType}
+        keepAlive
+        onChange={handleSelectType}
+        onPreviewTabChange={restoreTabScrollOffset}
+        renderPage={renderResults}
+        tabs={SEARCH_SWIPE_TABS}
       />
 
       <SearchFeedViewers

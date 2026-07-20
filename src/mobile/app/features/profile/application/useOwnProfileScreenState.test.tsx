@@ -63,6 +63,8 @@ jest.mock("./useOwnProfileProjectionState", () => ({
       loadingMore: false,
       query: { isFetching: false },
     },
+    albumProjection: { query: { isFetching: false } },
+    eventProjection: { query: { isFetching: false } },
     loadingMore: false,
     onRefresh: mockProjectionRefresh,
     overviewQuery: { error: null, isLoading: false },

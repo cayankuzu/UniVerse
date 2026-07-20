@@ -49,6 +49,7 @@
       "ios": {
         "ascAppId": "6761912452",
         "appleTeamId": "HBRG8P523Z",
+        "ascApiKeyPath": "./.secrets/AuthKey_DC34BUDLPC.p8",
         "ascApiKeyIssuerId": "27f87a66-f102-47b0-be3b-9ab8359d393f",
         "ascApiKeyId": "DC34BUDLPC"
       }

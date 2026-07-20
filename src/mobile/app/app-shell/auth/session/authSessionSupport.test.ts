@@ -109,4 +109,31 @@ describe("authSessionSupport", () => {
     expect(mockGetPersistedAuthSession).not.toHaveBeenCalled();
     expect(mockSavePersistedAuthSession).toHaveBeenCalledWith(session);
   });
+
+  it("prefers a newly signed-in session over an older pending bootstrap lookup", async () => {
+    const session = createSession();
+    let resolveBootstrap: ((value: { data: { session: Session | null } }) => void) | undefined;
+
+    mockGetSession.mockImplementationOnce(
+      () =>
+        new Promise<{ data: { session: Session | null } }>((resolve) => {
+          resolveBootstrap = resolve;
+        }),
+    );
+    mockGetPersistedAuthSession.mockResolvedValue(null);
+    mockSavePersistedAuthSession.mockResolvedValue(undefined);
+
+    const { getActiveOrPersistedSession, persistAuthSession } =
+      require("./authSessionSupport") as typeof import("./authSessionSupport");
+
+    const pendingBootstrap = getActiveOrPersistedSession();
+    await Promise.resolve();
+    expect(resolveBootstrap).toBeDefined();
+
+    await persistAuthSession(session);
+    await expect(getActiveOrPersistedSession()).resolves.toBe(session);
+
+    resolveBootstrap!({ data: { session: null } });
+    await expect(pendingBootstrap).resolves.toBeNull();
+  });
 });

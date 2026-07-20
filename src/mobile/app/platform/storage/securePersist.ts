@@ -9,6 +9,8 @@ type SecureMeta = {
   chunkCount: number;
 };
 
+let secureStoreAvailabilityPromise: Promise<boolean> | null = null;
+
 function encodeKeySegment(value: string) {
   return String(value || "")
     .trim()
@@ -47,11 +49,8 @@ function chunkString(value: string) {
 
 async function canUseSecureStore() {
   if (Platform.OS === "web") return false;
-  try {
-    return await SecureStore.isAvailableAsync();
-  } catch {
-    return false;
-  }
+  secureStoreAvailabilityPromise ??= SecureStore.isAvailableAsync().catch(() => false);
+  return secureStoreAvailabilityPromise;
 }
 
 function canUseInsecureDevelopmentStorage() {

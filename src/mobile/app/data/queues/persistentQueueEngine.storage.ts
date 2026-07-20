@@ -21,6 +21,14 @@ interface PersistentQueueStorageOptions<_Kind extends string, Status extends str
   storageKey: string;
 }
 
+interface QueueEntryInput<Kind extends string> {
+  id: string;
+  kind: Kind;
+  maxAttempts?: number;
+  ownerId?: string;
+  payload: Record<string, unknown>;
+}
+
 function normalizeEntry<
   Kind extends string,
   Status extends string,
@@ -218,36 +226,79 @@ export function createPersistentQueueStorageApi<
     );
   }
 
-  async function enqueue(params: {
-    id: string;
-    kind: Kind;
-    maxAttempts?: number;
-    ownerId?: string;
-    payload: Record<string, unknown>;
-  }) {
-    return runSerialized(async () => {
-      const createdAt = getNowIsoString();
-      const entry = {
-        attemptCount: 0,
-        createdAt,
-        id: params.id,
-        kind: params.kind,
-        maxAttempts: normalizeMaxAttempts(params.maxAttempts, options.defaultMaxAttempts),
-        nextProcessAt: createdAt,
-        ownerId: normalizeOwnerId(params.ownerId),
-        payload: params.payload,
-        schemaVersion: options.schemaVersion,
-        status: options.pendingStatus,
-        terminalAt: null,
-        updatedAt: createdAt,
-      } as Entry;
+  function createEntry(params: QueueEntryInput<Kind>) {
+    const createdAt = getNowIsoString();
+    return {
+      attemptCount: 0,
+      createdAt,
+      id: params.id,
+      kind: params.kind,
+      maxAttempts: normalizeMaxAttempts(params.maxAttempts, options.defaultMaxAttempts),
+      nextProcessAt: createdAt,
+      ownerId: normalizeOwnerId(params.ownerId),
+      payload: params.payload,
+      schemaVersion: options.schemaVersion,
+      status: options.pendingStatus,
+      terminalAt: null,
+      updatedAt: createdAt,
+    } as Entry;
+  }
 
-      const existingIds = await readIndexUnlocked();
-      if (!existingIds.includes(entry.id)) {
-        await writeIndexUnlocked([...existingIds, entry.id]);
-      }
-      await writeEntryUnlocked(entry);
+  function assertCompatibleEntry(current: Entry, params: QueueEntryInput<Kind>) {
+    if (
+      current.kind !== params.kind ||
+      normalizeOwnerId(current.ownerId) !== normalizeOwnerId(params.ownerId)
+    ) {
+      throw new Error("Queue entry id already belongs to another action.");
+    }
+  }
+
+  async function persistNewEntryUnlocked(entry: Entry) {
+    const existingIds = await readIndexUnlocked();
+    if (!existingIds.includes(entry.id)) {
+      await writeIndexUnlocked([...existingIds, entry.id]);
+    }
+    await writeEntryUnlocked(entry);
+  }
+
+  async function enqueue(params: QueueEntryInput<Kind>) {
+    return runSerialized(async () => {
+      const entry = createEntry(params);
+      await persistNewEntryUnlocked(entry);
       return entry;
+    });
+  }
+
+  async function enqueueOrPatch(
+    params: QueueEntryInput<Kind>,
+    patchExisting: (entry: Entry) => PersistentQueueEntryPatch<Kind, Status>,
+  ) {
+    return runSerialized(async () => {
+      const normalizedId = String(params.id || "").trim();
+      if (!normalizedId) throw new Error("Queue entry id is required.");
+
+      const current = await readEntryUnlocked(normalizedId);
+      if (!current) {
+        const entry = createEntry({ ...params, id: normalizedId });
+        await persistNewEntryUnlocked(entry);
+        return { created: true, entry };
+      }
+
+      assertCompatibleEntry(current, params);
+      const nextEntry = normalizeEntry(
+        {
+          ...current,
+          ...patchExisting(current),
+          updatedAt: getNowIsoString(),
+        } as Entry,
+        options,
+      ).entry;
+      await writeEntryUnlocked(nextEntry);
+      const existingIds = await readIndexUnlocked();
+      if (!existingIds.includes(nextEntry.id)) {
+        await writeIndexUnlocked([...existingIds, nextEntry.id]);
+      }
+      return { created: false, entry: nextEntry };
     });
   }
 
@@ -336,6 +387,7 @@ export function createPersistentQueueStorageApi<
   return {
     clearStorage,
     enqueue,
+    enqueueOrPatch,
     getEntry,
     getQueue,
     patchEntry,

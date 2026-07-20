@@ -77,7 +77,7 @@ jest.mock("./useRootNavigationController", () => ({
 }));
 
 jest.mock("./hooks/useTabLandingPrefetch", () => ({
-  useTabLandingPrefetch: jest.fn(),
+  useTabLandingPrefetch: jest.fn(() => ({ prefetchTabIntent: jest.fn() })),
 }));
 
 jest.mock("./rootNavigationScreens", () => ({

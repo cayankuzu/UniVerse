@@ -57,7 +57,7 @@ export function EventAlbumDraggableThumb({
         <VideoThumbnailPreview
           candidateUris={candidateUris}
           contentFit="cover"
-          priority="eager"
+          priority="deferred"
           style={{ width: "100%", height: "100%" }}
           uri={uri}
         />

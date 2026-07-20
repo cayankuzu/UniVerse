@@ -12,26 +12,14 @@ function createBundle() {
         },
       ],
     },
-    notifications: { items: [{ userImage: "notification-user" }] },
-    profileAlbums: { items: [{ cover_image_variants: { thumbnail: "album-thumb" } }] },
-    profileEvents: { items: [{ clubImage: "club-image" }] },
-    profileOverview: {
-      overview: {
-        profile: { profileImageVariants: { thumbnail: "profile-thumb" } },
-      },
-    },
-    search: { content: { items: [{ image_variants: { thumbnail: "search-thumb" } }] } },
-    searchDiscovery: {
-      clubs: { items: [{ coverImageVariants: { thumbnail: "club-cover" } }] },
-    },
   } as any;
 }
 
 describe("app warmup image helpers", () => {
-  it("collects every projection surface with Home content first", () => {
+  it("collects only first-fold Home content", () => {
     const bundle = createBundle();
 
-    expect(collectWarmupBundleItems(bundle)).toHaveLength(7);
+    expect(collectWarmupBundleItems(bundle)).toHaveLength(1);
     expect(collectWarmupBundleItems(bundle)[0]).toEqual(bundle.home.items[0]);
   });
 

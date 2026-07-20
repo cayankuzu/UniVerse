@@ -5,7 +5,11 @@ import { queryClient } from "../../../data/query/queryClient";
 import type { AuthUserData } from "../../../data/contracts/entities";
 import type { PersistedAuthSnapshot } from "../../../platform/storage/authSession";
 import { getSeededAuthStateFromSession } from "./authSessionSeed";
-import { persistResolvedAuthSnapshot, persistSeededSessionState } from "./authSessionSupport";
+import {
+  forgetActiveSession,
+  persistResolvedAuthSnapshot,
+  persistSeededSessionState,
+} from "./authSessionSupport";
 import { buildDemoAuthState } from "./authFixtureSeed";
 import {
   EMPTY_AUTH_USER_DATA,
@@ -132,6 +136,7 @@ export function useAuthSessionStateActions({
 
   const clearAuthState = useCallback(
     (opts?: { keepLoading?: boolean; nextBootState?: AuthBootState }) => {
+      forgetActiveSession();
       isDemoRef.current = false;
       hydratedSessionKey.current = "";
       queryClient.clear();

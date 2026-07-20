@@ -3,10 +3,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { debugWarn } from "../../../platform/logging/logger";
 import { createClientMutationId } from "../../../data/mutations/clientMutation";
 import {
-  getMutationActionEntry,
-  patchMutationActionEntry,
-} from "../../../data/queues/mutationActionQueue";
-import {
   applyOptimisticProfileFollowMutation,
   rollbackProfileFollowMutation,
 } from "../data/profileFollowMutationPolicy";
@@ -131,28 +127,7 @@ export function useProfileFollowAction(params: UseProfileFollowActionParams) {
           viewerCacheKey,
           viewerUsername,
         };
-        const queuedEntry = await getMutationActionEntry(outboxId);
-        if (queuedEntry?.kind === "follow-toggle") {
-          const queuedPayload = queuedEntry.payload as {
-            previousStatus?: ProfileFollowState;
-          };
-          entry = await patchMutationActionEntry(queuedEntry.id, {
-            attemptCount: 0,
-            errorMessage: undefined,
-            nextProcessAt:
-              queuedEntry.status === "running"
-                ? (queuedEntry.nextProcessAt ?? null)
-                : new Date().toISOString(),
-            payload: {
-              ...nextPayload,
-              previousStatus: queuedPayload.previousStatus || previousStatus,
-            } as unknown as Record<string, unknown>,
-            status: queuedEntry.status === "running" ? "running" : "pending",
-          });
-        }
-        if (!entry) {
-          entry = await queueFollowAction(nextPayload);
-        }
+        entry = await queueFollowAction(nextPayload);
       } catch (error) {
         debugWarn("PROFILE/FOLLOW", "follow-toggle-queue-failed", {
           message: String(

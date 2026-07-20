@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { PAGE_SIZES } from "../../../data/projections/cacheConfig";
 import type { ProfileContentTab } from "../../../data/projections/projections.types";
 import { PROFILE_PROJECTION_POLICY } from "../../../data/projections/policies/projectionPolicies";
-import { useProjectionScreen } from "../../../data/projections/screen/useProjectionScreen";
 import { useScreenRefresh } from "../../../data/projections/screen/useScreenRefresh";
 import { useOptimisticOutboxMetaStore } from "../../../data/queues/optimisticOutboxMeta";
 import { createStableQueryOptions } from "../../../data/query/options";
@@ -14,15 +13,11 @@ import {
   resolveProfileLockState,
   resolveProfileContentAccess,
 } from "../domain/viewProfileState.helpers";
-import {
-  getViewProfileContentQueryDef,
-  getViewProfileOverviewQueryDef,
-  type AlbumPhotoWithMeta,
-  type EventWithMeta,
-} from "../data";
+import { getViewProfileContentQueryDef, getViewProfileOverviewQueryDef } from "../data";
 import { useCanonicalProfileFollowState } from "./useCanonicalProfileFollowState";
 import { useProfileBootstrapState } from "./useProfileBootstrapState";
 import type { ProfileFollowState } from "./useProfileFollowAction";
+import { useProfileContentProjections } from "./useProfileContentProjections";
 import { useProfileProjectionContentState } from "./useProfileProjectionContentState";
 import type { UseViewProfileParams } from "./viewProfile.types";
 
@@ -57,20 +52,29 @@ export function useViewProfileOverviewState(options: UseViewProfileOverviewState
       }),
     [params.username, viewer],
   );
-  const contentDef = useMemo(
+  const albumContentDef = useMemo(
     () =>
       getViewProfileContentQueryDef({
-        tab: contentTab,
+        tab: "album",
         targetUsername: params.username,
         viewer,
       }),
-    [contentTab, params.username, viewer],
+    [params.username, viewer],
+  );
+  const eventContentDef = useMemo(
+    () =>
+      getViewProfileContentQueryDef({
+        tab: "events",
+        targetUsername: params.username,
+        viewer,
+      }),
+    [params.username, viewer],
   );
   const profileBootstrap = useProfileBootstrapState({
     enabled: Boolean(params.username),
     pageSize: PAGE_SIZES.profileContent,
     policy: PROFILE_PROJECTION_POLICY,
-    tab: contentTab,
+    tab: "album",
     username: params.username,
     viewerId: params.userData.id,
     viewerKey: viewerCacheKey,
@@ -133,29 +137,24 @@ export function useViewProfileOverviewState(options: UseViewProfileOverviewState
     Boolean(profile) && (canViewContent || Boolean(profileCapabilities?.canViewFollowing));
   const shouldFetchContent =
     Boolean(profile) && canViewContent && !profileBootstrap.isBootstrapping;
-  const expectedAlbumsCount = Number(profile?.albumsCount || 0);
-  const expectedEventsCount = Number(profile?.eventsCount || 0);
-  const activeProjection = useProjectionScreen<AlbumPhotoWithMeta | EventWithMeta>({
-    ...contentDef,
-    autoRefreshOnFocus: false,
+  const { activeProjection, albumProjection, eventProjection } = useProfileContentProjections({
+    albumDef: albumContentDef,
     enabled: shouldFetchContent,
+    eventDef: eventContentDef,
+    tab: contentTab,
   });
   const profileContent = useProfileProjectionContentState({
-    activeItems: activeProjection.items,
+    albumItems: albumProjection.items,
     enabled: Boolean(profile) && canViewContent,
-    expectedAlbumsCount,
-    expectedEventsCount,
-    tab: contentTab,
-    username: params.username,
-    viewerId: params.userData.id || undefined,
-    viewerKey: viewerCacheKey,
-    viewerUsername,
+    eventItems: eventProjection.items,
   });
   const hasPrimaryProfileContent =
     Boolean(profile) &&
     (!shouldFetchContent ||
-      activeProjection.hasCachedSnapshot ||
-      activeProjection.items.length > 0 ||
+      albumProjection.hasCachedSnapshot ||
+      eventProjection.hasCachedSnapshot ||
+      albumProjection.items.length > 0 ||
+      eventProjection.items.length > 0 ||
       profileContent.sourceAlbums.length > 0 ||
       profileContent.sourceEvents.length > 0);
   useEffect(() => {
@@ -165,10 +164,10 @@ export function useViewProfileOverviewState(options: UseViewProfileOverviewState
       setBackgroundWorkReady(true);
     }, 96);
     return () => task.cancel();
-  }, [contentTab, hasPrimaryProfileContent, params.username]);
+  }, [hasPrimaryProfileContent, params.username]);
   const onRefresh = useScreenRefresh({
     maxParallel: 2,
-    screenKey: `view-profile:${viewerCacheKey}:${params.username}:${contentTab}`,
+    screenKey: `view-profile:${viewerCacheKey}:${params.username}`,
     surface: "view-profile",
     tasks: [
       {
@@ -179,8 +178,13 @@ export function useViewProfileOverviewState(options: UseViewProfileOverviewState
       },
       {
         bestEffort: !canViewContent,
-        id: "profile-content",
-        run: () => (shouldFetchContent ? activeProjection.onRefresh() : undefined),
+        id: "profile-albums",
+        run: () => (shouldFetchContent ? albumProjection.onRefresh() : undefined),
+      },
+      {
+        bestEffort: !canViewContent,
+        id: "profile-events",
+        run: () => (shouldFetchContent ? eventProjection.onRefresh() : undefined),
       },
     ],
   });
@@ -198,7 +202,9 @@ export function useViewProfileOverviewState(options: UseViewProfileOverviewState
   const profileLoading = profileBootstrap.isBootstrapping || profileQuery.isLoading;
   const refreshing =
     profileBootstrap.isBootstrapping ||
-    (shouldFetchContent ? activeProjection.refreshing : Boolean(profileQuery.isFetching));
+    (shouldFetchContent
+      ? albumProjection.refreshing || eventProjection.refreshing
+      : Boolean(profileQuery.isFetching));
   const loadingMore = shouldFetchContent ? activeProjection.loadingMore : false;
 
   return {
@@ -206,11 +212,13 @@ export function useViewProfileOverviewState(options: UseViewProfileOverviewState
     normalizedAccountType,
     screenData: {
       activeProjection,
+      albumProjection,
       canViewContent,
       canViewFollowers,
       canViewFollowing,
       contentLockedMessage,
       displayName,
+      eventProjection,
       followLabel,
       followMutation,
       followStatus,

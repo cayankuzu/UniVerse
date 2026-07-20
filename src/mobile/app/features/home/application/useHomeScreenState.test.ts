@@ -5,7 +5,6 @@ const mockUseViewerRelations = jest.fn();
 const mockUseHomeFeedCollections = jest.fn();
 const mockUseHomeProjectionState = jest.fn();
 const mockUseHomeScreenPrefetch = jest.fn();
-const mockUseHomeVisibleMediaUpgrade = jest.fn();
 
 jest.mock("@tanstack/react-query", () => ({
   useQueryClient: () => ({}),
@@ -84,10 +83,6 @@ jest.mock("./useHomeScreenPrefetch", () => ({
   useHomeScreenPrefetch: (...args: unknown[]) => mockUseHomeScreenPrefetch(...args),
 }));
 
-jest.mock("./useHomeVisibleMediaUpgrade", () => ({
-  useHomeVisibleMediaUpgrade: (...args: unknown[]) => mockUseHomeVisibleMediaUpgrade(...args),
-}));
-
 const viewerRelationsValue = {
   buildRelationByClub: jest.fn(() => ({})),
   clubPrivacyMap: {},
@@ -150,24 +145,17 @@ const prefetchStateValue = {
   viewabilityConfig: {},
 };
 
-const mediaUpgradeStateValue = {
-  onViewableItemsChanged: jest.fn(),
-  readyMediaRowKeys: new Set<string>(),
-};
-
 describe("useHomeScreenState", () => {
   beforeEach(() => {
     mockUseViewerRelations.mockReset();
     mockUseHomeFeedCollections.mockReset();
     mockUseHomeProjectionState.mockReset();
     mockUseHomeScreenPrefetch.mockReset();
-    mockUseHomeVisibleMediaUpgrade.mockReset();
 
     mockUseViewerRelations.mockReturnValue(viewerRelationsValue);
     mockUseHomeFeedCollections.mockReturnValue(collectionsValue);
     mockUseHomeProjectionState.mockReturnValue(projectionStateValue);
     mockUseHomeScreenPrefetch.mockReturnValue(prefetchStateValue);
-    mockUseHomeVisibleMediaUpgrade.mockReturnValue(mediaUpgradeStateValue);
   });
 
   it("waits for the relationship snapshot before enforcing follow visibility on startup preview content", () => {

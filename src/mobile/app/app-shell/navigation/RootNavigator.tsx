@@ -72,7 +72,7 @@ export function RootNavigator() {
     triggerTabReselect,
   });
 
-  useTabLandingPrefetch({
+  const { prefetchTabIntent } = useTabLandingPrefetch({
     activeRoute: controller.currentRoute,
     enabled: controller.showAppTabs && authBootState === "signed_in_hydrated",
     userId: userData.id,
@@ -159,6 +159,7 @@ export function RootNavigator() {
               onSearch={controller.handleSearchPress}
               onProfile={controller.handleProfilePress}
               onCreate={controller.handleCreatePress}
+              onIntent={prefetchTabIntent}
             />
           ) : null}
 

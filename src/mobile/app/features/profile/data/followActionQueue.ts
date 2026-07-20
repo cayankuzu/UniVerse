@@ -3,11 +3,11 @@ import { createClientMutationId } from "../../../data/mutations/clientMutation";
 import { FollowAPI } from "../../../data/social";
 import { useOptimisticOutboxMetaStore } from "../../../data/queues/optimisticOutboxMeta";
 import {
-  enqueueMutationAction,
   getMutationActionEntry,
   processMutationActionQueue,
   subscribeMutationAction,
   type MutationActionQueueEntry,
+  upsertMutationAction,
 } from "../../../data/queues/mutationActionQueue";
 import {
   commitProfileFollowMutation,
@@ -52,12 +52,34 @@ export function buildFollowActionQueueEntryId(username: string) {
 
 export async function queueFollowAction(payload: SerializedFollowPayload & { ownerId?: string }) {
   const { ownerId, ...serializedPayload } = payload;
-  return enqueueMutationAction({
-    id: payload.outboxId || buildFollowActionQueueEntryId(payload.username),
+  const clientMutationId =
+    serializedPayload.clientMutationId || createClientMutationId("follow-toggle");
+  const result = await upsertMutationAction({
+    id: serializedPayload.outboxId || buildFollowActionQueueEntryId(serializedPayload.username),
     kind: "follow-toggle",
     ownerId,
-    payload: serializedPayload as unknown as Record<string, unknown>,
+    patchExisting: (entry) => {
+      const currentPayload = getFollowPayload(entry);
+      return {
+        attemptCount: 0,
+        errorMessage: undefined,
+        nextProcessAt:
+          entry.status === "running" ? (entry.nextProcessAt ?? null) : new Date().toISOString(),
+        payload: {
+          ...serializedPayload,
+          clientMutationId,
+          previousStatus: currentPayload.previousStatus,
+        } as unknown as Record<string, unknown>,
+        status: entry.status === "running" ? "running" : "pending",
+        terminalAt: null,
+      };
+    },
+    payload: {
+      ...serializedPayload,
+      clientMutationId,
+    } as unknown as Record<string, unknown>,
   });
+  return result.entry;
 }
 
 export function subscribeToFollowAction(

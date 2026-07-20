@@ -1,5 +1,4 @@
-import { startTransition, useEffect, useRef, useState } from "react";
-import { useTransitionSetter } from "../../../shared/hooks/useTransitionSetter";
+import { startTransition, useCallback, useEffect, useRef, useState } from "react";
 import type { AppFlatListRef } from "../../../shared/components";
 import {
   getCachedWarmupPreferences,
@@ -41,7 +40,9 @@ export function useOwnProfileScreenUiState(params: { viewerKey: string }) {
     void persistWarmupProfileTab(viewerKey, tab as ProfileContentTab);
   }, [tab, viewerKey]);
 
-  const setTab = useTransitionSetter<ProfileTab>(setTabState);
+  const setTab = useCallback((nextTab: ProfileTab) => {
+    setTabState(nextTab);
+  }, []);
 
   return {
     albumOwnerFilter,

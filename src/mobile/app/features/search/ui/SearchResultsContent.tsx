@@ -1,12 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import type { ViewToken } from "@shopify/flash-list";
-import {
-  FlatList,
-  View,
-  useWindowDimensions,
-  type NativeScrollEvent,
-  type NativeSyntheticEvent,
-} from "react-native";
+import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import {
   DiscoveryAlbumGridCard,
   DiscoveryEventGridCard,
@@ -28,8 +22,6 @@ type GridMetrics = {
 };
 
 type SearchResultItem = AlbumPhotoWithMeta | EventWithMeta | SearchUserResult;
-const SEARCH_RESULT_PAGES: SearchType[] = ["albums", "events", "clubs", "students"];
-const noop = () => undefined;
 
 type ViewabilityInfo<TItem> = {
   changed: ViewToken<TItem>[];
@@ -81,11 +73,12 @@ type SearchResultsGridProps<T extends { id: string }> = {
   loadingMore: boolean;
   numColumns: number;
   onEndReached: () => void;
+  onListRef?: (node: AppFlatListRef<SearchResultItem> | null) => void;
   onRefresh: () => void;
+  onScrollOffsetChange?: (offset: number) => void;
   onViewableItemsChanged?: (info: ViewabilityInfo<T>) => void;
   refreshing: boolean;
   renderCard: (item: T, index: number) => React.ReactElement;
-  showFooter: boolean;
   viewabilityConfig?: Record<string, unknown>;
 };
 
@@ -100,22 +93,25 @@ type SearchResultsContentProps = {
   filteredStudents: SearchUserResult[];
   grid: GridMetrics;
   hasMore?: boolean;
-  listRef: React.RefObject<AppFlatListRef<SearchResultItem> | null>;
+  listRef?: React.RefObject<AppFlatListRef<SearchResultItem> | null>;
   loadingMore: boolean;
   numColumns: number;
   onEndReached: () => void;
   onOpenAlbumCard: (item: AlbumPhotoWithMeta, index: number) => void;
   onOpenEventCard: (item: EventWithMeta, index: number) => void;
+  onListRef?: (type: SearchType, node: AppFlatListRef<SearchResultItem> | null) => void;
   onOpenProfile: (profile: SearchProfileSummaryInput) => void;
   onRefresh: () => void;
-  onSelectType: (type: SearchType) => void;
-  pagerEnabled?: boolean;
+  onScrollOffsetChange?: (type: SearchType, offset: number) => void;
   prefetchEventById: (eventId: string) => unknown;
   prefetchProfileByUsername: (username: string) => unknown;
+  preview?: boolean;
   refreshing: boolean;
   type: SearchType;
   viewportPrefetch: ViewportPrefetch<SearchResultItem>;
 };
+
+const NOOP = () => undefined;
 
 function SearchResultsGrid<T extends { id: string }>({
   bottomPadding,
@@ -130,11 +126,12 @@ function SearchResultsGrid<T extends { id: string }>({
   loadingMore,
   numColumns,
   onEndReached,
+  onListRef,
   onRefresh,
+  onScrollOffsetChange,
   onViewableItemsChanged,
   refreshing,
   renderCard,
-  showFooter,
   viewabilityConfig,
 }: SearchResultsGridProps<T>) {
   const columnWrapperStyle = useMemo(
@@ -169,10 +166,25 @@ function SearchResultsGrid<T extends { id: string }>({
     ({ item, index }: { index: number; item: T }) => (item ? renderCard(item, index) : null),
     [renderCard],
   );
+  const setListNode = useCallback(
+    (node: AppFlatListRef<T> | null) => {
+      onListRef?.(node as unknown as AppFlatListRef<SearchResultItem> | null);
+      if (listRef) {
+        (listRef as unknown as React.MutableRefObject<AppFlatListRef<T> | null>).current = node;
+      }
+    },
+    [listRef, onListRef],
+  );
+  const handleScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      onScrollOffsetChange?.(event.nativeEvent.contentOffset.y);
+    },
+    [onScrollOffsetChange],
+  );
 
   return (
     <AppFlatList
-      ref={listRef as React.RefObject<AppFlatListRef<T> | null> | undefined}
+      ref={setListNode}
       alwaysBounceVertical
       columnWrapperStyle={columnWrapperStyle}
       contentContainerStyle={contentContainerStyle}
@@ -181,21 +193,23 @@ function SearchResultsGrid<T extends { id: string }>({
       error={currentError}
       estimatedItemSize={grid.cardHeight + grid.rowGap}
       getItemType={() => "search-grid-card"}
-      hasMore={showFooter ? hasMore : undefined}
+      hasMore={hasMore}
       key={listKey}
       keyExtractor={(item, index) => String(item?.id || index)}
       loading={currentLoading}
       loadingComponent={loadingComponent}
-      loadingMore={showFooter ? loadingMore : false}
+      loadingMore={loadingMore}
       numColumns={numColumns}
       onEndReached={onEndReached}
       onEndReachedThreshold={0.82}
       onRefresh={onRefresh}
+      onScroll={onScrollOffsetChange ? handleScroll : undefined}
       onViewableItemsChanged={onViewableItemsChanged}
       overScrollMode="always"
       performanceTier="tier1"
       refreshing={refreshing}
       renderItem={renderItem}
+      scrollEventThrottle={onScrollOffsetChange ? 16 : undefined}
       showsVerticalScrollIndicator={false}
       style={{ flex: 1 }}
       viewabilityConfig={viewabilityConfig}
@@ -204,42 +218,43 @@ function SearchResultsGrid<T extends { id: string }>({
 }
 
 export function SearchResultsContent(props: SearchResultsContentProps) {
-  const { onSelectType, type: selectedType } = props;
   const {
     grid,
+    onListRef,
     onOpenAlbumCard,
     onOpenEventCard,
     onOpenProfile,
+    onScrollOffsetChange,
     prefetchEventById,
     prefetchProfileByUsername,
+    preview = false,
+    type,
   } = props;
-  const pagerRef = useRef<FlatList<SearchType> | null>(null);
-  const didMountRef = useRef(false);
-  const { width } = useWindowDimensions();
-  const pageWidth = Math.max(1, width);
-  const activeIndex = Math.max(0, SEARCH_RESULT_PAGES.indexOf(props.type));
-  const albumListKey = useMemo(
-    () => `albums-${props.grid.cardWidth}-${props.grid.cardHeight}`,
-    [props.grid.cardHeight, props.grid.cardWidth],
+  const previewRef = useRef(preview);
+  const viewabilityCallbackRef = useRef(props.viewportPrefetch.onViewableItemsChanged);
+  const viewabilityConfigRef = useRef(props.viewportPrefetch.viewabilityConfig);
+  previewRef.current = preview;
+  viewabilityCallbackRef.current = props.viewportPrefetch.onViewableItemsChanged;
+  const stableOnViewableItemsChanged = useRef((info: ViewabilityInfo<SearchResultItem>) => {
+    if (previewRef.current) return;
+    viewabilityCallbackRef.current?.(info);
+  }).current;
+  const listKey = useMemo(
+    () => `${type}-${grid.cardWidth}-${grid.cardHeight}`,
+    [grid.cardHeight, grid.cardWidth, type],
   );
-  const eventListKey = useMemo(
-    () => `events-${props.grid.cardWidth}-${props.grid.cardHeight}`,
-    [props.grid.cardHeight, props.grid.cardWidth],
+  const handleListRef = useCallback(
+    (node: AppFlatListRef<SearchResultItem> | null) => {
+      onListRef?.(type, node);
+    },
+    [onListRef, type],
   );
-  const userListKey = useMemo(
-    () => `${props.type}-${props.grid.cardWidth}-${props.grid.cardHeight}`,
-    [props.grid.cardHeight, props.grid.cardWidth, props.type],
+  const handleScrollOffsetChange = useCallback(
+    (offset: number) => {
+      onScrollOffsetChange?.(type, offset);
+    },
+    [onScrollOffsetChange, type],
   );
-  useEffect(() => {
-    const handle = requestAnimationFrame(() => {
-      pagerRef.current?.scrollToIndex({
-        animated: didMountRef.current,
-        index: activeIndex,
-      });
-      didMountRef.current = true;
-    });
-    return () => cancelAnimationFrame(handle);
-  }, [activeIndex, pageWidth]);
   const renderAlbumCard = useCallback(
     (item: AlbumPhotoWithMeta, index: number) => {
       const visibility = buildPreparedAlbumVisibility(item, "search");
@@ -298,117 +313,56 @@ export function SearchResultsContent(props: SearchResultsContentProps) {
     ),
     [grid.cardHeight, grid.cardWidth, grid.mediaHeight, onOpenProfile, prefetchProfileByUsername],
   );
-  const handleMomentumScrollEnd = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const nextIndex = Math.max(
-        0,
-        Math.min(
-          SEARCH_RESULT_PAGES.length - 1,
-          Math.round(event.nativeEvent.contentOffset.x / pageWidth),
-        ),
-      );
-      const nextType = SEARCH_RESULT_PAGES[nextIndex];
-      if (nextType && nextType !== selectedType) {
-        onSelectType(nextType);
-      }
-    },
-    [onSelectType, pageWidth, selectedType],
-  );
-  const renderPage = useCallback(
-    ({ item: pageType }: { item: SearchType }) => {
-      const isActive = pageType === props.type;
-      const pageProps = {
-        bottomPadding: props.bottomPadding,
-        currentError: isActive ? props.currentError : null,
-        currentLoading: isActive ? props.currentLoading : false,
-        emptyText: isActive ? props.emptyText : "",
-        grid: props.grid,
-        hasMore: isActive ? props.hasMore : undefined,
-        listRef: isActive ? props.listRef : undefined,
-        loadingMore: isActive ? props.loadingMore : false,
-        numColumns: props.numColumns,
-        onEndReached: isActive ? props.onEndReached : noop,
-        onRefresh: isActive ? props.onRefresh : noop,
-        onViewableItemsChanged: isActive
-          ? props.viewportPrefetch.onViewableItemsChanged
-          : undefined,
-        refreshing: isActive ? props.refreshing : false,
-        viewabilityConfig: isActive ? props.viewportPrefetch.viewabilityConfig : undefined,
-      };
-      if (pageType === "albums") {
-        return (
-          <View style={{ width: pageWidth, flex: 1 }}>
-            <SearchResultsGrid
-              {...pageProps}
-              data={props.filteredAlbums}
-              listKey={albumListKey}
-              renderCard={renderAlbumCard}
-              showFooter={isActive && props.filteredAlbums.length > 0}
-            />
-          </View>
-        );
-      }
-      if (pageType === "events") {
-        return (
-          <View style={{ width: pageWidth, flex: 1 }}>
-            <SearchResultsGrid
-              {...pageProps}
-              data={props.filteredEvents}
-              listKey={eventListKey}
-              renderCard={renderEventCard}
-              showFooter={isActive && props.filteredEvents.length > 0}
-            />
-          </View>
-        );
-      }
-      const userItems = pageType === "clubs" ? props.filteredClubs : props.filteredStudents;
-      return (
-        <View style={{ width: pageWidth, flex: 1 }}>
-          <SearchResultsGrid
-            {...pageProps}
-            data={userItems}
-            listKey={`${pageType}-${userListKey}`}
-            renderCard={renderUserCard}
-            showFooter={isActive && userItems.length > 0}
-          />
-        </View>
-      );
-    },
-    [
-      albumListKey,
-      eventListKey,
-      pageWidth,
-      props,
-      renderAlbumCard,
-      renderEventCard,
-      renderUserCard,
-      userListKey,
-    ],
-  );
+  const sharedProps = {
+    bottomPadding: props.bottomPadding,
+    currentError: preview ? null : props.currentError,
+    currentLoading: preview ? false : props.currentLoading,
+    emptyText: props.emptyText,
+    grid: props.grid,
+    hasMore: preview ? false : props.hasMore,
+    listRef: preview ? undefined : props.listRef,
+    loadingMore: preview ? false : props.loadingMore,
+    numColumns: props.numColumns,
+    onEndReached: preview ? NOOP : props.onEndReached,
+    onListRef: onListRef ? handleListRef : undefined,
+    onRefresh: preview ? NOOP : props.onRefresh,
+    onScrollOffsetChange: !preview && onScrollOffsetChange ? handleScrollOffsetChange : undefined,
+    onViewableItemsChanged: stableOnViewableItemsChanged,
+    refreshing: preview ? false : props.refreshing,
+    viewabilityConfig: viewabilityConfigRef.current,
+  };
+
+  if (type === "albums") {
+    return (
+      <SearchResultsGrid
+        {...sharedProps}
+        currentLoading={preview ? false : props.currentLoading}
+        data={props.filteredAlbums}
+        listKey={listKey}
+        renderCard={renderAlbumCard}
+      />
+    );
+  }
+  if (type === "events") {
+    return (
+      <SearchResultsGrid
+        {...sharedProps}
+        currentLoading={preview ? false : props.currentLoading}
+        data={props.filteredEvents}
+        listKey={listKey}
+        renderCard={renderEventCard}
+      />
+    );
+  }
+
+  const userItems = type === "clubs" ? props.filteredClubs : props.filteredStudents;
   return (
-    <FlatList
-      ref={pagerRef}
-      data={SEARCH_RESULT_PAGES}
-      extraData={selectedType}
-      getItemLayout={(_, index) => ({ index, length: pageWidth, offset: pageWidth * index })}
-      horizontal
-      initialNumToRender={1}
-      initialScrollIndex={activeIndex}
-      keyExtractor={(item) => item}
-      keyboardShouldPersistTaps="handled"
-      onMomentumScrollEnd={handleMomentumScrollEnd}
-      onScrollToIndexFailed={({ index }) => {
-        pagerRef.current?.scrollToOffset({ animated: false, offset: pageWidth * index });
-      }}
-      overScrollMode="never"
-      pagingEnabled
-      maxToRenderPerBatch={1}
-      removeClippedSubviews={false}
-      renderItem={renderPage}
-      scrollEnabled={props.pagerEnabled !== false}
-      showsHorizontalScrollIndicator={false}
-      style={{ flex: 1 }}
-      windowSize={3}
+    <SearchResultsGrid
+      {...sharedProps}
+      currentLoading={preview ? false : props.currentLoading}
+      data={userItems}
+      listKey={listKey}
+      renderCard={renderUserCard}
     />
   );
 }

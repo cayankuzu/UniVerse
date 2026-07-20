@@ -1,25 +1,12 @@
 import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, renderHook } from "@testing-library/react-native";
+import { renderHook } from "@testing-library/react-native";
 import { projectionKeys } from "../../../data/projections/projectionKeys";
 import { SEARCH_DISCOVERY_SCOPE } from "../data";
 import { useSearchProjectionState } from "./useSearchProjectionState";
 
-const mockPrefetchProjectionScreen = jest.fn((params: unknown) => Promise.resolve(params));
-const mockResolveNetworkBudget = jest.fn(() => ({
-  allowIdlePrefetch: true,
-  allowIntentPrefetch: true,
-}));
-const mockUseProjectionScreen = jest.fn((params: unknown) => params);
+const mockUseProjectionScreen = jest.fn();
 const mockUseScreenRefresh = jest.fn((_params: unknown) => jest.fn());
-
-jest.mock("../../../data/projections/networkAwareBudget", () => ({
-  resolveNetworkBudget: () => mockResolveNetworkBudget(),
-}));
-
-jest.mock("../../../data/projections/prefetch/prefetchProjection", () => ({
-  prefetchProjectionScreen: (params: unknown) => mockPrefetchProjectionScreen(params),
-}));
 
 jest.mock("../../../data/projections/screen/useProjectionScreen", () => ({
   useProjectionScreen: (params: unknown) => mockUseProjectionScreen(params),
@@ -29,144 +16,95 @@ jest.mock("../../../data/projections/screen/useScreenRefresh", () => ({
   useScreenRefresh: (params: unknown) => mockUseScreenRefresh(params),
 }));
 
-function createQueryClient() {
-  return new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
-  });
+function createProjection(id: string) {
+  return {
+    hasCachedSnapshot: true,
+    items: [{ id }],
+    loadingMore: false,
+    onRefresh: jest.fn(async () => undefined),
+    query: { error: null, fetchStatus: "idle", isSuccess: true },
+    refreshing: false,
+    screenState: { touchedAt: 123 },
+    shouldShowInitialSkeleton: false,
+  };
 }
 
-function createWrapper(queryClient: QueryClient) {
+function createWrapper() {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return function Wrapper({ children }: { children: React.ReactNode }) {
     return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
   };
 }
 
+function createSearchUi(type: "albums" | "events" | "clubs" | "students") {
+  return {
+    effectiveSearchInput: {
+      category: "",
+      fee: "",
+      query: "",
+      sort: "newest",
+      university: "",
+    },
+    effectiveSearchScope: SEARCH_DISCOVERY_SCOPE,
+    persistedSearchScopeRef: { current: "" },
+    restoreReady: true,
+    type,
+  } as never;
+}
+
 describe("useSearchProjectionState", () => {
   beforeEach(() => {
-    jest.useFakeTimers();
-    mockPrefetchProjectionScreen.mockClear();
-    mockResolveNetworkBudget.mockClear();
     mockUseProjectionScreen.mockReset();
     mockUseScreenRefresh.mockClear();
-    mockUseProjectionScreen.mockReturnValue({
-      hasCachedSnapshot: true,
-      items: [{ id: "album-1" }],
-      loadingMore: false,
-      onBackgroundRefresh: jest.fn(async () => undefined),
-      onRefresh: jest.fn(async () => undefined),
-      query: {
-        error: null,
-        fetchStatus: "idle",
-        isSuccess: false,
-      },
-      refreshing: false,
-      screenState: {
-        touchedAt: 123,
-      },
-      shouldShowInitialSkeleton: false,
-    });
+    mockUseProjectionScreen.mockImplementation((params: { entity: string }) =>
+      createProjection(params.entity),
+    );
   });
 
-  afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
-  });
-
-  it("prefetches the other discovery tabs after the active tab settles", async () => {
-    const queryClient = createQueryClient();
-
-    renderHook(
+  it("mounts all discovery projections and exposes every preloaded list", () => {
+    const { result } = renderHook(
       () =>
         useSearchProjectionState({
-          searchUi: {
-            effectiveSearchInput: {
-              category: "",
-              fee: "",
-              query: "",
-              sort: "newest",
-              university: "",
-            },
-            effectiveSearchScope: SEARCH_DISCOVERY_SCOPE,
-            persistedSearchScopeRef: { current: "" },
-            restoreReady: true,
-            type: "albums",
-          } as never,
-          userData: {
-            id: "viewer-1",
-            username: "viewer",
-          } as never,
+          searchUi: createSearchUi("albums"),
+          userData: { id: "viewer-1", username: "viewer" } as never,
           viewerKey: "viewer-1",
         }),
-      { wrapper: createWrapper(queryClient) },
+      { wrapper: createWrapper() },
     );
 
-    await act(async () => {
-      jest.advanceTimersByTime(600);
-      await Promise.resolve();
-    });
-
-    expect(mockPrefetchProjectionScreen).toHaveBeenCalledTimes(3);
-    const calledQueryKeys = mockPrefetchProjectionScreen.mock.calls.map(
-      (call) => (call[0] as { queryKey: unknown[] }).queryKey,
-    );
-
-    expect(calledQueryKeys).toEqual([
+    expect(mockUseProjectionScreen).toHaveBeenCalledTimes(4);
+    expect(mockUseProjectionScreen.mock.calls.map((call) => call[0].queryKey)).toEqual([
+      projectionKeys.search("albums", "viewer-1", SEARCH_DISCOVERY_SCOPE),
       projectionKeys.search("events", "viewer-1", SEARCH_DISCOVERY_SCOPE),
       projectionKeys.search("clubs", "viewer-1", SEARCH_DISCOVERY_SCOPE),
       projectionKeys.search("students", "viewer-1", SEARCH_DISCOVERY_SCOPE),
     ]);
-    mockPrefetchProjectionScreen.mock.calls.forEach((call) => {
-      expect(call[0]).toMatchObject({ source: "warmup" });
-    });
+    expect(result.current.itemsByType.albums).toEqual([{ id: "search-albums" }]);
+    expect(result.current.itemsByType.events).toEqual([{ id: "search-events" }]);
+    expect(result.current.itemsByType.clubs).toEqual([{ id: "search-users" }]);
+    expect(result.current.itemsByType.students).toEqual([{ id: "search-users" }]);
   });
 
-  it("skips discovery prefetch when a sibling tab is already cached", async () => {
-    const queryClient = createQueryClient();
-    queryClient.setQueryData(projectionKeys.search("events", "viewer-1", SEARCH_DISCOVERY_SCOPE), {
-      ids: ["cached-event-1"],
-      touchedAt: 100,
-    });
-
-    renderHook(
+  it("changes only the selected projection when swiping between loaded tabs", () => {
+    let type: "albums" | "events" = "albums";
+    const { rerender, result } = renderHook(
       () =>
         useSearchProjectionState({
-          searchUi: {
-            effectiveSearchInput: {
-              category: "",
-              fee: "",
-              query: "",
-              sort: "newest",
-              university: "",
-            },
-            effectiveSearchScope: SEARCH_DISCOVERY_SCOPE,
-            persistedSearchScopeRef: { current: "" },
-            restoreReady: true,
-            type: "albums",
-          } as never,
-          userData: {
-            id: "viewer-1",
-            username: "viewer",
-          } as never,
+          searchUi: createSearchUi(type),
+          userData: { id: "viewer-1", username: "viewer" } as never,
           viewerKey: "viewer-1",
         }),
-      { wrapper: createWrapper(queryClient) },
+      { wrapper: createWrapper() },
     );
 
-    await act(async () => {
-      jest.advanceTimersByTime(600);
-      await Promise.resolve();
-    });
+    expect(result.current.searchProjection.items).toEqual([{ id: "search-albums" }]);
+    type = "events";
+    rerender({});
 
-    expect(mockPrefetchProjectionScreen).toHaveBeenCalledTimes(2);
-    const calledQueryKeys = mockPrefetchProjectionScreen.mock.calls.map(
-      (call) => (call[0] as { queryKey: unknown[] }).queryKey,
-    );
-
-    expect(calledQueryKeys).toEqual([
+    expect(result.current.searchProjection.items).toEqual([{ id: "search-events" }]);
+    expect(mockUseProjectionScreen.mock.calls.slice(-4).map((call) => call[0].queryKey)).toEqual([
+      projectionKeys.search("albums", "viewer-1", SEARCH_DISCOVERY_SCOPE),
+      projectionKeys.search("events", "viewer-1", SEARCH_DISCOVERY_SCOPE),
       projectionKeys.search("clubs", "viewer-1", SEARCH_DISCOVERY_SCOPE),
       projectionKeys.search("students", "viewer-1", SEARCH_DISCOVERY_SCOPE),
     ]);

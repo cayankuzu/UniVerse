@@ -28,7 +28,6 @@ import {
 import { MediaViewerModal, type MediaViewerItem } from "../../../../shared/media/MediaViewerModal";
 import { VideoThumbnailPreview } from "../../../../shared/media/VideoThumbnailPreview";
 import { useAlbumPreviewViewerActions } from "./useAlbumPreviewViewerActions";
-
 type Props = {
   cropPending: boolean;
   handleThumbPress: (index: number) => void;
@@ -311,7 +310,9 @@ export function EventAlbumUploadPreviewSection({
                     <VideoThumbnailPreview
                       candidateUris={resolveMediaSelectionPreviewCandidates(item)}
                       contentFit="cover"
-                      priority="eager"
+                      priority={
+                        Math.abs(index - normalizedSelectedPhotoIndex) <= 1 ? "eager" : "deferred"
+                      }
                       uri={resolveMediaSelectionPreviewUri(item)}
                       style={{ width: "100%", height: "100%" }}
                     />

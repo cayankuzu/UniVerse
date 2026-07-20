@@ -6,7 +6,7 @@ module.exports = {
   testMatch: ["<rootDir>/src/mobile/**/*.test.ts", "<rootDir>/src/mobile/**/*.test.tsx"],
   testPathIgnorePatterns: ["/node_modules/", "/android/"],
   transformIgnorePatterns: [
-    "/node_modules/(?!(.pnpm|react-native|@react-native|@react-native-community|expo|@expo|@expo-google-fonts|@noble/hashes|react-navigation|@react-navigation|@sentry/react-native|native-base))",
+    "/node_modules/(?!(.pnpm|react-native|@react-native|@react-native-community|expo|@expo|@expo-google-fonts|@noble/hashes|@shopify/flash-list|react-navigation|@react-navigation|@sentry/react-native|native-base))",
     "/node_modules/react-native-reanimated/plugin/",
   ],
   collectCoverageFrom: [

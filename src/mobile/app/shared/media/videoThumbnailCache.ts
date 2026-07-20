@@ -20,6 +20,7 @@ function getVideoThumbnailsModule() {
 
 const thumbnailCache = new Map<string, VideoThumbnail | null>();
 const thumbnailInflightCache = new Map<string, Promise<VideoThumbnail | null>>();
+const MAX_THUMBNAIL_CACHE_ENTRIES = 96;
 const VIDEO_THUMBNAIL_QUALITY = 0.72;
 const VIDEO_THUMBNAIL_SAMPLE_TIMES_SECONDS = [0.35, 0.18, 0.05];
 
@@ -30,7 +31,26 @@ function normalizeUri(value: string | null | undefined) {
 export function getCachedVideoThumbnail(uri: string | null | undefined) {
   const normalizedUri = normalizeUri(uri);
   if (!normalizedUri) return null;
-  return thumbnailCache.get(normalizedUri) ?? null;
+  const thumbnail = thumbnailCache.get(normalizedUri) ?? null;
+  if (thumbnailCache.has(normalizedUri)) {
+    thumbnailCache.delete(normalizedUri);
+    thumbnailCache.set(normalizedUri, thumbnail);
+  }
+  return thumbnail;
+}
+
+function cacheVideoThumbnail(uri: string, thumbnail: VideoThumbnail | null) {
+  thumbnailCache.delete(uri);
+  thumbnailCache.set(uri, thumbnail);
+  while (thumbnailCache.size > MAX_THUMBNAIL_CACHE_ENTRIES) {
+    const oldestKey = thumbnailCache.keys().next().value;
+    if (typeof oldestKey !== "string") break;
+    thumbnailCache.delete(oldestKey);
+  }
+}
+
+export function clearVideoThumbnailMemoryCache() {
+  thumbnailCache.clear();
 }
 
 async function resolveViaNativeModule(uri: string): Promise<VideoThumbnail | null> {
@@ -85,7 +105,7 @@ export async function resolveVideoThumbnail(
   const generateThumbnail = async () => {
     const thumbnail =
       (await resolveViaNativeModule(normalizedUri)) || (await resolveViaVideoPlayer(normalizedUri));
-    thumbnailCache.set(normalizedUri, thumbnail);
+    cacheVideoThumbnail(normalizedUri, thumbnail);
     return thumbnail;
   };
   const pending = (

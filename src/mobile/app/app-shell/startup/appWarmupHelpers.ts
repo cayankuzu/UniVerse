@@ -83,17 +83,5 @@ function collectWarmupImageUris(items: unknown[], maxCount: number) {
 }
 
 export function collectWarmupBundleItems(bundle: AppWarmupBundle) {
-  const searchDiscoveryItems = Object.values(bundle.searchDiscovery || {}).flatMap(
-    (entry) => entry?.items || [],
-  );
-  const searchItems = bundle.search?.content?.items || [];
-  return [
-    ...(bundle.home.items || []),
-    bundle.profileOverview,
-    ...(bundle.notifications.items || []),
-    ...(bundle.profileAlbums.items || []),
-    ...(bundle.profileEvents.items || []),
-    ...searchItems,
-    ...searchDiscoveryItems,
-  ];
+  return bundle.home.items || [];
 }

@@ -2,6 +2,7 @@ import { tokens } from "../../../shared/theme";
 
 export type ProfileTab = "album" | "events";
 export type AlbumOwnerFilter = "all" | "club" | "students";
+export const PROFILE_TAB_ORDER: readonly ProfileTab[] = ["album", "events"];
 
 export interface ProfileTabItem {
   key: ProfileTab;

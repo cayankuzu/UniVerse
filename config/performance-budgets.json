@@ -1,0 +1,8 @@
+{
+  "androidBundleJsBytesMax": 8500000,
+  "coldStartupP95Ms": 2500,
+  "frameJankPercentMax": 1,
+  "splashMaxWaitMs": 900,
+  "tapResponseP95Ms": 100,
+  "warmStartupP95Ms": 1000
+}

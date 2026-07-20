@@ -1,5 +1,6 @@
 import type { Session } from "@supabase/supabase-js";
 import { AuthAPI } from "../../../data/auth";
+import { isRetryableQueryError } from "../../../data/query/retryPolicy";
 import { isEmailConfirmationError } from "../../../platform/security/errors";
 import { supabase } from "../../../platform/supabase";
 import { DEMO_MODE_ENABLED } from "../../../platform/config/runtime";
@@ -30,6 +31,7 @@ interface CreateLoginHandlerParams {
   recoverAndHydrateSession: (session: Session) => Promise<void>;
   releaseSignedOutSuppression: () => void;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  startSessionHydrationInBackground: (session: Session, event: string) => void;
   suppressSignedOutRef: React.MutableRefObject<boolean>;
 }
 
@@ -65,7 +67,11 @@ export function createLoginHandler(params: CreateLoginHandlerParams) {
           LOGIN_PROFILE_SYNC_WAIT_MS,
           "login-profile-sync-wait-timeout",
         ).catch((error) => {
-          if (toErrorMessage(error) === "login-profile-sync-wait-timeout") {
+          if (
+            toErrorMessage(error) === "login-profile-sync-wait-timeout" ||
+            isRetryableQueryError(error)
+          ) {
+            params.startSessionHydrationInBackground(session, "login-profile-sync-retry");
             return;
           }
           throw error;

@@ -248,7 +248,9 @@ export function AppUploadActivityBar({ navigationRef }: Props) {
 
     return {
       actions,
-      hint: progress?.hint || "Uygulamadan cikmayin. Paylasim arka planda suruyor.",
+      hint:
+        progress?.hint ||
+        "Uygulamayi kullanmaya devam edebilirsin; kapanirsa sonraki acilista surer.",
       percent: progress?.percent ?? (visibleQueueEntry.status === "uploading" ? 18 : 5),
       stage:
         progress?.stage ||

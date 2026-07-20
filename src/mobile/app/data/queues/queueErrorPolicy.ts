@@ -46,8 +46,9 @@ export function isRetryableQueueError(error: unknown, options: QueueErrorPolicyO
   if (options.useHttpStatus && isHttpRequestError(error)) {
     if (error.isTimeout) return true;
     const status = error.httpStatus;
+    if (status === 429) return true;
     if (status >= 400 && status < 500) return false;
-    return status === 429 || status >= 500 || status === 0;
+    return status >= 500 || status === 0;
   }
 
   const message = String((error as { message?: string } | null)?.message || error || "")

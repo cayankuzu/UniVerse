@@ -1,9 +1,12 @@
+jest.mock("../../data/projections/networkAwareBudget", () => ({
+  resolveNetworkBudget: () => ({ allowImagePrefetch: true, quality: "good" }),
+}));
+
 import { resolveWarmupIdleBudget } from "./appWarmupBudget";
 
-function createBundle(source: "fallback" | "rpc" | "timeout-backpressure") {
+function createBundle(source: "rpc" | "timeout-backpressure") {
   return {
     home: { items: source === "timeout-backpressure" ? [] : [{ id: "1" }] },
-    notifications: { items: source === "fallback" ? [] : [{ id: "n1" }] },
     source,
   } as any;
 }
@@ -18,18 +21,6 @@ describe("resolveWarmupIdleBudget", () => {
     ).toMatchObject({
       allowIdle: false,
       maxImages: 0,
-    });
-  });
-
-  it("allows fallback warmup with moderate budget", () => {
-    expect(
-      resolveWarmupIdleBudget({
-        appState: "active",
-        bundle: createBundle("fallback"),
-      }),
-    ).toMatchObject({
-      allowIdle: true,
-      maxImages: 1,
     });
   });
 

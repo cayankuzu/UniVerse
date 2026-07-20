@@ -6,6 +6,7 @@ type MockTusOptions = {
   headers?: Record<string, string>;
   metadata?: Record<string, string>;
   onError?: ((error: Error) => void) | null;
+  onProgress?: ((sentBytes: number, totalBytes: number) => void) | null;
   onSuccess?: (() => void) | null;
   removeFingerprintOnSuccess?: boolean;
   retryDelays?: number[] | null;
@@ -111,7 +112,10 @@ describe("resumable storage upload", () => {
   });
 
   it("uses six-megabyte TUS chunks and resumes a stored upload", async () => {
-    await expect(uploadFileResumably(buildParams())).resolves.toBe("albums/viewer/video.mp4");
+    const onProgress = jest.fn();
+    const upload = uploadFileResumably({ ...buildParams(), onProgress });
+    mockLatestOptions?.onProgress?.(3_500_000, 7_000_000);
+    await expect(upload).resolves.toBe("albums/viewer/video.mp4");
 
     expect(mockResume).toHaveBeenCalledWith(
       expect.objectContaining({ uploadUrl: "https://resume.example/upload-1" }),
@@ -133,6 +137,7 @@ describe("resumable storage upload", () => {
       storeFingerprintForResuming: true,
       uploadSize: 7_000_000,
     });
+    expect(onProgress).toHaveBeenCalledWith(3_500_000, 7_000_000);
   });
 
   it("aborts the TUS request when the queue operation is cancelled", async () => {

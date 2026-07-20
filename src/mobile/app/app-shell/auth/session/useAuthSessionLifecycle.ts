@@ -103,6 +103,7 @@ export function useAuthSessionLifecycle({
         recoverAndHydrateSession,
         releaseSignedOutSuppression,
         setIsLoading,
+        startSessionHydrationInBackground,
         suppressSignedOutRef,
       }),
     [
@@ -111,6 +112,7 @@ export function useAuthSessionLifecycle({
       recoverAndHydrateSession,
       releaseSignedOutSuppression,
       setIsLoading,
+      startSessionHydrationInBackground,
       suppressSignedOutRef,
     ],
   );

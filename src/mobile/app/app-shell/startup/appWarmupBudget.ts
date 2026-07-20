@@ -23,8 +23,7 @@ export function resolveWarmupIdleBudget(params: {
   const networkBudget = resolveNetworkBudget(params.appState);
 
   if (networkBudget.quality === "offline") return DISABLED_BUDGET;
-  const constrainedBudget =
-    params.bundle.source === "fallback" || networkBudget.quality === "degraded";
+  const constrainedBudget = networkBudget.quality === "degraded";
   const maxImages = networkBudget.allowImagePrefetch
     ? constrainedBudget
       ? Math.min(1, STARTUP_PERFORMANCE_BUDGET.idleImages)

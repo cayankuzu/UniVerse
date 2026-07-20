@@ -51,6 +51,7 @@ const mutationQueueEngine = createPersistentQueueEngine<
   },
   pendingStatus: "pending",
   processingStatus: "running",
+  retainRetryableErrors: true,
   storageKey: MUTATION_ACTION_QUEUE_STORAGE_KEY,
 });
 
@@ -116,9 +117,25 @@ export async function enqueueMutationAction(params: {
   ownerId?: string;
   payload: Record<string, unknown>;
 }) {
-  const entry = await mutationQueueEngine.enqueue(params);
+  const { entry } = await mutationQueueEngine.enqueueOrPatch(params, () => ({}));
   emitQueueResumeSignal("mutation");
   return entry;
+}
+
+export async function upsertMutationAction(params: {
+  id: string;
+  kind: MutationActionQueueKind;
+  maxAttempts?: number;
+  ownerId?: string;
+  patchExisting: (
+    entry: MutationActionQueueEntry,
+  ) => PersistentQueueEntryPatch<MutationActionQueueKind, MutationActionQueueStatus>;
+  payload: Record<string, unknown>;
+}) {
+  const { patchExisting, ...entryParams } = params;
+  const result = await mutationQueueEngine.enqueueOrPatch(entryParams, patchExisting);
+  emitQueueResumeSignal("mutation");
+  return result;
 }
 
 export async function patchMutationActionEntry(
@@ -156,6 +173,7 @@ export async function processMutationActionQueue<TResult>(
 ) {
   await mutationQueueEngine.processQueue({
     ...params,
+    deferUntilInteractionIdle: params.deferUntilInteractionIdle ?? false,
     onFailed: async (entry, error) => {
       await params.onFailed?.(entry, error);
       notifyMutationActionListeners(entry.id, {

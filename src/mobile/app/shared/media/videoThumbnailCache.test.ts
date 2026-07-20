@@ -64,4 +64,15 @@ describe("videoThumbnailCache", () => {
     expect(mockRunLowPriorityTask).not.toHaveBeenCalled();
     expect(mockCreateVideoPlayer).toHaveBeenCalledTimes(1);
   });
+
+  it("clears generated thumbnails on memory pressure", async () => {
+    const { clearVideoThumbnailMemoryCache, getCachedVideoThumbnail, resolveVideoThumbnail } =
+      require("./videoThumbnailCache") as typeof import("./videoThumbnailCache");
+    mockGenerateThumbnailsAsync.mockResolvedValue([{ uri: "file:///thumb-clear.jpg" } as never]);
+
+    await resolveVideoThumbnail("file:///clear.mp4");
+    clearVideoThumbnailMemoryCache();
+
+    expect(getCachedVideoThumbnail("file:///clear.mp4")).toBeNull();
+  });
 });

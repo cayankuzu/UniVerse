@@ -17,11 +17,6 @@ import { useViewProfileUiState } from "./useViewProfileUiState";
 import { useViewProfileOverviewState } from "./useViewProfileOverviewState";
 import type { UseViewProfileOptions, UseViewProfileParams } from "./viewProfile.types";
 
-const INACTIVE_PROFILE_QUERY_STATE = {
-  error: null,
-  isLoading: false,
-} as const;
-
 export function useViewProfile(params: UseViewProfileParams, options: UseViewProfileOptions = {}) {
   const bottomPadding = useBottomNavPadding();
   const { width, height } = useWindowDimensions();
@@ -54,7 +49,8 @@ export function useViewProfile(params: UseViewProfileParams, options: UseViewPro
     buildRelationByClub,
     profile: screenData.profile,
     profileOwnerId: String(screenData.profile?.id || ""),
-    projectionFetching: screenData.activeProjection.query.isFetching,
+    projectionFetching:
+      screenData.albumProjection.query.isFetching || screenData.eventProjection.query.isFetching,
     refreshing: screenData.refreshing,
     sourceAlbums: screenData.sourceAlbums || [],
     sourceEvents: screenData.sourceEvents || [],
@@ -94,7 +90,8 @@ export function useViewProfile(params: UseViewProfileParams, options: UseViewPro
     !screenData.canViewContent ||
     !backgroundWorkReady ||
     screenData.refreshing ||
-    screenData.activeProjection.query.isFetching ||
+    screenData.albumProjection.query.isFetching ||
+    screenData.eventProjection.query.isFetching ||
     screenData.loadingMore ||
     screenData.profileQuery.isFetching;
   const viewportPrefetch = useProfileViewportPrefetch({
@@ -121,9 +118,6 @@ export function useViewProfile(params: UseViewProfileParams, options: UseViewPro
     id: params.userData.id,
     username: params.userData.username,
   });
-  const activeTab = viewState.tab;
-  const activeProjectionQuery = screenData.activeProjection.query;
-
   useEffect(() => {
     debugLog("PROFILE/VIEW", "counts", {
       username: params.username,
@@ -154,7 +148,7 @@ export function useViewProfile(params: UseViewProfileParams, options: UseViewPro
     albumOwnerFilterExpanded: viewState.albumOwnerFilterExpanded,
     albumRelationByClub: collections.albumRelationByClub,
     albums: collections.albums,
-    albumsQuery: activeTab === "album" ? activeProjectionQuery : INACTIVE_PROFILE_QUERY_STATE,
+    albumsQuery: screenData.albumProjection.query,
     canViewContent: screenData.canViewContent,
     canViewFollowers: screenData.canViewFollowers,
     canViewFollowing: screenData.canViewFollowing,
@@ -164,7 +158,7 @@ export function useViewProfile(params: UseViewProfileParams, options: UseViewPro
     emptyText: collections.emptyText,
     eventRelationByClub: collections.eventRelationByClub,
     events: collections.events,
-    eventsQuery: activeTab === "events" ? activeProjectionQuery : INACTIVE_PROFILE_QUERY_STATE,
+    eventsQuery: screenData.eventProjection.query,
     followersAccess: relationshipActions.followersAccess,
     followAction: relationshipActions.followAction,
     followLabel: screenData.followLabel,

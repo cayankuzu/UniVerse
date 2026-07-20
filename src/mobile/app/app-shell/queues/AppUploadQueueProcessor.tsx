@@ -11,10 +11,10 @@ import { logEvent } from "../../platform/observability";
 
 const IDLE_RESUME_DELAY_MS = 15_000;
 const PENDING_RESUME_DELAY_MS = 4_000;
-const INITIAL_RESUME_DELAY_MS = 1_800;
-const ACTIVE_RESUME_DELAY_MS = 2_400;
-const SIGNAL_RESUME_DELAY_MS = 900;
-const RESUME_JITTER_WINDOW_MS = 480;
+const INITIAL_RESUME_DELAY_MS = 300;
+const ACTIVE_RESUME_DELAY_MS = 500;
+const SIGNAL_RESUME_DELAY_MS = 250;
+const RESUME_JITTER_WINDOW_MS = 200;
 
 async function readUploadQueueStats(ownerId: string) {
   const queue = await getUploadQueue(undefined, ownerId);

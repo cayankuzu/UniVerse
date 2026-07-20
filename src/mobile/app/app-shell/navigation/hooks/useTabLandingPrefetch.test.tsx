@@ -5,10 +5,17 @@ const mockNotificationsModuleLoaded = jest.fn();
 const mockProfileModuleLoaded = jest.fn();
 const mockSearchModuleLoaded = jest.fn();
 const mockCancel = jest.fn();
+const mockPrefetchProfile = jest.fn(async (_params?: unknown) => undefined);
+const mockPrefetchSearch = jest.fn(async (_params?: unknown) => undefined);
+const mockQueryClient = {};
 const scheduledCallbacks: Array<() => void> = [];
 const mockPersistLandingVisit = jest.fn(
   async (_viewerKey?: unknown, _surface?: unknown) => undefined,
 );
+
+jest.mock("@tanstack/react-query", () => ({
+  useQueryClient: () => mockQueryClient,
+}));
 
 jest.mock("../../../data/projections/warmupPreferences", () => ({
   loadPersistedWarmupPreferences: jest.fn(async () => ({
@@ -16,9 +23,18 @@ jest.mock("../../../data/projections/warmupPreferences", () => ({
     lastProfileTab: "events",
     lastSearchScope: null,
   })),
+  getCachedWarmupPreferences: jest.fn(() => ({
+    landingAffinity: null,
+    lastHomeScope: null,
+    lastProfileTab: "album",
+    lastSearchScope: null,
+  })),
   persistWarmupLandingVisit: (viewerKey: unknown, surface: unknown) =>
     mockPersistLandingVisit(viewerKey, surface),
   rankWarmupLandingSurfaces: jest.fn(() => ["profile", "search", "notifications"]),
+}));
+jest.mock("../../../data/projections/networkAwareBudget", () => ({
+  resolveNetworkBudget: () => ({ allowIntentPrefetch: true }),
 }));
 jest.mock("../../../shared/performance/runtimePerformanceTier", () => ({
   getRuntimePerformanceTier: () => "tier1",
@@ -41,6 +57,12 @@ jest.mock("../../../features/notifications/public/screens", () => {
   mockNotificationsModuleLoaded();
   return { NotificationsScreen: jest.fn() };
 });
+jest.mock("../../../features/search/public/prefetch", () => ({
+  prefetchSearchLandingExperience: (params: unknown) => mockPrefetchSearch(params),
+}));
+jest.mock("../../../features/profile/public/prefetch", () => ({
+  prefetchOwnProfileLandingExperience: (params: unknown) => mockPrefetchProfile(params),
+}));
 
 import { useTabLandingPrefetch } from "./useTabLandingPrefetch";
 
@@ -88,5 +110,27 @@ describe("useTabLandingPrefetch", () => {
 
     unmount();
     expect(mockCancel).toHaveBeenCalled();
+  });
+
+  it("starts the matching data prefetch on touch intent", () => {
+    const { result } = renderHook(() =>
+      useTabLandingPrefetch({
+        activeRoute: "Home",
+        enabled: true,
+        userId: "viewer-id",
+        username: "alice",
+      }),
+    );
+
+    act(() => result.current.prefetchTabIntent("search"));
+
+    expect(mockPrefetchSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        queryClient: mockQueryClient,
+        source: "intent",
+        viewer: { id: "viewer-id", username: "alice" },
+      }),
+    );
+    expect(mockPrefetchProfile).not.toHaveBeenCalled();
   });
 });

@@ -12,7 +12,6 @@ import { useHomeScreenUiState } from "./useHomeScreenUiState";
 import { getViewerKey } from "../../../data/contracts/viewerKey";
 import { useHomeProjectionState } from "./useHomeProjectionState";
 import { useHomeScreenPrefetch } from "./useHomeScreenPrefetch";
-import { useHomeVisibleMediaUpgrade } from "./useHomeVisibleMediaUpgrade";
 import type { HomeViewerData, UseHomeScreenStateParams } from "./homeScreen.types";
 
 function logHomeCounts(params: {
@@ -105,13 +104,6 @@ export function useHomeScreenState(params: UseHomeScreenStateParams) {
     viewer,
     viewerKey,
   });
-  const mediaUpgradeState = useHomeVisibleMediaUpgrade({
-    allowMediaUpgrade: projectionState.speedGate.allowMediaUpgrade,
-    filterScope: projectionState.filterScope,
-    items: collections.effectiveItems,
-    onViewableItemsChanged: prefetchState.onViewableItemsChanged,
-    viewerKey,
-  });
   const isLoading =
     projectionState.homeProjection.shouldShowInitialSkeleton &&
     !projectionState.shouldUseStartupPreview;
@@ -191,8 +183,7 @@ export function useHomeScreenState(params: UseHomeScreenStateParams) {
     onRefresh,
     onNotificationsPressIn: prefetchState.onNotificationsPressIn,
     onUserInteraction,
-    onViewableItemsChanged: mediaUpgradeState.onViewableItemsChanged,
-    readyMediaRowKeys: mediaUpgradeState.readyMediaRowKeys,
+    onViewableItemsChanged: prefetchState.onViewableItemsChanged,
     refreshing: projectionState.refreshing,
     setEntityFilter: uiState.setEntityFilter,
     setShowFilters: uiState.setShowFilters,

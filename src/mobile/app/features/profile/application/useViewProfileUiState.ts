@@ -1,5 +1,4 @@
-import { startTransition, useEffect, useState } from "react";
-import { useTransitionSetter } from "../../../shared/hooks/useTransitionSetter";
+import { startTransition, useCallback, useEffect, useState } from "react";
 import type { AlbumOwnerFilter, ProfileTab } from "../domain/profileConstants";
 
 export function useViewProfileUiState(username: string) {
@@ -15,7 +14,9 @@ export function useViewProfileUiState(username: string) {
     });
   }, [username]);
 
-  const setTab = useTransitionSetter<ProfileTab>(setTabState);
+  const setTab = useCallback((nextTab: ProfileTab) => {
+    setTabState(nextTab);
+  }, []);
 
   return {
     albumOwnerFilter,

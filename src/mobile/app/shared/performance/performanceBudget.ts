@@ -58,7 +58,8 @@ export const STARTUP_PERFORMANCE_BUDGET: StartupPerformanceBudget = {
   idleImages: 3,
   splashMaxWaitMs: 900,
   splashMinDisplayMs: 0,
-  warmupRpcTimeoutMs: 320,
+  // Non-blocking startup work gets enough time to finish on mobile networks.
+  warmupRpcTimeoutMs: 900,
   warmupStaleMs: 15 * 60_000,
 };
 

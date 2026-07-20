@@ -5,7 +5,6 @@ import { useOptimisticOutboxMetaStore } from "../../../data/queues/optimisticOut
 import {
   clearMutationActionQueueStorage,
   getMutationActionEntry,
-  patchMutationActionEntry,
 } from "../../../data/queues/mutationActionQueue";
 import { processFollowActionQueue, queueFollowAction } from "./followActionQueue";
 
@@ -188,17 +187,15 @@ describe("followActionQueue", () => {
       await Promise.resolve();
     }
 
-    await patchMutationActionEntry("follow:user-1", {
-      payload: {
-        clientMutationId: "follow-toggle-next",
-        outboxId: "follow:user-1",
-        previousStatus: "none",
-        targetStatus: "none",
-        username: "user-1",
-        viewerCacheKey: "viewer-1",
-        viewerUsername: "viewer",
-      },
-      status: "running",
+    await queueFollowAction({
+      clientMutationId: "follow-toggle-next",
+      outboxId: "follow:user-1",
+      ownerId: "viewer-1",
+      previousStatus: "following",
+      targetStatus: "none",
+      username: "user-1",
+      viewerCacheKey: "viewer-1",
+      viewerUsername: "viewer",
     });
     expect(resolveFirstRequest).not.toBeNull();
     resolveFirstRequest!({ status: "following" });

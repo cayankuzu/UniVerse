@@ -18,6 +18,7 @@ interface Props {
   onSearch: () => void;
   onProfile: () => void;
   onCreate?: () => void;
+  onIntent?: (tab: "profile" | "search") => void;
 }
 
 interface Tab {
@@ -65,6 +66,7 @@ export const MainBottomTabs = memo(function MainBottomTabs({
   onSearch,
   onProfile,
   onCreate,
+  onIntent,
 }: Props) {
   const insets = useSafeAreaInsets();
   const reducedMotion = useReducedMotion();
@@ -136,6 +138,7 @@ export const MainBottomTabs = memo(function MainBottomTabs({
         >
           {tabs.map((tab) => {
             const isActive = tab.key === active;
+            const intentTab = tab.key === "profile" || tab.key === "search" ? tab.key : null;
             const tabButton = (
               <Pressable
                 accessibilityLabel={TAB_LABELS[tab.key]()}
@@ -143,6 +146,7 @@ export const MainBottomTabs = memo(function MainBottomTabs({
                 accessibilityState={{ selected: isActive }}
                 key={tab.key}
                 onPress={tab.onPress}
+                onPressIn={intentTab ? () => onIntent?.(intentTab) : undefined}
                 style={({ pressed }) => [styles.tabButton, pressed && styles.tabButtonPressed]}
               >
                 {isActive ? (

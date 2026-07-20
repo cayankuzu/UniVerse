@@ -16,6 +16,21 @@ export type UploadQueueStatus = "failed" | "pending" | "uploading";
 
 export type UploadQueueEntry = PersistentQueueEntryBase<UploadQueueKind, UploadQueueStatus>;
 
+const UPLOAD_NON_RETRYABLE_KEYWORDS = [
+  "boyutu veya formati uygun degil",
+  "fotograf boyutu cok buyuk",
+  "video boyutu cok buyuk",
+  "video suresi cok uzun",
+  "dosya seçilmedi",
+];
+
+export function isRetryableUploadError(error: unknown) {
+  return isRetryableQueueError(error, {
+    additionalNonRetryableKeywords: UPLOAD_NON_RETRYABLE_KEYWORDS,
+    additionalRetryableKeywords: ["http 429", "cok fazla", "çok fazla"],
+  });
+}
+
 const uploadQueueEngine = createPersistentQueueEngine<
   UploadQueueKind,
   UploadQueueStatus,
@@ -23,16 +38,7 @@ const uploadQueueEngine = createPersistentQueueEngine<
 >({
   errorMessageFallback: "Upload failed.",
   failedStatus: "failed",
-  isRetryableError: (error) =>
-    isRetryableQueueError(error, {
-      additionalNonRetryableKeywords: [
-        "boyutu veya formati uygun degil",
-        "fotograf boyutu cok buyuk",
-        "video boyutu cok buyuk",
-        "video suresi cok uzun",
-        "dosya seçilmedi",
-      ],
-    }),
+  isRetryableError: isRetryableUploadError,
   logReadError: (error) => {
     logError(error, {
       captureInSentry: false,

@@ -10,13 +10,13 @@ describe("networkAwareBudget", () => {
     (AppState as any).currentState = "active";
   });
 
-  it("returns good budget when quality is good and app is active", () => {
+  it("starts conservatively until the first native network state arrives", () => {
     const budget = resolveNetworkBudget("active");
-    expect(budget.quality).toBe("good");
-    expect(budget.allowIdlePrefetch).toBe(true);
-    expect(budget.allowImagePrefetch).toBe(true);
+    expect(budget.quality).toBe("unknown");
+    expect(budget.allowIdlePrefetch).toBe(false);
+    expect(budget.allowImagePrefetch).toBe(false);
     expect(budget.allowIntentPrefetch).toBe(true);
-    expect(budget.allowNextPagePrefetch).toBe(true);
+    expect(budget.allowNextPagePrefetch).toBe(false);
   });
 
   it("suppresses all prefetch when app is backgrounded", () => {

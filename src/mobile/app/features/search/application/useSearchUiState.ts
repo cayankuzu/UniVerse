@@ -139,16 +139,10 @@ export function useSearchUiState({ searchReselectCounter, viewerKey }: UseSearch
     type,
   });
 
-  const onSelectType = (value: SearchType) => {
-    startTransition(() => {
-      setType(value);
-      setShowFilters(false);
-      setSelectedCategory("");
-      setSelectedUniversity("");
-      setSelectedFee("");
-      setSortOption("newest");
-    });
-  };
+  const onSelectType = useCallback((value: SearchType) => {
+    setType(value);
+    setShowFilters(false);
+  }, []);
 
   return {
     activeFilterCount,

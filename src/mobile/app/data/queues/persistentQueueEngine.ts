@@ -51,6 +51,7 @@ export function createPersistentQueueEngine<
       failedStatus: options.failedStatus,
       getNextRetryDelayMs,
       isRetryableError: options.isRetryableError,
+      retainRetryableErrors: options.retainRetryableErrors ?? false,
       patchEntry: storageApi.patchEntry,
       pendingStatus: options.pendingStatus,
       processingStatus: options.processingStatus,
@@ -67,6 +68,7 @@ export function createPersistentQueueEngine<
   return {
     clearStorage,
     enqueue: storageApi.enqueue,
+    enqueueOrPatch: storageApi.enqueueOrPatch,
     getEntry: storageApi.getEntry,
     getQueue: storageApi.getQueue,
     patchEntry: storageApi.patchEntry,

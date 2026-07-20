@@ -5,6 +5,7 @@ import {
   getUploadDeadLetterQueue,
   getUploadEntry,
   getUploadQueue,
+  isRetryableUploadError,
   processUploadQueue,
 } from "./uploadQueue";
 import { subscribeQueueResumeSignal } from "./runtimeSignals";
@@ -19,6 +20,12 @@ describe("uploadQueue", () => {
 
   afterEach(() => {
     jest.useRealTimers();
+  });
+
+  it("classifies transient upload transport failures for resumable checkpoints", () => {
+    expect(isRetryableUploadError(new Error("network request failed"))).toBe(true);
+    expect(isRetryableUploadError(new Error("HTTP 429"))).toBe(true);
+    expect(isRetryableUploadError(new Error("video boyutu cok buyuk"))).toBe(false);
   });
 
   it("processes uploads in FIFO order", async () => {

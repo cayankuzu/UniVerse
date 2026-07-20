@@ -81,7 +81,7 @@ export function writeUploadProgress(
 
 export function createAlbumUploadProgress(eventId: string): UploadProgressState {
   return {
-    hint: "Uygulamadan cikmayin. Paylasim arka planda suruyor.",
+    hint: "Uygulamayi kullanmaya devam edebilirsin; kapanirsa sonraki acilista surer.",
     percent: 5,
     stage: "Siraya alindi",
     target: {
@@ -94,7 +94,7 @@ export function createAlbumUploadProgress(eventId: string): UploadProgressState 
 
 export function createEventCreateProgress(): UploadProgressState {
   return {
-    hint: "Uygulamadan cikmayin. Etkinlik arka planda paylasiliyor.",
+    hint: "Uygulamayi kullanmaya devam edebilirsin; kapanirsa sonraki acilista surer.",
     percent: 5,
     stage: "Siraya alindi",
     target: {

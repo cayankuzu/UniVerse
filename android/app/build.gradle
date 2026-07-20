@@ -173,12 +173,12 @@ def configuredVersionCode =
     findProperty("android.versionCode") ?:
     localProperties.getProperty("android.versionCode") ?:
     System.getenv("ANDROID_VERSION_CODE") ?:
-    "120"
+    "127"
 def configuredVersionName =
     findProperty("android.versionName") ?:
     localProperties.getProperty("android.versionName") ?:
     System.getenv("ANDROID_VERSION_NAME") ?:
-    "1.0.120"
+    "1.0.127"
 def configuredApplicationId =
     findProperty("android.applicationId") ?:
     localProperties.getProperty("android.applicationId") ?:
@@ -249,6 +249,12 @@ android {
             versionNameSuffix "-dev"
             resValue "string", "app_name", "UniVerse"
             signingConfig signingConfigs.debug
+        }
+        benchmark {
+            initWith release
+            signingConfig signingConfigs.debug
+            matchingFallbacks = ["release"]
+            debuggable false
         }
         release {
             if (hasManualReleaseSigning) {
@@ -336,7 +342,7 @@ dependencies {
 
 if (enableSentryGradlePlugin) {
     sentry {
-        ignoredBuildTypes = ["debug"]
+        ignoredBuildTypes = ["debug", "benchmark"]
         autoUploadProguardMapping = shouldSentryAutoUpload()
         includeProguardMapping = true
         dexguardEnabled = false

@@ -2,7 +2,7 @@
   "expo": {
     "name": "UniVerse",
     "slug": "universe",
-    "version": "1.0.120",
+    "version": "1.0.127",
     "scheme": "ogrencisosyalagi",
     "platforms": ["android", "ios"],
     "icon": "./assets/app-icons_background_not_removed/appstore.png",
@@ -45,7 +45,7 @@
     },
     "ios": {
       "bundleIdentifier": "com.ogrencisosyalagi.app",
-      "buildNumber": "120",
+      "buildNumber": "127",
       "supportsTablet": false,
       "icon": "./assets/app-icons_background_not_removed/appstore.png",
       "infoPlist": {
@@ -57,7 +57,7 @@
     "android": {
       "package": "com.ogrencisosyalagi.app",
       "icon": "./assets/app-icons_background_not_removed/playstore.png",
-      "versionCode": 120,
+      "versionCode": 127,
       "splash": {
         "backgroundColor": "#FFFFFF",
         "resizeMode": "native",
@@ -80,7 +80,7 @@
       }
     },
     "owner": "cayanns-team",
-    "runtimeVersion": "1.0.120",
+    "runtimeVersion": "1.0.127",
     "updates": {
       "fallbackToCacheTimeout": 0,
       "url": "https://u.expo.dev/c7565eaa-d013-430f-9576-217c4beefa3f"

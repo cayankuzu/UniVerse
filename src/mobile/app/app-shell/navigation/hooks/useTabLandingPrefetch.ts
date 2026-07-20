@@ -1,12 +1,15 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { AppState } from "react-native";
+import { useQueryClient } from "@tanstack/react-query";
 import { getViewerKey } from "../../../data/contracts/viewerKey";
 import {
+  getCachedWarmupPreferences,
   loadPersistedWarmupPreferences,
   persistWarmupLandingVisit,
   rankWarmupLandingSurfaces,
   type WarmupLandingSurface,
 } from "../../../data/projections/warmupPreferences";
+import { resolveNetworkBudget } from "../../../data/projections/networkAwareBudget";
 import { getRuntimePerformanceTier } from "../../../shared/performance/runtimePerformanceTier";
 import { scheduleAfterInteractions } from "../../../shared/utils/scheduleAfterInteractions";
 
@@ -55,6 +58,7 @@ export function useTabLandingPrefetch(params: {
   userId?: string | null;
   username?: string | null;
 }) {
+  const queryClient = useQueryClient();
   const lastObservedRouteRef = useRef("");
   const viewerKey = getViewerKey({ id: params.userId, username: params.username });
   const username = String(params.username || "").trim();
@@ -105,4 +109,41 @@ export function useTabLandingPrefetch(params: {
     if (!surface) return;
     void persistWarmupLandingVisit(viewerKey, surface).catch(() => undefined);
   }, [params.activeRoute, params.enabled, username, viewerKey]);
+
+  const prefetchTabIntent = useCallback(
+    (surface: "profile" | "search") => {
+      warmLandingModule(surface);
+      if (!params.enabled || !username || !resolveNetworkBudget("active").allowIntentPrefetch) {
+        return;
+      }
+
+      const preferences = getCachedWarmupPreferences(viewerKey);
+      const viewer = { id: params.userId || undefined, username };
+      if (surface === "search") {
+        const {
+          prefetchSearchLandingExperience,
+        } = require("../../../features/search/public/prefetch");
+        void prefetchSearchLandingExperience({
+          preferredScope: preferences.lastSearchScope,
+          queryClient,
+          source: "intent",
+          viewer,
+        });
+        return;
+      }
+
+      const {
+        prefetchOwnProfileLandingExperience,
+      } = require("../../../features/profile/public/prefetch");
+      void prefetchOwnProfileLandingExperience({
+        preferredTab: preferences.lastProfileTab || "album",
+        queryClient,
+        source: "intent",
+        viewer,
+      });
+    },
+    [params.enabled, params.userId, queryClient, username, viewerKey],
+  );
+
+  return { prefetchTabIntent };
 }

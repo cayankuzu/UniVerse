@@ -96,56 +96,56 @@ jest.mock("../../../features/content-cards/public/cards", () => {
 import { SearchResultsContent } from "./SearchResultsContent";
 
 describe("SearchResultsContent", () => {
-  it("routes card intent immediately and switches paged result types", () => {
+  it("mounts only the selected result type and routes its card intent", () => {
     const onOpenAlbumCard = jest.fn();
     const onOpenEventCard = jest.fn();
     const onOpenProfile = jest.fn();
-    const onSelectType = jest.fn();
     const prefetchEventById = jest.fn();
     const prefetchProfileByUsername = jest.fn();
-    const screen = render(
-      <SearchResultsContent
-        bottomPadding={0}
-        currentError={null}
-        currentLoading={false}
-        emptyText="empty"
-        filteredAlbums={[{ id: "album-1" } as never]}
-        filteredClubs={[{ id: "club-1" } as never]}
-        filteredEvents={[{ id: "event-1" } as never]}
-        filteredStudents={[]}
-        grid={{
-          cardHeight: 200,
-          cardWidth: 160,
-          horizontalPadding: 12,
-          mediaHeight: 120,
-          rowGap: 8,
-        }}
-        listRef={{ current: null }}
-        loadingMore={false}
-        numColumns={2}
-        onEndReached={jest.fn()}
-        onOpenAlbumCard={onOpenAlbumCard}
-        onOpenEventCard={onOpenEventCard}
-        onOpenProfile={onOpenProfile}
-        onRefresh={jest.fn()}
-        onSelectType={onSelectType}
-        prefetchEventById={prefetchEventById}
-        prefetchProfileByUsername={prefetchProfileByUsername}
-        refreshing={false}
-        type="albums"
-        viewportPrefetch={{}}
-      />,
-    );
+    const sharedProps = {
+      bottomPadding: 0,
+      currentError: null,
+      currentLoading: false,
+      emptyText: "empty",
+      filteredAlbums: [{ id: "album-1" } as never],
+      filteredClubs: [{ id: "club-1" } as never],
+      filteredEvents: [{ id: "event-1" } as never],
+      filteredStudents: [],
+      grid: {
+        cardHeight: 200,
+        cardWidth: 160,
+        horizontalPadding: 12,
+        mediaHeight: 120,
+        rowGap: 8,
+      },
+      listRef: { current: null },
+      loadingMore: false,
+      numColumns: 2,
+      onEndReached: jest.fn(),
+      onOpenAlbumCard,
+      onOpenEventCard,
+      onOpenProfile,
+      onRefresh: jest.fn(),
+      prefetchEventById,
+      prefetchProfileByUsername,
+      refreshing: false,
+      viewportPrefetch: {},
+    };
+    const screen = render(<SearchResultsContent {...sharedProps} type="albums" />);
 
     fireEvent.press(screen.getByTestId("album-prefetch"));
     fireEvent.press(screen.getByTestId("album-open"));
+    expect(screen.queryByTestId("event-open")).toBeNull();
+    expect(screen.queryByTestId("profile-open")).toBeNull();
+
+    screen.rerender(<SearchResultsContent {...sharedProps} type="events" />);
     fireEvent.press(screen.getByTestId("event-prefetch"));
     fireEvent.press(screen.getByTestId("event-open"));
+    expect(screen.queryByTestId("album-open")).toBeNull();
+
+    screen.rerender(<SearchResultsContent {...sharedProps} type="clubs" />);
     fireEvent.press(screen.getByTestId("profile-prefetch"));
     fireEvent.press(screen.getByTestId("profile-open"));
-    fireEvent(screen.getByTestId("search-pager"), "momentumScrollEnd", {
-      nativeEvent: { contentOffset: { x: 100_000 } },
-    });
 
     expect(prefetchEventById).toHaveBeenCalledWith("event-from-album");
     expect(prefetchEventById).toHaveBeenCalledWith("event-1");
@@ -153,6 +153,5 @@ describe("SearchResultsContent", () => {
     expect(onOpenAlbumCard).toHaveBeenCalled();
     expect(onOpenEventCard).toHaveBeenCalled();
     expect(onOpenProfile).toHaveBeenCalled();
-    expect(onSelectType).toHaveBeenCalledWith("students");
   });
 });

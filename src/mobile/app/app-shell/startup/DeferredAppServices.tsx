@@ -29,9 +29,9 @@ const INITIAL_DEFERRED_SERVICE_STATE: DeferredServiceState = {
 };
 
 const AUTHENTICATED_DEFERRED_SERVICE_PLAN: readonly DeferredServicePlanEntry[] = [
-  { key: "mutationQueue", waitMs: 180 },
+  { key: "uploadQueue", waitMs: 100 },
+  { key: "mutationQueue", waitMs: 80 },
   { key: "realtime", waitMs: 160 },
-  { key: "uploadQueue", waitMs: 240 },
   { key: "pushBridge", waitMs: 480 },
 ];
 

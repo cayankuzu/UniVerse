@@ -181,7 +181,7 @@ async function patchAlbumUploadProgress(params: {
   stage: string;
 }) {
   const nextPayload = writeUploadProgress(params.payload, {
-    hint: "Uygulamadan cikmayin. Paylasim arka planda suruyor.",
+    hint: "Uygulamayi kullanmaya devam edebilirsin; kapanirsa sonraki acilista surer.",
     percent: params.percent,
     stage: params.stage,
     title: "Album karti paylasiliyor",
@@ -271,8 +271,8 @@ async function createAlbumFromUploadEntry(
     payload = await patchAlbumUploadProgress({
       entryId: entry.id,
       payload,
-      percent: 22,
-      stage: `Medyalar yukleniyor (${pendingUploads.length})`,
+      percent: 14,
+      stage: `Medyalar hazirlaniyor (0/${pendingUploads.length})`,
     });
     payload = await uploadPendingAlbumMedia({
       assertActive: (nextPayload) => assertAlbumUploadEntryActive(entry.id, nextPayload),

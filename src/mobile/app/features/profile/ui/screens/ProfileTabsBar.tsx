@@ -47,6 +47,9 @@ export function ProfileTabsBar({
           const Indicator = active && expanded ? ChevronDown : ChevronRight;
           return (
             <Pressable
+              accessibilityLabel={item.label}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: active }}
               key={item.key}
               onPress={() => {
                 if (active && isExpandable && onToggleExpanded) {

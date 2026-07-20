@@ -8,7 +8,7 @@
 export const STALE_TIMES = {
   /** Home feed — users expect near-realtime. */
   homeFeed: 45_000,
-  /** Notification badge — frequently polled. */
+  /** Notification badge - refreshed by startup, foreground, and realtime events. */
   notificationBadge: 90_000,
   /** Notification inbox items. */
   notifications: 30_000,

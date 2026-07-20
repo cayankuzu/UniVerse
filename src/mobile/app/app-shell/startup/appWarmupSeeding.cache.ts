@@ -18,6 +18,7 @@ export interface WarmupSeedCacheSnapshot {
   homeItemCount: number;
   preferences: PersistedWarmupPreferences;
   preferredHomeScope: string;
+  shouldRequestWarmup: boolean;
 }
 
 interface PrepareWarmupSeedCacheParams {
@@ -43,6 +44,7 @@ export async function prepareWarmupSeedCache(
     "home-feed",
   );
   const homeState = getProjectionState(params.queryClient, homeKey);
+  const homeQueryState = params.queryClient.getQueryState(homeKey);
   const notificationItemCount = readProjectionItems(
     params.queryClient,
     notificationsKey,
@@ -83,6 +85,8 @@ export async function prepareWarmupSeedCache(
     homeItemCount: homeItems.length,
     preferences,
     preferredHomeScope,
+    shouldRequestWarmup:
+      homeQueryState?.fetchStatus !== "fetching" && (!homeState || homeState.isStale === true),
   };
 }
 

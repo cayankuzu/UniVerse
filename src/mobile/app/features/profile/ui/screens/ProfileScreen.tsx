@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../../../app-shell/auth";
@@ -9,10 +9,12 @@ import {
   useOpenEventDetail,
   useOpenProfile,
 } from "../../../../app-shell/navigation/hooks/useIntentNavigation";
-import { PROFILE_COLORS } from "../../domain/profileConstants";
+import { PROFILE_COLORS, type ProfileTab } from "../../domain/profileConstants";
 import { useOwnProfileScreenState } from "../../application/useOwnProfileScreenState";
-import { ProfileContentContainer } from "./ProfileContentContainer";
+import { estimateProfilePagerHeights } from "../profilePagerLayout";
+import { ProfileContentPager } from "./ProfileContentPager";
 import { OwnProfileHeaderContainer } from "./OwnProfileHeaderContainer";
+import { ProfilePagedScrollContainer } from "./ProfilePagedScrollContainer";
 import { ProfileScreenOverlays } from "./ProfileScreenOverlays";
 import { useProfileViewerChromeState } from "../useProfileViewerChromeState";
 import { useOwnProfileScreenActions } from "../useOwnProfileScreenActions";
@@ -48,6 +50,13 @@ export function ProfileScreen({ navigation }: Props) {
     userData,
   });
   const toggleAlbumOwnerFilter = state.setAlbumOwnerFilterExpanded;
+  const activeProfileTab = state.tab;
+  const ownProfileListRef = state.listRef;
+  const setOwnProfileTab = state.handleSetTab;
+  const [visibleProfileTab, setVisibleProfileTab] = useState<ProfileTab>(activeProfileTab);
+  const [measuredPagerHeights, setMeasuredPagerHeights] = useState<
+    Partial<Record<ProfileTab, number>>
+  >({});
   const { handleLoadMore, openAlbumAt, openContentProfile, openEventAt } =
     useOwnProfileScreenActions({
       albums: state.albums,
@@ -59,41 +68,83 @@ export function ProfileScreen({ navigation }: Props) {
       setViewerTargetId: chromeState.setViewerTargetId,
       setViewerType: chromeState.setViewerType,
     });
-  const header = useMemo(
-    () => (
-      <OwnProfileHeaderContainer
-        albumOwnerFilter={state.albumOwnerFilter}
-        albumOwnerFilterExpanded={state.albumOwnerFilterExpanded}
-        displayName={state.displayName}
-        onOpenFollowers={state.handleOpenFollowers}
-        onOpenFollowing={state.handleOpenFollowing}
-        onOpenImage={chromeState.setViewerImage}
-        onOpenSettings={state.handleOpenSettings}
-        onSetAlbumOwnerFilter={state.setAlbumOwnerFilter}
-        onSetTab={state.handleSetTab}
-        onToggleAlbumOwnerFilter={() => toggleAlbumOwnerFilter((previous) => !previous)}
-        resolvedAccountType={state.resolvedAccountType}
-        tab={state.tab}
-        tabs={state.tabs}
-        userData={state.resolvedUserData}
-      />
-    ),
+  useEffect(() => {
+    setVisibleProfileTab(activeProfileTab);
+  }, [activeProfileTab]);
+  useEffect(() => {
+    setMeasuredPagerHeights({});
+  }, [
+    state.albums.length,
+    state.events.length,
+    state.grid.cardHeight,
+    state.grid.rowGap,
+    state.hasMore,
+    state.numColumns,
+  ]);
+  const pagerHeights = useMemo(
+    () =>
+      estimateProfilePagerHeights({
+        cardHeight: state.grid.cardHeight,
+        hasMore: state.hasMore,
+        numColumns: state.numColumns,
+        rowGap: state.grid.rowGap,
+        tabs: {
+          album: state.albums,
+          events: state.events,
+        },
+      }),
     [
-      chromeState.setViewerImage,
-      state.albumOwnerFilter,
-      state.albumOwnerFilterExpanded,
-      state.displayName,
-      state.handleOpenFollowers,
-      state.handleOpenFollowing,
-      state.handleOpenSettings,
-      state.handleSetTab,
-      state.resolvedAccountType,
-      state.resolvedUserData,
-      state.setAlbumOwnerFilter,
-      toggleAlbumOwnerFilter,
-      state.tab,
-      state.tabs,
+      state.albums,
+      state.events,
+      state.grid.cardHeight,
+      state.grid.rowGap,
+      state.hasMore,
+      state.numColumns,
     ],
+  );
+  const pagerHeight = Math.max(
+    measuredPagerHeights[activeProfileTab] ?? pagerHeights[activeProfileTab],
+    measuredPagerHeights[visibleProfileTab] ?? pagerHeights[visibleProfileTab],
+  );
+  const handlePagerContentHeightChange = useCallback((pageTab: ProfileTab, height: number) => {
+    if (height <= 0) return;
+    setMeasuredPagerHeights((currentHeights) => {
+      const currentHeight = currentHeights[pageTab];
+      if (currentHeight && Math.abs(currentHeight - height) < 1) return currentHeights;
+      return { ...currentHeights, [pageTab]: height };
+    });
+  }, []);
+  const handleProfileSetTab = useCallback(
+    (nextTab: ProfileTab) => {
+      if (nextTab === activeProfileTab) {
+        ownProfileListRef.current?.scrollToOffset({ offset: 0, animated: true });
+        return;
+      }
+      setVisibleProfileTab(nextTab);
+      setOwnProfileTab(nextTab);
+    },
+    [activeProfileTab, ownProfileListRef, setOwnProfileTab],
+  );
+  const handleProfilePreviewTab = useCallback((nextTab: ProfileTab) => {
+    setVisibleProfileTab(nextTab);
+  }, []);
+  const renderHeader = () => (
+    <OwnProfileHeaderContainer
+      albumOwnerFilter={state.albumOwnerFilter}
+      albumOwnerFilterExpanded={state.albumOwnerFilterExpanded}
+      displayName={state.displayName}
+      onOpenFollowers={state.handleOpenFollowers}
+      onOpenFollowing={state.handleOpenFollowing}
+      onOpenImage={chromeState.setViewerImage}
+      onOpenSettings={state.handleOpenSettings}
+      onSetAlbumOwnerFilter={state.setAlbumOwnerFilter}
+      onSetTab={handleProfileSetTab}
+      onToggleAlbumOwnerFilter={() => toggleAlbumOwnerFilter((previous) => !previous)}
+      resolvedAccountType={state.resolvedAccountType}
+      tab={visibleProfileTab}
+      tabs={state.tabs}
+      userData={state.resolvedUserData}
+    />
   );
   const profileOwnerId = useMemo(
     () => String(state.resolvedUserData.id || "").trim() || undefined,
@@ -101,41 +152,46 @@ export function ProfileScreen({ navigation }: Props) {
   );
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: PROFILE_COLORS.bg }} edges={["top"]}>
-      <ProfileContentContainer
-        albumData={state.albums}
-        albumsError={state.tab === "album" && Boolean(state.errorMessage)}
-        albumsLoading={state.tab === "album" && state.isLoading}
-        cardHeight={state.grid.cardHeight}
-        cardWidth={state.grid.cardWidth}
-        emptyText={state.emptyText}
-        eventData={state.events}
-        eventsError={state.tab === "events" && Boolean(state.errorMessage)}
-        eventsLoading={state.tab === "events" && state.isLoading}
-        gridHorizontalPadding={state.grid.horizontalPadding}
-        gridRowGap={state.grid.rowGap}
-        hasMore={state.hasMore}
-        header={header}
-        loadingMore={state.loadingMore}
-        mediaHeight={state.grid.mediaHeight}
-        numColumns={state.numColumns}
-        onLoadMore={handleLoadMore}
-        onOpenAlbumAt={openAlbumAt}
-        onOpenEventAt={openEventAt}
-        onOpenProfile={openContentProfile}
-        onPrefetchEvent={state.prefetchEventById}
-        onPrefetchProfile={state.prefetchProfileByUsername}
+      <ProfilePagedScrollContainer
+        header={renderHeader()}
+        listRef={ownProfileListRef}
+        onEndReached={state.hasMore === false ? undefined : handleLoadMore}
         onRefresh={state.onRefresh}
-        onSetTab={state.handleSetTab}
-        onViewableItemsChanged={state.viewportPrefetch.onViewableItemsChanged}
-        pagerEnabled={state.tabs.length > 1}
-        profileAccountType={state.resolvedAccountType}
-        profileOwnerId={profileOwnerId}
-        profileOwnerUsername={state.profileUsername}
+        pager={
+          <ProfileContentPager
+            activeTab={activeProfileTab}
+            albumData={state.albums}
+            albumsError={Boolean(state.errorMessage)}
+            albumsLoading={state.isLoading}
+            cardHeight={state.grid.cardHeight}
+            cardWidth={state.grid.cardWidth}
+            emptyText={state.emptyText}
+            enabled={state.tabs.length > 1}
+            eventData={state.events}
+            eventsError={Boolean(state.errorMessage)}
+            eventsLoading={state.isLoading}
+            gridHorizontalPadding={state.grid.horizontalPadding}
+            gridRowGap={state.grid.rowGap}
+            hasMore={state.hasMore}
+            loadingMore={state.loadingMore}
+            mediaHeight={state.grid.mediaHeight}
+            numColumns={state.numColumns}
+            onContentHeightChange={handlePagerContentHeightChange}
+            onOpenAlbumAt={openAlbumAt}
+            onOpenEventAt={openEventAt}
+            onOpenProfile={openContentProfile}
+            onPrefetchEvent={state.prefetchEventById}
+            onPrefetchProfile={state.prefetchProfileByUsername}
+            onTabChange={handleProfileSetTab}
+            onTabPreviewChange={handleProfilePreviewTab}
+            pagerHeight={pagerHeight}
+            profileAccountType={state.resolvedAccountType}
+            profileOwnerId={profileOwnerId}
+            profileOwnerUsername={state.profileUsername}
+            tourTargetIndex={0}
+          />
+        }
         refreshing={state.refreshing}
-        tab={state.tab}
-        tileData={state.tileData}
-        tourTargetIndex={0}
-        viewabilityConfig={state.viewportPrefetch.viewabilityConfig}
       />
 
       <ProfileScreenOverlays

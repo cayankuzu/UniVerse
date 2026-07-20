@@ -1,4 +1,4 @@
-import { startTransition, useCallback, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useWindowDimensions } from "react-native";
 import { getViewerKey } from "../../../data/contracts/viewerKey";
@@ -67,7 +67,8 @@ export function useOwnProfileScreenState(params: UseOwnProfileScreenStateParams)
     buildRelationByClub,
     profile: screenData.resolvedProfile,
     profileOwnerId: params.userData.id,
-    projectionFetching: screenData.activeProjection.query.isFetching,
+    projectionFetching:
+      screenData.albumProjection.query.isFetching || screenData.eventProjection.query.isFetching,
     refreshing: screenData.refreshing,
     sourceAlbums: screenData.sourceAlbums,
     sourceEvents: screenData.sourceEvents,
@@ -86,7 +87,8 @@ export function useOwnProfileScreenState(params: UseOwnProfileScreenStateParams)
   };
   const disableProfilePrefetch =
     screenData.refreshing ||
-    screenData.activeProjection.query.isFetching ||
+    screenData.albumProjection.query.isFetching ||
+    screenData.eventProjection.query.isFetching ||
     screenData.activeProjection.loadingMore;
 
   const viewportPrefetch = useProfileViewportPrefetch({
@@ -137,12 +139,10 @@ export function useOwnProfileScreenState(params: UseOwnProfileScreenStateParams)
       );
   const handleSetTab = useCallback(
     (nextTab: ProfileTab) => {
-      startTransition(() => {
-        setTab(nextTab);
-        if (nextTab !== "album") {
-          setAlbumOwnerFilterExpanded(false);
-        }
-      });
+      setTab(nextTab);
+      if (nextTab !== "album") {
+        setAlbumOwnerFilterExpanded(false);
+      }
     },
     [setAlbumOwnerFilterExpanded, setTab],
   );

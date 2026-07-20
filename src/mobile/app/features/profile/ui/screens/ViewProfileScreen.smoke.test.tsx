@@ -241,6 +241,9 @@ describe("ViewProfileScreen smoke", () => {
 
     expect(screen.getByText("Cyn User")).toBeTruthy();
     expect(screen.getByText("@cyn")).toBeTruthy();
+    expect(screen.getByTestId("profile-outer-scroll")).toBeTruthy();
+    expect(screen.getByTestId("profile-content-pager")).toBeTruthy();
+    expect(screen.getByTestId("profile-static-grid-album")).toBeTruthy();
   });
 
   it("renders blocked profile actions without crashing", () => {

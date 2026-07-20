@@ -14,6 +14,7 @@ import { getSeededAuthStateFromSession } from "./authSessionSeed";
 
 let restorePersistedSessionPromise: Promise<Session | null> | null = null;
 let activeOrPersistedSessionPromise: Promise<Session | null> | null = null;
+let activeSessionHint: Session | null = null;
 
 export async function restorePersistedSession(): Promise<Session | null> {
   if (restorePersistedSessionPromise) {
@@ -32,7 +33,7 @@ export async function restorePersistedSession(): Promise<Session | null> {
       return null;
     }
 
-    await savePersistedAuthSession(data.session);
+    await persistAuthSession(data.session);
     return data.session;
   })();
 
@@ -47,6 +48,7 @@ export async function restorePersistedSession(): Promise<Session | null> {
 }
 
 export async function persistAuthSession(session: Session | null) {
+  activeSessionHint = session;
   if (session) {
     await savePersistedAuthSession(session);
     return;
@@ -55,11 +57,18 @@ export async function persistAuthSession(session: Session | null) {
   await clearPersistedAuthSession();
 }
 
+export function forgetActiveSession() {
+  activeSessionHint = null;
+}
+
 export async function getPersistedAuthBootstrapSnapshot() {
   return getPersistedAuthSnapshot();
 }
 
 export async function getActiveOrPersistedSession() {
+  if (activeSessionHint) {
+    return activeSessionHint;
+  }
   if (activeOrPersistedSessionPromise) {
     return activeOrPersistedSessionPromise;
   }
@@ -115,6 +124,6 @@ export async function persistResolvedAuthSnapshot(params: {
 }
 
 export async function persistSeededSessionState(session: Session) {
-  await savePersistedAuthSession(session);
+  await persistAuthSession(session);
   await savePersistedAuthSnapshot(buildPersistedAuthSnapshotFromSession(session));
 }

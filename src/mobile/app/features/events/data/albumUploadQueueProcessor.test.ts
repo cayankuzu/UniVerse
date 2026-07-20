@@ -4,6 +4,9 @@ jest.mock("../../../data/content/albums/albums.local", () => ({
 
 jest.mock("../../../data/queues/uploadQueue", () => ({
   getUploadEntry: jest.fn(),
+  isRetryableUploadError: jest.fn(
+    (error: { retryableQueueError?: boolean }) => error?.retryableQueueError === true,
+  ),
   patchUploadEntry: jest.fn(async (_entryId: string, patch: unknown) => patch),
   processUploadQueue: jest.fn(),
 }));
@@ -13,6 +16,8 @@ jest.mock("../../../data/storage/storage", () => ({
     cancelUploadSession: jest.fn(),
     createUploadSession: jest.fn(),
     finalizeUploadSession: jest.fn(),
+    prepareUploadFile: jest.fn(async (file: unknown) => file),
+    uploadPreparedFile: jest.fn(),
     uploadFile: jest.fn(),
   },
 }));
@@ -74,7 +79,8 @@ const mockPatchUploadEntry = patchUploadEntry as jest.Mock;
 const mockCancelUploadSession = StorageAPI.cancelUploadSession as jest.Mock;
 const mockCreateUploadSession = StorageAPI.createUploadSession as jest.Mock;
 const mockFinalizeUploadSession = StorageAPI.finalizeUploadSession as jest.Mock;
-const mockUploadFile = StorageAPI.uploadFile as jest.Mock;
+const mockPrepareUploadFile = StorageAPI.prepareUploadFile as jest.Mock;
+const mockUploadFile = StorageAPI.uploadPreparedFile as jest.Mock;
 const mockRecoverAuthState = recoverAuthState as jest.Mock;
 const mockUploadPhoto = AlbumAPI.uploadPhoto as jest.Mock;
 
@@ -97,6 +103,7 @@ describe("albumUploadQueueProcessor", () => {
     );
     mockCancelUploadSession.mockResolvedValue(undefined);
     mockFinalizeUploadSession.mockResolvedValue(undefined);
+    mockPrepareUploadFile.mockImplementation(async (file: unknown) => file);
     mockUploadFile.mockResolvedValue("albums/viewer-id/video.mp4");
     mockUploadPhoto.mockResolvedValue({
       comments: 0,
@@ -291,7 +298,7 @@ describe("albumUploadQueueProcessor", () => {
     expect(mockUploadPhoto).not.toHaveBeenCalled();
   });
 
-  it("keeps successful media checkpoints when one parallel upload fails", async () => {
+  it("clears cancelled-session checkpoints when one parallel upload fails", async () => {
     const entry = {
       attemptCount: 0,
       createdAt: "2026-03-13T00:00:00.000Z",
@@ -339,13 +346,16 @@ describe("albumUploadQueueProcessor", () => {
       "temp-album:partial-failure",
       expect.objectContaining({
         payload: expect.objectContaining({
-          uploadedImages: ["albums/viewer-id/photo.webp", ""],
+          uploadedImages: ["", ""],
+          uploadSessionId: null,
         }),
         status: "uploading",
       }),
     );
+    expect(mockCancelUploadSession).toHaveBeenCalledWith("session-default", "token-1");
     expect(mockUploadPhoto).not.toHaveBeenCalled();
   });
+
   it("uses upload session tickets and finalizes the session after album creation", async () => {
     const entry = {
       attemptCount: 0,
@@ -439,61 +449,5 @@ describe("albumUploadQueueProcessor", () => {
     );
     expect(mockFinalizeUploadSession).toHaveBeenCalledWith("session-1", "token-1");
     expect(mockCancelUploadSession).not.toHaveBeenCalled();
-  });
-
-  it("cancels an upload session when a ticketed media upload fails", async () => {
-    const entry = {
-      attemptCount: 0,
-      createdAt: "2026-03-13T00:00:00.000Z",
-      id: "temp-album:session-failure",
-      kind: "album-photo",
-      maxAttempts: 24,
-      nextProcessAt: null,
-      ownerId: "viewer-id",
-      payload: {
-        clientMutationId: "album-upload:session-failure",
-        eventId: "event-1",
-        eventTitle: "Event Title",
-        image: "file:///photo.jpg",
-        images: ["file:///photo.jpg"],
-        mediaKinds: ["image"],
-        uploaderUserId: "viewer-id",
-      },
-      status: "pending",
-      updatedAt: "2026-03-13T00:00:00.000Z",
-    };
-    mockGetUploadEntry.mockImplementation(async () => entry);
-    mockCreateUploadSession.mockResolvedValue({
-      sessionId: "session-failure",
-      tickets: [
-        {
-          mediaIndex: 0,
-          path: "albums/viewer-id/album-upload-session-failure-0.jpg",
-          uploadUrl: "https://upload.example/0",
-        },
-      ],
-    });
-    mockUploadFile.mockRejectedValue(new Error("upload failed"));
-    mockProcessUploadQueue.mockImplementationOnce(async (params) => {
-      await params.handler(entry);
-    });
-
-    await expect(
-      processAlbumUploadQueue({
-        accountType: "student",
-        ownerId: "viewer-id",
-        queryClient: {} as never,
-        userData: {
-          id: "viewer-id",
-          profileImage: "",
-          username: "viewer",
-        },
-        viewerKey: "viewer-id",
-      }),
-    ).rejects.toThrow("upload failed");
-
-    expect(mockCancelUploadSession).toHaveBeenCalledWith("session-failure", "token-1");
-    expect(mockFinalizeUploadSession).not.toHaveBeenCalled();
-    expect(mockUploadPhoto).not.toHaveBeenCalled();
   });
 });

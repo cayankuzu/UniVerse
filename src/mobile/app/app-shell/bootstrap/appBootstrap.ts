@@ -42,9 +42,10 @@ function syncReactQueryOnlineState(quality: NetworkQuality) {
 }
 
 export function hydrateStartupCaches() {
-  cacheHydrationPromise ??= rehydrateHomeStartupSnapshots().then(() =>
+  cacheHydrationPromise ??= Promise.all([
+    rehydrateHomeStartupSnapshots(),
     rehydratePersistedMediaUriCache(),
-  );
+  ]).then(() => undefined);
   return cacheHydrationPromise;
 }
 

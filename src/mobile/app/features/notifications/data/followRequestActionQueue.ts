@@ -1,5 +1,6 @@
 import type { QueryClient } from "@tanstack/react-query";
 import type { NotificationItem } from "../../../data/contracts/api";
+import { createClientMutationId } from "../../../data/mutations/clientMutation";
 import { FollowAPI } from "../../../data/social";
 import { projectionKeys } from "../../../data/projections/projectionKeys";
 import {
@@ -47,7 +48,12 @@ export async function queueFollowRequestResolutionAction(
     id: buildFollowRequestResolutionQueueEntryId(payload.notificationId),
     kind: "follow-request-resolution",
     ownerId,
-    payload: serializedPayload as unknown as Record<string, unknown>,
+    payload: {
+      ...serializedPayload,
+      clientMutationId:
+        serializedPayload.clientMutationId ||
+        createClientMutationId(`follow-request-${serializedPayload.action}`),
+    } as unknown as Record<string, unknown>,
   });
 }
 

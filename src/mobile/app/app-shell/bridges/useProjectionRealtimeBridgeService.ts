@@ -24,7 +24,6 @@ import { hydrateNotificationPresence } from "./notificationPresenceSync";
 
 const REALTIME_EVENT_BATCH_WINDOW_MS = 32;
 const REALTIME_SCOPE_REBUILD_DEBOUNCE_MS = 160;
-const NOTIFICATION_PRESENCE_SYNC_INTERVAL_MS = 2_500;
 
 export function useProjectionRealtimeBridgeService() {
   const queryClient = useQueryClient();
@@ -38,10 +37,7 @@ export function useProjectionRealtimeBridgeService() {
   const pendingPhotoIdsRef = useRef(new Set<string>());
   const pendingUnreadDeltaRef = useRef(0);
   const notificationsDirtyRef = useRef(false);
-  const lastNotificationPresenceSyncAtRef = useRef(0);
   const notificationPresenceSyncPromiseRef = useRef<Promise<void> | null>(null);
-  const notificationPresenceSyncHydratesListRef = useRef(false);
-  const notificationPresenceSyncRunIdRef = useRef(0);
   const pendingSocialProfileIdsRef = useRef(new Set<string>());
   const pendingSocialUsernamesRef = useRef(new Set<string>());
   const pendingViewerUsernameRef = useRef("");
@@ -110,7 +106,7 @@ export function useProjectionRealtimeBridgeService() {
           queryClient,
         });
         if (appStateRef.current === "active") {
-          void syncNotificationPresence(true, { hydrateListWhenMissing: true });
+          void syncNotificationPresence("realtime-event");
         }
       } else if (notificationsDirty) {
         applyProjectionRealtimeEvent({
@@ -122,7 +118,7 @@ export function useProjectionRealtimeBridgeService() {
           queryClient,
         });
         if (appStateRef.current === "active") {
-          void syncNotificationPresence(true, { hydrateListWhenMissing: true });
+          void syncNotificationPresence("realtime-event");
         }
       }
 
@@ -205,49 +201,24 @@ export function useProjectionRealtimeBridgeService() {
       scheduleRealtimeFlush();
     };
 
-    const syncNotificationPresence = (
-      force = false,
-      options: { hydrateListWhenMissing?: boolean } = {},
-    ) => {
-      const now = Date.now();
-      if (
-        !force &&
-        now - lastNotificationPresenceSyncAtRef.current < NOTIFICATION_PRESENCE_SYNC_INTERVAL_MS
-      ) {
-        return notificationPresenceSyncPromiseRef.current || Promise.resolve();
-      }
-      const hydrateListWhenMissing = Boolean(options.hydrateListWhenMissing);
-      if (
-        notificationPresenceSyncPromiseRef.current &&
-        (!hydrateListWhenMissing || notificationPresenceSyncHydratesListRef.current)
-      ) {
+    const syncNotificationPresence = (reason: string) => {
+      if (notificationPresenceSyncPromiseRef.current) {
         return notificationPresenceSyncPromiseRef.current;
       }
-
-      const syncRunId = notificationPresenceSyncRunIdRef.current + 1;
-      notificationPresenceSyncRunIdRef.current = syncRunId;
-      const syncTask = (async () => {
-        try {
-          const result = await hydrateNotificationPresence({
-            hydrateListWhenMissing,
-            queryClient,
-            reason: force ? "realtime-force" : "realtime-interval",
-            viewerId,
-            viewerKey,
-          });
-          if (result?.hydratedBadge || result?.hydratedNotifications) {
-            lastNotificationPresenceSyncAtRef.current = Date.now();
-          }
-        } finally {
-          if (notificationPresenceSyncRunIdRef.current === syncRunId) {
-            notificationPresenceSyncPromiseRef.current = null;
-            notificationPresenceSyncHydratesListRef.current = false;
-          }
+      const syncTask: Promise<void> = hydrateNotificationPresence({
+        queryClient,
+        reason,
+        viewerId,
+        viewerKey,
+      }).then(() => undefined);
+      const clearCompletedTask = () => {
+        if (notificationPresenceSyncPromiseRef.current === syncTask) {
+          notificationPresenceSyncPromiseRef.current = null;
         }
-      })();
+      };
 
       notificationPresenceSyncPromiseRef.current = syncTask;
-      notificationPresenceSyncHydratesListRef.current = hydrateListWhenMissing;
+      void syncTask.then(clearCompletedTask, clearCompletedTask);
       return syncTask;
     };
 
@@ -321,7 +292,7 @@ export function useProjectionRealtimeBridgeService() {
     };
 
     mountRealtimeChannel();
-    void syncNotificationPresence(true, { hydrateListWhenMissing: true });
+    void syncNotificationPresence("realtime-mount");
 
     const unsubscribeSyncStore = useSyncOrchestratorStore.subscribe((state, previousState) => {
       if (state.projections === previousState.projections) return;
@@ -341,13 +312,9 @@ export function useProjectionRealtimeBridgeService() {
           queryClient,
         });
         scheduleProjectionSyncByEntity(["home-feed", "notifications"], 120);
-        void syncNotificationPresence(true, { hydrateListWhenMissing: true });
+        void syncNotificationPresence("foreground");
       }
     });
-    const notificationPresenceInterval = setInterval(() => {
-      if (appStateRef.current !== "active") return;
-      void syncNotificationPresence();
-    }, NOTIFICATION_PRESENCE_SYNC_INTERVAL_MS);
 
     return () => {
       if (scopeRebuildTimerRef.current) {
@@ -364,14 +331,10 @@ export function useProjectionRealtimeBridgeService() {
       pendingSocialUsernames.clear();
       pendingUnreadDeltaRef.current = 0;
       notificationsDirtyRef.current = false;
-      lastNotificationPresenceSyncAtRef.current = 0;
       notificationPresenceSyncPromiseRef.current = null;
-      notificationPresenceSyncHydratesListRef.current = false;
-      notificationPresenceSyncRunIdRef.current = 0;
       pendingViewerUsernameRef.current = "";
       unsubscribeSyncStore();
       subscription.remove();
-      clearInterval(notificationPresenceInterval);
       const channel = channelRef.current;
       channelRef.current = null;
       scopeSignatureRef.current = "";

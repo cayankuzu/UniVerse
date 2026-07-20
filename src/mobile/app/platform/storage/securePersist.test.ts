@@ -7,6 +7,7 @@ describe("secure persisted text storage", () => {
     secureStore.__store.clear();
     secureStore.deleteItemAsync.mockClear();
     secureStore.getItemAsync.mockClear();
+    secureStore.isAvailableAsync.mockClear();
     secureStore.isAvailableAsync.mockResolvedValue(true);
     secureStore.setItemAsync.mockClear();
   });
@@ -43,5 +44,16 @@ describe("secure persisted text storage", () => {
     expect(secureStore.__store.has("app-secure.cache-key.1")).toBe(false);
     expect(secureStore.__store.has("app-secure.cache-key.2")).toBe(false);
     await expect(secureTextStorage.getItem("cache-key")).resolves.toBe("small");
+  });
+
+  it("checks secure-store availability only once per runtime", async () => {
+    const secureStore = jest.requireMock("expo-secure-store");
+    const { secureTextStorage } = require("./securePersist") as typeof import("./securePersist");
+
+    await secureTextStorage.setItem("first", "one");
+    await secureTextStorage.setItem("second", "two");
+    await secureTextStorage.getItem("first");
+
+    expect(secureStore.isAvailableAsync).toHaveBeenCalledTimes(1);
   });
 });

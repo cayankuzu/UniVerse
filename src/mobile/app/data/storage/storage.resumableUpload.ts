@@ -121,6 +121,7 @@ export function uploadFileResumably(params: {
   accessToken: string;
   contentType: string;
   file: StorageUploadFile;
+  onProgress?: (sentBytes: number, totalBytes: number) => void;
   signal?: AbortSignal;
   ticket: StorageUploadSessionTicket;
   uploadKey: string;
@@ -167,6 +168,7 @@ export function uploadFileResumably(params: {
           objectName: params.ticket.path,
         },
         onError: (error) => settle(error),
+        onProgress: (sentBytes, totalBytes) => params.onProgress?.(sentBytes, totalBytes),
         onSuccess: () => settle(),
         removeFingerprintOnSuccess: true,
         retryDelays: [0, 1_000, 3_000, 5_000, 10_000, 20_000],

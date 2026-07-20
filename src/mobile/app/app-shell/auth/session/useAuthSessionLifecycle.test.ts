@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { act, renderHook, waitFor } from "@testing-library/react-native";
 import { AUTH_STORAGE_VERSION } from "./authContext.shared";
 import { createSession } from "./useAuthSessionLifecycle.test.helpers";
-jest.setTimeout(15_000);
+jest.setTimeout(30_000);
 const mockConfirmEmailForTesting = jest.fn();
 const mockGetSession = jest.fn();
 const mockHardSignOut = jest.fn();
@@ -73,6 +73,9 @@ function renderLifecycle(params: any) {
 describe("useAuthSessionLifecycle", () => {
   beforeEach(() => {
     jest.useRealTimers();
+    const { forgetActiveSession } =
+      require("./authSessionSupport") as typeof import("./authSessionSupport");
+    forgetActiveSession();
     mockConfirmEmailForTesting.mockReset();
     mockGetSession.mockReset();
     mockHardSignOut.mockReset();

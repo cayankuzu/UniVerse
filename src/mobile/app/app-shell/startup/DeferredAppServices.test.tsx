@@ -92,7 +92,7 @@ describe("DeferredAppServices", () => {
 
     const { queryByTestId } = render(<DeferredAppServices />);
 
-    expect(scheduleAfterInteractionsMock.mock.calls.map(([, delayMs]) => delayMs)).toEqual([180]);
+    expect(scheduleAfterInteractionsMock.mock.calls.map(([, delayMs]) => delayMs)).toEqual([100]);
     expect(queryByTestId("app-data-warmup")).toBeNull();
   });
 
@@ -108,7 +108,7 @@ describe("DeferredAppServices", () => {
 
     const { getByTestId } = render(<DeferredAppServices />);
 
-    expect(scheduleAfterInteractionsMock.mock.calls.map(([, delayMs]) => delayMs)).toEqual([180]);
+    expect(scheduleAfterInteractionsMock.mock.calls.map(([, delayMs]) => delayMs)).toEqual([100]);
     expect(getByTestId("app-data-warmup")).toBeTruthy();
   });
 
@@ -132,7 +132,7 @@ describe("DeferredAppServices", () => {
     }
 
     expect(scheduleAfterInteractionsMock.mock.calls.map(([, delayMs]) => delayMs)).toEqual([
-      180, 160, 240, 480,
+      100, 80, 160, 480,
     ]);
     expect(scheduledCallbacks).toHaveLength(0);
   });

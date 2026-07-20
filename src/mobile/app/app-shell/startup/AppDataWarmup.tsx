@@ -11,7 +11,7 @@ import { type WarmupFailurePhase, type WarmupReason, WARMUP_STALE_MS } from "./a
 
 export function AppDataWarmup() {
   const queryClient = useQueryClient();
-  const { accountType, isLoggedIn, isDemoMode, userData } = useAuth();
+  const { isLoggedIn, isDemoMode, userData } = useAuth();
   const { queryRestoreReady } = useAppStartupState();
   const warmedViewerRef = useRef("");
   const prefetchedImageUrisRef = useRef(new Set<string>());
@@ -78,7 +78,6 @@ export function AppDataWarmup() {
   const seedWarmupBundle = useCallback(
     async (reason: "foreground-stale" | "startup") => {
       const result = await seedAppWarmupBundle({
-        accountType,
         prefetchedImageUris: prefetchedImageUrisRef.current,
         queryClient,
         reason,
@@ -91,15 +90,7 @@ export function AppDataWarmup() {
       lastWarmupAtRef.current = result.warmedAt;
       return result.cancelIdleTask;
     },
-    [
-      accountType,
-      queryClient,
-      reportWarmupFailure,
-      runIdleWarmup,
-      viewerId,
-      viewerKey,
-      viewerUsername,
-    ],
+    [queryClient, reportWarmupFailure, runIdleWarmup, viewerId, viewerKey, viewerUsername],
   );
 
   const runWarmup = useCallback(

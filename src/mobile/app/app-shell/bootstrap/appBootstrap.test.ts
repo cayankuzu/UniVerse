@@ -41,11 +41,11 @@ jest.mock("../../shared/media/mediaUri", () => ({
 import { hydrateStartupCaches, initializeAppBootstrap } from "./appBootstrap";
 
 describe("initializeAppBootstrap", () => {
-  it("hydrates critical caches in priority order and only initializes once", async () => {
+  it("hydrates independent startup caches in parallel and only initializes once", async () => {
     const firstInitialization = initializeAppBootstrap();
 
     expect(mockRehydrateHomeStartupSnapshots).toHaveBeenCalledTimes(1);
-    expect(mockRehydratePersistedMediaUriCache).not.toHaveBeenCalled();
+    expect(mockRehydratePersistedMediaUriCache).toHaveBeenCalledTimes(1);
 
     await firstInitialization;
     await initializeAppBootstrap();

@@ -1,8 +1,8 @@
 import { createClientMutationId } from "../mutations/clientMutation";
 import {
   enqueueMutationAction,
-  getMutationActionEntry,
-  patchMutationActionEntry,
+  upsertMutationAction,
+  type MutationActionQueueKind,
   type MutationActionQueueEntry,
 } from "../queues/mutationActionQueue";
 import {
@@ -17,6 +17,12 @@ import {
   assertAlbumInteractionAllowed,
   assertEventInteractionAllowed,
 } from "../social/blockedInteractionGuard";
+
+function withoutOwnerId<T extends { ownerId?: string }>(payload: T): Omit<T, "ownerId"> {
+  const { ownerId: _ownerId, ...serialized } = payload;
+  void _ownerId;
+  return serialized;
+}
 
 export async function queueEventLikeToggleAction(
   payload: EventLikeTogglePayload & { ownerId?: string },
@@ -75,21 +81,23 @@ export async function queueAlbumLikeToggleAction(
   });
 }
 
-// Generic queueOrReplace: patches an existing entry if it matches the expected kind,
-// otherwise enqueues a fresh one.
 async function queueOrReplace<TPayload extends Record<string, unknown>>(params: {
   clientMutationIdPrefix: string;
   clientMutationId?: string | null;
   entryId: string;
-  expectedKind: string;
+  expectedKind: MutationActionQueueKind;
   extractPayload: (entry: MutationActionQueueEntry) => TPayload;
-  fallback: () => Promise<MutationActionQueueEntry>;
+  initialPayload: TPayload;
+  ownerId?: string;
   targetPatch: Record<string, unknown>;
 }) {
-  const existingEntry = await getMutationActionEntry(params.entryId);
-  if (existingEntry?.kind === params.expectedKind) {
-    const existingPayload = params.extractPayload(existingEntry);
-    const nextEntry = await patchMutationActionEntry(params.entryId, {
+  const clientMutationId =
+    params.clientMutationId || createClientMutationId(params.clientMutationIdPrefix);
+  const result = await upsertMutationAction({
+    id: params.entryId,
+    kind: params.expectedKind,
+    ownerId: params.ownerId,
+    patchExisting: (existingEntry) => ({
       attemptCount: 0,
       errorMessage: undefined,
       nextProcessAt:
@@ -97,18 +105,19 @@ async function queueOrReplace<TPayload extends Record<string, unknown>>(params: 
           ? (existingEntry.nextProcessAt ?? null)
           : new Date().toISOString(),
       payload: {
-        ...existingPayload,
-        clientMutationId:
-          params.clientMutationId || createClientMutationId(params.clientMutationIdPrefix),
+        ...params.extractPayload(existingEntry),
+        clientMutationId,
         ...params.targetPatch,
       } as unknown as Record<string, unknown>,
       status: existingEntry.status === "running" ? "running" : "pending",
-    });
-    if (nextEntry) {
-      return { entry: nextEntry, replaced: true };
-    }
-  }
-  return { entry: await params.fallback(), replaced: false };
+      terminalAt: null,
+    }),
+    payload: {
+      ...params.initialPayload,
+      clientMutationId,
+    } as unknown as Record<string, unknown>,
+  });
+  return { entry: result.entry, replaced: !result.created };
 }
 
 export async function queueOrReplaceEventLikeToggleAction(
@@ -124,7 +133,8 @@ export async function queueOrReplaceEventLikeToggleAction(
     entryId: buildEventLikeQueueEntryId(payload.eventId),
     expectedKind: "event-like-toggle",
     extractPayload: (e) => e.payload as unknown as EventLikeTogglePayload,
-    fallback: () => queueEventLikeToggleAction(payload),
+    initialPayload: withoutOwnerId(payload),
+    ownerId: payload.ownerId,
     targetPatch: { targetLiked: payload.targetLiked },
   });
 }
@@ -142,7 +152,8 @@ export async function queueOrReplaceEventAttendanceToggleAction(
     entryId: buildEventAttendanceQueueEntryId(payload.eventId),
     expectedKind: "event-attendance-toggle",
     extractPayload: (e) => e.payload as unknown as EventAttendanceTogglePayload,
-    fallback: () => queueEventAttendanceToggleAction(payload),
+    initialPayload: withoutOwnerId(payload),
+    ownerId: payload.ownerId,
     targetPatch: { targetJoined: payload.targetJoined },
   });
 }
@@ -160,7 +171,8 @@ export async function queueOrReplaceAlbumLikeToggleAction(
     entryId: buildAlbumLikeQueueEntryId(payload.photoId),
     expectedKind: "album-like-toggle",
     extractPayload: (e) => e.payload as unknown as AlbumLikeTogglePayload,
-    fallback: () => queueAlbumLikeToggleAction(payload),
+    initialPayload: withoutOwnerId(payload),
+    ownerId: payload.ownerId,
     targetPatch: { targetLiked: payload.targetLiked },
   });
 }

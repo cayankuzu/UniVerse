@@ -76,7 +76,6 @@ export function useSearchResults(params: {
     viewerUsername: params.userData.username,
   });
 
-  const searchResultData = projectionState.searchProjection.items;
   const numColumns = getResponsiveGridColumns(width, { tabletPortrait: 3 });
   const grid = useMemo(
     () =>
@@ -128,7 +127,7 @@ export function useSearchResults(params: {
     excludeFollowedContent: !searchUi.hasDebouncedSearchIntent,
     followingClubUsernames,
     followingUsernames,
-    searchProjectionItems: searchResultData,
+    searchProjectionItemsByType: projectionState.itemsByType,
     searchType: searchUi.type,
     viewerIdentity,
   });

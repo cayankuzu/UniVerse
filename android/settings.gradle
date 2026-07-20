@@ -36,4 +36,5 @@ rootProject.name = 'UniVerse'
 expoAutolinking.useExpoVersionCatalog()
 
 include ':app'
+include ':macrobenchmark'
 includeBuild(expoAutolinking.reactNativeGradlePlugin)

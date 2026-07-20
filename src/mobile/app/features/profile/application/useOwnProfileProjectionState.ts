@@ -1,14 +1,14 @@
 import { useMemo } from "react";
 import { PAGE_SIZES } from "../../../data/projections/cacheConfig";
 import { PROFILE_PROJECTION_POLICY } from "../../../data/projections/policies/projectionPolicies";
-import { useProjectionScreen } from "../../../data/projections/screen/useProjectionScreen";
 import { useScreenRefresh } from "../../../data/projections/screen/useScreenRefresh";
 import type { AuthUserData } from "../../../data/contracts/entities";
 import type { ProfileContentTab } from "../../../data/projections/projections.types";
 import type { ProfileTab } from "../domain/profileConstants";
-import { getOwnProfileContentQueryDef, type AlbumPhotoWithMeta, type EventWithMeta } from "../data";
+import { getOwnProfileContentQueryDef } from "../data";
 import { useProfileBootstrapState } from "./useProfileBootstrapState";
 import { useProfileProjectionContentState } from "./useProfileProjectionContentState";
+import { useProfileContentProjections } from "./useProfileContentProjections";
 import { useOwnProfileOverviewState } from "./useOwnProfileOverviewState";
 
 type UseOwnProfileProjectionStateParams = {
@@ -30,19 +30,27 @@ export function useOwnProfileProjectionState(params: UseOwnProfileProjectionStat
     enabled: profileEnabled,
     pageSize: PAGE_SIZES.profileContent,
     policy: PROFILE_PROJECTION_POLICY,
-    tab: params.contentTab,
+    tab: "album",
     username: params.profileUsername,
     viewerId: params.userData.id,
     viewerKey: params.viewerKey,
     viewerUsername: params.profileUsername,
   });
-  const contentDef = useMemo(
+  const albumContentDef = useMemo(
     () =>
       getOwnProfileContentQueryDef({
-        tab: params.contentTab,
+        tab: "album",
         viewer,
       }),
-    [params.contentTab, viewer],
+    [viewer],
+  );
+  const eventContentDef = useMemo(
+    () =>
+      getOwnProfileContentQueryDef({
+        tab: "events",
+        viewer,
+      }),
+    [viewer],
   );
   const overviewState = useOwnProfileOverviewState({
     accountType: params.accountType,
@@ -52,26 +60,21 @@ export function useOwnProfileProjectionState(params: UseOwnProfileProjectionStat
     userData: params.userData,
   });
   const shouldFetchContent = profileEnabled && !profileBootstrap.isBootstrapping;
-  const activeProjection = useProjectionScreen<AlbumPhotoWithMeta | EventWithMeta>({
-    ...contentDef,
-    autoRefreshOnFocus: false,
+  const { activeProjection, albumProjection, eventProjection } = useProfileContentProjections({
+    albumDef: albumContentDef,
     enabled: shouldFetchContent,
+    eventDef: eventContentDef,
+    tab: params.contentTab,
   });
   const profileContent = useProfileProjectionContentState({
-    activeItems: activeProjection.items,
+    albumItems: albumProjection.items,
     enabled: profileEnabled,
-    expectedAlbumsCount: overviewState.expectedAlbumsCount,
-    expectedEventsCount: overviewState.expectedEventsCount,
-    tab: params.contentTab,
-    username: params.profileUsername,
-    viewerId: params.userData.id || undefined,
-    viewerKey: params.viewerKey,
-    viewerUsername: params.profileUsername,
+    eventItems: eventProjection.items,
   });
   const onRefresh = useScreenRefresh({
     enabled: true,
     maxParallel: 2,
-    screenKey: `profile:${params.viewerKey}:${params.profileUsername}:${params.contentTab}`,
+    screenKey: `profile:${params.viewerKey}:${params.profileUsername}`,
     surface: "profile",
     tasks: [
       {
@@ -81,21 +84,27 @@ export function useOwnProfileProjectionState(params: UseOwnProfileProjectionStat
         run: () => overviewState.overviewQuery.refetch(),
       },
       {
-        id: "profile-content",
-        run: () => (shouldFetchContent ? activeProjection.onRefresh() : undefined),
+        id: "profile-albums",
+        run: () => (shouldFetchContent ? albumProjection.onRefresh() : undefined),
+      },
+      {
+        id: "profile-events",
+        run: () => (shouldFetchContent ? eventProjection.onRefresh() : undefined),
       },
     ],
   });
 
   return {
     activeProjection,
+    albumProjection,
+    eventProjection,
     loadingMore: activeProjection.loadingMore,
     onRefresh,
     overviewQuery: overviewState.overviewQuery,
     profileBootstrap,
     profileTab: params.profileTab,
     refreshing: shouldFetchContent
-      ? activeProjection.refreshing
+      ? albumProjection.refreshing || eventProjection.refreshing
       : Boolean(overviewState.overviewQuery.isFetching),
     resolvedAccountType: overviewState.resolvedAccountType,
     resolvedProfile: overviewState.resolvedProfile,

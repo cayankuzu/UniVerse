@@ -1,5 +1,4 @@
 import { STARTUP_PERFORMANCE_BUDGET } from "../../data/projections/performanceBudget";
-import type { AccountType } from "../../data/contracts/api";
 import type { QueryClient } from "@tanstack/react-query";
 
 // Re-warm often enough to keep tier-1 surfaces fresh after backgrounding.
@@ -11,7 +10,6 @@ export const WARMUP_MANIFEST = {
 };
 
 export type WarmupSharedParams = {
-  accountType: AccountType;
   queryClient: QueryClient;
   viewerId?: string;
   viewerKey: string;

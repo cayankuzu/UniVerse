@@ -4,6 +4,7 @@ import {
   getMutationActionQueue,
 } from "../queues/mutationActionQueue";
 import {
+  queueOrReplaceEventLikeToggleAction,
   queueAlbumLikeToggleAction,
   queueEventAttendanceToggleAction,
   queueEventLikeToggleAction,
@@ -81,5 +82,35 @@ describe("contentToggleQueue enqueue blocking", () => {
     ).rejects.toThrow("Blocked interaction forbidden.");
 
     await expect(getMutationActionQueue("album-like-toggle")).resolves.toEqual([]);
+  });
+
+  it("atomically coalesces rapid toggles while preserving the authoritative rollback baseline", async () => {
+    const first = await queueOrReplaceEventLikeToggleAction({
+      clientMutationId: "like-1",
+      eventId: "event-1",
+      ownerId: "viewer-1",
+      previousCount: 8,
+      previousLiked: false,
+      targetLiked: true,
+    });
+    const second = await queueOrReplaceEventLikeToggleAction({
+      clientMutationId: "like-2",
+      eventId: "event-1",
+      ownerId: "viewer-1",
+      previousCount: 9,
+      previousLiked: true,
+      targetLiked: false,
+    });
+
+    expect(first.replaced).toBe(false);
+    expect(second.replaced).toBe(true);
+    expect(second.entry.payload).toEqual({
+      clientMutationId: "like-2",
+      eventId: "event-1",
+      previousCount: 8,
+      previousLiked: false,
+      targetLiked: false,
+    });
+    await expect(getMutationActionQueue("event-like-toggle", "viewer-1")).resolves.toHaveLength(1);
   });
 });

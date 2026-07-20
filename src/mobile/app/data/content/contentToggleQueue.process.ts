@@ -58,16 +58,22 @@ async function processToggleKind<TPayload, TResult>(config: {
     entryId: config.entryId,
     handler: async (entry) => config.handler(config.extractPayload(entry)),
     kind: config.kind,
+    maxConcurrentEntries: 4,
     onFailed: (entry) => config.onFailed(config.queryClient, config.extractPayload(entry)),
     onResolved: async (entry, result) => {
       const payload = config.extractPayload(entry);
       const resolved = result as TResult;
-      config.onResolved(config.queryClient, payload, resolved);
       const latestEntry = await getMutationActionEntry(entry.id);
       const latestPayload = latestEntry ? config.extractPayload(latestEntry) : payload;
       if (latestEntry && latestEntry.status === "running") {
-        return config.retryCheck({ latestPayload, originalPayload: payload, result: resolved });
+        const retryPatch = config.retryCheck({
+          latestPayload,
+          originalPayload: payload,
+          result: resolved,
+        });
+        if (retryPatch) return retryPatch;
       }
+      config.onResolved(config.queryClient, payload, resolved);
       return null;
     },
     ownerId: config.ownerId,

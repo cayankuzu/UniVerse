@@ -188,5 +188,8 @@ describe("ProfileScreen smoke", () => {
 
     expect(screen.getByText("Cyn User")).toBeTruthy();
     expect(screen.getByText("@viewer")).toBeTruthy();
+    expect(screen.getByTestId("profile-outer-scroll")).toBeTruthy();
+    expect(screen.getByTestId("profile-content-pager")).toBeTruthy();
+    expect(screen.getByTestId("profile-static-grid-album")).toBeTruthy();
   });
 });

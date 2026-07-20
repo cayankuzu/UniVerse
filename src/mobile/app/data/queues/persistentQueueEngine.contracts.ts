@@ -33,6 +33,7 @@ export interface CreatePersistentQueueOptions<_Kind extends string, Status exten
   pendingStatus: Status;
   processingStatus: Status;
   retryBaseDelayMs?: number;
+  retainRetryableErrors?: boolean;
   schemaVersion?: number;
   staleProcessingMs?: number;
   storageKey: string;
@@ -44,9 +45,11 @@ export interface ProcessPersistentQueueOptions<
   Entry extends PersistentQueueEntryBase<Kind, Status>,
   TResult,
 > {
+  deferUntilInteractionIdle?: boolean;
   entryId?: string;
   handler: (entry: Entry) => Promise<TResult>;
   kind: Kind;
+  maxConcurrentEntries?: number;
   onFailed?: (entry: Entry, error: unknown) => Promise<void> | void;
   onResolved?: (
     entry: Entry,

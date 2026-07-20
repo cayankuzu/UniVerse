@@ -19,7 +19,7 @@ import { HomeEventRow } from "./HomeEventRow";
 import { useHomeScreenActions } from "./useHomeScreenActions";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Home">;
-const EMPTY_READY_MEDIA_ROW_KEYS = new Set<string>();
+const HOME_HIGH_PRIORITY_ROW_LIMIT = 2;
 
 function normalize(value: string) {
   return String(value || "")
@@ -60,7 +60,6 @@ export function HomeScreen({ navigation }: Props) {
     onRefresh,
     onUserInteraction,
     onViewableItemsChanged,
-    readyMediaRowKeys = EMPTY_READY_MEDIA_ROW_KEYS,
     refreshing,
     setEntityFilter,
     setShowFilters,
@@ -107,7 +106,7 @@ export function HomeScreen({ navigation }: Props) {
             accountType={accountType}
             isTourTarget={index === tourEventIndex}
             item={item}
-            mediaReady={readyMediaRowKeys.has(`${item.kind}:${item.id}`)}
+            mediaReady={index < HOME_HIGH_PRIORITY_ROW_LIMIT}
             onOpenAlbum={handleOpenAlbumScreen}
             onOpenCard={handleOpenEventFromAlbum}
             onOpenClub={handleOpenProfile}
@@ -126,7 +125,7 @@ export function HomeScreen({ navigation }: Props) {
           currentUsername={userData.username}
           isTourTarget={index === tourAlbumIndex}
           item={item}
-          mediaReady={readyMediaRowKeys.has(`${item.kind}:${item.id}`)}
+          mediaReady={index < HOME_HIGH_PRIORITY_ROW_LIMIT}
           onOpenClub={handleOpenProfile}
           onOpenEvent={handleOpenEventFromAlbum}
           onOpenProfile={handleOpenProfile}
@@ -145,7 +144,6 @@ export function HomeScreen({ navigation }: Props) {
       handleOpenEventFromAlbum,
       handleOpenProfile,
       openEventOverlay,
-      readyMediaRowKeys,
       setWarningMessage,
       tourAlbumIndex,
       tourEventIndex,

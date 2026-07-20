@@ -87,12 +87,20 @@ Current read policy:
 
 Canonical projection surfaces:
 
-- `data/projections/useProjectionScreen.ts`
+- `data/projections/screen/useProjectionScreen.ts`
 - `data/projections/projections.ts`
 - `data/projections/projectionFreshness.ts`
-- `data/projections/syncOrchestrator.ts`
+- `data/projections/sync/syncOrchestrator.ts`
 - `data/query/queryClient.ts`
 - `data/query/guards.ts`
+
+Startup policy:
+
+- restore local query/home/media caches in parallel
+- never gate the splash screen on a network request
+- warm only the first-fold home projection and notification badge
+- prefetch profile/search data only after explicit touch intent
+- keep notification presence event-driven; fixed polling is prohibited
 
 ## Features
 

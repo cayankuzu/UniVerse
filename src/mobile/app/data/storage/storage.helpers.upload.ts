@@ -114,17 +114,23 @@ export function buildUploadFormData(
 async function uploadBinaryContent(params: {
   contentType: string;
   localUri: string;
+  onProgress?: (sentBytes: number, totalBytes: number) => void;
   signal?: AbortSignal;
   signedUploadUrl: string;
 }) {
   throwIfUploadAborted(params.signal);
-  const uploadTask = createUploadTask(params.signedUploadUrl, params.localUri, {
+  const uploadOptions = {
     headers: {
       "Content-Type": params.contentType,
     },
-    httpMethod: "PUT",
+    httpMethod: "PUT" as const,
     uploadType: FileSystemUploadType.BINARY_CONTENT,
-  });
+  };
+  const uploadTask = params.onProgress
+    ? createUploadTask(params.signedUploadUrl, params.localUri, uploadOptions, (progress) => {
+        params.onProgress?.(progress.totalBytesSent, progress.totalBytesExpectedToSend);
+      })
+    : createUploadTask(params.signedUploadUrl, params.localUri, uploadOptions);
   let cancelRequested = false;
   let cancelPromise: Promise<unknown> | null = null;
   const cancelUpload = () => {
@@ -170,6 +176,7 @@ type StorageUploadConfirmResponse = {
 };
 
 type DirectUploadOptions = {
+  onProgress?: (sentBytes: number, totalBytes: number) => void;
   sessionTicket?: StorageUploadSessionTicket;
   signal?: AbortSignal;
   signedUpload?: {
@@ -421,6 +428,7 @@ export async function directUploadWithRest(
           accessToken: normalizeStorageText(effectiveToken),
           contentType,
           file: { ...file, uri: preparedFile.localUri },
+          onProgress: options.onProgress,
           signal: options.signal,
           ticket: options.sessionTicket,
           uploadKey: normalizedUploadKey || options.sessionTicket.path,
@@ -429,6 +437,7 @@ export async function directUploadWithRest(
         const response = await uploadBinaryContent({
           contentType,
           localUri: preparedFile.localUri,
+          onProgress: options.onProgress,
           signal: options.signal,
           signedUploadUrl,
         });

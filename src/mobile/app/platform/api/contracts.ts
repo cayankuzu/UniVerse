@@ -43,6 +43,7 @@ export interface StorageUploadSessionResponse {
 export interface StorageUploadOptions {
   accessToken?: string;
   context?: string;
+  onProgress?: (sentBytes: number, totalBytes: number) => void;
   signal?: AbortSignal;
   sessionTicket?: StorageUploadSessionTicket;
   timeoutMs?: number;

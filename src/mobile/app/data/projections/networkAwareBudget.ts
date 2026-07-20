@@ -18,7 +18,9 @@ export interface NetworkBudget {
   quality: NetworkQuality;
 }
 
-let currentQuality: NetworkQuality = "good";
+// Unknown must be conservative: assuming a fast network during native startup
+// can launch image/page prefetches before NetInfo has produced its first state.
+let currentQuality: NetworkQuality = "unknown";
 let listenerAttached = false;
 const listeners = new Set<(quality: NetworkQuality) => void>();
 

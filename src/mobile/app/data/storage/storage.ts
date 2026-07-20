@@ -136,121 +136,150 @@ function toStorageUploadError(error: unknown, fallback: string) {
   return new Error(fallback);
 }
 
-export const StorageAPI = {
-  uploadFile: async (
-    file: StorageUploadFile,
-    folder: StorageFolder,
-    options: StorageUploadOptions = {},
-  ): Promise<string> => {
-    const context = options.context || `storage/upload:${folder}`;
-    const sourceIsVideo = isVideoUploadFile(file);
-    const uploadTimeoutMs =
-      options.timeoutMs ||
-      (sourceIsVideo
-        ? DEFAULT_STORAGE_VIDEO_UPLOAD_TIMEOUT_MS
-        : DEFAULT_STORAGE_IMAGE_UPLOAD_TIMEOUT_MS);
-    const prepareTimeoutMs = Math.min(
-      uploadTimeoutMs,
-      sourceIsVideo
-        ? DEFAULT_STORAGE_VIDEO_PREPARE_TIMEOUT_MS
-        : DEFAULT_STORAGE_IMAGE_PREPARE_TIMEOUT_MS,
+async function prepareStorageUploadFile(
+  file: StorageUploadFile,
+  folder: StorageFolder,
+  options: StorageUploadOptions = {},
+) {
+  const sourceIsVideo = isVideoUploadFile(file);
+  const uploadTimeoutMs =
+    options.timeoutMs ||
+    (sourceIsVideo
+      ? DEFAULT_STORAGE_VIDEO_UPLOAD_TIMEOUT_MS
+      : DEFAULT_STORAGE_IMAGE_UPLOAD_TIMEOUT_MS);
+  const prepareTimeoutMs = Math.min(
+    uploadTimeoutMs,
+    sourceIsVideo
+      ? DEFAULT_STORAGE_VIDEO_PREPARE_TIMEOUT_MS
+      : DEFAULT_STORAGE_IMAGE_PREPARE_TIMEOUT_MS,
+  );
+
+  try {
+    return await withStorageTimeout(
+      async (signal) => {
+        throwIfStorageAborted(signal, "Media prepare");
+        const prepared = await normalizeStorageUploadFile(file, folder);
+        throwIfStorageAborted(signal, "Media prepare");
+        return prepared;
+      },
+      prepareTimeoutMs,
+      "Media prepare",
+      options.signal,
     );
-    let normalizedFile: StorageUploadFile;
+  } catch (error) {
+    throw toStorageUploadError(error, "Dosya yuklenemedi.");
+  }
+}
+
+async function uploadStorageFile(
+  file: StorageUploadFile,
+  folder: StorageFolder,
+  options: StorageUploadOptions,
+  prepare: boolean,
+) {
+  const context = options.context || `storage/upload:${folder}`;
+  let normalizedFile: StorageUploadFile;
+  try {
+    normalizedFile = prepare ? await prepareStorageUploadFile(file, folder, options) : file;
+  } catch (error) {
+    throw toStorageUploadError(error, "Dosya yüklenemedi.");
+  }
+
+  const normalizedFileIsVideo = isVideoUploadFile(normalizedFile);
+  const normalizedUploadTimeoutMs =
+    options.timeoutMs ||
+    (normalizedFileIsVideo
+      ? DEFAULT_STORAGE_VIDEO_UPLOAD_TIMEOUT_MS
+      : DEFAULT_STORAGE_IMAGE_UPLOAD_TIMEOUT_MS);
+
+  if (options.sessionTicket || normalizedFileIsVideo) {
     try {
-      normalizedFile = await withStorageTimeout(
-        async (signal) => {
-          throwIfStorageAborted(signal, "Media prepare");
-          const prepared = await normalizeStorageUploadFile(file, folder);
-          throwIfStorageAborted(signal, "Media prepare");
-          return prepared;
-        },
-        prepareTimeoutMs,
-        "Media prepare",
-        options.signal,
-      );
-    } catch (error) {
-      throw toStorageUploadError(error, "Dosya yüklenemedi.");
-    }
-
-    const normalizedFileIsVideo = isVideoUploadFile(normalizedFile);
-    const normalizedUploadTimeoutMs =
-      options.timeoutMs ||
-      (normalizedFileIsVideo
-        ? DEFAULT_STORAGE_VIDEO_UPLOAD_TIMEOUT_MS
-        : DEFAULT_STORAGE_IMAGE_UPLOAD_TIMEOUT_MS);
-
-    if (options.sessionTicket || normalizedFileIsVideo) {
-      try {
-        return await withStorageTimeout(
-          (signal) =>
-            directUploadWithRest(
-              normalizedFile,
-              folder,
-              context,
-              options.accessToken,
-              options.uploadKey,
-              {
-                signal,
-                sessionTicket: options.sessionTicket,
-              },
-            ),
-          normalizedUploadTimeoutMs,
-          "Storage upload",
-          options.signal,
-        );
-      } catch (error) {
-        throw toStorageUploadError(error, "Dosya yüklenemedi.");
-      }
-    }
-
-    let res: Response | null = null;
-    let requestError: unknown = null;
-
-    try {
-      res = await withStorageTimeout(
+      return await withStorageTimeout(
         (signal) =>
-          retryWithRefreshedSession(
-            (token) =>
-              fetch(`${BASE_URL}/storage/upload`, {
-                method: "POST",
-                headers: {
-                  apikey: SUPABASE_PUBLIC_ANON_KEY,
-                  Authorization: `Bearer ${token}`,
-                  "x-client-info": SUPABASE_CLIENT_INFO,
-                },
-                body: buildUploadFormData(normalizedFile, folder, options.uploadKey),
-                signal,
-              }),
+          directUploadWithRest(
+            normalizedFile,
+            folder,
             context,
             options.accessToken,
+            options.uploadKey,
+            {
+              onProgress: options.onProgress,
+              signal,
+              sessionTicket: options.sessionTicket,
+            },
           ),
         normalizedUploadTimeoutMs,
         "Storage upload",
         options.signal,
       );
     } catch (error) {
-      requestError = error;
+      throw toStorageUploadError(error, "Dosya yüklenemedi.");
+    }
+  }
+
+  let res: Response | null = null;
+  let requestError: unknown = null;
+
+  try {
+    res = await withStorageTimeout(
+      (signal) =>
+        retryWithRefreshedSession(
+          (token) =>
+            fetch(`${BASE_URL}/storage/upload`, {
+              method: "POST",
+              headers: {
+                apikey: SUPABASE_PUBLIC_ANON_KEY,
+                Authorization: `Bearer ${token}`,
+                "x-client-info": SUPABASE_CLIENT_INFO,
+              },
+              body: buildUploadFormData(normalizedFile, folder, options.uploadKey),
+              signal,
+            }),
+          context,
+          options.accessToken,
+        ),
+      normalizedUploadTimeoutMs,
+      "Storage upload",
+      options.signal,
+    );
+  } catch (error) {
+    requestError = error;
+  }
+
+  const data = res ? await readStorageResponse<UploadResponse>(res) : null;
+  if (!res || !res.ok) {
+    if (res?.status === 413 || res?.status === 415) {
+      throw new Error("Dosya boyutu veya formatı uygun değil.");
+    }
+    if (res?.status === 429) {
+      throw new Error("Çok fazla yükleme denemesi var. Lütfen daha sonra tekrar deneyin.");
     }
 
-    const data = res ? await readStorageResponse<UploadResponse>(res) : null;
-    if (!res || !res.ok) {
-      if (res?.status === 413 || res?.status === 415) {
-        throw new Error("Dosya boyutu veya formatı uygun değil.");
-      }
-      if (res?.status === 429) {
-        throw new Error("Çok fazla yükleme denemesi var. Lütfen daha sonra tekrar deneyin.");
-      }
-
-      if (res?.status === 401) {
-        throw new Error("Oturumunuzu yenileyip tekrar deneyin.");
-      }
-      if (requestError) throw toStorageUploadError(requestError, "Dosya yüklenemedi.");
-      throw new Error("Dosya yüklenemedi.");
+    if (res?.status === 401) {
+      throw new Error("Oturumunuzu yenileyip tekrar deneyin.");
     }
+    if (requestError) throw toStorageUploadError(requestError, "Dosya yüklenemedi.");
+    throw new Error("Dosya yüklenemedi.");
+  }
 
-    const uploaded = data as UploadResponse;
-    return uploaded.path || uploaded.url || "";
-  },
+  const uploaded = data as UploadResponse;
+  return uploaded.path || uploaded.url || "";
+}
+
+export const StorageAPI = {
+  prepareUploadFile: prepareStorageUploadFile,
+
+  uploadPreparedFile: (
+    file: StorageUploadFile,
+    folder: StorageFolder,
+    options: StorageUploadOptions = {},
+  ) => uploadStorageFile(file, folder, options, false),
+
+  uploadFile: (
+    file: StorageUploadFile,
+    folder: StorageFolder,
+    options: StorageUploadOptions = {},
+  ) => uploadStorageFile(file, folder, options, true),
 
   createUploadSession: async (params: {
     accessToken?: string;

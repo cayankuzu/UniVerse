@@ -1,11 +1,6 @@
 import type { ProjectionEnvelope } from "../../data/query/contracts";
 import type { UserProfile } from "../contracts/entities";
-import type {
-  BlockedUserItem,
-  FollowRequestItem,
-  NotificationItem,
-  SearchUserResult,
-} from "../contracts/api";
+import type { BlockedUserItem, FollowRequestItem, SearchUserResult } from "../contracts/api";
 import type { AlbumPhotoWithMeta, EventWithMeta } from "../contracts/content";
 import type { ProfileCapabilities } from "../profile/profileLookup";
 
@@ -103,35 +98,10 @@ export interface SearchProjectionParams {
   viewerUsername?: string;
 }
 
-export interface AppWarmupSearchBundle {
-  content: ProjectionEnvelope<SearchProjectionItem>;
-  kind: SearchProjectionParams["kind"];
-  params: {
-    categoryFilter?: string;
-    feeFilter?: SearchProjectionParams["feeFilter"];
-    queryText?: string;
-    sortMode?: string;
-    universityFilter?: string;
-  };
-  scope: string;
-}
-
-export type AppWarmupSearchDiscoveryBundle = Record<
-  SearchProjectionParams["kind"],
-  ProjectionEnvelope<SearchProjectionItem>
->;
-
 export interface AppWarmupBundle {
   generatedAt: string;
   home: ProjectionEnvelope<ProjectionHomeFeedItem>;
   homeScope: string;
   notificationBadge: NotificationBadgeProjection;
-  notifications: ProjectionEnvelope<NotificationItem>;
-  profileAlbums: ProjectionEnvelope<AlbumPhotoWithMeta>;
-  profileEvents: ProjectionEnvelope<EventWithMeta>;
-  profileOverview: ProfileOverviewProjection;
-  profileUsername: string;
-  source: "fallback" | "rpc" | "timeout-backpressure";
-  searchDiscovery: AppWarmupSearchDiscoveryBundle;
-  search: AppWarmupSearchBundle | null;
+  source: "rpc" | "timeout-backpressure";
 }

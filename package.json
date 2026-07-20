@@ -1,7 +1,7 @@
 {
   "name": "ogrencisosyalagi-mobile",
   "private": true,
-  "version": "1.0.120",
+  "version": "1.0.127",
   "expo": {
     "doctor": {
       "appConfigFieldsNotSyncedCheck": {
@@ -10,7 +10,9 @@
     },
     "install": {
       "exclude": [
-        "@sentry/react-native"
+        "@shopify/flash-list",
+        "@sentry/react-native",
+        "react-native-screens"
       ]
     }
   },
@@ -33,6 +35,7 @@
     "guard:no-legacy-hooks": "node ./utils/guards/check-legacy-hooks.cjs",
     "guard:no-onboarding-leak": "node ./utils/guards/check-onboarding-mock.cjs",
     "guard:runtime-hygiene": "node ./utils/guards/check-runtime-hygiene.cjs",
+    "guard:performance-contract": "node ./utils/guards/check-performance-contract.cjs",
     "guard:server-route-size": "node ./utils/guards/check-server-route-size.cjs",
     "guard:security-mobile": "node ./utils/guards/check-security-mobile.cjs",
     "guard:secure-upload": "node ./utils/guards/check-secure-upload-state-machine.cjs",
@@ -49,7 +52,7 @@
     "guard:release-hardening": "node ./utils/guards/check-release-hardening.cjs",
     "guard:native-config-materialize": "node ./utils/guards/check-materialize-native-config.cjs",
     "guard:utf8": "node ./utils/guards/check-utf8-mojibake.cjs",
-    "check": "npm run check:types && npm run guard:max-lines && npm run guard:architecture-boundaries && npm run guard:no-legacy-hooks && npm run guard:no-onboarding-leak && npm run guard:runtime-hygiene && npm run guard:server-route-size && npm run guard:security-mobile && npm run guard:secure-upload && npm run guard:diff-coverage:self-test && npm run guard:native-config-materialize && npm run guard:utf8",
+    "check": "npm run check:types && npm run guard:max-lines && npm run guard:architecture-boundaries && npm run guard:no-legacy-hooks && npm run guard:no-onboarding-leak && npm run guard:runtime-hygiene && npm run guard:performance-contract && npm run guard:server-route-size && npm run guard:security-mobile && npm run guard:secure-upload && npm run guard:diff-coverage:self-test && npm run guard:native-config-materialize && npm run guard:utf8",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --cache --cache-location .eslintcache --max-warnings=0",
     "format:check": "node ./utils/guards/check-prettier-changed.cjs",
     "format:check:all": "node ./utils/guards/check-prettier-all.cjs",
@@ -76,6 +79,8 @@
     "release:sentry:verify": "npm run guard:release-sentry-env && npm run release:sentry:healthcheck && npm run release:prepare-sentry-artifacts && npm run release:sentry:upload-updates && npm run guard:release-native-symbols",
     "release:verify": "npm run guard:release-toolchain && npm run guard:release-config-parity && npm run guard:release-readiness-docs && npm run guard:k6-env && npm run guard:release-cutover && npm run release:sentry:verify && npm run security:verify:internal && npm run lint -- --max-warnings=0 && npm run format:check:all && npm run test:coverage && npm run guard:diff-coverage && npm run security:sast && npm run security:secrets && npm run security:secrets:history && npm run release:sql:validate && npm run maestro:test:critical && npm run loadtest:rehearsal:full",
     "test:android:dev-smoke": "powershell -ExecutionPolicy Bypass -File ./utils/ops/run-device-dev-smoke.ps1",
+    "android:benchmark:startup": "cd android && gradlew.bat :macrobenchmark:connectedBenchmarkAndroidTest",
+    "android:baseline-profile": "powershell -ExecutionPolicy Bypass -File ./utils/ops/generate-android-baseline-profile.ps1",
     "android:uninstall:all-users": "powershell -ExecutionPolicy Bypass -File ./utils/ops/remove-android-package-all-users.ps1",
     "logs:android": "powershell -ExecutionPolicy Bypass -Command \"$adb=Join-Path $env:ANDROID_HOME 'platform-tools\\adb.exe'; if(!(Test-Path $adb)){$adb=Join-Path $env:ANDROID_SDK_ROOT 'platform-tools\\adb.exe'}; if(!(Test-Path $adb)){$adb=Join-Path $env:LOCALAPPDATA 'Android\\Sdk\\platform-tools\\adb.exe'}; if(!(Test-Path $adb)){$adb='adb'}; & $adb logcat ReactNativeJS:D ReactNative:V Expo:V '*:S'\"",
     "logs:supabase": "powershell -Command \"Write-Output 'Supabase Edge loglari icin Dashboard > Edge Functions > server > Logs kullan.'\"",
@@ -92,7 +97,7 @@
     "@react-navigation/native": "^7.1.19",
     "@react-navigation/native-stack": "^7.6.2",
     "@sentry/react-native": "^8.3.0",
-    "@shopify/flash-list": "2.0.2",
+    "@shopify/flash-list": "2.1.0",
     "@supabase/supabase-js": "^2.97.0",
     "@tanstack/query-async-storage-persister": "^5.99.2",
     "@tanstack/react-query": "^5.90.21",
@@ -124,10 +129,11 @@
     "react-hook-form": "^7.71.2",
     "react-native": "0.83.6",
     "react-native-gesture-handler": "~2.30.0",
+    "react-native-pager-view": "8.0.0",
     "react-native-paper": "^5.15.0",
     "react-native-reanimated": "^4.2.1",
     "react-native-safe-area-context": "~5.6.2",
-    "react-native-screens": "~4.23.0",
+    "react-native-screens": "4.25.2",
     "react-native-svg": "15.15.3",
     "react-native-url-polyfill": "^2.0.0",
     "react-native-worklets": "0.7.4",

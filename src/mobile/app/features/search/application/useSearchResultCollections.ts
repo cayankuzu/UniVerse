@@ -21,7 +21,10 @@ export function useSearchResultCollections(params: {
   excludeFollowedContent?: boolean;
   followingClubUsernames: Set<string>;
   followingUsernames: Set<string>;
-  searchProjectionItems?: Array<EventWithMeta | AlbumPhotoWithMeta | SearchUserResult>;
+  searchProjectionItemsByType?: Record<
+    SearchType,
+    Array<EventWithMeta | AlbumPhotoWithMeta | SearchUserResult>
+  >;
   searchType: SearchType;
   viewerIdentity: ViewerIdentity;
 }) {
@@ -31,7 +34,7 @@ export function useSearchResultCollections(params: {
     excludeFollowedContent,
     followingClubUsernames,
     followingUsernames,
-    searchProjectionItems,
+    searchProjectionItemsByType,
     searchType,
     viewerIdentity,
   } = params;
@@ -39,10 +42,9 @@ export function useSearchResultCollections(params: {
   const { rawAlbums, rawClubs, rawEvents, rawStudents } = useMemo(
     () =>
       resolveSearchRawCollections({
-        searchProjectionItems,
-        type: searchType,
+        searchProjectionItemsByType,
       }),
-    [searchProjectionItems, searchType],
+    [searchProjectionItemsByType],
   );
 
   const blockedSet = useMemo(() => buildBlockedSet(blockedUsers), [blockedUsers]);

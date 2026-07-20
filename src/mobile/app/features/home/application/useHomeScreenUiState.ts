@@ -1,5 +1,5 @@
 import { startTransition, useCallback, useDeferredValue, useEffect, useRef, useState } from "react";
-import type { AppFlatListRef } from "../../../shared/components";
+import type { FlatList } from "react-native";
 import { useAutoClearingMessage } from "../../../shared/hooks/useAutoClearingMessage";
 import { useTransitionSetter } from "../../../shared/hooks/useTransitionSetter";
 import type { HomeFeedItem } from "../data";
@@ -40,7 +40,7 @@ export function useHomeScreenUiState(params: UseHomeScreenUiStateParams) {
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
   const [restoreReady, setRestoreReady] = useState(Boolean(cachedHomeScope));
   const { message: warningMessage, setMessage: setWarningMessage } = useAutoClearingMessage();
-  const listRef = useRef<AppFlatListRef<HomeFeedItem> | null>(null);
+  const listRef = useRef<FlatList<HomeFeedItem> | null>(null);
 
   const deferredSourceFilter = useDeferredValue(sourceFilter);
   const deferredTypeFilter = useDeferredValue(typeFilter);

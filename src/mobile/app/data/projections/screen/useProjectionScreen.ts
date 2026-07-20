@@ -133,7 +133,19 @@ export function useProjectionScreen<T extends { id?: string }>({
     queryKey: stableQueryKey,
   });
 
-  const items = readProjectionItems<T>(queryClient, stableQueryKey, entity);
+  const nextItems = readProjectionItems<T>(queryClient, stableQueryKey, entity);
+  const stableItemsRef = useRef<{ items: T[]; scope: string }>({
+    items: nextItems,
+    scope: queryScope,
+  });
+  const itemsChanged =
+    stableItemsRef.current.scope !== queryScope ||
+    stableItemsRef.current.items.length !== nextItems.length ||
+    nextItems.some((item, index) => item !== stableItemsRef.current.items[index]);
+  if (itemsChanged) {
+    stableItemsRef.current = { items: nextItems, scope: queryScope };
+  }
+  const items = stableItemsRef.current.items;
 
   const shouldShowInitialSkeleton = shouldShowInitialProjectionSkeleton({
     hasCachedSnapshot: hasRenderableCachedContent,
