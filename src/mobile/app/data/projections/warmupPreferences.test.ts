@@ -126,10 +126,12 @@ describe("warmupPreferences", () => {
       persistWarmupLandingVisit("viewer-2", "search"),
       persistWarmupLandingVisit("viewer-2", "profile"),
     ]);
-    expect(getCachedWarmupPreferences("viewer-2").landingAffinity).toMatchObject({
+    const landingAffinity = getCachedWarmupPreferences("viewer-2").landingAffinity;
+    expect(landingAffinity).toMatchObject({
       lastSurface: "profile",
-      scores: { profile: 1, search: 1 },
     });
+    expect(landingAffinity?.scores.profile).toBeCloseTo(1, 6);
+    expect(landingAffinity?.scores.search).toBeCloseTo(1, 6);
 
     multiGetSpy.mockRestore();
   });

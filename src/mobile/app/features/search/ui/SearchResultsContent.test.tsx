@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, render } from "@testing-library/react-native";
+import { act, fireEvent, render } from "@testing-library/react-native";
 
 jest.mock("react-native", () => {
   const ReactRuntime = require("react") as typeof React;
@@ -34,10 +34,15 @@ jest.mock("../../../shared/components", () => {
   const ReactRuntime = require("react") as typeof React;
   const { View } = require("react-native") as typeof import("react-native");
   return {
-    AppFlatList: ReactRuntime.forwardRef((props: Record<string, any>, _ref) =>
-      ReactRuntime.createElement(
+    AppFlatList: ReactRuntime.forwardRef((props: Record<string, any>, ref) => {
+      ReactRuntime.useImperativeHandle(ref, () => ({ scrollToOffset: jest.fn() }));
+      return ReactRuntime.createElement(
         View,
-        null,
+        {
+          onScroll: props.onScroll,
+          onViewableItemsChanged: props.onViewableItemsChanged,
+          testID: "search-grid",
+        } as any,
         props.data.map((item: unknown, index: number) =>
           ReactRuntime.createElement(
             ReactRuntime.Fragment,
@@ -45,8 +50,8 @@ jest.mock("../../../shared/components", () => {
             props.renderItem({ index, item }),
           ),
         ),
-      ),
-    ),
+      );
+    }),
     AppListSkeleton: () => null,
   };
 });
@@ -153,5 +158,60 @@ describe("SearchResultsContent", () => {
     expect(onOpenAlbumCard).toHaveBeenCalled();
     expect(onOpenEventCard).toHaveBeenCalled();
     expect(onOpenProfile).toHaveBeenCalled();
+  });
+
+  it("registers per-tab list state, reports offsets and suppresses preview side effects", () => {
+    const onListRef = jest.fn();
+    const onScrollOffsetChange = jest.fn();
+    const onViewableItemsChanged = jest.fn();
+    const props = {
+      bottomPadding: 0,
+      currentError: null,
+      currentLoading: false,
+      emptyText: "empty",
+      filteredAlbums: [{ id: "album-1" } as never],
+      filteredClubs: [],
+      filteredEvents: [],
+      filteredStudents: [],
+      grid: {
+        cardHeight: 200,
+        cardWidth: 160,
+        horizontalPadding: 12,
+        mediaHeight: 120,
+        rowGap: 8,
+      },
+      hasMore: true,
+      listRef: { current: null },
+      loadingMore: false,
+      numColumns: 2,
+      onEndReached: jest.fn(),
+      onListRef,
+      onOpenAlbumCard: jest.fn(),
+      onOpenEventCard: jest.fn(),
+      onOpenProfile: jest.fn(),
+      onRefresh: jest.fn(),
+      onScrollOffsetChange,
+      prefetchEventById: jest.fn(),
+      prefetchProfileByUsername: jest.fn(),
+      refreshing: false,
+      viewportPrefetch: { onViewableItemsChanged, viewabilityConfig: { minimumViewTime: 50 } },
+    };
+    const screen = render(<SearchResultsContent {...props} type="albums" />);
+    let grid = screen.getByTestId("search-grid");
+    const viewabilityInfo = { changed: [], viewableItems: [] };
+
+    fireEvent.scroll(grid, { nativeEvent: { contentOffset: { y: 123 } } });
+    act(() => grid.props.onViewableItemsChanged(viewabilityInfo));
+    expect(onListRef).toHaveBeenCalledWith("albums", expect.any(Object));
+    expect(props.listRef.current).toEqual(expect.any(Object));
+    expect(onScrollOffsetChange).toHaveBeenCalledWith("albums", 123);
+    expect(onViewableItemsChanged).toHaveBeenCalledWith(viewabilityInfo);
+
+    screen.rerender(<SearchResultsContent {...props} preview type="students" />);
+    grid = screen.getByTestId("search-grid");
+    act(() => grid.props.onViewableItemsChanged(viewabilityInfo));
+    expect(grid.props.onScroll).toBeUndefined();
+    expect(onViewableItemsChanged).toHaveBeenCalledTimes(1);
+    expect(onListRef).toHaveBeenLastCalledWith("students", expect.any(Object));
   });
 });
