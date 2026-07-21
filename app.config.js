@@ -46,13 +46,7 @@ function toExpoRelativePath(filePath) {
 }
 
 function shouldRequireGoogleServicesFile(platformKey) {
-  if (APP_ENV !== "production") {
-    return false;
-  }
-  if (!EAS_BUILD_PLATFORM) {
-    return true;
-  }
-  return EAS_BUILD_PLATFORM === platformKey;
+  return APP_ENV === "production" && EAS_BUILD_PLATFORM === platformKey;
 }
 
 function resolveGoogleServicesFile({ envNames, fallbackRelativePath, platform, platformKey }) {
