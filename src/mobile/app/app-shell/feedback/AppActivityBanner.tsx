@@ -1,8 +1,9 @@
 import React from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { AppText as Text } from "../../shared/components/AppText";
+import { ActivityIndicator, View } from "react-native";
 import type { OverflowActionItem } from "../../shared/components";
 import { OverflowActionMenu } from "../../shared/components";
-import { tokens } from "../../shared/theme";
+import { tokens, withAlpha } from "../../shared/theme";
 
 export type AppActivityBannerTone = "error" | "info" | "success";
 
@@ -18,18 +19,18 @@ type Props = {
 function getToneColors(tone: AppActivityBannerTone) {
   if (tone === "error") {
     return {
-      border: "rgba(185, 28, 28, 0.24)",
+      border: withAlpha(tokens.colors.dangerStrong, 0.24),
       progress: tokens.colors.danger,
-      progressTrack: "rgba(185, 28, 28, 0.12)",
+      progressTrack: withAlpha(tokens.colors.dangerStrong, 0.12),
       stage: tokens.colors.dangerDeep,
       title: tokens.colors.foreground,
     };
   }
   if (tone === "success") {
     return {
-      border: "rgba(5, 150, 105, 0.24)",
+      border: withAlpha(tokens.colors.successIcon, 0.24),
       progress: tokens.colors.success,
-      progressTrack: "rgba(5, 150, 105, 0.12)",
+      progressTrack: withAlpha(tokens.colors.successIcon, 0.12),
       stage: tokens.colors.success,
       title: tokens.colors.foreground,
     };
@@ -79,7 +80,7 @@ export function AppActivityBanner({ actions, hint, percent, stage, title, tone }
           style={{
             width: 28,
             height: 28,
-            borderRadius: 999,
+            borderRadius: tokens.radius.pill,
             alignItems: "center",
             justifyContent: "center",
             backgroundColor: colors.progressTrack,
@@ -92,14 +93,14 @@ export function AppActivityBanner({ actions, hint, percent, stage, title, tone }
               style={{
                 width: 10,
                 height: 10,
-                borderRadius: 999,
+                borderRadius: tokens.radius.pill,
                 backgroundColor: colors.progress,
               }}
             />
           )}
         </View>
 
-        <View style={{ flex: 1, gap: 2 }}>
+        <View style={{ flex: 1, gap: tokens.spacing.micro }}>
           <Text
             numberOfLines={2}
             style={{
@@ -147,7 +148,7 @@ export function AppActivityBanner({ actions, hint, percent, stage, title, tone }
       <View
         style={{
           height: 7,
-          borderRadius: 999,
+          borderRadius: tokens.radius.pill,
           backgroundColor: colors.progressTrack,
           overflow: "hidden",
         }}
@@ -157,7 +158,7 @@ export function AppActivityBanner({ actions, hint, percent, stage, title, tone }
             width: `${normalizedPercent}%`,
             minWidth: normalizedPercent > 0 ? 12 : 0,
             height: "100%",
-            borderRadius: 999,
+            borderRadius: tokens.radius.pill,
             backgroundColor: colors.progress,
           }}
         />
@@ -168,7 +169,7 @@ export function AppActivityBanner({ actions, hint, percent, stage, title, tone }
           style={{
             color: tokens.colors.muted,
             fontSize: tokens.typography.micro,
-            lineHeight: 15,
+            lineHeight: tokens.lineHeight.tiny,
           }}
         >
           {hint}

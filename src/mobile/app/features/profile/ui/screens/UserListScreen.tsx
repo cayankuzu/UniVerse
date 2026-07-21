@@ -1,5 +1,6 @@
 import React, { memo, useDeferredValue, useMemo, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { Pressable, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Lock, UserCheck } from "lucide-react-native";
 import { tokens } from "../../../../shared/theme";
@@ -57,12 +58,12 @@ function UserRow({
         alignItems: "center",
         backgroundColor: tokens.colors.surface,
         borderColor: tokens.colors.border,
-        borderRadius: 14,
+        borderRadius: tokens.radius.control,
         borderWidth: 1,
         flexDirection: "row",
         gap: tokens.spacing.sm,
-        paddingHorizontal: 14,
-        paddingVertical: 10,
+        paddingHorizontal: tokens.spacing.smPlus,
+        paddingVertical: tokens.spacing.compact,
       }}
     >
       <Pressable
@@ -70,9 +71,9 @@ function UserRow({
         accessibilityRole="button"
         onPressIn={handlePressIn}
         onPress={onPress}
-        style={{ alignItems: "center", flex: 1, flexDirection: "row", gap: 10 }}
+        style={{ alignItems: "center", flex: 1, flexDirection: "row", gap: tokens.spacing.compact }}
       >
-        <Avatar uri={item.image} name={item.name} size={46} />
+        <Avatar uri={item.image} name={item.name} size={38} />
         <View style={{ flex: 1 }}>
           <Text
             style={{
@@ -88,14 +89,21 @@ function UserRow({
             style={{
               color: tokens.colors.muted,
               fontSize: tokens.typography.caption,
-              marginTop: 2,
+              marginTop: tokens.spacing.micro,
             }}
             numberOfLines={1}
           >
             {item.university || t("common.university.missing")}
           </Text>
           {isPrivate ? (
-            <View style={{ alignItems: "center", flexDirection: "row", gap: 4, marginTop: 2 }}>
+            <View
+              style={{
+                alignItems: "center",
+                flexDirection: "row",
+                gap: tokens.spacing.xxs,
+                marginTop: tokens.spacing.micro,
+              }}
+            >
               <Lock size={tokens.typography.tiny} color={tokens.colors.warningIcon} />
               <Text
                 style={{
@@ -110,7 +118,11 @@ function UserRow({
           ) : null}
           {item.time ? (
             <Text
-              style={{ color: tokens.colors.muted, fontSize: tokens.typography.tiny, marginTop: 1 }}
+              style={{
+                color: tokens.colors.muted,
+                fontSize: tokens.typography.tiny,
+                marginTop: tokens.spacing.hairline,
+              }}
             >
               {item.time}
             </Text>
@@ -192,7 +204,7 @@ export function UserListScreen({ route, navigation }: Props) {
             <Text
               style={{
                 color: tokens.colors.muted,
-                fontSize: 13,
+                fontSize: tokens.typography.label,
                 fontWeight: tokens.fontWeight.semibold,
               }}
             >
@@ -216,7 +228,7 @@ export function UserListScreen({ route, navigation }: Props) {
           gap: tokens.spacing.xs,
           paddingHorizontal: tokens.spacing.md,
           paddingBottom: bottomPadding,
-          paddingTop: 10,
+          paddingTop: tokens.spacing.compact,
         }}
         data={filteredData}
         emptyText={

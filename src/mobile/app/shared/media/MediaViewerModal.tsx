@@ -1,13 +1,14 @@
 import { ArrowLeft } from "lucide-react-native";
+import { AppText as Text } from "../components/AppText";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { FlatList, Image, StatusBar, Text, View, useWindowDimensions } from "react-native";
+import { FlatList, Image, StatusBar, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppIconButton } from "../components/AppIconButton";
 import { AppModalHost } from "../components/AppModalHost";
 import { OverflowActionMenu, type OverflowActionItem } from "../components/OverflowActionMenu";
 import { AppImage } from "../components/AppImage";
 import { t } from "../i18n";
-import { tokens } from "../theme";
+import { tokens, withAlpha } from "../theme";
 import { scheduleAfterInteractions } from "../utils/scheduleAfterInteractions";
 import { isVideoMediaUri } from "./mediaVideoUtils";
 import { VideoThumbnailPreview } from "./VideoThumbnailPreview";
@@ -150,14 +151,14 @@ export function MediaViewerModal({
             style={{
               flexDirection: "row",
               alignItems: "center",
-              gap: 10,
+              gap: tokens.spacing.compact,
             }}
           >
             <AppIconButton
               accessibilityLabel={t("media.viewer.back")}
               icon={({ color, size }) => <ArrowLeft color={color} size={size} strokeWidth={2.1} />}
               iconColor={tokens.colors.surface}
-              outlineColor="rgba(148,163,184,0.22)"
+              outlineColor={withAlpha(tokens.colors.textSubtle, 0.22)}
               onPress={onClose}
               size={tokens.iconSize["4xl"]}
               surfaceColor={tokens.colors.backdropLight}
@@ -174,9 +175,9 @@ export function MediaViewerModal({
                 <View
                   style={{
                     borderRadius: tokens.radius.pill,
-                    backgroundColor: "rgba(15,23,42,0.68)",
+                    backgroundColor: withAlpha(tokens.colors.foreground, 0.68),
                     paddingHorizontal: tokens.spacing.sm,
-                    paddingVertical: 6,
+                    paddingVertical: tokens.spacing.xsMinus,
                   }}
                 >
                   <Text
@@ -217,7 +218,7 @@ export function MediaViewerModal({
             );
             setCurrentIndex(nextIndex);
           }}
-          renderItem={({ item }) => (
+          renderItem={({ index, item }) => (
             <View
               style={{
                 width,
@@ -234,11 +235,12 @@ export function MediaViewerModal({
                   borderRadius: tokens.radius["2xl"],
                   backgroundColor: tokens.colors.dark900,
                   borderWidth: 1,
-                  borderColor: "rgba(148,163,184,0.18)",
+                  borderColor: withAlpha(tokens.colors.textSubtle, 0.18),
                 }}
               >
                 {item.kind === "video" ? (
                   <DeferredMediaVideo
+                    active={index === activeIndex}
                     autoPlay
                     contentFit="contain"
                     muted={false}
@@ -285,7 +287,7 @@ export function MediaViewerModal({
                 borderRadius: tokens.radius.pill,
                 backgroundColor: tokens.colors.backdropLight,
                 paddingHorizontal: tokens.spacing.sm,
-                paddingVertical: 7,
+                paddingVertical: tokens.spacing.xsCompact,
               }}
             >
               <Text
@@ -293,7 +295,7 @@ export function MediaViewerModal({
                   color: tokens.colors.surface,
                   fontSize: tokens.typography.tiny,
                   fontWeight: tokens.fontWeight.bold,
-                  lineHeight: 15,
+                  lineHeight: tokens.lineHeight.tiny,
                 }}
                 numberOfLines={2}
               >

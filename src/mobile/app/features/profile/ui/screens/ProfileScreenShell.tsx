@@ -41,8 +41,8 @@ export const ProfileScreenShell = memo(function ProfileScreenShell({
               icon={({ color, size }) => <MoreVertical size={size} color={color} />}
               onPress={onOpenMenu}
               outlineColor={tokens.colors.border}
-              size={36}
-              style={{ borderRadius: 10 }}
+              size={32}
+              style={{ borderRadius: tokens.radius.compact }}
               surfaceColor={tokens.colors.surfaceVariant}
             />
           ) : undefined

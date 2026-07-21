@@ -1,4 +1,5 @@
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { AppText as Text } from "./AppText";
 import { tokens } from "../theme";
 
 interface Props {
@@ -19,10 +20,13 @@ export function Badge({ label, variant = "default" }: Props) {
   const s = STYLES[variant];
   return (
     <View
+      accessibilityLabel={label}
+      accessibilityRole="text"
+      accessible
       style={{
         borderRadius: tokens.radius.pill,
-        paddingHorizontal: 10,
-        paddingVertical: 3,
+        paddingHorizontal: tokens.spacing.compact,
+        paddingVertical: tokens.spacing.microPlus,
         backgroundColor: s.bg,
         alignSelf: "flex-start",
       }}
@@ -32,6 +36,8 @@ export function Badge({ label, variant = "default" }: Props) {
           fontSize: tokens.typography.tiny,
           fontWeight: tokens.fontWeight.semibold,
           color: s.text,
+          fontVariant: ["tabular-nums"],
+          lineHeight: tokens.lineHeight.tiny,
         }}
       >
         {label}

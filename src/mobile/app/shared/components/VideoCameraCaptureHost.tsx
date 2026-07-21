@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Platform, StatusBar, StyleSheet, Text, View } from "react-native";
+import { AppText as Text } from "./AppText";
+import { Platform, StatusBar, StyleSheet, View } from "react-native";
 import { CameraView, useCameraPermissions, useMicrophonePermissions } from "expo-camera";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -8,10 +9,9 @@ import {
   resolveVideoCameraCapture,
   useVideoCameraCaptureState,
 } from "../media/videoCameraCaptureController";
-import { tokens } from "../theme";
+import { tokens, withAlpha } from "../theme";
 import { InstantPressable } from "./InstantPressable";
 import { AppModalHost } from "./AppModalHost";
-
 function clearTimer(timerRef: React.MutableRefObject<ReturnType<typeof setTimeout> | null>) {
   if (!timerRef.current) return;
   clearTimeout(timerRef.current);
@@ -286,7 +286,7 @@ export default function VideoCameraCaptureHost() {
             onPress={handleClose}
             style={styles.closeButton}
           >
-            <Ionicons name="close" size={28} color="#fff" />
+            <Ionicons name="close" size={tokens.iconSize["2xl"]} color={tokens.colors.onMedia} />
           </InstantPressable>
 
           <View style={styles.timerContainer}>
@@ -310,7 +310,11 @@ export default function VideoCameraCaptureHost() {
               onPress={handleToggleFacing}
               style={styles.flipButton}
             >
-              <Ionicons name="camera-reverse-outline" size={26} color="#fff" />
+              <Ionicons
+                name="camera-reverse-outline"
+                size={tokens.iconSize["2xl"]}
+                color={tokens.colors.onMedia}
+              />
             </InstantPressable>
           ) : (
             <View style={styles.flipPlaceholder} />
@@ -361,26 +365,26 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-around",
-    paddingHorizontal: 32,
-    paddingTop: 16,
+    paddingHorizontal: tokens.spacing.xxl,
+    paddingTop: tokens.spacing.md,
   },
   closeButton: {
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.4)",
-    borderRadius: 24,
+    backgroundColor: withAlpha(tokens.colors.mediaBlack, 0.4),
+    borderRadius: tokens.radius["2xl"],
     height: tokens.minHeight.touchTarget,
     justifyContent: "center",
     width: tokens.minHeight.touchTarget,
   },
   container: {
-    backgroundColor: "#000",
+    backgroundColor: tokens.colors.mediaBlack,
     flex: 1,
     justifyContent: "space-between",
   },
   flipButton: {
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.4)",
-    borderRadius: 24,
+    backgroundColor: withAlpha(tokens.colors.mediaBlack, 0.4),
+    borderRadius: tokens.radius["2xl"],
     height: tokens.minHeight.touchTarget,
     justifyContent: "center",
     width: tokens.minHeight.touchTarget,
@@ -394,106 +398,102 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   loadingText: {
-    color: "#fff",
-    fontSize: 15,
+    color: tokens.colors.onMedia,
+    fontSize: tokens.typography.control,
     fontWeight: "700",
   },
   permissionButton: {
-    backgroundColor: "#2563eb",
-    borderRadius: 12,
+    backgroundColor: tokens.colors.primary,
+    borderRadius: tokens.radius.md,
     justifyContent: "center",
-    marginTop: 20,
-    minHeight: tokens.minHeight.touchTarget,
-    paddingHorizontal: 24,
+    marginTop: tokens.spacing.lg,
+    minHeight: tokens.minHeight.buttonLg,
+    paddingHorizontal: tokens.spacing.xl,
   },
   permissionButtonText: {
-    color: "#fff",
-    fontSize: 16,
+    color: tokens.colors.onMedia,
+    fontSize: tokens.typography.subtitle,
     fontWeight: "600",
   },
   permissionContainer: {
     alignItems: "center",
-    backgroundColor: "#000",
+    backgroundColor: tokens.colors.mediaBlack,
     flex: 1,
     justifyContent: "center",
   },
   permissionSecondaryButton: {
     justifyContent: "center",
-    marginTop: 12,
-    minHeight: tokens.minHeight.touchTarget,
-    paddingHorizontal: 20,
+    marginTop: tokens.spacing.sm,
+    minHeight: tokens.minHeight.buttonLg,
+    paddingHorizontal: tokens.spacing.lg,
   },
   permissionSecondaryText: {
-    color: "rgba(255,255,255,0.8)",
-    fontSize: 14,
+    color: withAlpha(tokens.colors.onMedia, 0.8),
+    fontSize: tokens.typography.body,
     fontWeight: "600",
   },
   permissionText: {
-    color: "#fff",
-    fontSize: 18,
+    color: tokens.colors.onMedia,
+    fontSize: tokens.typography.cardTitle,
     fontWeight: "600",
   },
   progressBar: {
-    backgroundColor: "#ef4444",
+    backgroundColor: tokens.colors.red,
     height: "100%",
   },
   progressBarContainer: {
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: withAlpha(tokens.colors.onMedia, 0.2),
     height: 3,
     width: "100%",
   },
   recordButtonInner: {
-    backgroundColor: "#ef4444",
-    borderRadius: 28,
-    height: 56,
-    width: 56,
+    backgroundColor: tokens.colors.red,
+    borderRadius: tokens.radius["3xl"],
+    height: 46,
+    width: 46,
   },
   recordButtonOuter: {
     alignItems: "center",
-    borderColor: "#fff",
-    borderRadius: 36,
+    borderColor: tokens.colors.onMedia,
+    borderRadius: 30,
     borderWidth: 4,
-    height: 72,
+    height: 60,
     justifyContent: "center",
-    width: 72,
+    width: 60,
   },
   recordButtonStop: {
-    borderRadius: 8,
-    height: 32,
-    width: 32,
+    borderRadius: tokens.radius.sm,
+    height: 26,
+    width: 26,
   },
   recordingDot: {
-    backgroundColor: "#ef4444",
+    backgroundColor: tokens.colors.red,
     borderRadius: 5,
     height: 10,
-    marginRight: 6,
+    marginRight: tokens.spacing.xsMinus,
     width: 10,
   },
-  sideButtonPlaceholder: {
-    width: 56,
-  },
+  sideButtonPlaceholder: { width: 46 },
   timerContainer: {
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
-    borderRadius: 16,
+    backgroundColor: withAlpha(tokens.colors.mediaBlack, 0.5),
+    borderRadius: tokens.radius.lg,
     flexDirection: "row",
-    paddingHorizontal: 14,
-    paddingVertical: 6,
+    paddingHorizontal: tokens.spacing.smPlus,
+    paddingVertical: tokens.spacing.xsMinus,
   },
   timerText: {
-    color: "#fff",
+    color: tokens.colors.onMedia,
     fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
-    fontSize: 18,
+    fontSize: tokens.typography.cardTitle,
     fontVariant: ["tabular-nums"],
     fontWeight: "700",
   },
-  timerWarning: {
-    color: "#ef4444",
-  },
+  timerWarning: { color: tokens.colors.red },
   topBar: {
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
+    paddingHorizontal: tokens.spacing.md,
   },
 });

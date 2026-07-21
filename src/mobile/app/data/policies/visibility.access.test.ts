@@ -20,7 +20,7 @@ describe("album button action", () => {
       ),
     ).toEqual({
       action: "view_event",
-      label: "Etkinligi Gor",
+      label: "Etkinliği Gör",
       navigateTo: "/album/event-1",
     });
   });
@@ -39,7 +39,7 @@ describe("album button action", () => {
       ),
     ).toEqual({
       action: "view_event",
-      label: "Etkinligi Gor",
+      label: "Etkinliği Gör",
       navigateTo: "/album/event-1",
     });
   });
@@ -60,7 +60,7 @@ describe("album button action", () => {
       ),
     ).toEqual({
       action: "disabled",
-      label: "Etkinligi Gor",
+      label: "Etkinliği Gör",
       message: "Bu albümün bagli oldugu etkinlik artik mevcut degil.",
     });
   });
@@ -99,7 +99,7 @@ describe("fallback visibility access", () => {
       ),
     ).toEqual({
       canView: false,
-      reason: "Bu kulübün albumunu gormek icin kulübü takip etmelisiniz.",
+      reason: "Bu kulübün albümünü görmek için kulübü takip etmelisiniz.",
     });
   });
 

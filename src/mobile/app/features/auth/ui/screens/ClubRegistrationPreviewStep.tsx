@@ -8,6 +8,7 @@ import {
   RegistrationUploadProgressCard,
 } from "../components";
 import type { ClubRegistrationStepProps } from "../clubRegistrationSections.shared";
+import { tokens } from "../../../../shared/theme";
 
 export function ClubRegistrationPreviewStep({
   coverImageUri,
@@ -33,18 +34,18 @@ export function ClubRegistrationPreviewStep({
         categories={selectedCategories}
         profileImageUri={profileImageUri || undefined}
         coverImageUri={coverImageUri || undefined}
-        accent="#7c3aed"
+        accent={tokens.colors.violetBrand}
       />
 
       <RegistrationUploadProgressCard
-        accent="#7c3aed"
-        backgroundColor="#f5f3ff"
-        textColor="#6d28d9"
+        accent={tokens.colors.violetBrand}
+        backgroundColor={tokens.colors.violetSoft}
+        textColor={tokens.colors.violetDark}
         message={uploadProgress}
       />
       <RegistrationSubmitError message={submitError} />
 
-      <View style={{ marginTop: 20 }}>
+      <View style={{ marginTop: tokens.spacing.lg }}>
         <GradientButton
           label="Kayıt Ol"
           onPress={() => void submit()}

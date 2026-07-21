@@ -1,4 +1,5 @@
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
 
 import { GradientButton, TextField } from "../../../../shared/components";
 import { isPasswordPolicySatisfied } from "../../../../shared/security/passwordPolicy";
@@ -8,6 +9,7 @@ import {
   RegistrationStepHeading,
 } from "../components";
 import type { ClubRegistrationStepProps } from "../clubRegistrationSections.shared";
+import { tokens } from "../../../../shared/theme";
 
 export function ClubRegistrationProfileStep({
   coverImageUri,
@@ -22,7 +24,7 @@ export function ClubRegistrationProfileStep({
     <>
       <RegistrationStepHeading title="Profil" subtitle="Kulüp profil bilgilerini tamamla" />
       <RegistrationProfileMediaFields
-        accent="#7c3aed"
+        accent={tokens.colors.violetBrand}
         coverImageUri={coverImageUri}
         coverLabel="Kapak Fotoğrafı"
         onPick={pickImage}
@@ -30,7 +32,7 @@ export function ClubRegistrationProfileStep({
         profileLabel="Kulüp Logosu"
       />
 
-      <View style={{ marginTop: 12 }}>
+      <View style={{ marginTop: tokens.spacing.sm }}>
         <TextField
           error={errors.description?.message}
           fieldName="description"
@@ -40,7 +42,14 @@ export function ClubRegistrationProfileStep({
           onChangeText={(value) => setField("description", value)}
         />
       </View>
-      <Text style={{ color: "#94a3b8", fontSize: 12, textAlign: "right", marginTop: 4 }}>
+      <Text
+        style={{
+          color: tokens.colors.muted,
+          fontSize: tokens.typography.caption,
+          textAlign: "right",
+          marginTop: tokens.spacing.xxs,
+        }}
+      >
         {values.description.length}/200
       </Text>
 
@@ -50,7 +59,7 @@ export function ClubRegistrationProfileStep({
         onPasswordChange={(value) => setField("password", value)}
       />
 
-      <View style={{ marginTop: 20 }}>
+      <View style={{ marginTop: tokens.spacing.lg }}>
         <GradientButton
           label="Devam Et"
           onPress={() => void goNext()}

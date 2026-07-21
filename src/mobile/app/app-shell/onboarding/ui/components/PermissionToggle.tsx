@@ -1,5 +1,5 @@
 import { Pressable, View } from "react-native";
-import { tokens } from "../../../../shared/theme";
+import { tokens, withAlpha } from "../../../../shared/theme";
 
 interface PermissionToggleProps {
   value: boolean;
@@ -23,20 +23,20 @@ export function PermissionToggle({ value, onToggle }: PermissionToggleProps) {
         style={{
           width: 44,
           height: 24,
-          borderRadius: 12,
-          backgroundColor: value ? "#2563eb" : "rgba(255,255,255,0.15)",
+          borderRadius: tokens.radius.md,
+          backgroundColor: value ? tokens.colors.primary : withAlpha(tokens.colors.onMedia, 0.15),
           justifyContent: "center",
-          paddingHorizontal: 2,
+          paddingHorizontal: tokens.spacing.micro,
         }}
       >
         <View
           style={{
             width: 20,
             height: 20,
-            borderRadius: 10,
-            backgroundColor: "#ffffff",
+            borderRadius: tokens.radius.compact,
+            backgroundColor: tokens.colors.onMedia,
             alignSelf: value ? "flex-end" : "flex-start",
-            shadowColor: "#000",
+            shadowColor: tokens.colors.mediaBlack,
             shadowOpacity: 0.15,
             shadowRadius: 2,
             elevation: 2,

@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import { useProgressiveHydration } from "../../../../shared/utils/useProgressiveHydration";
 import {
   buildEventDetailInfoSlides,
@@ -17,7 +18,7 @@ import { EventDetailDescription } from "./EventDetailDescription";
 import { EventDetailHeader } from "./EventDetailHeader";
 import { EventDetailImage } from "./EventDetailImage";
 import { EventDetailInteractions } from "./EventDetailInteractions";
-import { tokens } from "../../../../shared/theme";
+import { tokens, withAlpha } from "../../../../shared/theme";
 
 type Props = {
   accountType: AccountType;
@@ -116,11 +117,11 @@ export function EventDetailCard({
     <>
       <View
         style={{
-          borderRadius: 22,
+          borderRadius: tokens.radius.sheet,
           overflow: "hidden",
           backgroundColor: tokens.colors.surface,
           borderWidth: 1,
-          borderColor: "rgba(15,23,42,0.07)",
+          borderColor: withAlpha(tokens.colors.foreground, 0.07),
         }}
       >
         <EventDetailHeader event={event} onPress={() => onOpenClub(event.clubUsername)} />
@@ -142,13 +143,19 @@ export function EventDetailCard({
           }}
         />
 
-        <View style={{ paddingHorizontal: 14, paddingTop: 14, paddingBottom: 10 }}>
+        <View
+          style={{
+            paddingHorizontal: tokens.spacing.smPlus,
+            paddingTop: tokens.spacing.smPlus,
+            paddingBottom: tokens.spacing.compact,
+          }}
+        >
           <Text
             style={{
               fontSize: tokens.typography.title,
               fontWeight: tokens.fontWeight.extrabold,
               color: tokens.colors.foreground,
-              lineHeight: 28,
+              lineHeight: tokens.lineHeight.sectionTitle,
             }}
           >
             {event.title}
@@ -175,7 +182,7 @@ export function EventDetailCard({
             joinHardDisabled={state.eventActionAccess.isEnded}
             joinLabel={
               getJoinButtonLabel(state.eventActionAccess, state.joined) ||
-              (state.joined ? "Katildin" : "Katil")
+              (state.joined ? "Katıldın" : "Katıl")
             }
             menuActions={state.eventMenuActions}
             joinWarningMessage={state.joinWarningMessage}

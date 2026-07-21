@@ -140,6 +140,7 @@ module.exports = ({ config }) => {
     name: config.name || APP_NAME,
     slug: expoSlug,
     owner: expoOwner,
+    plugins: Array.from(new Set([...(config.plugins || []), "expo-asset"])),
     android: androidConfig,
     ios: iosConfig,
     runtimeVersion,

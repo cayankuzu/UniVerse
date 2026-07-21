@@ -1,5 +1,6 @@
 import { MessageCircle, X } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { Pressable, View } from "react-native";
 import { tokens } from "../../../../shared/theme";
 
 interface CommentPanelSheetHeaderProps {
@@ -20,17 +21,17 @@ export function CommentPanelSheetHeader({
       <View
         style={{
           alignSelf: "center",
-          width: 54,
+          width: 44,
           height: 5,
-          borderRadius: 999,
+          borderRadius: tokens.radius.pill,
           backgroundColor: tokens.colors.border,
-          marginTop: 10,
+          marginTop: tokens.spacing.compact,
         }}
       />
 
       <View
         style={{
-          marginTop: 10,
+          marginTop: tokens.spacing.compact,
           paddingHorizontal: tokens.spacing.md,
           paddingBottom: tokens.spacing.md,
           borderBottomWidth: 1,
@@ -66,7 +67,7 @@ export function CommentPanelSheetHeader({
           </Text>
           <Text
             style={{
-              marginTop: 2,
+              marginTop: tokens.spacing.micro,
               color: tokens.colors.mutedFg,
               fontSize: tokens.typography.caption,
               fontWeight: tokens.fontWeight.semibold,
@@ -83,7 +84,7 @@ export function CommentPanelSheetHeader({
           style={{
             width: 38,
             height: 38,
-            borderRadius: 999,
+            borderRadius: tokens.radius.pill,
             alignItems: "center",
             justifyContent: "center",
             backgroundColor: tokens.colors.surfaceVariant,

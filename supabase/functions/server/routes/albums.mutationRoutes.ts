@@ -86,8 +86,8 @@ export function registerAlbumMutationRoutes(
       if (!incomingImages.length) {
         return c.json({ error: "Fotograf secilmedi" }, 400);
       }
-      if (incomingImages.length > 9) {
-        return c.json({ error: "Tek bir album kartinda en fazla 9 medya olabilir." }, 400);
+      if (incomingImages.length > 6) {
+        return c.json({ error: "Tek bir albüm kartında en fazla 6 medya olabilir." }, 400);
       }
 
       const [photos, eventRes, ownAlbumRowsRes] = await Promise.all([
@@ -111,7 +111,7 @@ export function registerAlbumMutationRoutes(
       if (remainingSlots <= 0) {
         return c.json(
           {
-            error: "Her kullanici bu etkinlige en fazla 3 album karti ekleyebilir.",
+            error: "Her kullanıcı bu etkinliğe en fazla 3 albüm kartı ekleyebilir.",
           },
           400,
         );

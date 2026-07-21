@@ -12,12 +12,13 @@ import { useRegistrationWizard } from "../../application/useRegistrationWizard";
 import { studentRegisterSchema } from "../../domain/schemas";
 import { completeRegistrationFlow } from "../../application/completeRegistrationFlow";
 import { StudentRegistrationSections } from "./StudentRegistrationSections";
+import { tokens } from "../../../../shared/theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "StudentRegister">;
 
 const TOTAL_STEPS = 4;
 const STEP_LABELS = ["Bilgiler", "Üniversite", "Profil", "İlgi Alanları"] as const;
-const GRADIENT_COLORS = ["#3b82f6", "#2563eb"] as const;
+const GRADIENT_COLORS = [tokens.colors.blue, tokens.colors.primary] as const;
 const studentRegisterFormSchema = studentRegisterSchema.extend({
   bio: z.string().max(150, "Biyografi en fazla 150 karakter olabilir."),
 });

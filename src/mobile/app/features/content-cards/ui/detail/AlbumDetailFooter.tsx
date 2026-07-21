@@ -1,7 +1,8 @@
 import { Calendar, Heart, MessageCircle } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { Pressable, View } from "react-native";
 import { OverflowActionMenu, type OverflowActionItem } from "../../../../shared/components";
-import { tokens } from "../../../../shared/theme";
+import { tokens, withAlpha } from "../../../../shared/theme";
 
 interface AlbumDetailFooterProps {
   commentCount: number;
@@ -34,9 +35,9 @@ export function AlbumDetailFooter({
         flexDirection: "row",
         alignItems: "center",
         gap: tokens.spacing.xxs,
-        paddingHorizontal: 14,
+        paddingHorizontal: tokens.spacing.smPlus,
         paddingBottom: tokens.spacing.sm,
-        paddingTop: 10,
+        paddingTop: tokens.spacing.compact,
         borderTopWidth: 1,
         borderTopColor: tokens.colors.divider,
         marginTop: tokens.spacing.xs,
@@ -51,11 +52,11 @@ export function AlbumDetailFooter({
         style={{
           flexDirection: "row",
           alignItems: "center",
-          gap: 5,
+          gap: tokens.spacing.xxsPlus,
           borderRadius: tokens.radius.pill,
-          paddingHorizontal: 10,
-          minHeight: tokens.minHeight.touchTarget,
-          backgroundColor: liked ? "rgba(254,226,226,0.9)" : "transparent",
+          paddingHorizontal: tokens.spacing.compact,
+          minHeight: tokens.minHeight.buttonMd,
+          backgroundColor: liked ? withAlpha(tokens.colors.dangerSurface, 0.9) : "transparent",
         }}
       >
         <Heart
@@ -82,10 +83,10 @@ export function AlbumDetailFooter({
         style={{
           flexDirection: "row",
           alignItems: "center",
-          gap: 5,
+          gap: tokens.spacing.xxsPlus,
           borderRadius: tokens.radius.pill,
-          paddingHorizontal: 10,
-          minHeight: tokens.minHeight.touchTarget,
+          paddingHorizontal: tokens.spacing.compact,
+          minHeight: tokens.minHeight.buttonMd,
         }}
       >
         <MessageCircle size={tokens.iconSize.lg} color={tokens.colors.mutedFg} strokeWidth={1.7} />
@@ -110,11 +111,11 @@ export function AlbumDetailFooter({
         style={{
           minHeight: tokens.minHeight.header,
           borderRadius: tokens.radius.pill,
-          paddingHorizontal: 14,
+          paddingHorizontal: tokens.spacing.smPlus,
           alignItems: "center",
           justifyContent: "center",
           flexDirection: "row",
-          gap: 5,
+          gap: tokens.spacing.xxsPlus,
           backgroundColor: eventDisabled ? tokens.colors.background : tokens.colors.accent,
           borderWidth: 1,
           borderColor: eventDisabled ? tokens.colors.border : tokens.colors.primaryBorder,

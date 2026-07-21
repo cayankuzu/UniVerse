@@ -284,7 +284,13 @@ export function resetProjectionRpcStateForTests() {
 export async function tryProjectionRpc<T>(
   fn: string,
   params: Record<string, unknown>,
+  signal?: AbortSignal,
 ): Promise<ProjectionEnvelope<T> | null> {
+  if (signal?.aborted) {
+    const error = new Error("Projection request was cancelled.");
+    error.name = "AbortError";
+    throw error;
+  }
   // Circuit breaker: skip RPC if server is known to be unresponsive.
   if (isCircuitOpen()) {
     debugLog("PROJECTIONS", "rpc-circuit-breaker-rejected", { fn });
@@ -307,6 +313,8 @@ export async function tryProjectionRpc<T>(
   const requestGroup = resolveProjectionRpcGroup(fn);
   incrementProjectionRpcGroup(requestGroup);
   const requestController = new AbortController();
+  const abortRequest = () => requestController.abort();
+  signal?.addEventListener("abort", abortRequest, { once: true });
 
   const request = (async () => {
     let result: Awaited<ReturnType<typeof supabase.rpc>>;
@@ -320,6 +328,11 @@ export async function tryProjectionRpc<T>(
         : rpcRequest;
       result = await pendingRpc;
     } catch (error) {
+      if (signal?.aborted) {
+        const abortError = new Error("Projection request was cancelled.");
+        abortError.name = "AbortError";
+        throw abortError;
+      }
       debugLog("PROJECTIONS", "rpc-request-failed", {
         fn,
         message: String((error as { message?: string })?.message || error || ""),
@@ -327,6 +340,11 @@ export async function tryProjectionRpc<T>(
       return {
         status: "counted-failure" as const,
       };
+    }
+    if (signal?.aborted) {
+      const abortError = new Error("Projection request was cancelled.");
+      abortError.name = "AbortError";
+      throw abortError;
     }
     const { data, error } = result;
     if (error) {
@@ -362,6 +380,7 @@ export async function tryProjectionRpc<T>(
   trimOldestProjectionRpcEntries();
 
   const finalizeRequest = () => {
+    signal?.removeEventListener("abort", abortRequest);
     decrementProjectionRpcGroup(requestGroup);
     if (inFlightProjectionRpcRequests.get(requestKey) === entry) {
       inFlightProjectionRpcRequests.delete(requestKey);

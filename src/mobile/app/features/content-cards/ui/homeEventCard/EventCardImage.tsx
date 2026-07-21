@@ -5,7 +5,7 @@ import type { EventWithMeta } from "../../data";
 import { AppImage } from "../../../../shared/components";
 import { isVideoMediaUri } from "../../../../shared/media/mediaVideoUtils";
 import { VideoThumbnailPreview } from "../../../../shared/media/VideoThumbnailPreview";
-import { tokens } from "../../../../shared/theme";
+import { tokens, withAlpha } from "../../../../shared/theme";
 
 interface Props {
   event: EventWithMeta;
@@ -57,7 +57,7 @@ export function EventCardImage({
               style={{ width: "100%", height: "100%" }}
             />
             <View style={styles.videoOverlay}>
-              <Play size={34} color={tokens.colors.surface} strokeWidth={1.8} />
+              <Play size={tokens.iconSize["3xl"]} color={tokens.colors.surface} strokeWidth={1.8} />
             </View>
           </View>
         ) : (
@@ -73,7 +73,11 @@ export function EventCardImage({
         )
       ) : (
         <View style={styles.fallback}>
-          <ImageIcon size={28} color={tokens.colors.mutedFg} strokeWidth={1.5} />
+          <ImageIcon
+            size={tokens.iconSize["2xl"]}
+            color={tokens.colors.mutedFg}
+            strokeWidth={1.5}
+          />
         </View>
       )}
     </TouchableOpacity>
@@ -83,7 +87,7 @@ export function EventCardImage({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: tokens.colors.border,
-    height: 232,
+    height: 188,
     overflow: "hidden",
   },
   fallback: {
@@ -99,6 +103,6 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(15,23,42,0.18)",
+    backgroundColor: withAlpha(tokens.colors.foreground, 0.18),
   },
 });

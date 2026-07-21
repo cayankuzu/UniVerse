@@ -1,7 +1,8 @@
 import { LinearGradient } from "expo-linear-gradient";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import { Bell, Camera, Image, MapPin, Mic, Shield } from "lucide-react-native";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AppState, Linking, Pressable, Text, TouchableOpacity, View } from "react-native";
+import { AppState, Linking, Pressable, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AppModalHost, AppScrollView as ScrollView } from "../../../../shared/components";
 import {
@@ -13,7 +14,7 @@ import {
   toPermissionSnapshot,
 } from "../../../../platform/permissions/devicePermissions";
 import { t } from "../../../../shared/i18n";
-import { tokens } from "../../../../shared/theme";
+import { tokens, withAlpha } from "../../../../shared/theme";
 import type { PermissionSnapshot } from "../../domain";
 import { PermissionItem } from "./PermissionItem";
 
@@ -26,13 +27,17 @@ const DEFAULT_STATE: DevicePermissionState = {
 };
 
 const ICONS: Record<DevicePermissionKey, ReactNode> = {
-  camera: <Camera size={tokens.iconSize.xl} color="#38bdf8" strokeWidth={1.5} />,
+  camera: <Camera size={tokens.iconSize.xl} color={tokens.colors.primaryLight} strokeWidth={1.5} />,
   location: (
     <MapPin size={tokens.iconSize.xl} color={tokens.colors.primaryLight} strokeWidth={1.5} />
   ),
-  microphone: <Mic size={tokens.iconSize.xl} color="#f97316" strokeWidth={1.5} />,
-  notifications: <Bell size={tokens.iconSize.xl} color={tokens.colors.amber} strokeWidth={1.5} />,
-  photos: <Image size={tokens.iconSize.xl} color={tokens.colors.emerald} strokeWidth={1.5} />,
+  microphone: (
+    <Mic size={tokens.iconSize.xl} color={tokens.colors.primaryLight} strokeWidth={1.5} />
+  ),
+  notifications: (
+    <Bell size={tokens.iconSize.xl} color={tokens.colors.primaryLight} strokeWidth={1.5} />
+  ),
+  photos: <Image size={tokens.iconSize.xl} color={tokens.colors.primaryLight} strokeWidth={1.5} />,
 };
 
 interface Props {
@@ -129,8 +134,8 @@ export function PermissionsScreen({ visible, onComplete }: Props) {
               <LinearGradient
                 colors={[tokens.colors.primaryLight, tokens.colors.primary]}
                 style={{
-                  width: 80,
-                  height: 80,
+                  width: 64,
+                  height: 64,
                   borderRadius: tokens.radius["2xl"],
                   alignItems: "center",
                   justifyContent: "center",
@@ -152,7 +157,7 @@ export function PermissionsScreen({ visible, onComplete }: Props) {
                   fontSize: tokens.typography.heading,
                   fontWeight: tokens.fontWeight.extrabold,
                   color: tokens.colors.surface,
-                  letterSpacing: -0.5,
+                  letterSpacing: tokens.letterSpacing.displayTight,
                 }}
               >
                 {t("permissions.title")}
@@ -161,9 +166,9 @@ export function PermissionsScreen({ visible, onComplete }: Props) {
                 style={{
                   marginTop: tokens.spacing.xs,
                   fontSize: tokens.typography.body,
-                  color: "rgba(255,255,255,0.6)",
+                  color: withAlpha(tokens.colors.onMedia, 0.6),
                   textAlign: "center",
-                  lineHeight: 20,
+                  lineHeight: tokens.lineHeight.body,
                 }}
               >
                 {t("permissions.subtitle")}
@@ -183,7 +188,7 @@ export function PermissionsScreen({ visible, onComplete }: Props) {
                   flex: 1,
                   height: 6,
                   borderRadius: 3,
-                  backgroundColor: "rgba(255,255,255,0.1)",
+                  backgroundColor: withAlpha(tokens.colors.onMedia, 0.1),
                   overflow: "hidden",
                 }}
               >
@@ -200,7 +205,7 @@ export function PermissionsScreen({ visible, onComplete }: Props) {
                 style={{
                   fontSize: tokens.typography.caption,
                   fontWeight: tokens.fontWeight.semibold,
-                  color: "rgba(255,255,255,0.5)",
+                  color: withAlpha(tokens.colors.onMedia, 0.5),
                 }}
               >
                 {t("permissions.progress", {
@@ -210,7 +215,7 @@ export function PermissionsScreen({ visible, onComplete }: Props) {
               </Text>
             </View>
 
-            <View style={{ gap: 10 }}>
+            <View style={{ gap: tokens.spacing.compact }}>
               {DEVICE_PERMISSION_DETAILS.map((permission) => (
                 <PermissionItem
                   key={permission.id}
@@ -229,16 +234,16 @@ export function PermissionsScreen({ visible, onComplete }: Props) {
             <Pressable
               onPress={() => setDontShowAgain((current) => !current)}
               style={{
-                marginTop: 18,
+                marginTop: tokens.spacing.mdPlus,
                 flexDirection: "row",
                 alignItems: "center",
-                gap: 10,
-                borderRadius: 14,
-                paddingHorizontal: 14,
+                gap: tokens.spacing.compact,
+                borderRadius: tokens.radius.control,
+                paddingHorizontal: tokens.spacing.smPlus,
                 paddingVertical: tokens.spacing.sm,
                 borderWidth: 1,
-                borderColor: "rgba(255,255,255,0.12)",
-                backgroundColor: "rgba(255,255,255,0.04)",
+                borderColor: withAlpha(tokens.colors.onMedia, 0.12),
+                backgroundColor: withAlpha(tokens.colors.onMedia, 0.04),
               }}
             >
               <View
@@ -247,7 +252,9 @@ export function PermissionsScreen({ visible, onComplete }: Props) {
                   height: 22,
                   borderRadius: 7,
                   borderWidth: 1.5,
-                  borderColor: dontShowAgain ? "#60a5fa" : "rgba(255,255,255,0.35)",
+                  borderColor: dontShowAgain
+                    ? tokens.colors.blueMuted
+                    : withAlpha(tokens.colors.onMedia, 0.35),
                   backgroundColor: dontShowAgain ? tokens.colors.primary : "transparent",
                   alignItems: "center",
                   justifyContent: "center",
@@ -269,7 +276,7 @@ export function PermissionsScreen({ visible, onComplete }: Props) {
                 <Text
                   style={{
                     color: tokens.colors.surface,
-                    fontSize: 13,
+                    fontSize: tokens.typography.label,
                     fontWeight: tokens.fontWeight.bold,
                   }}
                 >
@@ -277,9 +284,9 @@ export function PermissionsScreen({ visible, onComplete }: Props) {
                 </Text>
                 <Text
                   style={{
-                    color: "rgba(255,255,255,0.55)",
-                    fontSize: tokens.typography.tiny,
-                    marginTop: 2,
+                    color: withAlpha(tokens.colors.onMedia, 0.55),
+                    fontSize: tokens.typography.caption,
+                    marginTop: tokens.spacing.micro,
                   }}
                 >
                   {t("permissions.dontShowAgain.hint")}
@@ -307,7 +314,7 @@ export function PermissionsScreen({ visible, onComplete }: Props) {
                 >
                   <Text
                     style={{
-                      fontSize: 15,
+                      fontSize: tokens.typography.control,
                       fontWeight: tokens.fontWeight.bold,
                       color: tokens.colors.surface,
                     }}
@@ -321,14 +328,14 @@ export function PermissionsScreen({ visible, onComplete }: Props) {
                     borderRadius: tokens.radius.lg,
                     padding: tokens.spacing.md,
                     alignItems: "center",
-                    backgroundColor: "rgba(255,255,255,0.1)",
+                    backgroundColor: withAlpha(tokens.colors.onMedia, 0.1),
                   }}
                 >
                   <Text
                     style={{
-                      fontSize: 15,
+                      fontSize: tokens.typography.control,
                       fontWeight: tokens.fontWeight.bold,
-                      color: "rgba(255,255,255,0.7)",
+                      color: withAlpha(tokens.colors.onMedia, 0.7),
                     }}
                   >
                     {t("permissions.closeForNow")}
@@ -341,8 +348,8 @@ export function PermissionsScreen({ visible, onComplete }: Props) {
               style={{
                 marginTop: tokens.spacing.sm,
                 textAlign: "center",
-                fontSize: tokens.typography.tiny,
-                color: "rgba(255,255,255,0.3)",
+                fontSize: tokens.typography.caption,
+                color: withAlpha(tokens.colors.onMedia, 0.3),
               }}
             >
               {t("permissions.settingsHint")}

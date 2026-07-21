@@ -1,10 +1,10 @@
 import React, { useCallback, type ReactNode, type RefObject } from "react";
+import { AppText as Text } from "./AppText";
 import {
   AccessibilityInfo,
   KeyboardAvoidingView,
   Platform,
   Pressable,
-  Text,
   View,
   useWindowDimensions,
   type StyleProp,
@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { t } from "../i18n";
 import { tokens } from "../theme";
 import { AppModalHost } from "./AppModalHost";
+import { InstantPressable } from "./InstantPressable";
 
 export type AppModalSheetHeightMode = "content" | "medium" | "full";
 export type AppModalSheetVariant = "dialog" | "menu" | "alert" | "form";
@@ -142,14 +143,29 @@ export function AppModalSheet({
                 borderTopLeftRadius: tokens.radius.xl,
                 borderTopRightRadius: tokens.radius.xl,
                 maxHeight,
-                paddingBottom: Math.max(insets.bottom + 12, 26),
+                paddingBottom: Math.max(insets.bottom + tokens.spacing.sm, tokens.spacing.xl),
                 paddingHorizontal: tokens.spacing.md,
-                paddingTop: 14,
+                paddingTop: tokens.spacing.smPlus,
               },
               style,
             ]}
             testID={testID}
           >
+            {variant !== "alert" ? (
+              <View
+                accessibilityElementsHidden
+                importantForAccessibility="no"
+                pointerEvents="none"
+                style={{
+                  alignSelf: "center",
+                  backgroundColor: tokens.colors.borderStrong,
+                  borderRadius: tokens.radius.pill,
+                  height: tokens.spacing.xxs,
+                  marginBottom: tokens.spacing.xs,
+                  width: tokens.spacing["3xl"],
+                }}
+              />
+            ) : null}
             <View
               style={{
                 alignItems: "center",
@@ -166,30 +182,31 @@ export function AppModalSheet({
                 style={{
                   color: tokens.colors.foreground,
                   flex: 1,
-                  fontSize: 17,
+                  fontSize: tokens.typography.header,
                   fontWeight: "700",
                 }}
               >
                 {title}
               </Text>
               {dismissible ? (
-                <Pressable
+                <InstantPressable
                   accessibilityLabel={t("common.close")}
                   accessibilityRole="button"
                   accessibilityState={{ busy, disabled: !canRequestClose }}
                   disabled={!canRequestClose}
+                  haptic="selection"
                   hitSlop={tokens.hitSlop.sm}
                   onPress={handleCloseRequest}
                   style={{
                     alignItems: "center",
                     height: closeTargetSize,
                     justifyContent: "center",
-                    opacity: canRequestClose ? 1 : 0.45,
+                    opacity: canRequestClose ? 1 : tokens.opacity.disabled,
                     width: closeTargetSize,
                   }}
                 >
-                  <X size={20} color={tokens.colors.iconMuted} />
-                </Pressable>
+                  <X size={tokens.iconSize.xl} color={tokens.colors.iconMuted} />
+                </InstantPressable>
               ) : null}
             </View>
             <View style={contentStyle}>{children}</View>

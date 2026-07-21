@@ -1,5 +1,6 @@
 import React from "react";
-import { ActivityIndicator, Pressable, Text } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { ActivityIndicator, Pressable } from "react-native";
 import { tokens } from "../../../../shared/theme";
 
 type Props = {
@@ -20,7 +21,7 @@ export function EventAlbumActionButton({ disabled, icon, label, loading, onPress
       style={{
         flex: 1,
         minHeight: tokens.minHeight.inputLg,
-        borderRadius: 14,
+        borderRadius: tokens.radius.control,
         borderWidth: 1,
         borderColor: blocked ? tokens.colors.border : tokens.colors.primaryBorder,
         backgroundColor: blocked ? tokens.colors.background : tokens.colors.primarySofter,

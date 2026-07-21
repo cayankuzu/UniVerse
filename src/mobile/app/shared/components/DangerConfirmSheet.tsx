@@ -1,8 +1,9 @@
 import React from "react";
-import { ActivityIndicator, Pressable, Text, View, useWindowDimensions } from "react-native";
+import { AppText as Text } from "./AppText";
+import { ActivityIndicator, Pressable, View, useWindowDimensions } from "react-native";
 import { AlertTriangle, ChevronRight, Trash2 } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { tokens } from "../../shared/theme";
+import { tokens, withAlpha } from "../../shared/theme";
 import { t } from "../../shared/i18n";
 import { AppModalHost } from "./AppModalHost";
 
@@ -53,9 +54,9 @@ export function DangerConfirmSheet({
         onPress={handleCloseRequest}
         style={{
           flex: 1,
-          backgroundColor: "rgba(2,6,23,0.56)",
+          backgroundColor: withAlpha(tokens.colors.dark950, 0.56),
           justifyContent: "flex-end",
-          paddingHorizontal: 12,
+          paddingHorizontal: tokens.spacing.sm,
           paddingTop: Math.max(insets.top + 12, 20),
           paddingBottom: Math.max(insets.bottom + 12, 20),
         }}
@@ -66,7 +67,7 @@ export function DangerConfirmSheet({
           accessibilityViewIsModal
           onPress={(event) => event.stopPropagation()}
           style={{
-            borderRadius: 28,
+            borderRadius: tokens.radius["3xl"],
             backgroundColor: tokens.colors.surface,
             borderWidth: 1,
             borderColor: tokens.colors.border,
@@ -80,30 +81,44 @@ export function DangerConfirmSheet({
         >
           <View
             style={{
-              paddingHorizontal: 18,
-              paddingTop: 18,
-              paddingBottom: 16,
-              gap: 14,
+              paddingHorizontal: tokens.spacing.mdPlus,
+              paddingTop: tokens.spacing.mdPlus,
+              paddingBottom: tokens.spacing.md,
+              gap: tokens.spacing.smPlus,
             }}
           >
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.smPlus }}
+            >
               <View
                 style={{
-                  width: 52,
-                  height: 52,
-                  borderRadius: 18,
+                  width: 44,
+                  height: 44,
+                  borderRadius: tokens.radius.card,
                   alignItems: "center",
                   justifyContent: "center",
                   backgroundColor: tokens.colors.dangerSoft,
                 }}
               >
-                <Trash2 size={24} color={tokens.colors.dangerDark} />
+                <Trash2 size={tokens.iconSize["2xl"]} color={tokens.colors.dangerDark} />
               </View>
-              <View style={{ flex: 1, gap: 4 }}>
-                <Text style={{ color: tokens.colors.foreground, fontSize: 20, fontWeight: "800" }}>
+              <View style={{ flex: 1, gap: tokens.spacing.xxs }}>
+                <Text
+                  style={{
+                    color: tokens.colors.foreground,
+                    fontSize: tokens.typography.sectionTitle,
+                    fontWeight: "800",
+                  }}
+                >
                   {title}
                 </Text>
-                <Text style={{ color: tokens.colors.muted, fontSize: 13, lineHeight: 18 }}>
+                <Text
+                  style={{
+                    color: tokens.colors.muted,
+                    fontSize: tokens.typography.label,
+                    lineHeight: tokens.lineHeight.label,
+                  }}
+                >
                   {description}
                 </Text>
               </View>
@@ -112,27 +127,27 @@ export function DangerConfirmSheet({
             {warningItems.length ? (
               <View
                 style={{
-                  borderRadius: 22,
+                  borderRadius: tokens.radius.sheet,
                   borderWidth: 1,
                   borderColor: tokens.colors.dangerBorder,
                   backgroundColor: tokens.colors.dangerSoft,
-                  padding: 14,
-                  gap: 10,
+                  padding: tokens.spacing.smPlus,
+                  gap: tokens.spacing.compact,
                 }}
               >
                 {warningItems.map((item, index) => (
                   <View
                     key={`${item}-${index}`}
-                    style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+                    style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.xs }}
                   >
                     <ChevronRight size={14} color={tokens.colors.dangerDark} />
                     <Text
                       style={{
                         flex: 1,
                         color: tokens.colors.dangerDeep,
-                        fontSize: 12,
+                        fontSize: tokens.typography.caption,
                         fontWeight: "700",
-                        lineHeight: 17,
+                        lineHeight: tokens.lineHeight.caption,
                       }}
                     >
                       {item}
@@ -144,15 +159,15 @@ export function DangerConfirmSheet({
 
             <View
               style={{
-                borderRadius: 18,
+                borderRadius: tokens.radius.card,
                 borderWidth: 1,
                 borderColor: tokens.colors.warningBorder,
                 backgroundColor: tokens.colors.warningSoft,
-                paddingHorizontal: 12,
-                paddingVertical: 10,
+                paddingHorizontal: tokens.spacing.sm,
+                paddingVertical: tokens.spacing.compact,
                 flexDirection: "row",
                 alignItems: "center",
-                gap: 8,
+                gap: tokens.spacing.xs,
               }}
             >
               <AlertTriangle size={16} color={tokens.colors.warningIcon} />
@@ -160,16 +175,21 @@ export function DangerConfirmSheet({
                 style={{
                   flex: 1,
                   color: tokens.colors.warningText,
-                  fontSize: 12,
+                  fontSize: tokens.typography.caption,
                   fontWeight: "700",
-                  lineHeight: 17,
+                  lineHeight: tokens.lineHeight.caption,
                 }}
               >
                 {note}
               </Text>
             </View>
 
-            <View style={{ flexDirection: stackActions ? "column" : "row", gap: 10 }}>
+            <View
+              style={{
+                flexDirection: stackActions ? "column" : "row",
+                gap: tokens.spacing.compact,
+              }}
+            >
               <Pressable
                 accessibilityLabel={cancelLabel}
                 accessibilityRole="button"
@@ -178,8 +198,8 @@ export function DangerConfirmSheet({
                 onPress={onClose}
                 style={{
                   flex: 1,
-                  minHeight: 50,
-                  borderRadius: 16,
+                  minHeight: tokens.minHeight.buttonLg,
+                  borderRadius: tokens.radius.lg,
                   borderWidth: 1,
                   borderColor: tokens.colors.border,
                   alignItems: "center",
@@ -188,7 +208,13 @@ export function DangerConfirmSheet({
                   opacity: busy ? 0.5 : 1,
                 }}
               >
-                <Text style={{ color: tokens.colors.muted, fontSize: 14, fontWeight: "800" }}>
+                <Text
+                  style={{
+                    color: tokens.colors.muted,
+                    fontSize: tokens.typography.body,
+                    fontWeight: "800",
+                  }}
+                >
                   {cancelLabel}
                 </Text>
               </Pressable>
@@ -201,13 +227,13 @@ export function DangerConfirmSheet({
                 onPress={onConfirm}
                 style={{
                   flex: 1.15,
-                  minHeight: 50,
-                  borderRadius: 16,
+                  minHeight: tokens.minHeight.buttonLg,
+                  borderRadius: tokens.radius.lg,
                   alignItems: "center",
                   justifyContent: "center",
                   backgroundColor: tokens.colors.dangerDark,
                   flexDirection: "row",
-                  gap: 8,
+                  gap: tokens.spacing.xs,
                   opacity: busy ? 0.78 : 1,
                 }}
               >
@@ -216,7 +242,13 @@ export function DangerConfirmSheet({
                 ) : (
                   <Trash2 size={16} color={tokens.colors.surface} />
                 )}
-                <Text style={{ color: tokens.colors.surface, fontSize: 14, fontWeight: "800" }}>
+                <Text
+                  style={{
+                    color: tokens.colors.surface,
+                    fontSize: tokens.typography.body,
+                    fontWeight: "800",
+                  }}
+                >
                   {busy ? t("common.deleting") : confirmLabel}
                 </Text>
               </Pressable>

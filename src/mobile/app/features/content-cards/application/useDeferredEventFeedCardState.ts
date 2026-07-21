@@ -256,7 +256,7 @@ export function useDeferredEventFeedCardState(params: {
     if (!interactive) return;
     try {
       await reportEvent({ eventId: event.id, reason: "Uygunsuz içerik" });
-      onShowWarning?.("Şikayetiniz alindi.");
+      onShowWarning?.("Şikâyetiniz alındı.");
     } catch (error) {
       debugWarn("CONTENT-CARDS", "deferred-event-report-failed", {
         eventId: event.id,
@@ -264,7 +264,7 @@ export function useDeferredEventFeedCardState(params: {
           (error as { message?: string } | null)?.message || "deferred-event-report-failed",
         ),
       });
-      onShowWarning?.("Şikayet gönderilemedi.");
+      onShowWarning?.("Şikâyet gönderilemedi.");
     }
   }, [event.id, interactive, onShowWarning]);
 
@@ -282,7 +282,7 @@ export function useDeferredEventFeedCardState(params: {
     if (!interactive || !canDeleteEvent || deleteBusy) return;
     setDeleteBusy(true);
     const activityId = showActivity({
-      hint: "Etkinlik karti listelerden ve veritabanindan kaldiriliyor.",
+      hint: "Etkinlik kartı listelerden ve veritabanından kaldırılıyor.",
       percent: 32,
       stage: "Etkinlik siliniyor",
       title: "Etkinlik silme islemi basladi",
@@ -298,7 +298,7 @@ export function useDeferredEventFeedCardState(params: {
       updateActivity(activityId, {
         dismissAfterMs: 1800,
         percent: 100,
-        stage: "Etkinlik kaldirildi",
+        stage: "Etkinlik kaldırıldı",
         title: "Etkinlik silindi",
         tone: "success",
       });
@@ -321,12 +321,12 @@ export function useDeferredEventFeedCardState(params: {
         ? [
             {
               key: "delete",
-              label: deleteBusy ? "Siliniyor..." : "Etkinligi Sil",
+              label: deleteBusy ? "Siliniyor..." : "Etkinliği Sil",
               destructive: true,
               onPress: openDeleteConfirmModal,
             },
           ]
-        : [{ key: "report", label: "Etkinligi Şikayet Et", onPress: () => void handleReport() }],
+        : [{ key: "report", label: "Etkinliği Şikâyet Et", onPress: () => void handleReport() }],
     [canDeleteEvent, deleteBusy, handleReport, openDeleteConfirmModal],
   );
 

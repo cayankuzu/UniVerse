@@ -1,6 +1,7 @@
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import { ChevronDown, ChevronRight } from "lucide-react-native";
-import { tokens } from "../../../../shared/theme";
+import { tokens, withAlpha } from "../../../../shared/theme";
 import { TourAnchor } from "../../../../app-shell/onboarding";
 import type { ProfileTab } from "../../domain/profileConstants";
 
@@ -33,10 +34,10 @@ export function ProfileTabsBar({
         style={{
           marginHorizontal: 0,
           marginTop: tokens.spacing.xs,
-          borderRadius: 14,
+          borderRadius: tokens.radius.control,
           backgroundColor: tokens.colors.surface,
           borderWidth: 1,
-          borderColor: "rgba(15,23,42,0.08)",
+          borderColor: withAlpha(tokens.colors.foreground, 0.08),
           flexDirection: "row",
           overflow: "hidden",
         }}
@@ -60,11 +61,11 @@ export function ProfileTabsBar({
               }}
               style={{
                 flex: 1,
-                minHeight: tokens.minHeight.touchTarget,
+                minHeight: tokens.minHeight.chipLg,
                 alignItems: "center",
                 justifyContent: "center",
                 flexDirection: "row",
-                gap: 5,
+                gap: tokens.spacing.xxsPlus,
                 position: "relative",
               }}
             >
@@ -89,8 +90,8 @@ export function ProfileTabsBar({
                   backgroundColor: active
                     ? tokens.colors.primarySoft
                     : tokens.colors.surfaceVariant,
-                  paddingHorizontal: 6,
-                  paddingVertical: 2,
+                  paddingHorizontal: tokens.spacing.xsMinus,
+                  paddingVertical: tokens.spacing.micro,
                 }}
               >
                 <Text

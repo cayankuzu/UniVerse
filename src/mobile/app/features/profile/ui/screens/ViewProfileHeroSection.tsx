@@ -1,9 +1,17 @@
 import { BookOpen, GraduationCap, Mail, MapPin } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { Pressable, View } from "react-native";
 import { tokens } from "../../../../shared/theme";
 import { t } from "../../../../shared/i18n";
-import { AppImage, Avatar, GradientButton } from "../../../../shared/components";
+import {
+  AppImage,
+  Avatar,
+  GradientButton,
+  ProfileCoverPlaceholder,
+  ProfileRoleBadge,
+} from "../../../../shared/components";
 import type { UserProfile } from "../../application/profileUiModels";
+import { ProfileCategoryChips } from "./ProfileCategoryChips";
 import { ViewProfileStats } from "./ViewProfileStats";
 
 interface ViewProfileHeroSectionProps {
@@ -40,7 +48,7 @@ export function ViewProfileHeroSection({
           accessibilityLabel={t("viewProfile.a11y.cover")}
           accessibilityRole="button"
           onPress={onOpenCover}
-          style={{ height: 176, backgroundColor: tokens.colors.border }}
+          style={{ height: 144, backgroundColor: tokens.colors.border }}
         >
           {profile.coverImage ? (
             <AppImage
@@ -50,9 +58,11 @@ export function ViewProfileHeroSection({
               style={{ width: "100%", height: "100%" }}
               contentFit="cover"
             />
-          ) : null}
+          ) : (
+            <ProfileCoverPlaceholder accountType={profile.accountType} />
+          )}
         </Pressable>
-        <View style={{ position: "absolute", left: tokens.spacing.sm, bottom: -48, zIndex: 4 }}>
+        <View style={{ position: "absolute", left: tokens.spacing.sm, bottom: -40, zIndex: 4 }}>
           <Pressable
             accessibilityLabel={t("viewProfile.a11y.avatar")}
             accessibilityRole="button"
@@ -62,7 +72,7 @@ export function ViewProfileHeroSection({
               uri={profile.profileImage}
               variants={profile.profileImageVariants}
               name={displayName}
-              size={96}
+              size={80}
               borderWidth={4}
               borderColor={tokens.colors.surface}
             />
@@ -73,24 +83,28 @@ export function ViewProfileHeroSection({
       <View
         style={{
           backgroundColor: tokens.colors.surface,
-          paddingTop: 58,
+          paddingTop: 48,
           paddingHorizontal: tokens.spacing.sm,
           paddingBottom: tokens.spacing.sm,
         }}
       >
-        <Text
-          style={{
-            color: tokens.colors.foreground,
-            fontSize: tokens.typography.sectionTitle,
-            fontWeight: tokens.fontWeight.extrabold,
-          }}
-        >
-          {displayName}
-        </Text>
+        <View style={{ alignItems: "center", flexDirection: "row", gap: tokens.spacing.xs }}>
+          <Text
+            style={{
+              color: tokens.colors.foreground,
+              flexShrink: 1,
+              fontSize: tokens.typography.sectionTitle,
+              fontWeight: tokens.fontWeight.extrabold,
+            }}
+          >
+            {displayName}
+          </Text>
+          <ProfileRoleBadge accountType={profile.accountType} />
+        </View>
         {profile.username ? (
           <Text
             style={{
-              marginTop: 2,
+              marginTop: tokens.spacing.micro,
               color: tokens.colors.muted,
               fontSize: tokens.typography.caption,
               fontWeight: tokens.fontWeight.semibold,
@@ -99,29 +113,36 @@ export function ViewProfileHeroSection({
             @{profile.username}
           </Text>
         ) : null}
-        {!profile.hideEmail && profile.email ? (
-          <View style={{ marginTop: 6, flexDirection: "row", alignItems: "center", gap: 5 }}>
-            <Mail size={tokens.iconSize.xs} color={tokens.colors.mutedFg} />
-            <Text
-              style={{ color: tokens.colors.muted, fontSize: tokens.typography.caption }}
-              numberOfLines={1}
-            >
-              {profile.email}
-            </Text>
-          </View>
-        ) : null}
-
         {profile.bio || profile.description ? (
           <Text
             style={{
               marginTop: tokens.spacing.xs,
               color: tokens.colors.dark600,
-              fontSize: 13,
-              lineHeight: 19,
+              fontSize: tokens.typography.label,
+              lineHeight: tokens.lineHeight.bodyCompact,
             }}
           >
             {profile.bio || profile.description}
           </Text>
+        ) : null}
+
+        {!profile.hideEmail && profile.email ? (
+          <View
+            style={{
+              marginTop: tokens.spacing.xsMinus,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: tokens.spacing.xxsPlus,
+            }}
+          >
+            <Mail size={tokens.iconSize.xs} color={tokens.colors.textSubtle} />
+            <Text
+              style={{ color: tokens.colors.textSubtle, fontSize: tokens.typography.caption }}
+              numberOfLines={1}
+            >
+              {profile.email}
+            </Text>
+          </View>
         ) : null}
 
         {profile.university ? (
@@ -130,7 +151,7 @@ export function ViewProfileHeroSection({
               marginTop: tokens.spacing.xs,
               flexDirection: "row",
               alignItems: "center",
-              gap: 5,
+              gap: tokens.spacing.xxsPlus,
             }}
           >
             <MapPin size={tokens.iconSize.xs} color={tokens.colors.mutedFg} />
@@ -140,7 +161,14 @@ export function ViewProfileHeroSection({
           </View>
         ) : null}
         {profile.department ? (
-          <View style={{ marginTop: 6, flexDirection: "row", alignItems: "center", gap: 5 }}>
+          <View
+            style={{
+              marginTop: tokens.spacing.xsMinus,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: tokens.spacing.xxsPlus,
+            }}
+          >
             <BookOpen size={tokens.iconSize.xs} color={tokens.colors.mutedFg} />
             <Text style={{ color: tokens.colors.muted, fontSize: tokens.typography.caption }}>
               {profile.department}
@@ -148,7 +176,14 @@ export function ViewProfileHeroSection({
           </View>
         ) : null}
         {profile.gradeYear ? (
-          <View style={{ marginTop: 6, flexDirection: "row", alignItems: "center", gap: 5 }}>
+          <View
+            style={{
+              marginTop: tokens.spacing.xsMinus,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: tokens.spacing.xxsPlus,
+            }}
+          >
             <GraduationCap size={tokens.iconSize.xs} color={tokens.colors.mutedFg} />
             <Text style={{ color: tokens.colors.muted, fontSize: tokens.typography.caption }}>
               {profile.gradeYear}
@@ -157,7 +192,7 @@ export function ViewProfileHeroSection({
         ) : null}
 
         {!isOwnProfile ? (
-          <View style={{ marginTop: 10 }}>
+          <View style={{ marginTop: tokens.spacing.compact }}>
             <GradientButton
               accessibilityLabel={t("viewProfile.a11y.follow")}
               label={followLabel}
@@ -176,34 +211,7 @@ export function ViewProfileHeroSection({
           profile={profile}
         />
 
-        {Array.isArray(profile.categories) && profile.categories.length > 0 ? (
-          <View style={{ marginTop: 10, flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
-            {profile.categories
-              .slice(0, 10)
-              .filter(Boolean)
-              .map((category: string) => (
-                <View
-                  key={category}
-                  style={{
-                    borderRadius: tokens.radius.sm,
-                    backgroundColor: tokens.colors.primarySofter,
-                    paddingHorizontal: tokens.spacing.xs,
-                    paddingVertical: 5,
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: tokens.colors.primary,
-                      fontSize: tokens.typography.tiny,
-                      fontWeight: tokens.fontWeight.bold,
-                    }}
-                  >
-                    {category}
-                  </Text>
-                </View>
-              ))}
-          </View>
-        ) : null}
+        <ProfileCategoryChips accountType={profile.accountType} categories={profile.categories} />
       </View>
     </>
   );

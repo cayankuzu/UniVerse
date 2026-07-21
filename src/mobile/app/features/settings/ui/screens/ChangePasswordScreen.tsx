@@ -1,5 +1,6 @@
 import React from "react";
-import { Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { CheckCircle, Mail, ShieldCheck } from "lucide-react-native";
@@ -52,20 +53,20 @@ export function ChangePasswordScreen({ navigation }: Props) {
         >
           <View
             style={{
-              width: 80,
-              height: 80,
+              width: 64,
+              height: 64,
               borderRadius: tokens.radius["2xl"],
               backgroundColor: tokens.colors.successSurface,
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <CheckCircle size={46} color={tokens.colors.successDark} strokeWidth={1.7} />
+            <CheckCircle size={36} color={tokens.colors.successDark} strokeWidth={1.7} />
           </View>
 
           <Text
             style={{
-              marginTop: 22,
+              marginTop: tokens.spacing.lgPlus,
               color: tokens.colors.foreground,
               fontSize: tokens.typography.heading,
               fontWeight: tokens.fontWeight.bold,
@@ -79,7 +80,7 @@ export function ChangePasswordScreen({ navigation }: Props) {
               marginTop: tokens.spacing.xs,
               color: tokens.colors.muted,
               fontSize: tokens.typography.body,
-              lineHeight: 21,
+              lineHeight: tokens.lineHeight.bodyRelaxed,
               textAlign: "center",
               maxWidth: 320,
             }}
@@ -87,7 +88,7 @@ export function ChangePasswordScreen({ navigation }: Props) {
             {t("settings.password.successSubtitle", { email: verifiedEmail })}
           </Text>
 
-          <View style={{ marginTop: 26, width: "100%", gap: 10 }}>
+          <View style={{ marginTop: 26, width: "100%", gap: tokens.spacing.compact }}>
             <GradientButton
               label={t("auth.password.forgot.resend")}
               onPress={() => void sendResetMail()}
@@ -115,11 +116,11 @@ export function ChangePasswordScreen({ navigation }: Props) {
         paddingTop: tokens.spacing.lg,
       }}
     >
-      <View style={{ flex: 1, gap: 14 }}>
+      <View style={{ flex: 1, gap: tokens.spacing.smPlus }}>
         <View
           style={{
-            width: 56,
-            height: 56,
+            width: 46,
+            height: 46,
             borderRadius: tokens.radius.lg,
             backgroundColor: tokens.colors.primary,
             alignItems: "center",
@@ -133,19 +134,23 @@ export function ChangePasswordScreen({ navigation }: Props) {
           />
         </View>
 
-        <View style={{ gap: 3 }}>
+        <View style={{ gap: tokens.spacing.microPlus }}>
           <Text
             style={{
               color: tokens.colors.foreground,
               fontSize: tokens.typography.display,
               fontWeight: tokens.fontWeight.bold,
-              letterSpacing: 0.2,
+              letterSpacing: tokens.letterSpacing.helper,
             }}
           >
             {t("settings.password.heading")}
           </Text>
           <Text
-            style={{ color: tokens.colors.muted, fontSize: tokens.typography.body, lineHeight: 21 }}
+            style={{
+              color: tokens.colors.muted,
+              fontSize: tokens.typography.body,
+              lineHeight: tokens.lineHeight.bodyRelaxed,
+            }}
           >
             {t("settings.password.subtitle")}
           </Text>
@@ -153,27 +158,27 @@ export function ChangePasswordScreen({ navigation }: Props) {
 
         <View
           style={{
-            borderRadius: 14,
+            borderRadius: tokens.radius.control,
             borderWidth: 1,
             borderColor: tokens.colors.primarySoft,
             backgroundColor: tokens.colors.primarySofter,
-            paddingHorizontal: 14,
+            paddingHorizontal: tokens.spacing.smPlus,
             paddingVertical: tokens.spacing.sm,
             flexDirection: "row",
             alignItems: "flex-start",
-            gap: 10,
+            gap: tokens.spacing.compact,
           }}
         >
           <Mail
             size={tokens.iconSize.lg}
             color={tokens.colors.primaryDark}
-            style={{ marginTop: 1 }}
+            style={{ marginTop: tokens.spacing.hairline }}
           />
           <View style={{ flex: 1 }}>
             <Text
               style={{
                 color: tokens.colors.primaryDark,
-                fontSize: 13,
+                fontSize: tokens.typography.label,
                 fontWeight: tokens.fontWeight.bold,
               }}
             >
@@ -181,10 +186,10 @@ export function ChangePasswordScreen({ navigation }: Props) {
             </Text>
             <Text
               style={{
-                marginTop: 3,
+                marginTop: tokens.spacing.microPlus,
                 color: tokens.colors.primaryDeep,
                 fontSize: tokens.typography.caption,
-                lineHeight: 18,
+                lineHeight: tokens.lineHeight.label,
               }}
             >
               {t("settings.password.infoBody")}
@@ -200,13 +205,13 @@ export function ChangePasswordScreen({ navigation }: Props) {
               borderColor: tokens.colors.dangerBorder,
               backgroundColor: tokens.colors.dangerSoft,
               paddingHorizontal: tokens.spacing.sm,
-              paddingVertical: 10,
+              paddingVertical: tokens.spacing.compact,
             }}
           >
             <Text
               style={{
                 color: tokens.colors.dangerDark,
-                fontSize: 13,
+                fontSize: tokens.typography.label,
                 fontWeight: tokens.fontWeight.medium,
               }}
             >
@@ -237,14 +242,18 @@ export function ChangePasswordScreen({ navigation }: Props) {
           </Text>
         ) : null}
 
-        <View style={{ gap: 6 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}>
+        <View style={{ gap: tokens.spacing.xsMinus }}>
+          <View
+            style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.xsCompact }}
+          >
             <View
               style={{
                 width: 6,
                 height: 6,
                 borderRadius: tokens.radius.pill,
-                backgroundColor: currentPassword.trim() ? tokens.colors.successDark : "#cbd5e1",
+                backgroundColor: currentPassword.trim()
+                  ? tokens.colors.successDark
+                  : tokens.colors.borderStrong,
               }}
             />
             <Text
@@ -256,26 +265,30 @@ export function ChangePasswordScreen({ navigation }: Props) {
               {t("settings.password.tip.verify")}
             </Text>
           </View>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}>
+          <View
+            style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.xsCompact }}
+          >
             <View
               style={{
                 width: 6,
                 height: 6,
                 borderRadius: tokens.radius.pill,
-                backgroundColor: "#cbd5e1",
+                backgroundColor: tokens.colors.borderStrong,
               }}
             />
             <Text style={{ color: tokens.colors.mutedFg, fontSize: tokens.typography.caption }}>
               {t("settings.password.tip.mail")}
             </Text>
           </View>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}>
+          <View
+            style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.xsCompact }}
+          >
             <View
               style={{
                 width: 6,
                 height: 6,
                 borderRadius: tokens.radius.pill,
-                backgroundColor: "#cbd5e1",
+                backgroundColor: tokens.colors.borderStrong,
               }}
             />
             <Text style={{ color: tokens.colors.mutedFg, fontSize: tokens.typography.caption }}>

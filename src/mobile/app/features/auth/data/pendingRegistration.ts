@@ -25,7 +25,7 @@ type FinalizeParams = {
 };
 
 export const PENDING_REGISTRATION_FINALIZE_ERROR_MESSAGE =
-  "Kayıt tamamlanamadi. Lütfen tekrar dene.";
+  "Kayıt tamamlanamadı. Lütfen tekrar dene.";
 
 function buildFinalProfilePayload(
   updatePayload: RegisterPayload,

@@ -1,15 +1,16 @@
 import React from "react";
 import { View } from "react-native";
 import { renderTourAnchor, type TourAnchorRenderer } from "../tourAnchorRenderer";
+import { tokens, withAlpha } from "../../../../shared/theme";
 
 const EVENT_CARD_CONTAINER_STYLE = {
-  borderRadius: 20,
+  borderRadius: tokens.radius.xl,
   overflow: "hidden" as const,
-  backgroundColor: "#ffffff",
+  backgroundColor: tokens.colors.onMedia,
   borderWidth: 1,
-  borderColor: "rgba(15,23,42,0.06)",
-  marginBottom: 12,
-  shadowColor: "#0f172a",
+  borderColor: withAlpha(tokens.colors.foreground, 0.06),
+  marginBottom: tokens.spacing.sm,
+  shadowColor: tokens.colors.foreground,
   shadowOffset: { width: 0, height: 2 },
   shadowOpacity: 0.05,
   shadowRadius: 8,

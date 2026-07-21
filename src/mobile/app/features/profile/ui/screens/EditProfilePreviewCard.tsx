@@ -1,5 +1,6 @@
 import React from "react";
-import { Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { View } from "react-native";
 import {
   BookOpen,
   Calendar,
@@ -10,7 +11,7 @@ import {
   Users,
 } from "lucide-react-native";
 import { AppImage } from "../../../../shared/components";
-import { tokens } from "../../../../shared/theme";
+import { tokens, withAlpha } from "../../../../shared/theme";
 import { t } from "../../../../shared/i18n";
 
 type Props = {
@@ -51,9 +52,9 @@ export function EditProfilePreviewCard({
   return (
     <View
       style={{
-        borderRadius: 18,
+        borderRadius: tokens.radius.card,
         borderWidth: 1,
-        borderColor: "rgba(15,23,42,0.08)",
+        borderColor: withAlpha(tokens.colors.foreground, 0.08),
         overflow: "hidden",
         backgroundColor: tokens.colors.background,
       }}
@@ -65,7 +66,7 @@ export function EditProfilePreviewCard({
           paddingVertical: tokens.spacing.xs,
           borderBottomWidth: 1,
           borderBottomColor: tokens.colors.border,
-          backgroundColor: "rgba(255,255,255,0.9)",
+          backgroundColor: withAlpha(tokens.colors.onMedia, 0.9),
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "space-between",
@@ -85,8 +86,8 @@ export function EditProfilePreviewCard({
           style={{
             borderRadius: tokens.radius.sm,
             backgroundColor: tokens.colors.primarySofter,
-            paddingHorizontal: 7,
-            paddingVertical: 3,
+            paddingHorizontal: tokens.spacing.xsCompact,
+            paddingVertical: tokens.spacing.microPlus,
           }}
         >
           <Text
@@ -101,7 +102,7 @@ export function EditProfilePreviewCard({
         </View>
       </View>
 
-      <View style={{ height: 140, backgroundColor: tokens.colors.border }}>
+      <View style={{ height: 112, backgroundColor: tokens.colors.border }}>
         {coverImageUri ? (
           <AppImage
             uri={coverImageUri}
@@ -120,11 +121,11 @@ export function EditProfilePreviewCard({
           paddingBottom: tokens.spacing.sm,
         }}
       >
-        <View style={{ marginTop: -26, marginBottom: tokens.spacing.xs }}>
+        <View style={{ marginTop: -22, marginBottom: tokens.spacing.xs }}>
           <View
             style={{
-              width: 78,
-              height: 78,
+              width: 64,
+              height: 64,
               borderRadius: tokens.radius.lg,
               borderWidth: 3,
               borderColor: tokens.colors.surface,
@@ -140,7 +141,11 @@ export function EditProfilePreviewCard({
               />
             ) : (
               <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-                <Users size={26} color={tokens.colors.mutedFg} strokeWidth={1.7} />
+                <Users
+                  size={tokens.iconSize["2xl"]}
+                  color={tokens.colors.mutedFg}
+                  strokeWidth={1.7}
+                />
               </View>
             )}
           </View>
@@ -149,7 +154,7 @@ export function EditProfilePreviewCard({
         <Text
           style={{
             color: tokens.colors.foreground,
-            fontSize: tokens.typography.subtitle + 2,
+            fontSize: tokens.typography.cardTitle,
             fontWeight: tokens.fontWeight.bold,
           }}
           numberOfLines={1}
@@ -161,7 +166,7 @@ export function EditProfilePreviewCard({
         </Text>
         <Text
           style={{
-            marginTop: 1,
+            marginTop: tokens.spacing.hairline,
             color: tokens.colors.mutedFg,
             fontSize: tokens.typography.caption,
           }}
@@ -171,7 +176,14 @@ export function EditProfilePreviewCard({
         </Text>
 
         {!hideEmail && email ? (
-          <View style={{ marginTop: 7, flexDirection: "row", alignItems: "center", gap: 5 }}>
+          <View
+            style={{
+              marginTop: tokens.spacing.xsCompact,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: tokens.spacing.xxsPlus,
+            }}
+          >
             <Mail size={tokens.iconSize.xs} color={tokens.colors.mutedFg} strokeWidth={2.1} />
             <Text
               style={{ color: tokens.colors.muted, fontSize: tokens.typography.tiny }}
@@ -188,7 +200,7 @@ export function EditProfilePreviewCard({
               marginTop: tokens.spacing.xs,
               color: tokens.colors.dark600,
               fontSize: tokens.typography.caption,
-              lineHeight: 18,
+              lineHeight: tokens.lineHeight.label,
             }}
             numberOfLines={3}
           >
@@ -231,7 +243,7 @@ export function EditProfilePreviewCard({
         >
           <View
             style={{
-              minWidth: 76,
+              minWidth: 62,
               borderRadius: tokens.radius.md,
               backgroundColor: tokens.colors.background,
               alignItems: "center",
@@ -260,7 +272,7 @@ export function EditProfilePreviewCard({
 
           <View
             style={{
-              minWidth: 76,
+              minWidth: 62,
               borderRadius: tokens.radius.md,
               backgroundColor: tokens.colors.background,
               alignItems: "center",
@@ -294,7 +306,7 @@ export function EditProfilePreviewCard({
               marginTop: tokens.spacing.xs + 2,
               flexDirection: "row",
               flexWrap: "wrap",
-              gap: 6,
+              gap: tokens.spacing.xsMinus,
             }}
           >
             {selectedCategories.slice(0, 14).map((category) => (
@@ -332,7 +344,10 @@ export function EditProfilePreviewCard({
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             {[t("profile.preview.tabs.albums"), t("profile.preview.tabs.events")].map(
               (tab, idx) => (
-                <View key={tab} style={{ flex: 1, alignItems: "center", gap: 2 }}>
+                <View
+                  key={tab}
+                  style={{ flex: 1, alignItems: "center", gap: tokens.spacing.micro }}
+                >
                   {idx === 0 ? (
                     <ImageIcon
                       size={tokens.iconSize.sm}
@@ -381,7 +396,7 @@ export function EditProfilePreviewCard({
             </View>
             <View
               style={{
-                marginTop: 7,
+                marginTop: tokens.spacing.xsCompact,
                 flexDirection: "row",
                 alignItems: "center",
                 gap: tokens.spacing.xxs,

@@ -1,5 +1,6 @@
 import React from "react";
-import { Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { View } from "react-native";
 import { Globe, Users } from "lucide-react-native";
 import { Avatar } from "../../../../shared/components/Avatar";
 import { tokens } from "../../../../shared/theme";
@@ -41,7 +42,7 @@ export function AccessChip({ label, kind }: { label: string; kind: EventAccessKi
   return (
     <View
       style={{
-        marginTop: 6,
+        marginTop: tokens.spacing.xsMinus,
         marginHorizontal: tokens.spacing.xs,
         alignSelf: "flex-start",
         flexDirection: "row",
@@ -51,7 +52,7 @@ export function AccessChip({ label, kind }: { label: string; kind: EventAccessKi
         borderWidth: 1,
         borderColor: visual.border,
         backgroundColor: visual.bg,
-        paddingHorizontal: 7,
+        paddingHorizontal: tokens.spacing.xsCompact,
         paddingVertical: tokens.spacing.xxs,
       }}
     >
@@ -86,14 +87,14 @@ export function VisibilityChip({ label, type }: { label: string; type: "club" | 
   return (
     <View
       style={{
-        marginTop: 6,
+        marginTop: tokens.spacing.xsMinus,
         marginHorizontal: tokens.spacing.xs,
         alignSelf: "flex-start",
         borderRadius: tokens.radius.pill,
         borderWidth: 1,
         borderColor: visual.border,
         backgroundColor: visual.bg,
-        paddingHorizontal: 7,
+        paddingHorizontal: tokens.spacing.xsCompact,
         paddingVertical: tokens.spacing.xxs,
       }}
     >
@@ -125,11 +126,11 @@ export function OwnerRow({
   return (
     <View
       style={{
-        marginTop: 6,
+        marginTop: tokens.spacing.xsMinus,
         paddingHorizontal: tokens.spacing.xs,
         flexDirection: "row",
         alignItems: "center",
-        gap: 6,
+        gap: tokens.spacing.xsMinus,
       }}
     >
       <Avatar uri={image} variants={imageVariants} name={name} size={22} />
@@ -139,14 +140,18 @@ export function OwnerRow({
             color: tokens.colors.foreground,
             fontSize: tokens.typography.tiny,
             fontWeight: tokens.fontWeight.bold,
-            lineHeight: 14,
+            lineHeight: tokens.lineHeight.micro,
           }}
           numberOfLines={1}
         >
           {name}
         </Text>
         <Text
-          style={{ color: tokens.colors.muted, fontSize: tokens.typography.micro, lineHeight: 13 }}
+          style={{
+            color: tokens.colors.muted,
+            fontSize: tokens.typography.micro,
+            lineHeight: tokens.lineHeight.nano,
+          }}
           numberOfLines={1}
         >
           {university}

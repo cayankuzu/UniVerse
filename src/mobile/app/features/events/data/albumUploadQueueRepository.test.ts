@@ -103,7 +103,7 @@ describe("albumUploadQueueRepository", () => {
     });
 
     expect(pendingPhoto.uploadError).toBe(
-      "Secilen medya dosyasina Android galerisi uzerinden erisilemiyor. Karti silip medyayi galeriden yeniden sec.",
+      "Seçilen medya dosyasına Android galerisi üzerinden erişilemiyor. Kartı silip medyayı galeriden yeniden seç.",
     );
   });
 
@@ -125,7 +125,7 @@ describe("albumUploadQueueRepository", () => {
     });
 
     expect(pendingPhoto.uploadError).toBe(
-      "Secilen medya dosyasina Android galerisi uzerinden erisilemiyor. Karti silip medyayi galeriden yeniden sec.",
+      "Seçilen medya dosyasına Android galerisi üzerinden erişilemiyor. Kartı silip medyayı galeriden yeniden seç.",
     );
   });
 

@@ -48,7 +48,7 @@ export async function handleEventCreateEntry(params: {
   });
   progressPayload = await patchEventCreateProgress(params.entry, {
     percent: 18,
-    stage: "Kapak gorseli yukleniyor",
+    stage: "Kapak görseli yükleniyor",
   });
   payload = toEventCreateQueuePayload({
     ...params.entry,
@@ -95,7 +95,7 @@ export async function handleEventCreateEntry(params: {
         payload: writeUploadProgress(progressPayload, {
           hint: "Uygulamadan cikmayin. Etkinlik arka planda paylasiliyor.",
           percent: 96,
-          stage: "Etkinlik gonderiye ekleniyor",
+          stage: "Etkinlik gönderiye ekleniyor",
           title: "Etkinlik paylasiliyor",
         }),
         status: "uploading",

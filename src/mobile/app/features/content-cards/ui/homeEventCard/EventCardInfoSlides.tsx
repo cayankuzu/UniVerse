@@ -1,7 +1,9 @@
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import { AppScrollView as ScrollView } from "../../../../shared/components";
 import { renderTourAnchor, type TourAnchorRenderer } from "../tourAnchorRenderer";
 import type { SlideItem } from "./EventCardBody.shared";
+import { tokens, withAlpha } from "../../../../shared/theme";
 
 interface EventCardInfoSlidesProps {
   isTourTarget: boolean;
@@ -23,7 +25,11 @@ export function EventCardInfoSlides({
         nestedScrollEnabled
         directionalLockEnabled
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 7, marginTop: 10, paddingRight: 10 }}
+        contentContainerStyle={{
+          gap: tokens.spacing.xsCompact,
+          marginTop: tokens.spacing.compact,
+          paddingRight: tokens.spacing.compact,
+        }}
       >
         {slides.map((slide, index) => {
           const Icon = slide.icon;
@@ -31,40 +37,47 @@ export function EventCardInfoSlides({
             <View
               key={`info-${index}-${slide.sub}-${slide.label}`}
               style={{
-                minWidth: 132,
-                borderRadius: 11,
+                minWidth: 118,
+                borderRadius: tokens.radius.md,
                 backgroundColor: slide.backgroundColor,
-                paddingHorizontal: 9,
-                paddingVertical: 8,
+                paddingHorizontal: tokens.spacing.xsPlus,
+                paddingVertical: tokens.spacing.xs,
                 flexDirection: "row",
                 alignItems: "center",
-                gap: 7,
+                gap: tokens.spacing.xsCompact,
               }}
             >
               <View
                 style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: 9,
-                  backgroundColor: "rgba(255,255,255,0.74)",
+                  width: 30,
+                  height: 30,
+                  borderRadius: tokens.radius.compact,
+                  backgroundColor: withAlpha(tokens.colors.onMedia, 0.74),
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                <Icon size={13} color={slide.iconColor} />
+                <Icon size={tokens.iconSize.sm} color={slide.iconColor} />
               </View>
               <View style={{ flexShrink: 0 }}>
                 <Text
                   style={{
-                    fontSize: 11,
+                    fontSize: tokens.typography.label,
                     fontWeight: "700",
                     color: slide.textColor,
-                    lineHeight: 15,
+                    lineHeight: tokens.lineHeight.label,
                   }}
                 >
                   {slide.label}
                 </Text>
-                <Text style={{ fontSize: 9, color: "#94a3b8", marginTop: 1, lineHeight: 13 }}>
+                <Text
+                  style={{
+                    fontSize: tokens.typography.caption,
+                    color: tokens.colors.textSecondary,
+                    marginTop: tokens.spacing.hairline,
+                    lineHeight: tokens.lineHeight.compact,
+                  }}
+                >
                   {slide.sub}
                 </Text>
               </View>

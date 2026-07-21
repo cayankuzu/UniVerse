@@ -63,7 +63,7 @@ export function useEditProfileScreenState(params: UseEditProfileScreenStateParam
       cancelLabel: "Vazgec",
       confirmLabel: "Cik",
       destructive: true,
-      message: "Kaydedilmeyen profil degisiklikleri silinecek.",
+      message: "Kaydedilmeyen profil değişiklikleri silinecek.",
       onConfirm: leaveScreen,
       title: "Profilden cikilsin mi?",
     });

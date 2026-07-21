@@ -50,7 +50,7 @@ function isAlbumUploadSessionError(error: unknown) {
 
 function createAlbumUploadSessionRecoveryError() {
   const error = new Error(
-    "Oturum dogrulanamadi. Uygulamayi yeniden acip tekrar dene.",
+    "Oturum doğrulanamadı. Uygulamayı yeniden açıp tekrar dene.",
   ) as RetryableQueueError;
   error.retryableQueueError = true;
   return error;
@@ -60,7 +60,7 @@ function toAlbumUploadVisibleError(error: unknown) {
   if (isAlbumUploadSessionError(error)) {
     return createAlbumUploadSessionRecoveryError();
   }
-  return error instanceof Error ? error : new Error(String(error || "Album yuklenemedi."));
+  return error instanceof Error ? error : new Error(String(error || "Albüm yüklenemedi."));
 }
 
 export async function persistAlbumUpload(

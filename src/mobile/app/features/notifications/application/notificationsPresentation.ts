@@ -8,6 +8,7 @@ import {
   UserPlus,
   Users,
 } from "lucide-react-native";
+import { tokens } from "../../../shared/theme";
 
 export type FilterCategory = "all" | "social" | "like" | "comment" | "club";
 
@@ -18,11 +19,41 @@ export const FILTERS: Array<{
   color: string;
   activeBg: string;
 }> = [
-  { key: "all", label: "Tumu", icon: Bell, color: "#64748b", activeBg: "#e2e8f0" },
-  { key: "social", label: "Sosyal", icon: Users, color: "#7c3aed", activeBg: "#ede9fe" },
-  { key: "like", label: "Beğeni", icon: Heart, color: "#ef4444", activeBg: "#fee2e2" },
-  { key: "comment", label: "Yorumlar", icon: MessageSquare, color: "#2563eb", activeBg: "#dbeafe" },
-  { key: "club", label: "Kulüp", icon: Calendar, color: "#d97706", activeBg: "#fef3c7" },
+  {
+    key: "all",
+    label: "Tümü",
+    icon: Bell,
+    color: tokens.colors.textSecondary,
+    activeBg: tokens.colors.primarySofter,
+  },
+  {
+    key: "social",
+    label: "Sosyal",
+    icon: Users,
+    color: tokens.colors.primary,
+    activeBg: tokens.colors.primarySofter,
+  },
+  {
+    key: "like",
+    label: "Beğeni",
+    icon: Heart,
+    color: tokens.colors.danger,
+    activeBg: tokens.colors.primarySofter,
+  },
+  {
+    key: "comment",
+    label: "Yorumlar",
+    icon: MessageSquare,
+    color: tokens.colors.primary,
+    activeBg: tokens.colors.primarySofter,
+  },
+  {
+    key: "club",
+    label: "Kulüp",
+    icon: Calendar,
+    color: tokens.colors.textSecondary,
+    activeBg: tokens.colors.primarySofter,
+  },
 ];
 
 export function mapNotificationIcon(type: string) {
@@ -45,10 +76,10 @@ export function mapNotificationIcon(type: string) {
 }
 
 export function getNotificationIconBg(type: string) {
-  if (type === "comment") return "#dbeafe";
-  if (type === "like") return "#fee2e2";
+  if (type === "comment") return tokens.colors.primarySoft;
+  if (type === "like") return tokens.colors.dangerSurface;
   if (type === "follow" || type === "follow_request" || type === "follow_accepted")
-    return "#ede9fe";
+    return tokens.colors.primarySofter;
   if (
     type === "event" ||
     type === "join" ||
@@ -57,9 +88,9 @@ export function getNotificationIconBg(type: string) {
     type === "join_rejected" ||
     type === "system"
   ) {
-    return "#fef3c7";
+    return tokens.colors.surfaceVariant;
   }
-  return "#e2e8f0";
+  return tokens.colors.surfaceVariant;
 }
 
 export function toFilterCategory(type: string): FilterCategory {

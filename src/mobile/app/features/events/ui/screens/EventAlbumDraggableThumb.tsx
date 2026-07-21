@@ -1,6 +1,7 @@
 import React from "react";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import { Play, Image as ImageIcon } from "lucide-react-native";
-import { Image, Pressable, Text, View } from "react-native";
+import { Image, Pressable, View } from "react-native";
 import { tokens } from "../../../../shared/theme";
 import { THUMB_SIZE } from "../../domain/eventAlbumDragLayout";
 import { isVideoMediaUri } from "../../../../shared/media/mediaVideoUtils";
@@ -71,11 +72,11 @@ export function EventAlbumDraggableThumb({
           bottom: 4,
           borderRadius: tokens.radius.pill,
           backgroundColor: tokens.colors.backdrop,
-          paddingHorizontal: 6,
-          paddingVertical: 3,
+          paddingHorizontal: tokens.spacing.xsMinus,
+          paddingVertical: tokens.spacing.microPlus,
           flexDirection: "row",
           alignItems: "center",
-          gap: 4,
+          gap: tokens.spacing.xxs,
         }}
       >
         {video ? (
@@ -91,11 +92,11 @@ export function EventAlbumDraggableThumb({
           top: 4,
           borderRadius: tokens.radius.pill,
           backgroundColor: tokens.colors.backdrop,
-          paddingHorizontal: 5,
-          paddingVertical: 2,
+          paddingHorizontal: tokens.spacing.xxsPlus,
+          paddingVertical: tokens.spacing.micro,
           flexDirection: "row",
           alignItems: "center",
-          gap: 3,
+          gap: tokens.spacing.microPlus,
         }}
       >
         <Text

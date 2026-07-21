@@ -1,5 +1,6 @@
 import React from "react";
-import { Pressable, Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { Pressable, View } from "react-native";
 import { tokens } from "../../../../shared/theme";
 import { t } from "../../../../shared/i18n";
 
@@ -32,8 +33,9 @@ function StatChip({
       <Text
         style={{
           color: tokens.colors.foreground,
-          fontSize: 13,
+          fontSize: tokens.typography.label,
           fontWeight: tokens.fontWeight.extrabold,
+          fontVariant: ["tabular-nums"],
         }}
       >
         {count}
@@ -41,7 +43,7 @@ function StatChip({
       <Text
         style={{
           color: tokens.colors.muted,
-          fontSize: tokens.typography.tiny,
+          fontSize: tokens.typography.caption,
           fontWeight: tokens.fontWeight.bold,
         }}
       >
@@ -54,11 +56,11 @@ function StatChip({
     return (
       <View
         style={{
-          minWidth: 96,
+          minWidth: 80,
           borderRadius: tokens.radius.md,
           backgroundColor: tokens.colors.background,
-          paddingHorizontal: 14,
-          paddingVertical: 10,
+          paddingHorizontal: tokens.spacing.smPlus,
+          paddingVertical: tokens.spacing.compact,
           alignItems: "center",
           justifyContent: "center",
         }}
@@ -74,11 +76,11 @@ function StatChip({
       accessibilityRole="button"
       onPress={onPress}
       style={{
-        minWidth: 96,
+        minWidth: 80,
         borderRadius: tokens.radius.md,
         backgroundColor: tokens.colors.background,
-        paddingHorizontal: 14,
-        paddingVertical: 10,
+        paddingHorizontal: tokens.spacing.smPlus,
+        paddingVertical: tokens.spacing.compact,
         alignItems: "center",
         justifyContent: "center",
       }}
@@ -116,7 +118,7 @@ export function ViewProfileStats({
   return (
     <View
       style={{
-        marginTop: 14,
+        marginTop: tokens.spacing.smPlus,
         width: "100%",
         flexDirection: "row",
         flexWrap: "wrap",

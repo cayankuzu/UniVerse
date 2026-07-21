@@ -190,9 +190,9 @@ describe("StorageAPI.createUploadSession", () => {
         },
       ],
     });
-    await expect(StorageAPI.createUploadSession(params)).rejects.toThrow("Upload session yan");
+    await expect(StorageAPI.createUploadSession(params)).rejects.toThrow("Yükleme oturumu yan");
 
     mockReadStorageResponse.mockResolvedValue({ sessionId: "session-1", tickets: [] });
-    await expect(StorageAPI.createUploadSession(params)).rejects.toThrow("Upload session yan");
+    await expect(StorageAPI.createUploadSession(params)).rejects.toThrow("Yükleme oturumu yan");
   });
 });

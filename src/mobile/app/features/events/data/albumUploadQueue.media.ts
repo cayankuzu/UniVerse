@@ -21,7 +21,7 @@ function resolveAlbumUploadMediaDirectory() {
     normalizeAlbumUploadMediaText(documentDirectory) ||
     normalizeAlbumUploadMediaText(cacheDirectory);
   if (!baseDirectory) {
-    throw new Error("Secilen medya dosyasi hazirlanamadi. Lutfen yeniden sec.");
+    throw new Error("Seçilen medya dosyası hazırlanamadı. Lütfen yeniden seç.");
   }
   return `${baseDirectory.replace(/\/?$/, "/")}${ALBUM_UPLOAD_MEDIA_DIRECTORY_SEGMENT}/`;
 }
@@ -80,7 +80,7 @@ function buildPersistedAlbumUploadMediaName(
 }
 
 export function buildAlbumUploadMediaAccessErrorMessage() {
-  return "Secilen medya dosyasina Android galerisi uzerinden erisilemiyor. Karti silip medyayi galeriden yeniden sec.";
+  return "Seçilen medya dosyasına Android galerisi üzerinden erişilemiyor. Kartı silip medyayı galeriden yeniden seç.";
 }
 
 export function getAlbumUploadPayloadImages(payload: Record<string, unknown>) {

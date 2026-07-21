@@ -63,7 +63,7 @@ function logAlbumUploadError(entryId: string, step: string, error: unknown) {
 
 function createAlbumUploadAuthRecoveryError() {
   const error = new Error(
-    "Oturum yenileniyor. Album yukleme birazdan otomatik tekrar denenecek.",
+    "Oturum yenileniyor. Albüm yükleme birazdan otomatik tekrar denenecek.",
   ) as RetryableAlbumUploadQueueError;
   error.retryableQueueError = true;
   return error;
@@ -167,7 +167,7 @@ function toAlbumUploadSourceError(error: unknown, sourceUri: string) {
   ) {
     return new Error(buildAlbumUploadMediaAccessErrorMessage());
   }
-  return error instanceof Error ? error : new Error(rawMessage || "Album yuklenemedi.");
+  return error instanceof Error ? error : new Error(rawMessage || "Albüm yüklenemedi.");
 }
 
 function getAlbumMediaUploadTimeoutMs(mediaKind: "image" | "video" | undefined) {
@@ -242,7 +242,7 @@ async function createAlbumFromUploadEntry(
     : [];
 
   if (!eventId) throw new Error("Album etkinlik bilgisi eksik.");
-  if (!images.length) throw new Error("Album medyasi bulunamadi.");
+  if (!images.length) throw new Error("Albüm medyası bulunamadı.");
 
   const visibility = normalizeSharedEventAlbumVisibility(payload);
   const uploadSeed = normalizeUploadToken(
@@ -307,7 +307,7 @@ async function createAlbumFromUploadEntry(
 
   const albumImages = images.map((_image, index) => uploadedUrls[index]).filter(Boolean);
   if (albumImages.length !== images.length) {
-    throw new Error("Album medyasi yuklenemedi.");
+    throw new Error("Albüm medyası yüklenemedi.");
   }
 
   const albumAuthHints = authHints.accessTokenHint
@@ -366,7 +366,7 @@ async function createAlbumFromUploadEntry(
     entryId: entry.id,
     payload,
     percent: 97,
-    stage: "Album karti gonderiye ekleniyor",
+    stage: "Albüm kartı gönderiye ekleniyor",
   });
 
   return {
@@ -400,7 +400,7 @@ export async function processAlbumUploadQueue(params: {
           entryId: entry.id,
           payload: entry.payload,
           percent: 8,
-          stage: "Oturum dogrulaniyor",
+          stage: "Oturum doğrulanıyor",
         });
         const authHints = await withAlbumUploadStepTimeout(
           resolveAlbumUploadAuthHints({
@@ -427,7 +427,7 @@ export async function processAlbumUploadQueue(params: {
           entryId: entry.id,
           payload,
           percent: 100,
-          stage: "Paylasim tamamlandi",
+          stage: "Paylaşım tamamlandı",
         });
         logAlbumUploadStep(entry.id, "entry:done");
         return payload;

@@ -1,5 +1,6 @@
 import React from "react";
-import { ActivityIndicator, Pressable, RefreshControl, Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { ActivityIndicator, Pressable, RefreshControl, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Bell, Camera, ChevronRight, Image, MapPin, Mic, Shield } from "lucide-react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
@@ -12,17 +13,17 @@ import { usePermissionsScreenState } from "../../application/usePermissionsScree
 type Props = NativeStackScreenProps<RootStackParamList, "Permissions">;
 
 const ICONS = {
-  camera: <Camera size={18} color="#0284c7" strokeWidth={1.8} />,
-  location: <MapPin size={18} color="#2563eb" strokeWidth={1.8} />,
-  microphone: <Mic size={18} color="#ea580c" strokeWidth={1.8} />,
-  notifications: <Bell size={18} color="#d97706" strokeWidth={1.8} />,
-  photos: <Image size={18} color="#059669" strokeWidth={1.8} />,
+  camera: <Camera size={18} color={tokens.colors.primary} strokeWidth={1.8} />,
+  location: <MapPin size={18} color={tokens.colors.primary} strokeWidth={1.8} />,
+  microphone: <Mic size={18} color={tokens.colors.primary} strokeWidth={1.8} />,
+  notifications: <Bell size={18} color={tokens.colors.primary} strokeWidth={1.8} />,
+  photos: <Image size={18} color={tokens.colors.primary} strokeWidth={1.8} />,
 } as const;
 
 const STATUS_COLORS = {
-  denied: { bg: "#fef2f2", fg: "#dc2626" },
-  granted: { bg: "#ecfdf5", fg: "#059669" },
-  undetermined: { bg: "#eff6ff", fg: "#2563eb" },
+  denied: { bg: tokens.colors.dangerSoft, fg: tokens.colors.danger },
+  granted: { bg: tokens.colors.successSoft, fg: tokens.colors.successIcon },
+  undetermined: { bg: tokens.colors.primarySofter, fg: tokens.colors.primary },
 } as const;
 
 export function PermissionsSettingsScreen({ navigation }: Props) {
@@ -49,44 +50,56 @@ export function PermissionsSettingsScreen({ navigation }: Props) {
             onRefresh={() => {
               void refreshPermissions();
             }}
-            tintColor="#2563eb"
+            tintColor={tokens.colors.primary}
           />
         }
         contentContainerStyle={{
-          paddingHorizontal: 14,
-          paddingTop: 16,
+          paddingHorizontal: tokens.spacing.smPlus,
+          paddingTop: tokens.spacing.md,
           paddingBottom: Math.max(bottomPadding, insets.bottom + 24),
-          gap: 12,
+          gap: tokens.spacing.sm,
         }}
       >
         <View
           style={{
-            borderRadius: 18,
+            borderRadius: tokens.radius.card,
             borderWidth: 1,
             borderColor: tokens.colors.border,
             backgroundColor: tokens.colors.surface,
-            padding: 16,
-            gap: 8,
+            padding: tokens.spacing.md,
+            gap: tokens.spacing.xs,
           }}
         >
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.compact }}>
             <View
               style={{
                 width: 40,
                 height: 40,
-                borderRadius: 14,
-                backgroundColor: "#eff6ff",
+                borderRadius: tokens.radius.control,
+                backgroundColor: tokens.colors.primarySofter,
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <Shield size={20} color="#2563eb" strokeWidth={1.8} />
+              <Shield size={20} color={tokens.colors.primary} strokeWidth={1.8} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={{ color: tokens.colors.text, fontSize: 16, fontWeight: "800" }}>
+              <Text
+                style={{
+                  color: tokens.colors.text,
+                  fontSize: tokens.typography.subtitle,
+                  fontWeight: "800",
+                }}
+              >
                 Uygulama İzinleri
               </Text>
-              <Text style={{ color: tokens.colors.muted, fontSize: 12, marginTop: 2 }}>
+              <Text
+                style={{
+                  color: tokens.colors.muted,
+                  fontSize: tokens.typography.caption,
+                  marginTop: tokens.spacing.micro,
+                }}
+              >
                 İlk istekte sistem izni açılır. Sonraki değişiklikler için cihaz ayarları
                 kullanılır.
               </Text>
@@ -106,22 +119,22 @@ export function PermissionsSettingsScreen({ navigation }: Props) {
                 void handlePermissionPress(item.id);
               }}
               style={{
-                borderRadius: 18,
+                borderRadius: tokens.radius.card,
                 borderWidth: 1,
                 borderColor: tokens.colors.border,
                 backgroundColor: tokens.colors.surface,
-                padding: 16,
-                minHeight: tokens.minHeight.touchTarget,
-                gap: 12,
+                padding: tokens.spacing.md,
+                minHeight: tokens.minHeight.row,
+                gap: tokens.spacing.sm,
               }}
             >
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.sm }}>
                 <View
                   style={{
                     width: 44,
                     height: 44,
-                    borderRadius: 14,
-                    backgroundColor: "#f8fafc",
+                    borderRadius: tokens.radius.control,
+                    backgroundColor: tokens.colors.background,
                     alignItems: "center",
                     justifyContent: "center",
                   }}
@@ -129,10 +142,22 @@ export function PermissionsSettingsScreen({ navigation }: Props) {
                   {ICONS[item.id]}
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: tokens.colors.text, fontSize: 14, fontWeight: "800" }}>
+                  <Text
+                    style={{
+                      color: tokens.colors.text,
+                      fontSize: tokens.typography.body,
+                      fontWeight: "800",
+                    }}
+                  >
                     {item.label}
                   </Text>
-                  <Text style={{ color: tokens.colors.muted, fontSize: 12, marginTop: 3 }}>
+                  <Text
+                    style={{
+                      color: tokens.colors.muted,
+                      fontSize: tokens.typography.caption,
+                      marginTop: tokens.spacing.microPlus,
+                    }}
+                  >
                     {item.description}
                   </Text>
                 </View>
@@ -144,37 +169,51 @@ export function PermissionsSettingsScreen({ navigation }: Props) {
                   flexDirection: "row",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  gap: 10,
+                  gap: tokens.spacing.compact,
                 }}
               >
                 <View
                   style={{
-                    borderRadius: 999,
+                    borderRadius: tokens.radius.pill,
                     backgroundColor: colors.bg,
-                    paddingHorizontal: 10,
-                    paddingVertical: 5,
+                    paddingHorizontal: tokens.spacing.compact,
+                    paddingVertical: tokens.spacing.xxsPlus,
                   }}
                 >
-                  <Text style={{ color: colors.fg, fontSize: 11, fontWeight: "800" }}>
+                  <Text
+                    style={{
+                      color: colors.fg,
+                      fontSize: tokens.typography.caption,
+                      fontWeight: "800",
+                    }}
+                  >
                     {item.statusTitle}
                   </Text>
                 </View>
 
                 <View
                   style={{
-                    minWidth: 96,
-                    minHeight: tokens.minHeight.touchTarget,
-                    borderRadius: 12,
-                    backgroundColor: "#f8fafc",
-                    paddingHorizontal: 12,
+                    minWidth: 80,
+                    minHeight: tokens.minHeight.row,
+                    borderRadius: tokens.radius.md,
+                    backgroundColor: tokens.colors.background,
+                    paddingHorizontal: tokens.spacing.sm,
                     alignItems: "center",
                     justifyContent: "center",
                     flexDirection: "row",
-                    gap: 8,
+                    gap: tokens.spacing.xs,
                   }}
                 >
-                  {item.isPending ? <ActivityIndicator color="#2563eb" size="small" /> : null}
-                  <Text style={{ color: "#0f172a", fontSize: 12, fontWeight: "800" }}>
+                  {item.isPending ? (
+                    <ActivityIndicator color={tokens.colors.primary} size="small" />
+                  ) : null}
+                  <Text
+                    style={{
+                      color: tokens.colors.foreground,
+                      fontSize: tokens.typography.caption,
+                      fontWeight: "800",
+                    }}
+                  >
                     {item.isPending ? "Bekleniyor" : item.actionLabel}
                   </Text>
                 </View>

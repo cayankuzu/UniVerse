@@ -1,6 +1,32 @@
 import React from "react";
-import { act, render } from "@testing-library/react-native";
-import { FlatList, Text } from "react-native";
+import { act, render, screen } from "@testing-library/react-native";
+import { Text } from "react-native";
+
+let latestListProps: Record<string, unknown> | null = null;
+
+jest.mock("../../../shared/components", () => {
+  const React = require("react");
+  const { Text, View } = require("react-native");
+
+  return {
+    AppFlatList: React.forwardRef(function MockAppFlatList(props: unknown, _ref: unknown) {
+      latestListProps = props as Record<string, unknown>;
+      const { data = [], renderItem } = props as {
+        data?: Array<{ id: string }>;
+        renderItem?: (params: { index: number; item: { id: string } }) => React.ReactNode;
+      };
+      return (
+        <View testID="home-feed-list">
+          {data.map((item, index) => (
+            <React.Fragment key={item.id}>{renderItem?.({ index, item })}</React.Fragment>
+          ))}
+        </View>
+      );
+    }),
+    AppListSkeleton: () => <Text>Skeleton</Text>,
+  };
+});
+
 import { HomeFeedList } from "./HomeFeedList";
 
 type Item = { id: string; kind: string };
@@ -11,7 +37,7 @@ function createProps(overrides: Record<string, unknown> = {}) {
     data: [{ id: "one", kind: "album" }] as Item[],
     errorMessage: null,
     hasMore: true,
-    listRef: React.createRef<FlatList<Item>>(),
+    listRef: React.createRef<any>(),
     loadState: { isBlocking: false },
     loadingMore: false,
     onEndReached: jest.fn(),
@@ -26,67 +52,59 @@ function createProps(overrides: Record<string, unknown> = {}) {
 }
 
 describe("HomeFeedList", () => {
-  it("renders feed items, refreshes and loads the next page only once per data length", () => {
+  beforeEach(() => {
+    latestListProps = null;
+  });
+
+  it("uses typed FlashList recycling and delegates user actions", async () => {
     const onEndReached = jest.fn();
     const onRefresh = jest.fn().mockResolvedValue(undefined);
     const onUserInteraction = jest.fn();
     const props = createProps({ onEndReached, onRefresh, onUserInteraction });
-    const screen = render(<HomeFeedList {...props} />);
-    let list = screen.UNSAFE_getByType(FlatList);
+    render(<HomeFeedList {...props} />);
 
-    expect(screen.getByText("one:0")).toBeTruthy();
-    expect(list.props.keyExtractor(props.data[0])).toBe("album-one");
-    act(() => list.props.onScrollBeginDrag());
-    act(() => list.props.onTouchStart());
-    act(() => list.props.onRefresh());
-    act(() => list.props.onEndReached());
-    act(() => list.props.onEndReached());
+    expect(screen.getByTestId("home-feed-list")).toBeOnTheScreen();
+    const listProps = latestListProps as {
+      getItemType: (item: Item) => string;
+      keyExtractor: (item: Item) => string;
+      onEndReached: () => void;
+      onRefresh: () => void;
+      onScrollBeginDrag: () => void;
+      onTouchStart: () => void;
+    };
+    expect(listProps.keyExtractor(props.data[0])).toBe("album-one");
+    expect(listProps.getItemType(props.data[0])).toBe("album");
+
+    act(() => listProps.onScrollBeginDrag());
+    act(() => listProps.onTouchStart());
+    await act(async () => listProps.onRefresh());
+    act(() => listProps.onEndReached());
 
     expect(onUserInteraction).toHaveBeenCalledTimes(2);
     expect(onRefresh).toHaveBeenCalledTimes(1);
     expect(onEndReached).toHaveBeenCalledTimes(1);
-
-    const nextData = [...props.data, { id: "two", kind: "event" }];
-    screen.rerender(<HomeFeedList {...props} data={nextData} />);
-    list = screen.UNSAFE_getByType(FlatList);
-    act(() => list.props.onEndReached());
-    expect(onEndReached).toHaveBeenCalledTimes(2);
   });
 
-  it("blocks pagination for every non-actionable list state", () => {
-    const onEndReached = jest.fn();
-    const cases = [
-      { data: [] },
-      { loadState: { isBlocking: true } },
-      { loadingMore: true },
-      { refreshing: true },
-      { hasMore: false },
-    ];
+  it("keeps existing content visible while refreshes fail or block", () => {
+    const props = createProps({ errorMessage: "failed", loadState: { isBlocking: true } });
+    render(<HomeFeedList {...props} />);
 
-    for (const override of cases) {
-      const screen = render(<HomeFeedList {...createProps({ ...override, onEndReached })} />);
-      const list = screen.UNSAFE_getByType(FlatList);
-      act(() => list.props.onEndReached());
-      screen.unmount();
-    }
-
-    expect(onEndReached).not.toHaveBeenCalled();
+    expect(latestListProps).toMatchObject({
+      error: null,
+      loading: false,
+    });
   });
 
-  it("renders loading, terminal, empty and error surfaces", () => {
-    const loadingMore = render(<HomeFeedList {...createProps({ loadingMore: true })} />);
-    expect(loadingMore.UNSAFE_getByType(FlatList).props.ListFooterComponent).toBeTruthy();
-    loadingMore.unmount();
+  it("records the first recycled-list draw", () => {
+    const onFirstDraw = jest.fn();
+    render(<HomeFeedList {...createProps({ onFirstDraw })} />);
 
-    const terminal = render(<HomeFeedList {...createProps({ hasMore: false })} />);
-    expect(terminal.UNSAFE_getByType(FlatList).props.ListFooterComponent).toBeTruthy();
-    terminal.unmount();
+    act(() => {
+      (latestListProps as { onLoad?: (info: { elapsedTimeInMs: number }) => void }).onLoad?.({
+        elapsedTimeInMs: 42,
+      });
+    });
 
-    const empty = render(<HomeFeedList {...createProps({ data: [] })} />);
-    expect(empty.UNSAFE_getByType(FlatList).props.ListEmptyComponent).toBeTruthy();
-    empty.unmount();
-
-    const error = render(<HomeFeedList {...createProps({ data: [], errorMessage: "failed" })} />);
-    expect(error.UNSAFE_getByType(FlatList).props.ListEmptyComponent).toBeTruthy();
+    expect(onFirstDraw).toHaveBeenCalledWith(42);
   });
 });

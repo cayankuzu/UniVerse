@@ -1,7 +1,7 @@
 import { normalizeSharedEventAlbumVisibility } from "../../../../data/policies/visibility";
 import type { UploadPhotoPayload } from "./albums.shared";
 
-export const MAX_EVENT_ALBUM_PHOTOS = 9;
+export const MAX_EVENT_ALBUM_PHOTOS = 6;
 export const MAX_EVENT_ALBUM_CARDS = 3;
 
 export type AlbumUploadAvailability = {

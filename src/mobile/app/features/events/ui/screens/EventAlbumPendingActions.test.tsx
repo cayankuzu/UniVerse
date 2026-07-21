@@ -52,11 +52,11 @@ describe("EventAlbumPendingActions", () => {
       />,
     );
 
-    fireEvent.press(screen.getByText("Iptal Et"));
+    fireEvent.press(screen.getByText("İptal Et"));
 
     expect(alertSpy).toHaveBeenCalledWith(
-      "Yukleme iptal edilsin mi?",
-      "Bu album kartinin bekleyen yuklemesi iptal edilecek.",
+      "Yükleme iptal edilsin mi?",
+      "Bu albüm kartının bekleyen yüklemesi iptal edilecek.",
       expect.any(Array),
     );
 
@@ -108,7 +108,7 @@ describe("EventAlbumPendingActions", () => {
 
     expect(alertSpy).toHaveBeenCalledWith(
       "Kart silinsin mi?",
-      "Bu basarisiz album karti kuyruktan kaldirilacak.",
+      "Bu başarısız albüm kartı kuyruktan kaldırılacak.",
       expect.any(Array),
     );
 

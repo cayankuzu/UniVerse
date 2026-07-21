@@ -1,11 +1,13 @@
 import React, { memo, useEffect, useMemo, useRef } from "react";
 import { Home, PlusCircle, Search, User, type LucideIcon } from "lucide-react-native";
-import { Animated, Pressable, StyleSheet, View } from "react-native";
-import { Surface, Text } from "react-native-paper";
+import { Animated, StyleSheet, View } from "react-native";
+import { Surface } from "react-native-paper";
+import { AppText as Text } from "../../../shared/components/AppText";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { tokens } from "../../../shared/theme";
 import { t } from "../../../shared/i18n";
 import { useReducedMotion } from "../../../shared/hooks/useReducedMotion";
+import { InstantPressable } from "../../../shared/components/InstantPressable";
 import { TourAnchor } from "../../onboarding";
 
 type TabKey = "home" | "search" | "create" | "profile";
@@ -52,7 +54,7 @@ function renderTabIcon(tabKey: TabKey, isActive: boolean) {
   return (
     <Icon
       color={isActive ? tokens.colors.primary : tokens.colors.iconMuted}
-      size={tabKey === "create" ? 24 : 20}
+      size={tabKey === "create" ? tokens.iconSize["2xl"] : tokens.iconSize.xl}
       strokeWidth={isActive ? 2 : 1.5}
     />
   );
@@ -73,15 +75,17 @@ export const MainBottomTabs = memo(function MainBottomTabs({
   const visibilityAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    if (visible || reducedMotion) {
+    if (reducedMotion) {
       visibilityAnim.setValue(visible ? 1 : 0);
-    } else {
-      Animated.timing(visibilityAnim, {
-        toValue: 0,
-        duration: 80,
-        useNativeDriver: true,
-      }).start();
+      return;
     }
+    const animation = Animated.timing(visibilityAnim, {
+      toValue: visible ? 1 : 0,
+      duration: tokens.duration.fast,
+      useNativeDriver: true,
+    });
+    animation.start();
+    return () => animation.stop();
   }, [reducedMotion, visibilityAnim, visible]);
 
   const tabs = useMemo<Tab[]>(
@@ -97,7 +101,7 @@ export const MainBottomTabs = memo(function MainBottomTabs({
   );
   const tabTranslateY = visibilityAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [72, 0],
+    outputRange: [64, 0],
   });
 
   return (
@@ -119,16 +123,16 @@ export const MainBottomTabs = memo(function MainBottomTabs({
           style={{
             marginHorizontal: 0,
             marginBottom: 0,
-            borderTopLeftRadius: 16,
-            borderTopRightRadius: 16,
+            borderTopLeftRadius: tokens.radius.lg,
+            borderTopRightRadius: tokens.radius.lg,
             backgroundColor: tokens.colors.surface,
             borderWidth: 1,
             borderColor: tokens.colors.divider,
             flexDirection: "row",
             alignItems: "center",
-            paddingHorizontal: 6,
-            paddingTop: 6,
-            paddingBottom: Math.max(insets.bottom + 8, 12),
+            paddingHorizontal: tokens.spacing.xsMinus,
+            paddingTop: tokens.spacing.xsMinus,
+            paddingBottom: Math.max(insets.bottom + tokens.spacing.xs, tokens.spacing.sm),
             shadowColor: tokens.colors.shadow,
             shadowOffset: { width: 0, height: -2 },
             shadowOpacity: 0.06,
@@ -140,11 +144,11 @@ export const MainBottomTabs = memo(function MainBottomTabs({
             const isActive = tab.key === active;
             const intentTab = tab.key === "profile" || tab.key === "search" ? tab.key : null;
             const tabButton = (
-              <Pressable
+              <InstantPressable
                 accessibilityLabel={TAB_LABELS[tab.key]()}
                 accessibilityRole="tab"
                 accessibilityState={{ selected: isActive }}
-                key={tab.key}
+                haptic="selection"
                 onPress={tab.onPress}
                 onPressIn={intentTab ? () => onIntent?.(intentTab) : undefined}
                 style={({ pressed }) => [styles.tabButton, pressed && styles.tabButtonPressed]}
@@ -154,7 +158,7 @@ export const MainBottomTabs = memo(function MainBottomTabs({
                     style={{
                       position: "absolute",
                       top: 0,
-                      width: 20,
+                      width: tokens.iconSize.xl,
                       height: 2,
                       borderRadius: 1,
                       backgroundColor: tokens.colors.primary,
@@ -167,14 +171,14 @@ export const MainBottomTabs = memo(function MainBottomTabs({
                   style={{
                     color: isActive ? tokens.colors.primary : tokens.colors.iconMuted,
                     fontSize: tokens.typography.tiny,
-                    fontWeight: isActive ? "700" : "500",
-                    lineHeight: 13,
+                    fontWeight: isActive ? tokens.fontWeight.bold : tokens.fontWeight.medium,
+                    lineHeight: tokens.lineHeight.nano,
                     textAlign: "center",
                   }}
                 >
                   {TAB_LABELS[tab.key]()}
                 </Text>
-              </Pressable>
+              </InstantPressable>
             );
             return (
               <TourAnchor
@@ -196,10 +200,10 @@ const styles = StyleSheet.create({
   tabButton: {
     alignItems: "center",
     flex: 1,
-    gap: 3,
+    gap: tokens.spacing.microPlus,
     justifyContent: "center",
     minHeight: tokens.minHeight.touchTarget,
-    paddingHorizontal: 2,
+    paddingHorizontal: tokens.spacing.micro,
   },
   tabButtonPressed: {
     opacity: 0.68,

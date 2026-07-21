@@ -4,6 +4,7 @@ import { GradientButton, TextField } from "../../../../shared/components";
 import { RegistrationAvailabilityHint, RegistrationStepHeading } from "../components";
 import { sanitizeUsernameInput } from "../../application/useRegistrationWizard";
 import type { StudentRegistrationStepProps } from "../studentRegistrationSections.shared";
+import { tokens } from "../../../../shared/theme";
 
 export function StudentRegistrationBasicStep({
   errors,
@@ -30,7 +31,7 @@ export function StudentRegistrationBasicStep({
         text="Kullanıcı adı kontrol ediliyor..."
       />
 
-      <View style={{ marginTop: 12 }}>
+      <View style={{ marginTop: tokens.spacing.sm }}>
         <TextField
           error={errors.name?.message}
           fieldName="name"
@@ -41,7 +42,7 @@ export function StudentRegistrationBasicStep({
         />
       </View>
 
-      <View style={{ marginTop: 20 }}>
+      <View style={{ marginTop: tokens.spacing.lg }}>
         <GradientButton
           label="Devam Et"
           onPress={() => void goNext()}

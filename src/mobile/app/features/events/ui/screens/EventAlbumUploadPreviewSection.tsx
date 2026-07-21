@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import { Camera, Crop, ImagePlus, Trash2 } from "lucide-react-native";
 import {
   ActivityIndicator,
   Alert,
   Image,
   Pressable,
-  Text,
   View,
   useWindowDimensions,
   type NativeScrollEvent,
@@ -333,8 +333,8 @@ export function EventAlbumUploadPreviewSection({
                 right: 10,
                 borderRadius: tokens.radius.pill,
                 backgroundColor: tokens.colors.backdropLight,
-                paddingHorizontal: 10,
-                paddingVertical: 5,
+                paddingHorizontal: tokens.spacing.compact,
+                paddingVertical: tokens.spacing.xxsPlus,
               }}
             >
               <Text
@@ -355,8 +355,8 @@ export function EventAlbumUploadPreviewSection({
                   bottom: 10,
                   borderRadius: tokens.radius.pill,
                   backgroundColor: tokens.colors.backdropLight,
-                  paddingHorizontal: 10,
-                  paddingVertical: 5,
+                  paddingHorizontal: tokens.spacing.compact,
+                  paddingVertical: tokens.spacing.xxsPlus,
                 }}
               >
                 <Text
@@ -428,7 +428,7 @@ export function EventAlbumUploadPreviewSection({
           }
           label="Sil"
           onPress={() =>
-            Alert.alert("Medyayi sil", "Bu secili medyayi kaldirmak istiyor musun?", [
+            Alert.alert("Medyayı sil", "Bu seçili medyayı kaldırmak istiyor musun?", [
               { text: "Vazgec", style: "cancel" },
               {
                 text: "Sil",
@@ -447,8 +447,8 @@ export function EventAlbumUploadPreviewSection({
             borderWidth: 1,
             borderColor: tokens.colors.border,
             backgroundColor: tokens.colors.background,
-            paddingHorizontal: 10,
-            paddingVertical: 10,
+            paddingHorizontal: tokens.spacing.compact,
+            paddingVertical: tokens.spacing.compact,
           }}
         >
           <ScrollView
@@ -457,7 +457,7 @@ export function EventAlbumUploadPreviewSection({
             keyboardShouldPersistTaps="handled"
             nestedScrollEnabled
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ gap: 10 }}
+            contentContainerStyle={{ gap: tokens.spacing.compact }}
           >
             {previewMediaItems.map((item, index) => (
               <EventAlbumDraggableThumb

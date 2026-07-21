@@ -2,8 +2,9 @@ import React, { memo } from "react";
 import type { StyleProp, TextStyle, ViewStyle } from "react-native";
 import { Button } from "react-native-paper";
 import { tokens } from "../../shared/theme";
+import { triggerHapticFeedback, type AppHapticFeedback } from "../feedback/haptics";
 
-export type AppButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+export type AppButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "success";
 export type AppButtonSize = "sm" | "md" | "lg";
 
 export interface AppButtonProps {
@@ -11,6 +12,7 @@ export interface AppButtonProps {
   compact?: boolean;
   contentStyle?: StyleProp<ViewStyle>;
   fullWidth?: boolean;
+  haptic?: AppHapticFeedback;
   icon?: React.ReactNode;
   label: string;
   disabled?: boolean;
@@ -25,18 +27,23 @@ export interface AppButtonProps {
 }
 
 const BUTTON_SIZE = {
-  lg: { horizontal: 18, minHeight: 50, radius: tokens.radius.lg, textSize: 15 },
+  lg: {
+    horizontal: tokens.spacing.smPlus,
+    minHeight: tokens.minHeight.buttonLg,
+    radius: tokens.radius.lg,
+    textSize: tokens.typography.control,
+  },
   md: {
-    horizontal: 16,
+    horizontal: tokens.spacing.md,
     minHeight: tokens.minHeight.buttonMd,
     radius: tokens.radius.md,
-    textSize: 14,
+    textSize: tokens.typography.body,
   },
   sm: {
-    horizontal: 12,
+    horizontal: tokens.spacing.sm,
     minHeight: tokens.minHeight.buttonSm,
     radius: tokens.radius.sm,
-    textSize: 13,
+    textSize: tokens.typography.label,
   },
 } as const;
 
@@ -69,6 +76,13 @@ function resolveColors(variant: AppButtonVariant) {
       text: tokens.colors.surface,
     };
   }
+  if (variant === "success") {
+    return {
+      background: tokens.colors.success,
+      border: tokens.colors.success,
+      text: tokens.colors.surface,
+    };
+  }
   return {
     background: tokens.colors.primary,
     border: tokens.colors.primary,
@@ -82,6 +96,7 @@ export const AppButton = memo(function AppButton({
   contentStyle,
   disabled,
   fullWidth = true,
+  haptic,
   icon,
   label,
   labelStyle,
@@ -102,30 +117,42 @@ export const AppButton = memo(function AppButton({
     <Button
       accessibilityLabel={accessibilityLabel || label}
       accessibilityRole="button"
+      accessibilityState={{ busy: Boolean(loading), disabled: isDisabled }}
       compact={compact ?? resolvedMode === "text"}
       contentStyle={{
-        minHeight: resolvedMode === "text" ? tokens.minHeight.touchTarget : resolvedSize.minHeight,
-        paddingHorizontal: resolvedMode === "text" ? 8 : resolvedSize.horizontal,
+        minHeight: resolvedMode === "text" ? tokens.minHeight.buttonSm : resolvedSize.minHeight,
+        paddingHorizontal: resolvedMode === "text" ? tokens.spacing.xs : resolvedSize.horizontal,
         ...(contentStyle as object),
       }}
       disabled={isDisabled}
+      hitSlop={resolvedMode === "text" ? tokens.hitSlop.sm : undefined}
       icon={icon ? () => icon as React.ReactElement : undefined}
       labelStyle={{
-        fontSize: resolvedMode === "text" ? 15 : resolvedSize.textSize,
-        fontWeight: "700",
-        lineHeight: resolvedMode === "text" ? 20 : Math.round(resolvedSize.textSize * 1.35),
+        fontSize: resolvedMode === "text" ? tokens.typography.control : resolvedSize.textSize,
+        fontWeight: tokens.fontWeight.bold,
+        lineHeight:
+          resolvedMode === "text"
+            ? tokens.lineHeight.control
+            : Math.round(resolvedSize.textSize * 1.35),
         ...(labelStyle as object),
       }}
       loading={loading}
       mode={resolvedMode}
-      onPress={onPress}
+      onPress={
+        onPress
+          ? () => {
+              if (haptic) triggerHapticFeedback(haptic);
+              onPress();
+            }
+          : undefined
+      }
       buttonColor={resolvedMode === "text" ? undefined : colors.background}
       style={{
         alignSelf: fullWidth ? "stretch" : "flex-start",
         borderRadius: resolvedSize.radius,
         borderWidth: resolvedMode === "outlined" ? 1 : 0,
         borderColor: resolvedMode === "outlined" ? colors.border : "transparent",
-        opacity: isDisabled ? 0.55 : 1,
+        opacity: isDisabled ? tokens.opacity.disabled : 1,
         ...(resolvedMode === "contained" && variant === "primary"
           ? {
               shadowColor: tokens.colors.primaryLight,

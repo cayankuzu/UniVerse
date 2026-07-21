@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { AppText as Text } from "./AppText";
 import type { StyleProp, TextStyle, ViewStyle } from "react-native";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { tokens } from "../../shared/theme";
 
 export type ExpandableTextProps = {

@@ -178,7 +178,7 @@ describe("normalizeStorageUploadFile", () => {
         },
         "events",
       ),
-    ).rejects.toThrow("Fotograf boyutu cok buyuk. Lutfen daha kucuk bir gorsel sec.");
+    ).rejects.toThrow("Fotoğraf boyutu çok büyük. Lütfen daha küçük bir görsel seç.");
   });
 
   it("normalizes Android videos to mp4 before upload", async () => {
@@ -256,7 +256,7 @@ describe("normalizeStorageUploadFile", () => {
         "albums",
       ),
     ).rejects.toThrow(
-      "Video 1080p olarak hazirlanamadi. Lutfen daha kisa veya farkli bir video secip tekrar dene.",
+      "Video 1080p olarak hazırlanamadı. Lütfen daha kısa veya farklı bir video seçip tekrar dene.",
     );
   });
 
@@ -265,7 +265,7 @@ describe("normalizeStorageUploadFile", () => {
     mockVideoNormalize.mockRejectedValue({
       code: "E_NORMALIZE_FAILED",
       message:
-        "Video 1080p olarak hazirlanamadi. Lutfen daha kisa veya farkli bir video secip tekrar dene.",
+        "Video 1080p olarak hazırlanamadı. Lütfen daha kısa veya farklı bir video seçip tekrar dene.",
     });
     mockGetInfoAsync.mockImplementation(async (uri: string) => ({
       exists: !String(uri).includes("album-video-normalized.mp4"),
@@ -284,7 +284,7 @@ describe("normalizeStorageUploadFile", () => {
         "albums",
       ),
     ).rejects.toThrow(
-      "Video 1080p olarak hazirlanamadi. Lutfen daha kisa veya farkli bir video secip tekrar dene.",
+      "Video 1080p olarak hazırlanamadı. Lütfen daha kısa veya farklı bir video seçip tekrar dene.",
     );
   });
 
@@ -334,7 +334,7 @@ describe("normalizeStorageUploadFile", () => {
         "albums",
       ),
     ).rejects.toThrow(
-      "Video boyutu cok buyuk. 1080p olarak hazirlandiginda en fazla 201 MB video yukleyebilirsin.",
+      "Video boyutu çok büyük. 1080p olarak hazırlandığında en fazla 201 MB video yükleyebilirsin.",
     );
   });
 });

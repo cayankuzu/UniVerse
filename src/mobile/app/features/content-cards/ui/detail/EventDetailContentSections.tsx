@@ -1,7 +1,8 @@
 import { ChevronRight, Users } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { Pressable, View } from "react-native";
 import { AppScrollView as ScrollView } from "../../../../shared/components";
-import { tokens } from "../../../../shared/theme";
+import { tokens, withAlpha } from "../../../../shared/theme";
 import type {
   DetailAccessChip,
   DetailMetaChip,
@@ -15,7 +16,11 @@ export function EventDetailInfoSlides({ slides }: { slides: DetailSlideItem[] })
       directionalLockEnabled
       nestedScrollEnabled
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ gap: 7, marginTop: tokens.spacing.sm, paddingRight: 10 }}
+      contentContainerStyle={{
+        gap: tokens.spacing.xsCompact,
+        marginTop: tokens.spacing.sm,
+        paddingRight: tokens.spacing.compact,
+      }}
     >
       {slides.map((slide, index) => {
         const Icon = slide.icon;
@@ -23,14 +28,14 @@ export function EventDetailInfoSlides({ slides }: { slides: DetailSlideItem[] })
           <View
             key={`detail-slide-${index}-${slide.sub}-${slide.label}`}
             style={{
-              minWidth: 132,
+              minWidth: 108,
               borderRadius: 11,
               backgroundColor: slide.backgroundColor,
-              paddingHorizontal: 9,
+              paddingHorizontal: tokens.spacing.xsPlus,
               paddingVertical: tokens.spacing.xs,
               flexDirection: "row",
               alignItems: "center",
-              gap: 7,
+              gap: tokens.spacing.xsCompact,
             }}
           >
             <View
@@ -38,7 +43,7 @@ export function EventDetailInfoSlides({ slides }: { slides: DetailSlideItem[] })
                 width: 28,
                 height: 28,
                 borderRadius: 9,
-                backgroundColor: "rgba(255,255,255,0.74)",
+                backgroundColor: withAlpha(tokens.colors.onMedia, 0.74),
                 alignItems: "center",
                 justifyContent: "center",
               }}
@@ -51,7 +56,7 @@ export function EventDetailInfoSlides({ slides }: { slides: DetailSlideItem[] })
                   fontSize: tokens.typography.tiny,
                   fontWeight: tokens.fontWeight.bold,
                   color: slide.textColor,
-                  lineHeight: 15,
+                  lineHeight: tokens.lineHeight.tiny,
                 }}
               >
                 {slide.label}
@@ -60,8 +65,8 @@ export function EventDetailInfoSlides({ slides }: { slides: DetailSlideItem[] })
                 style={{
                   fontSize: tokens.typography.nano,
                   color: tokens.colors.mutedFg,
-                  marginTop: 1,
-                  lineHeight: 13,
+                  marginTop: tokens.spacing.hairline,
+                  lineHeight: tokens.lineHeight.nano,
                 }}
               >
                 {slide.sub}
@@ -81,7 +86,11 @@ export function EventDetailMetaChips({ chips }: { chips: DetailMetaChip[] }) {
       directionalLockEnabled
       nestedScrollEnabled
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ gap: 5, marginTop: 10, paddingRight: tokens.spacing.xs }}
+      contentContainerStyle={{
+        gap: tokens.spacing.xxsPlus,
+        marginTop: tokens.spacing.compact,
+        paddingRight: tokens.spacing.xs,
+      }}
     >
       {chips.map((chip, index) => (
         <View
@@ -91,7 +100,7 @@ export function EventDetailMetaChips({ chips }: { chips: DetailMetaChip[] }) {
             backgroundColor:
               chip.kind === "type" ? tokens.colors.warningSoft : tokens.colors.violetSoft,
             paddingHorizontal: tokens.spacing.xs,
-            paddingVertical: 3,
+            paddingVertical: tokens.spacing.microPlus,
             alignSelf: "flex-start",
           }}
         >
@@ -127,7 +136,7 @@ export function EventDetailAttendanceBar(props: {
         accessibilityLabel="Etkinlik katılımcılarını aç"
         disabled={!props.enabled}
         onPress={props.onPress}
-        style={{ flexDirection: "row", alignItems: "center", gap: 7 }}
+        style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.xsCompact }}
       >
         <Users size={13} color={tokens.colors.mutedFg} />
         <View
@@ -162,10 +171,10 @@ export function EventDetailAttendanceBar(props: {
 
       <View
         style={{
-          marginTop: 7,
+          marginTop: tokens.spacing.xsCompact,
           flexDirection: "row",
           alignItems: "center",
-          gap: 5,
+          gap: tokens.spacing.xxsPlus,
           flexWrap: "wrap",
         }}
       >
@@ -173,8 +182,8 @@ export function EventDetailAttendanceBar(props: {
           style={{
             borderRadius: tokens.radius.pill,
             backgroundColor: props.accessChip.backgroundColor,
-            paddingHorizontal: 7,
-            paddingVertical: 3,
+            paddingHorizontal: tokens.spacing.xsCompact,
+            paddingVertical: tokens.spacing.microPlus,
             flexDirection: "row",
             alignItems: "center",
             gap: tokens.spacing.xxs,

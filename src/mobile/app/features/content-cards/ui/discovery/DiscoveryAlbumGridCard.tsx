@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { Pressable, View } from "react-native";
 import { Image as ImageIcon, Play } from "lucide-react-native";
 import { AppImage } from "../../../../shared/components/AppImage";
 import { VideoThumbnailPreview } from "../../../../shared/media/VideoThumbnailPreview";
 import { OwnerRow, VisibilityChip } from "./DiscoveryGridCardPrimitives";
 import { DISCOVERY_GRID_CARD_COLORS, resolveAlbumUniversity } from "./discoveryCardTokens";
 import { isVideoMediaUri } from "../../../../shared/media/mediaVideoUtils";
-import { tokens } from "../../../../shared/theme";
+import { tokens, withAlpha } from "../../../../shared/theme";
 
 type ImageVariants = {
   full?: string | null;
@@ -109,7 +110,7 @@ export const DiscoveryAlbumGridCard = React.memo(function DiscoveryAlbumGridCard
         width: cardWidth,
         borderRadius: tokens.radius.md,
         borderWidth: 1,
-        borderColor: "rgba(15,23,42,0.08)",
+        borderColor: withAlpha(tokens.colors.foreground, 0.08),
         backgroundColor: DISCOVERY_GRID_CARD_COLORS.surface,
         overflow: "hidden",
         paddingBottom: tokens.spacing.xs,
@@ -160,10 +161,14 @@ export const DiscoveryAlbumGridCard = React.memo(function DiscoveryAlbumGridCard
                   left: 0,
                   alignItems: "center",
                   justifyContent: "center",
-                  backgroundColor: "rgba(15,23,42,0.18)",
+                  backgroundColor: withAlpha(tokens.colors.foreground, 0.18),
                 }}
               >
-                <Play size={24} color={tokens.colors.surface} strokeWidth={1.8} />
+                <Play
+                  size={tokens.iconSize["2xl"]}
+                  color={tokens.colors.surface}
+                  strokeWidth={1.8}
+                />
               </View>
             </View>
           ) : (
@@ -187,21 +192,27 @@ export const DiscoveryAlbumGridCard = React.memo(function DiscoveryAlbumGridCard
             <View
               style={{
                 borderRadius: tokens.radius.pill,
-                paddingHorizontal: 7,
-                paddingVertical: 2,
-                backgroundColor: "rgba(15,23,42,0.7)",
+                paddingHorizontal: tokens.spacing.xsCompact,
+                paddingVertical: tokens.spacing.micro,
+                backgroundColor: withAlpha(tokens.colors.foreground, 0.7),
                 flexDirection: "row",
                 alignItems: "center",
-                gap: 6,
+                gap: tokens.spacing.xsMinus,
               }}
             >
               {mediaCounts.photoItems > 0 ? (
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: tokens.spacing.microPlus,
+                  }}
+                >
                   <ImageIcon size={8} color={tokens.colors.surface} />
                   <Text
                     style={{
                       color: tokens.colors.surface,
-                      fontSize: 8,
+                      fontSize: tokens.typography.overline,
                       fontWeight: tokens.fontWeight.bold,
                     }}
                   >
@@ -210,12 +221,18 @@ export const DiscoveryAlbumGridCard = React.memo(function DiscoveryAlbumGridCard
                 </View>
               ) : null}
               {mediaCounts.videoItems > 0 ? (
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: tokens.spacing.microPlus,
+                  }}
+                >
                   <Play size={8} color={tokens.colors.surface} fill={tokens.colors.surface} />
                   <Text
                     style={{
                       color: tokens.colors.surface,
-                      fontSize: 8,
+                      fontSize: tokens.typography.overline,
                       fontWeight: tokens.fontWeight.bold,
                     }}
                   >
@@ -230,12 +247,12 @@ export const DiscoveryAlbumGridCard = React.memo(function DiscoveryAlbumGridCard
 
       <Text
         style={{
-          marginTop: 6,
+          marginTop: tokens.spacing.xsMinus,
           paddingHorizontal: tokens.spacing.xs,
           color: DISCOVERY_GRID_CARD_COLORS.text,
           fontSize: tokens.typography.caption,
           fontWeight: tokens.fontWeight.bold,
-          lineHeight: 15,
+          lineHeight: tokens.lineHeight.tiny,
         }}
         numberOfLines={2}
       >
@@ -244,11 +261,11 @@ export const DiscoveryAlbumGridCard = React.memo(function DiscoveryAlbumGridCard
       {item.caption ? (
         <Text
           style={{
-            marginTop: 2,
+            marginTop: tokens.spacing.micro,
             paddingHorizontal: tokens.spacing.xs,
             color: DISCOVERY_GRID_CARD_COLORS.muted,
             fontSize: tokens.typography.micro,
-            lineHeight: 13,
+            lineHeight: tokens.lineHeight.nano,
           }}
           numberOfLines={1}
         >

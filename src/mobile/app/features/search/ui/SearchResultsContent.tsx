@@ -12,6 +12,7 @@ import { AppFlatList, AppListSkeleton, type AppFlatListRef } from "../../../shar
 import type { AlbumPhotoWithMeta, EventWithMeta, SearchUserResult } from "../data/searchTypes";
 import { resolveSearchEventAccess } from "../application/searchCardPresentation";
 import type { SearchType } from "../domain/types";
+import { tokens } from "../../../shared/theme";
 
 type GridMetrics = {
   cardHeight: number;
@@ -146,7 +147,7 @@ function SearchResultsGrid<T extends { id: string }>({
     () => ({
       flexGrow: 1,
       paddingHorizontal: grid.horizontalPadding,
-      paddingTop: 8,
+      paddingTop: tokens.spacing.xs,
       paddingBottom: bottomPadding,
     }),
     [bottomPadding, grid.horizontalPadding],

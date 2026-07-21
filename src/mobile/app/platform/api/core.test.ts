@@ -195,7 +195,7 @@ describe("api core auth retry", () => {
     await expect(requestPromise).rejects.toMatchObject({
       httpStatus: 0,
       isTimeout: false,
-      message: "Istek iptal edildi.",
+      message: "İstek iptal edildi.",
     });
   });
 

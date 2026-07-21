@@ -22,10 +22,10 @@ export const CREATE_EVENT_STEP_FIELDS: Record<number, Array<keyof CreateEventFor
 };
 
 const CREATE_EVENT_FIELD_LABELS: Record<keyof CreateEventFormValues, string> = {
-  access: "Erisim",
+  access: "Erişim",
   address: "Adres",
   capacity: "Kontenjan",
-  description: "Aciklama",
+  description: "Açıklama",
   endDate: "Bitis tarihi",
   endTime: "Bitis saati",
   fee: "Ucret bilgisi",

@@ -35,7 +35,7 @@ function normalizeStorageUploadErrorMessage(error: unknown) {
     normalizedMessage.includes("file not foundexception") ||
     normalizedMessage.includes("open failed")
   ) {
-    return "Secilen medya dosyasina erisilemiyor. Karti silip medyayi galeriden yeniden sec.";
+    return "Seçilen medya dosyasına erişilemiyor. Kartı silip medyayı galeriden yeniden seç.";
   }
   return rawMessage;
 }
@@ -167,7 +167,7 @@ async function prepareStorageUploadFile(
       options.signal,
     );
   } catch (error) {
-    throw toStorageUploadError(error, "Dosya yuklenemedi.");
+    throw toStorageUploadError(error, "Dosya yüklenemedi.");
   }
 }
 
@@ -308,7 +308,7 @@ export const StorageAPI = {
     );
     const data = await readStorageResponse<StorageUploadSessionResponse>(response);
     if (!response.ok) {
-      throw new Error("Upload session oluşturulamadı.");
+      throw new Error("Yükleme oturumu oluşturulamadı.");
     }
     const record = data && typeof data === "object" ? (data as StorageUploadSessionResponse) : null;
     const sessionId = normalizeStorageText(record?.sessionId);
@@ -330,7 +330,7 @@ export const StorageAPI = {
         !ticket.uploadUrl,
     );
     if (!sessionId || invalidTicket || tickets.length !== params.items.length) {
-      throw new Error("Upload session yanıtı geçersiz.");
+      throw new Error("Yükleme oturumu yanıtı geçersiz.");
     }
     return { sessionId, tickets };
   },
@@ -352,7 +352,7 @@ export const StorageAPI = {
       accessToken,
     );
     if (!response.ok) {
-      throw new Error("Upload session finalize edilemedi.");
+      throw new Error("Yükleme oturumu tamamlanamadı.");
     }
   },
 
@@ -373,7 +373,7 @@ export const StorageAPI = {
       accessToken,
     );
     if (!response.ok && response.status !== 404) {
-      throw new Error("Upload session iptal edilemedi.");
+      throw new Error("Yükleme oturumu iptal edilemedi.");
     }
   },
 
@@ -429,13 +429,13 @@ export const StorageAPI = {
         throw new Error("Oturumunuzu yenileyip tekrar deneyin.");
       }
       if (res?.status === 403) {
-        throw new Error("Bu dosyaya erisemezsiniz.");
+        throw new Error("Bu dosyaya erişemezsiniz.");
       }
       if (res?.status === 429) {
-        throw new Error("Cok fazla istek var. Lutfen daha sonra tekrar deneyin.");
+        throw new Error("Çok fazla istek var. Lütfen daha sonra tekrar deneyin.");
       }
       if (requestError instanceof Error) throw requestError;
-      throw new Error("URL alinamadi");
+      throw new Error("Bağlantı alınamadı");
     }
 
     const resolvedUrl = normalizeStorageText((data as StorageSignedUrlResponse).url);
@@ -446,6 +446,6 @@ export const StorageAPI = {
       (await directSignedUrlWithClient(path, context));
     if (directUrl) return directUrl;
 
-    throw new Error("URL alinamadi");
+    throw new Error("Bağlantı alınamadı");
   },
 };

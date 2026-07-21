@@ -1,5 +1,6 @@
 import { memo, useMemo, useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { AppText as Text } from "./AppText";
 import { tokens } from "../theme";
 import { AppImage } from "./AppImage";
 
@@ -45,13 +46,18 @@ function resolveAvatarSourceKey(params: {
 const AvatarContent = memo(function AvatarContent(props: {
   initials: string;
   size: number;
+  sourceKey: string;
   uri?: string | null;
   variants?: AvatarImageVariants | null;
 }) {
-  const [imageFailed, setImageFailed] = useState(false);
+  const [failedSourceKey, setFailedSourceKey] = useState<string | null>(null);
   const fontSize = Math.max(10, props.size * 0.38);
+  const hasImage = Boolean(
+    props.uri || props.variants?.thumbnail || props.variants?.medium || props.variants?.full,
+  );
+  const imageFailed = failedSourceKey === props.sourceKey;
 
-  if (props.uri && !imageFailed) {
+  if (hasImage && !imageFailed) {
     return (
       <AppImage
         uri={props.uri}
@@ -59,7 +65,7 @@ const AvatarContent = memo(function AvatarContent(props: {
         variant="thumbnail"
         style={{ width: props.size, height: props.size, borderRadius: props.size / 2 }}
         contentFit="cover"
-        onError={() => setImageFailed(true)}
+        onError={() => setFailedSourceKey(props.sourceKey)}
       />
     );
   }
@@ -76,7 +82,7 @@ export function Avatar({
   variants,
   name,
   fallbackInitials,
-  size = 40,
+  size = 34,
   borderColor,
   borderWidth = 0,
 }: Props) {
@@ -101,9 +107,9 @@ export function Avatar({
       }}
     >
       <AvatarContent
-        key={avatarSourceKey}
         initials={initials}
         size={size}
+        sourceKey={avatarSourceKey}
         uri={uri}
         variants={variants}
       />

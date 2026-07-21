@@ -4,9 +4,11 @@ import { MediaVideo } from "./MediaVideo";
 
 let mockResolvedUri = "";
 const mockPlay = jest.fn();
+const mockPause = jest.fn();
 const mockPlayer = {
   loop: false,
   muted: false,
+  pause: mockPause,
   play: mockPlay,
 };
 const mockUseVideoPlayer = jest.fn(
@@ -17,6 +19,7 @@ const mockUseVideoPlayer = jest.fn(
 );
 
 jest.mock("expo-video", () => ({
+  setVideoCacheSizeAsync: jest.fn().mockResolvedValue(undefined),
   VideoView: () => null,
   useVideoPlayer: (source: string | null, setup?: (player: typeof mockPlayer) => void) =>
     mockUseVideoPlayer(source, setup),
@@ -38,6 +41,7 @@ jest.mock("./VideoThumbnailPreview", () => ({
 describe("MediaVideo", () => {
   beforeEach(() => {
     mockPlay.mockClear();
+    mockPause.mockClear();
     mockResolvedUri = "";
     mockUseVideoPlayer.mockClear();
   });
@@ -52,8 +56,20 @@ describe("MediaVideo", () => {
     rerender(<MediaVideo autoPlay uri="albums/private-video.mp4" />);
 
     await waitFor(() => {
-      expect(mockUseVideoPlayer).toHaveBeenLastCalledWith(mockResolvedUri, expect.any(Function));
+      expect(mockUseVideoPlayer).toHaveBeenLastCalledWith(
+        { uri: mockResolvedUri, useCaching: true },
+        expect.any(Function),
+      );
       expect(mockPlay).toHaveBeenCalledTimes(1);
     });
+  });
+
+  it("pauses playback as soon as the media is no longer active", async () => {
+    mockResolvedUri = "https://cdn.example.com/video.mp4";
+    const { rerender } = render(<MediaVideo active autoPlay uri="video.mp4" />);
+
+    rerender(<MediaVideo active={false} autoPlay uri="video.mp4" />);
+
+    await waitFor(() => expect(mockPause).toHaveBeenCalled());
   });
 });

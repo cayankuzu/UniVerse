@@ -1,6 +1,7 @@
 import { WifiOff } from "lucide-react-native";
 import React, { useSyncExternalStore } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { AppText as Text } from "../../shared/components/AppText";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   getNetworkQuality,
@@ -41,7 +42,7 @@ export function AppNetworkStatusBanner() {
           borderWidth: 1,
           flexDirection: "row",
           gap: tokens.spacing.xs,
-          minHeight: tokens.minHeight.touchTarget,
+          minHeight: tokens.minHeight.row,
           paddingHorizontal: tokens.spacing.sm,
           paddingVertical: tokens.spacing.xs,
           ...tokens.shadow.sm,
@@ -63,7 +64,7 @@ export function AppNetworkStatusBanner() {
               color: tokens.colors.warningText,
               fontSize: tokens.typography.tiny,
               fontWeight: tokens.fontWeight.medium,
-              lineHeight: 15,
+              lineHeight: tokens.lineHeight.tiny,
             }}
           >
             Kayıtlı içerikleri kullanmaya devam edebilirsin.

@@ -16,15 +16,15 @@ describe("useAlbumUploadDraftState", () => {
 
     act(() => {
       result.current.appendSelectedMediaItems(
-        Array.from({ length: 6 }, (_, index) => createSelection(index + 1)),
-        9,
+        Array.from({ length: 4 }, (_, index) => createSelection(index + 1)),
+        6,
       );
     });
 
     act(() => {
       result.current.appendSelectedMediaItems(
-        Array.from({ length: 3 }, (_, index) => createSelection(index + 7)),
-        3,
+        Array.from({ length: 2 }, (_, index) => createSelection(index + 5)),
+        2,
       );
     });
 
@@ -35,10 +35,7 @@ describe("useAlbumUploadDraftState", () => {
       "file:///album-media-4.jpg",
       "file:///album-media-5.jpg",
       "file:///album-media-6.jpg",
-      "file:///album-media-7.jpg",
-      "file:///album-media-8.jpg",
-      "file:///album-media-9.jpg",
     ]);
-    expect(result.current.normalizedSelectedPhotoIndex).toBe(6);
+    expect(result.current.normalizedSelectedPhotoIndex).toBe(4);
   });
 });

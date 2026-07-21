@@ -30,7 +30,7 @@ export const ACCESS_OPTIONS = [
   "Sadece Uyeler",
 ] as const;
 
-export const LEVEL_OPTIONS = ["Başlangıç", "Orta", "Ileri", "Tum seviyeler"] as const;
+export const LEVEL_OPTIONS = ["Başlangıç", "Orta", "İleri", "Tüm seviyeler"] as const;
 
 export const INITIAL_CREATE_EVENT_FORM: CreateEventFormState = {
   title: "",
@@ -47,7 +47,7 @@ export const INITIAL_CREATE_EVENT_FORM: CreateEventFormState = {
   feeAmount: "",
   capacity: "100",
   targetAudience: "",
-  level: "Tum seviyeler",
+  level: "Tüm seviyeler",
   materials: "",
 };
 

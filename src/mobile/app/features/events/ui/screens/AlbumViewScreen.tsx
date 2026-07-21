@@ -1,5 +1,6 @@
 import React from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { ActivityIndicator, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ImagePlus } from "lucide-react-native";
 import { useAuth } from "../../../../app-shell/auth";
@@ -62,7 +63,7 @@ export function AlbumViewScreen({ route, navigation }: Props) {
       cancelLabel: "Vazgec",
       confirmLabel: "Cik",
       destructive: true,
-      message: "Secili medya ve yazdigin alanlar silinecek.",
+      message: "Seçili medya ve yazdığın alanlar silinecek.",
       onConfirm: () => {
         state.resetUploadState();
         state.setShowAddPhoto(false);
@@ -92,7 +93,7 @@ export function AlbumViewScreen({ route, navigation }: Props) {
               void state.handleOpenUpload();
             }}
             outlineColor={tokens.colors.primaryBorder}
-            size={36}
+            size={32}
             surfaceColor={tokens.colors.primarySofter}
           />
         }
@@ -101,7 +102,7 @@ export function AlbumViewScreen({ route, navigation }: Props) {
       <View
         style={{
           paddingHorizontal: tokens.spacing.xs,
-          paddingTop: 6,
+          paddingTop: tokens.spacing.xsMinus,
           paddingBottom: tokens.spacing.xs,
         }}
       >

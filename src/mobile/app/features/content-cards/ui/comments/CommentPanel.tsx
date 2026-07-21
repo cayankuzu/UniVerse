@@ -8,7 +8,7 @@ import type { CommentPanelCurrentUser } from "./commentPanel.shared";
 import { CommentPanelSheet } from "./CommentPanelSheet";
 import { UserListSheet } from "./UserListSheet";
 import { useCommentPanelState } from "./useCommentPanelState";
-import { tokens } from "../../../../shared/theme";
+import { tokens, withAlpha } from "../../../../shared/theme";
 import { AppModalHost } from "../../../../shared/components";
 
 interface CommentPanelProps {
@@ -87,7 +87,7 @@ export function CommentPanel({
               right: 0,
               bottom: 0,
               left: 0,
-              backgroundColor: "rgba(2,6,23,0.38)",
+              backgroundColor: withAlpha(tokens.colors.dark950, 0.38),
             }}
             onPress={onClose}
           />

@@ -77,6 +77,7 @@ export const OwnProfileHeaderContainer = memo(function OwnProfileHeaderContainer
   return (
     <>
       <ProfileHeaderSection
+        accountType={resolvedAccountType}
         displayName={displayName}
         onOpenAvatar={openAvatar}
         onOpenCover={openCover}

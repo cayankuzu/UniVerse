@@ -1,9 +1,10 @@
 import { Trash2 } from "lucide-react-native";
-import { ActivityIndicator, Pressable, Text, View, useWindowDimensions } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { ActivityIndicator, Pressable, View, useWindowDimensions } from "react-native";
 
 import { AppModalHost } from "../../../../shared/components";
 import { t } from "../../../../shared/i18n";
-import { tokens } from "../../../../shared/theme";
+import { tokens, withAlpha } from "../../../../shared/theme";
 
 interface SettingsDeleteAccountModalProps {
   bottomInset: number;
@@ -44,7 +45,7 @@ export function SettingsDeleteAccountModal({
         onPress={handleCancel}
         style={{
           flex: 1,
-          backgroundColor: "rgba(2,6,23,0.42)",
+          backgroundColor: withAlpha(tokens.colors.dark950, 0.42),
           justifyContent: "flex-end",
           paddingHorizontal: tokens.spacing.md,
           paddingTop: tokens.spacing.md,
@@ -74,22 +75,22 @@ export function SettingsDeleteAccountModal({
           >
             <View
               style={{
-                width: 64,
-                height: 64,
+                width: 52,
+                height: 52,
                 borderRadius: tokens.radius.lg,
                 backgroundColor: tokens.colors.dangerSoft,
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <Trash2 size={30} color={tokens.colors.danger} />
+              <Trash2 size={tokens.iconSize["2xl"]} color={tokens.colors.danger} />
             </View>
 
             <Text
               style={{
                 marginTop: tokens.spacing.md,
                 color: tokens.colors.foreground,
-                fontSize: 18,
+                fontSize: tokens.typography.cardTitle,
                 fontWeight: "800",
               }}
             >
@@ -99,9 +100,9 @@ export function SettingsDeleteAccountModal({
               style={{
                 marginTop: tokens.spacing.xs,
                 color: tokens.colors.muted,
-                fontSize: 13,
+                fontSize: tokens.typography.label,
                 textAlign: "center",
-                lineHeight: 19,
+                lineHeight: tokens.lineHeight.bodyCompact,
               }}
             >
               {warning}
@@ -124,11 +125,17 @@ export function SettingsDeleteAccountModal({
                   borderWidth: 1,
                   backgroundColor: tokens.colors.dangerSoft,
                   paddingHorizontal: tokens.spacing.sm,
-                  paddingVertical: 10,
+                  paddingVertical: tokens.spacing.compact,
                   width: "100%",
                 }}
               >
-                <Text style={{ color: tokens.colors.dangerDark, fontSize: 13, fontWeight: "600" }}>
+                <Text
+                  style={{
+                    color: tokens.colors.dangerDark,
+                    fontSize: tokens.typography.label,
+                    fontWeight: "600",
+                  }}
+                >
                   {errorMessage}
                 </Text>
               </View>
@@ -152,7 +159,13 @@ export function SettingsDeleteAccountModal({
                   opacity: deletingAccount ? 0.5 : 1,
                 }}
               >
-                <Text style={{ color: tokens.colors.muted, fontSize: 14, fontWeight: "700" }}>
+                <Text
+                  style={{
+                    color: tokens.colors.muted,
+                    fontSize: tokens.typography.body,
+                    fontWeight: "700",
+                  }}
+                >
                   {t("common.cancel")}
                 </Text>
               </Pressable>
@@ -183,7 +196,13 @@ export function SettingsDeleteAccountModal({
                 {deletingAccount ? (
                   <ActivityIndicator color={tokens.colors.surface} size="small" />
                 ) : null}
-                <Text style={{ color: tokens.colors.surface, fontSize: 14, fontWeight: "700" }}>
+                <Text
+                  style={{
+                    color: tokens.colors.surface,
+                    fontSize: tokens.typography.body,
+                    fontWeight: "700",
+                  }}
+                >
                   {deletingAccount
                     ? t("common.deleting")
                     : errorMessage

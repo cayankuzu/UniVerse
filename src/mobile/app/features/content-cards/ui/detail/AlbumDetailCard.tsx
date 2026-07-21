@@ -13,7 +13,7 @@ import { type OverflowActionItem } from "../../../../shared/components";
 import { downloadMediaToGallery } from "../../../../shared/media/downloadMediaToGallery";
 import { isVideoMediaUri } from "../../../../shared/media/mediaVideoUtils";
 import { reportAlbum } from "../../data";
-import { tokens } from "../../../../shared/theme";
+import { tokens, withAlpha } from "../../../../shared/theme";
 
 type AlbumDetailCardContext = "feed" | "search" | "profile" | "event_album";
 
@@ -82,7 +82,7 @@ export function AlbumDetailCard({
     return [
       {
         key: isOwnPhoto ? "download" : "report",
-        label: isOwnPhoto ? "Indir" : "Şikayet Et",
+        label: isOwnPhoto ? "İndir" : "Şikâyet Et",
         destructive: !isOwnPhoto,
         onPress: () => {
           void (async () => {
@@ -98,7 +98,7 @@ export function AlbumDetailCard({
               await reportAlbum({ photoId: photo.id, username: photo.username });
             } catch (error) {
               Alert.alert(
-                isOwnPhoto ? "Indirme başarısız" : "Şikayet gönderilemedi",
+                isOwnPhoto ? "İndirme başarısız" : "Şikâyet gönderilemedi",
                 String((error as { message?: string } | null)?.message || "İşlem tamamlanamadı."),
               );
             }
@@ -123,11 +123,11 @@ export function AlbumDetailCard({
     <>
       <View
         style={{
-          borderRadius: 18,
+          borderRadius: tokens.radius.card,
           overflow: "hidden",
           backgroundColor: tokens.colors.surface,
           borderWidth: 1,
-          borderColor: "rgba(15,23,42,0.07)",
+          borderColor: withAlpha(tokens.colors.foreground, 0.07),
         }}
       >
         <AlbumDetailHeader

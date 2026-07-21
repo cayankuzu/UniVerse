@@ -63,12 +63,15 @@ export async function getEventDetailProjection(params: {
     : createEmptyBlockedVisibilitySnapshot();
 
   try {
+    const rpcArgs = {
+      ...resolveProjectionDeltaParams(context),
+      target_event_id: params.eventId,
+      viewer_id: params.viewerId || null,
+    };
     const rpcEnvelope = RUNTIME_FLAGS.useProjectionEventDetail
-      ? await tryProjectionRpc<unknown>("event_detail_projection", {
-          ...resolveProjectionDeltaParams(context),
-          target_event_id: params.eventId,
-          viewer_id: params.viewerId || null,
-        })
+      ? context.signal
+        ? await tryProjectionRpc<unknown>("event_detail_projection", rpcArgs, context.signal)
+        : await tryProjectionRpc<unknown>("event_detail_projection", rpcArgs)
       : null;
 
     if (rpcEnvelope) {
@@ -136,14 +139,17 @@ export async function getAlbumEventProjection(params: {
     : createEmptyBlockedVisibilitySnapshot();
 
   try {
+    const rpcArgs = {
+      cursor: context.cursor || null,
+      ...resolveProjectionDeltaParams(context),
+      limit_count: clampProjectionLimit(context.limit, 33),
+      target_event_id: params.eventId,
+      viewer_id: params.viewerId || null,
+    };
     const rpcEnvelope = RUNTIME_FLAGS.useProjectionAlbum
-      ? await tryProjectionRpc<unknown>("album_event_projection", {
-          cursor: context.cursor || null,
-          ...resolveProjectionDeltaParams(context),
-          limit_count: clampProjectionLimit(context.limit, 33),
-          target_event_id: params.eventId,
-          viewer_id: params.viewerId || null,
-        })
+      ? context.signal
+        ? await tryProjectionRpc<unknown>("album_event_projection", rpcArgs, context.signal)
+        : await tryProjectionRpc<unknown>("album_event_projection", rpcArgs)
       : null;
 
     if (rpcEnvelope) {

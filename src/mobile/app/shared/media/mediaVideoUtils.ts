@@ -59,11 +59,11 @@ export function isSelectableVideoDuration(durationMs?: number | null) {
 }
 
 export function buildVideoDurationLimitMessage() {
-  return `Video suresi cok uzun. En fazla ${Math.floor(MAX_VIDEO_DURATION_SECONDS / 60)} dakikalik video yukleyebilirsin.`;
+  return `Video süresi çok uzun. En fazla ${Math.floor(MAX_VIDEO_DURATION_SECONDS / 60)} dakikalık video yükleyebilirsin.`;
 }
 
 export function buildVideoSizeLimitMessage() {
-  return `Video boyutu cok buyuk. 1080p olarak hazirlandiginda en fazla ${MAX_VIDEO_UPLOAD_LIMIT_MB} MB video yukleyebilirsin.`;
+  return `Video boyutu çok büyük. 1080p olarak hazırlandığında en fazla ${MAX_VIDEO_UPLOAD_LIMIT_MB} MB video yükleyebilirsin.`;
 }
 
 export function buildVideoCaptureLimitMessage() {
@@ -71,7 +71,7 @@ export function buildVideoCaptureLimitMessage() {
 }
 
 export function buildVideoNormalizationFailureMessage() {
-  return "Video 1080p olarak hazirlanamadi. Lutfen daha kisa veya farkli bir video secip tekrar dene.";
+  return "Video 1080p olarak hazırlanamadı. Lütfen daha kısa veya farklı bir video seçip tekrar dene.";
 }
 
 export function formatMediaDuration(durationMs?: number | null) {

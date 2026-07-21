@@ -1,11 +1,9 @@
 import { Users } from "lucide-react-native";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { Pressable, StyleSheet, View } from "react-native";
 import { Avatar } from "../../../../shared/components";
 import type { EventWithMeta } from "../../data";
-import {
-  formatEventHeaderDate,
-  formatEventHeaderTime,
-} from "../../application/feedCardPresentation";
+import { formatContentAgeLabel } from "../../application/feedCardPresentation";
 import type { HomeEventCardPresentation } from "./eventCard.types";
 import { tokens } from "../../../../shared/theme";
 
@@ -16,8 +14,7 @@ interface Props {
 }
 
 export function EventCardHeader({ event, presentation, onPress }: Props) {
-  const dateLabel = presentation?.createdAtDateLabel || formatEventHeaderDate(event.createdAt);
-  const timeLabel = presentation?.createdAtTimeLabel || formatEventHeaderTime(event.createdAt);
+  const ageLabel = formatContentAgeLabel(event.createdAt);
   const clubSubtitle = presentation?.clubSubtitle || event.university;
 
   return (
@@ -28,7 +25,7 @@ export function EventCardHeader({ event, presentation, onPress }: Props) {
             <Avatar
               uri={event.clubImage}
               name={event.club}
-              size={40}
+              size={34}
               fallbackInitials={presentation?.avatarInitials}
             />
           ) : (
@@ -47,10 +44,9 @@ export function EventCardHeader({ event, presentation, onPress }: Props) {
         </View>
       </Pressable>
 
-      {dateLabel || timeLabel ? (
+      {ageLabel ? (
         <View style={styles.timeCopy}>
-          {!!dateLabel && <Text style={styles.timeLabel}>{dateLabel}</Text>}
-          {!!timeLabel && <Text style={styles.timeLabel}>{timeLabel}</Text>}
+          <Text style={styles.timeLabel}>{ageLabel}</Text>
         </View>
       ) : null}
     </View>
@@ -78,35 +74,35 @@ const styles = StyleSheet.create({
   clubSubtitle: {
     color: tokens.colors.muted,
     fontSize: tokens.typography.caption,
-    marginTop: 1,
+    marginTop: tokens.spacing.hairline,
   },
   clubTitle: {
     color: tokens.colors.foreground,
-    fontSize: 15,
+    fontSize: tokens.typography.control,
     fontWeight: tokens.fontWeight.bold,
   },
   container: {
     alignItems: "center",
     flexDirection: "row",
-    gap: 10,
-    paddingBottom: 10,
-    paddingHorizontal: 14,
+    gap: tokens.spacing.compact,
+    paddingBottom: tokens.spacing.compact,
+    paddingHorizontal: tokens.spacing.smPlus,
     paddingTop: tokens.spacing.sm,
   },
   pressable: {
     alignItems: "center",
     flex: 1,
     flexDirection: "row",
-    gap: 10,
+    gap: tokens.spacing.compact,
   },
   timeCopy: {
     alignItems: "flex-end",
-    gap: 1,
-    marginRight: 2,
+    gap: tokens.spacing.hairline,
+    marginRight: tokens.spacing.micro,
   },
   timeLabel: {
     color: tokens.colors.mutedFg,
-    fontSize: tokens.typography.micro,
+    fontSize: tokens.typography.caption,
     fontWeight: tokens.fontWeight.semibold,
   },
 });

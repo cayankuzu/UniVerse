@@ -17,13 +17,14 @@
  */
 import { useEffect, useMemo, useRef } from "react";
 import type { ViewToken } from "react-native";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, type QueryKey } from "@tanstack/react-query";
 import {
   logNetworkBudgetSkip,
   logPerformanceBudgetTrim,
   logViewportPrefetchFired,
 } from "../dataLoadingTelemetry";
 import { prefetchEventExperience, prefetchProfileExperience } from "./intentPrefetch";
+import { projectionKeys } from "../projectionKeys";
 import { resolveNetworkBudget } from "../networkAwareBudget";
 import {
   resolvePrefetchPerformanceBudget,
@@ -70,6 +71,7 @@ export interface UseViewportPrefetchOptions<T> {
 export function useViewportPrefetch<T>(options: UseViewportPrefetchOptions<T>) {
   const queryClient = useQueryClient();
   const prefetchedTargetsRef = useRef(new Set<string>());
+  const scheduledQueryKeysRef = useRef<QueryKey[]>([]);
   const optionsRef = useRef(options);
   const budget = resolvePrefetchPerformanceBudget(options.tier || "tier1");
 
@@ -79,7 +81,14 @@ export function useViewportPrefetch<T>(options: UseViewportPrefetchOptions<T>) {
 
   useEffect(() => {
     prefetchedTargetsRef.current.clear();
-  }, [options.scopeKey, options.viewerKey]);
+    scheduledQueryKeysRef.current = [];
+    return () => {
+      scheduledQueryKeysRef.current.forEach((queryKey) => {
+        void queryClient.cancelQueries({ exact: true, queryKey });
+      });
+      scheduledQueryKeysRef.current = [];
+    };
+  }, [options.scopeKey, options.viewerKey, queryClient]);
 
   const onViewableItemsChangedRef = useRef(
     ({ viewableItems }: { changed: ViewToken[]; viewableItems: ViewToken[] }) => {
@@ -125,6 +134,9 @@ export function useViewportPrefetch<T>(options: UseViewportPrefetchOptions<T>) {
 
           if (target.type === "event") {
             scheduledEventCount += 1;
+            scheduledQueryKeysRef.current.push(
+              projectionKeys.eventDetail(target.id, currentOptions.viewerKey),
+            );
             void prefetchEventExperience({
               eventId: target.id,
               queryClient,
@@ -134,6 +146,9 @@ export function useViewportPrefetch<T>(options: UseViewportPrefetchOptions<T>) {
             });
           } else {
             scheduledProfileCount += 1;
+            scheduledQueryKeysRef.current.push(
+              projectionKeys.profileOverview(target.username, currentOptions.viewerKey),
+            );
             void prefetchProfileExperience({
               queryClient,
               username: target.username,

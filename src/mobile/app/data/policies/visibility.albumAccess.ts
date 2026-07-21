@@ -22,8 +22,8 @@ function resolveAlbumBlockedReason(clubIsPrivate: boolean, album: BaseEntity) {
   return (
     album.lockedReasonText ||
     (clubIsPrivate
-      ? "Bu kulübün albumunu gormek icin kulübü takip etmelisiniz."
-      : "Bu albümü gormek icin kullanıcıy? takip etmelisiniz.")
+      ? "Bu kulübün albümünü görmek için kulübü takip etmelisiniz."
+      : "Bu albümü görmek için kullanıcıyı takip etmelisiniz.")
   );
 }
 
@@ -60,7 +60,7 @@ export function canViewAlbum(
       const canView = Boolean(album.canOpenAlbum ?? album.canDiscoverAlbum);
       return {
         canView,
-        reason: canView ? undefined : "Bu album etkinlik albumunde gösterilmiyor.",
+        reason: canView ? undefined : "Bu albüm etkinlik albümünde gösterilmiyor.",
       };
     }
 
@@ -80,7 +80,7 @@ export function canViewAlbum(
       Boolean(visibility.showOnOwnProfile || visibility.showOnClubProfile);
     return {
       canView,
-      reason: canView ? undefined : "Gizli hesap albumleri arama listesinde gösterilmez.",
+      reason: canView ? undefined : "Gizli hesap albümleri arama listesinde gösterilmez.",
     };
   }
 
@@ -95,7 +95,7 @@ export function canViewAlbum(
     );
     return {
       canView,
-      reason: canView ? undefined : "Bu album etkinlik albumunde gösterilmiyor.",
+      reason: canView ? undefined : "Bu albüm etkinlik albümünde gösterilmiyor.",
     };
   }
 
@@ -109,7 +109,7 @@ export function canViewAlbum(
     );
     return {
       canView,
-      reason: canView ? undefined : "Bu kulübün albumunu gormek icin kulübü takip etmelisiniz.",
+      reason: canView ? undefined : "Bu kulübün albümünü görmek için kulübü takip etmelisiniz.",
     };
   }
 
@@ -118,7 +118,7 @@ export function canViewAlbum(
   );
   return {
     canView,
-    reason: canView ? undefined : "Bu albümü gormek icin kullanıcıy? takip etmelisiniz.",
+    reason: canView ? undefined : "Bu albümü görmek için kullanıcıyı takip etmelisiniz.",
   };
 }
 
@@ -145,8 +145,8 @@ export function getAlbumButtonAction(
   if (removedEvent) {
     return {
       action: "disabled",
-      label: "Etkinligi Gor",
-      message: album.lockedReasonText || "Bu albümün bagli oldugu etkinlik artik mevcut degil.",
+      label: "Etkinliği Gör",
+      message: album.lockedReasonText || "Bu albümün bağlı olduğu etkinlik artık mevcut değil.",
     };
   }
 
@@ -160,15 +160,15 @@ export function getAlbumButtonAction(
   if (album.eventId || hasAlbumCapabilities(album) || canOpenEventDetail) {
     return {
       action: "view_event",
-      label: "Etkinligi Gor",
+      label: "Etkinliği Gör",
       navigateTo: album.eventId ? `/album/${album.eventId}` : undefined,
     };
   }
 
   return {
     action: clubUsername ? "view_club" : "disabled",
-    label: clubUsername ? "Kulübü Gor" : "Etkinligi Gor",
+    label: clubUsername ? "Kulübü Gör" : "Etkinliği Gör",
     navigateTo: clubUsername ? `/profile/${clubUsername}` : undefined,
-    message: "Bu etkinlik sadece takipcilere Özeldir. Kulübü takip ederek gorebilirsiniz.",
+    message: "Bu etkinlik sadece takipçilere özeldir. Kulübü takip ederek görebilirsiniz.",
   };
 }

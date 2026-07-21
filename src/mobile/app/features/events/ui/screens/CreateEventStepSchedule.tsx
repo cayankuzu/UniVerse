@@ -15,6 +15,7 @@ import { ACCESS_OPTIONS, type CreateEventFormState } from "../../domain";
 import { EventFormSection } from "./EventFormSection";
 import { CreateEventSchedulePicker } from "./CreateEventSchedulePicker";
 import { CreateEventSchedulePickerField } from "./CreateEventSchedulePickerField";
+import { tokens } from "../../../../shared/theme";
 
 interface Props {
   fieldErrors: Partial<Record<keyof CreateEventFormState, string | undefined>>;
@@ -49,7 +50,7 @@ export function CreateEventStepSchedule({ fieldErrors, form, onSetField }: Props
       title={t("events.create.schedule.title")}
       subtitle={t("events.create.schedule.subtitle")}
     >
-      <View style={{ flexDirection: "row", gap: 10 }}>
+      <View style={{ flexDirection: "row", gap: tokens.spacing.compact }}>
         <View style={{ flex: 1 }}>
           <CreateEventSchedulePickerField
             errorText={fieldErrors.startDate}
@@ -74,7 +75,7 @@ export function CreateEventStepSchedule({ fieldErrors, form, onSetField }: Props
         </View>
       </View>
 
-      <View style={{ flexDirection: "row", gap: 10 }}>
+      <View style={{ flexDirection: "row", gap: tokens.spacing.compact }}>
         <View style={{ flex: 1 }}>
           <CreateEventSchedulePickerField
             errorText={fieldErrors.startTime}
@@ -127,7 +128,7 @@ export function CreateEventStepSchedule({ fieldErrors, form, onSetField }: Props
         onSelect={(value) => onSetField("access", value)}
       />
 
-      <View style={{ flexDirection: "row", gap: 10 }}>
+      <View style={{ flexDirection: "row", gap: tokens.spacing.compact }}>
         <View style={{ flex: 1 }}>
           <SelectField
             errorText={fieldErrors.fee}

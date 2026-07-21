@@ -6,6 +6,8 @@ export {
 } from "./AppButton";
 export { AppFlatList, type AppFlatListProps, type AppFlatListRef } from "./AppFlatList";
 export { AppScrollView, type AppScrollViewProps } from "./AppScrollView";
+export { AppText, type AppTextProps, type AppTextVariant } from "./AppText";
+export { ProfileCoverPlaceholder, ProfileRoleBadge } from "./ProfileIdentity";
 export { AppIconButton } from "./AppIconButton";
 export { AppListSkeleton, type AppListSkeletonVariant } from "./AppListSkeleton";
 export {

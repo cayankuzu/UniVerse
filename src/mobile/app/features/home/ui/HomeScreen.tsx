@@ -57,6 +57,7 @@ export function HomeScreen({ navigation }: Props) {
     loadState,
     loadingMore,
     onNotificationsPressIn,
+    onFeedFirstDraw,
     onRefresh,
     onUserInteraction,
     onViewableItemsChanged,
@@ -190,6 +191,7 @@ export function HomeScreen({ navigation }: Props) {
         loadState={loadState}
         loadingMore={loadingMore}
         onEndReached={handleEndReached}
+        onFirstDraw={onFeedFirstDraw}
         onRefresh={onRefresh}
         onUserInteraction={onUserInteraction}
         onViewableItemsChanged={onViewableItemsChanged}

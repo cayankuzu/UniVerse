@@ -73,7 +73,7 @@ describe("useOnboardingProviderState", () => {
     expect(result.current.showPermissions).toBe(false);
   });
 
-  it("keeps the reminder visible when no permission has been granted yet", async () => {
+  it("keeps the startup permission wall closed when no permission has been granted yet", async () => {
     mockReadPermissionSnapshot.mockResolvedValue({
       camera: "undetermined",
       location: "denied",
@@ -85,10 +85,8 @@ describe("useOnboardingProviderState", () => {
 
     const { result } = renderHook(() => useOnboardingProviderState());
 
-    await waitFor(() => {
-      expect(result.current.showPermissions).toBe(true);
-    });
-
+    await waitFor(() => expect(mockReadPermissionSnapshot).toHaveBeenCalled());
+    expect(result.current.showPermissions).toBe(false);
     expect(result.current.hasPermissions).toBe(false);
   });
 });

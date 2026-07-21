@@ -1,5 +1,6 @@
 import React from "react";
-import { Pressable, Text, View } from "react-native";
+import { AppText as Text } from "../../shared/components/AppText";
+import { Pressable, View } from "react-native";
 import { logError, Sentry } from "../../platform/observability";
 import { tokens } from "../../shared/theme";
 
@@ -39,16 +40,16 @@ export function AppErrorBoundary({ children }: AppErrorBoundaryProps) {
             alignItems: "center",
             backgroundColor: tokens.colors.background,
             flex: 1,
-            gap: 14,
+            gap: tokens.spacing.smPlus,
             justifyContent: "center",
-            paddingHorizontal: 24,
+            paddingHorizontal: tokens.spacing.xl,
           }}
         >
           <Text
             accessibilityRole="header"
             style={{
               color: tokens.colors.foreground,
-              fontSize: 20,
+              fontSize: tokens.typography.sectionTitle,
               fontWeight: "800",
               textAlign: "center",
             }}
@@ -58,8 +59,8 @@ export function AppErrorBoundary({ children }: AppErrorBoundaryProps) {
           <Text
             style={{
               color: tokens.colors.muted,
-              fontSize: 14,
-              lineHeight: 20,
+              fontSize: tokens.typography.body,
+              lineHeight: tokens.lineHeight.body,
               textAlign: "center",
             }}
           >
@@ -103,13 +104,19 @@ export function AppErrorBoundary({ children }: AppErrorBoundaryProps) {
             style={{
               alignItems: "center",
               backgroundColor: tokens.colors.primary,
-              borderRadius: 12,
+              borderRadius: tokens.radius.md,
               justifyContent: "center",
-              minHeight: tokens.minHeight.touchTarget,
-              paddingHorizontal: 18,
+              minHeight: tokens.minHeight.buttonLg,
+              paddingHorizontal: tokens.spacing.mdPlus,
             }}
           >
-            <Text style={{ color: tokens.colors.surface, fontSize: 14, fontWeight: "700" }}>
+            <Text
+              style={{
+                color: tokens.colors.surface,
+                fontSize: tokens.typography.body,
+                fontWeight: "700",
+              }}
+            >
               Yeniden dene
             </Text>
           </Pressable>

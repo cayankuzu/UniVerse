@@ -1,6 +1,7 @@
 import React from "react";
 import { View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { tokens } from "../../../../shared/theme";
 
 interface AuthStepProgressProps {
   total: number;
@@ -10,15 +11,22 @@ interface AuthStepProgressProps {
 
 export function AuthStepProgress({ total, current, colors }: AuthStepProgressProps) {
   return (
-    <View style={{ flexDirection: "row", gap: 6, paddingHorizontal: 20, paddingBottom: 12 }}>
+    <View
+      style={{
+        flexDirection: "row",
+        gap: tokens.spacing.xsMinus,
+        paddingHorizontal: tokens.spacing.lg,
+        paddingBottom: tokens.spacing.sm,
+      }}
+    >
       {Array.from({ length: total }).map((_, i) => {
         const active = i < current;
         return (
-          <View key={i} style={{ flex: 1, borderRadius: 999, overflow: "hidden" }}>
+          <View key={i} style={{ flex: 1, borderRadius: tokens.radius.pill, overflow: "hidden" }}>
             {active ? (
               <LinearGradient colors={colors} style={{ height: 4 }} />
             ) : (
-              <View style={{ height: 4, backgroundColor: "#e2e8f0" }} />
+              <View style={{ height: 4, backgroundColor: tokens.colors.border }} />
             )}
           </View>
         );

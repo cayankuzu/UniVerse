@@ -1,8 +1,9 @@
 import React from "react";
-import { Pressable, Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { Pressable, View } from "react-native";
 import { Calendar, ChevronRight } from "lucide-react-native";
 import { Avatar } from "../../../../shared/components";
-import { tokens } from "../../../../shared/theme";
+import { tokens, withAlpha } from "../../../../shared/theme";
 import type { NotificationItem } from "../../data";
 import {
   getNotificationIconBg,
@@ -67,28 +68,28 @@ export const NotificationListItem = React.memo(function NotificationListItem({
       accessibilityRole="button"
       onPress={onPress}
       style={{
-        borderRadius: 14,
+        borderRadius: tokens.radius.control,
         borderWidth: 1,
-        borderColor: item.read ? "rgba(15,23,42,0.08)" : "rgba(37,99,235,0.35)",
+        borderColor: withAlpha(tokens.colors.foreground, 0.08),
         backgroundColor: item.read ? tokens.colors.surface : tokens.colors.surfaceTint,
-        paddingHorizontal: 12,
-        paddingVertical: 11,
+        paddingHorizontal: tokens.spacing.sm,
+        paddingVertical: tokens.spacing.compactPlus,
         flexDirection: "row",
         alignItems: "flex-start",
-        gap: 10,
+        gap: tokens.spacing.compact,
       }}
     >
       <Pressable
-        accessibilityLabel={`${item.fromName} profilini ac`}
+        accessibilityLabel={`${item.fromName} profilini aç`}
         accessibilityRole="button"
         onPress={() => onOpenProfile(item.fromUsername)}
-        style={{ minHeight: tokens.minHeight.touchTarget, minWidth: tokens.minHeight.touchTarget }}
+        style={{ minHeight: tokens.minHeight.row, minWidth: tokens.minHeight.row }}
       >
         <Avatar
           uri={item.fromImage}
           variants={item.fromImageVariants}
           name={item.fromName}
-          size={42}
+          size={34}
         />
       </Pressable>
 
@@ -96,12 +97,12 @@ export const NotificationListItem = React.memo(function NotificationListItem({
         style={{
           width: 22,
           height: 22,
-          borderRadius: 999,
+          borderRadius: tokens.radius.pill,
           backgroundColor: getNotificationIconBg(item.type),
           alignItems: "center",
           justifyContent: "center",
-          marginTop: 10,
-          marginLeft: -20,
+          marginTop: tokens.spacing.compact,
+          marginLeft: -16,
           borderWidth: 1.5,
           borderColor: tokens.colors.surface,
         }}
@@ -113,9 +114,9 @@ export const NotificationListItem = React.memo(function NotificationListItem({
         <Text
           style={{
             color: tokens.colors.foreground,
-            fontSize: 13,
+            fontSize: tokens.typography.label,
             fontWeight: "700",
-            lineHeight: 18,
+            lineHeight: tokens.lineHeight.label,
           }}
         >
           {cardContent.actorName}{" "}
@@ -126,10 +127,10 @@ export const NotificationListItem = React.memo(function NotificationListItem({
         {cardContent.contextTitle ? (
           <Text
             style={{
-              marginTop: 2,
+              marginTop: tokens.spacing.micro,
               color: tokens.colors.muted,
               fontSize: tokens.typography.caption,
-              lineHeight: 17,
+              lineHeight: tokens.lineHeight.caption,
             }}
             numberOfLines={2}
           >
@@ -142,10 +143,10 @@ export const NotificationListItem = React.memo(function NotificationListItem({
         {cardContent.previewText ? (
           <Text
             style={{
-              marginTop: 3,
+              marginTop: tokens.spacing.microPlus,
               color: tokens.colors.muted,
               fontSize: tokens.typography.caption,
-              lineHeight: 17,
+              lineHeight: tokens.lineHeight.caption,
             }}
             numberOfLines={2}
           >
@@ -153,7 +154,14 @@ export const NotificationListItem = React.memo(function NotificationListItem({
           </Text>
         ) : null}
         {cardContent.contextSubtitle ? (
-          <View style={{ marginTop: 4, flexDirection: "row", alignItems: "center", gap: 4 }}>
+          <View
+            style={{
+              marginTop: tokens.spacing.xxs,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: tokens.spacing.xxs,
+            }}
+          >
             <Calendar size={12} color={tokens.colors.muted} />
             <Text
               style={{ color: tokens.colors.muted, fontSize: tokens.typography.caption }}
@@ -165,7 +173,7 @@ export const NotificationListItem = React.memo(function NotificationListItem({
         ) : null}
         <Text
           style={{
-            marginTop: 6,
+            marginTop: tokens.spacing.xsMinus,
             color: tokens.colors.muted,
             fontSize: tokens.typography.caption,
             fontWeight: "600",
@@ -175,7 +183,7 @@ export const NotificationListItem = React.memo(function NotificationListItem({
         </Text>
 
         {showFollowActions ? (
-          <View style={{ marginTop: 7, gap: 6 }}>
+          <View style={{ marginTop: tokens.spacing.xsCompact, gap: tokens.spacing.xsMinus }}>
             <FollowRequestActionButtons
               acceptSelected={followAcceptSelected}
               disabled={!canShowFollowActions || followActionsLocked}
@@ -195,10 +203,10 @@ export const NotificationListItem = React.memo(function NotificationListItem({
         ) : null}
       </View>
 
-      <View style={{ alignItems: "center", justifyContent: "center", gap: 6 }}>
+      <View style={{ alignItems: "center", justifyContent: "center", gap: tokens.spacing.xsMinus }}>
         {!item.read ? (
           <View
-            accessibilityLabel="Okunmamis"
+            accessibilityLabel="Okunmamış"
             style={{
               width: 7,
               height: 7,

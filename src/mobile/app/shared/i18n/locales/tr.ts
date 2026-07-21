@@ -139,7 +139,7 @@ const trBaseMessages = {
   "viewProfile.blocked.subtitle":
     "Profil özeti görünür durumda. İçerik listeleri ve etkileşim alanları kapalı tutulur.",
   "viewProfile.blocked.unblock": "Engeli Kaldır",
-  "viewProfile.blocked.report": "Şikayet Et",
+  "viewProfile.blocked.report": "Şikâyet Et",
   "viewProfile.private.notice.title": "Bu hesap gizlidir",
   "viewProfile.private.notice.subtitle": "Takip etmeden bu profile ait listeler açılmaz.",
   "viewProfile.a11y.follow": "Takip işlemi",
@@ -178,7 +178,7 @@ const trBaseMessages = {
   "events.album.warning.cropFailed": "Fotoğraf kırpılamadı.",
   "events.album.warning.noPhoto": "Medya seçilmedi.",
   "events.album.warning.maxTotal":
-    "Bir albüm kartına en fazla 9 medya ekleyebilirsin. Fotoğraf ve video için ayrı adet sınırı yoktur; videoların her biri en fazla 3 dakika olabilir.",
+    "Bir albüm kartına en fazla 6 medya ekleyebilirsin. Fotoğraf ve video için ayrı adet sınırı yoktur; videoların her biri en fazla 3 dakika olabilir.",
   "events.album.warning.remaining": "Bu albüm kartında kalan medya hakkın {count}.",
   "events.album.subtitle.fallback": "Etkinlik Albümü",
   "auth.register.title": "Hesap Türünü Seç",
@@ -414,7 +414,7 @@ const trBaseMessages = {
   "search.filter.fee.free": "Ücretsiz",
   "search.filter.fee.paid": "Ücretli",
   "search.filter.clear": "Filtreleri Temizle",
-  "profile.report.title": "Şikayet et",
+  "profile.report.title": "Şikâyet et",
   "profile.report.submitted": "Bildirim gönderildi",
   "profile.report.submittedHint": "İnceleme için ekibe iletildi.",
   "profile.report.reasons.fake": "Sahte profil",

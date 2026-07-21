@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import type { StyleProp, TextStyle, ViewStyle } from "react-native";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import { tokens } from "../../../../shared/theme";
 
 type Props = {
   collapsedLabel?: string;
@@ -42,7 +44,7 @@ export function ExpandableCardText({
       {canExpand ? (
         <Pressable
           onPress={() => setExpanded((current) => !current)}
-          style={{ alignSelf: "flex-start", marginTop: 4 }}
+          style={{ alignSelf: "flex-start", marginTop: tokens.spacing.xxs }}
         >
           <Text style={toggleTextStyle}>{expanded ? expandedLabel : collapsedLabel}</Text>
         </Pressable>

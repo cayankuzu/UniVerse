@@ -5,6 +5,7 @@ import { buildPreparedAlbumVisibility } from "../../../content-cards/public/pres
 import { AppFlatList, AppListSkeleton } from "../../../../shared/components";
 import { isPendingPhoto, type PendingAlbumPhoto } from "../../data/albumUploadQueueRepository";
 import type { AlbumEventProjectionItem } from "../../data/albumProjection.types";
+import { tokens } from "../../../../shared/theme";
 
 type GridMetrics = {
   cardHeight: number;
@@ -53,8 +54,8 @@ export function AlbumViewPhotoGrid({
     () => ({
       flexGrow: 1,
       paddingHorizontal: grid.horizontalPadding,
-      paddingTop: 8,
-      paddingBottom: 18,
+      paddingTop: tokens.spacing.xs,
+      paddingBottom: tokens.spacing.mdPlus,
     }),
     [grid.horizontalPadding],
   );

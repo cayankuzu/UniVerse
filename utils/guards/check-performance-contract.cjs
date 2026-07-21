@@ -13,7 +13,22 @@ const requireText = (relativePath, pattern, message) => {
 };
 
 const budgets = JSON.parse(read("config/performance-budgets.json"));
-if (budgets.splashMaxWaitMs > 900 || budgets.tapResponseP95Ms > 100) {
+if (
+  budgets.splashMaxWaitMs > 900 ||
+  budgets.tapResponseP95Ms > 100 ||
+  budgets.firstFrameP95Ms > 700 ||
+  budgets.firstCachedContentP95Ms > 850 ||
+  budgets.interactiveP95Ms > 1_200 ||
+  budgets.navigationResponseP95Ms > 300 ||
+  budgets.jsFrameBudgetMs > 16.67 ||
+  budgets.feedFpsP50Min < 55 ||
+  budgets.feedBlankAreaP95PxMax > 8 ||
+  budgets.mediaCacheHitRateMin < 0.65 ||
+  budgets.projectionRpcP95Ms > 1_200 ||
+  budgets.projectionRpcP99Ms > 2_500 ||
+  budgets.projectionPayloadP95BytesMax > 180_000 ||
+  budgets.warmupUsefulnessRateMin < 0.4
+) {
   throw new Error("Interactive performance budgets were relaxed.");
 }
 

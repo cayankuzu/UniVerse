@@ -36,7 +36,7 @@ jest.mock("../../../platform/media/fileIntegrity", () => ({
 jest.mock("./albumUploadQueue.media", () => ({
   buildAlbumUploadMediaAccessErrorMessage: jest.fn(
     () =>
-      "Secilen medya dosyasina Android galerisi uzerinden erisilemiyor. Karti silip medyayi galeriden yeniden sec.",
+      "Seçilen medya dosyasına Android galerisi üzerinden erişilemiyor. Kartı silip medyayı galeriden yeniden seç.",
   ),
   cleanupAlbumUploadPayloadMedia: jest.fn(async () => undefined),
   getAlbumUploadPayloadImages: jest.fn((payload: Record<string, unknown>) =>
@@ -206,7 +206,7 @@ describe("albumUploadQueueProcessor", () => {
         payload: expect.objectContaining({
           __uploadProgress: expect.objectContaining({
             percent: 100,
-            stage: "Paylasim tamamlandi",
+            stage: "Paylaşım tamamlandı",
           }),
         }),
         status: "uploading",

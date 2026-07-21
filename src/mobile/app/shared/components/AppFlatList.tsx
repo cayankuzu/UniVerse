@@ -1,4 +1,5 @@
 import { FlashList, type FlashListProps, type FlashListRef } from "@shopify/flash-list";
+import { AppText as Text } from "./AppText";
 import {
   forwardRef,
   useCallback,
@@ -18,7 +19,7 @@ import type {
   StyleProp,
   ViewStyle,
 } from "react-native";
-import { Platform, RefreshControl, StyleSheet, Text, View } from "react-native";
+import { Platform, RefreshControl, StyleSheet, View } from "react-native";
 import { tokens } from "../../shared/theme";
 import { t } from "../../shared/i18n";
 import {

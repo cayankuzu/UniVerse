@@ -3,6 +3,7 @@ import { Pressable, StatusBar, View, useWindowDimensions } from "react-native";
 import { AppImage } from "./AppImage";
 import { AppModalHost } from "./AppModalHost";
 import { getResponsiveLayoutTokens } from "../layout/responsive";
+import { tokens, withAlpha } from "../theme";
 
 interface ImageViewerModalProps {
   onClose: () => void;
@@ -12,7 +13,7 @@ interface ImageViewerModalProps {
 
 export function ImageViewerModal({ onClose, uri, visible }: ImageViewerModalProps) {
   const { height, width } = useWindowDimensions();
-  const tokens = getResponsiveLayoutTokens(width, height);
+  const layoutTokens = getResponsiveLayoutTokens(width, height);
 
   return (
     <AppModalHost
@@ -23,27 +24,27 @@ export function ImageViewerModal({ onClose, uri, visible }: ImageViewerModalProp
       onRequestClose={onClose}
     >
       <Pressable
-        accessibilityLabel="Gorsel onizleme"
+        accessibilityLabel="Görsel önizleme"
         accessibilityRole="imagebutton"
         accessibilityViewIsModal
         style={{
           alignItems: "center",
-          backgroundColor: "rgba(2,6,23,0.9)",
+          backgroundColor: withAlpha(tokens.colors.dark950, 0.9),
           flex: 1,
           justifyContent: "center",
-          padding: tokens.spacing.modalPadding,
+          padding: layoutTokens.spacing.modalPadding,
         }}
         onPress={onClose}
       >
         <StatusBar barStyle="light-content" />
         <View
           style={{
-            backgroundColor: "#0f172a",
-            borderColor: "rgba(148,163,184,0.35)",
-            borderRadius: 16,
+            backgroundColor: tokens.colors.foreground,
+            borderColor: withAlpha(tokens.colors.textSubtle, 0.35),
+            borderRadius: tokens.radius.lg,
             borderWidth: 1,
             maxHeight: "84%",
-            maxWidth: tokens.media.modalMaxWidth,
+            maxWidth: layoutTokens.media.modalMaxWidth,
             overflow: "hidden",
             width: "100%",
           }}
@@ -52,7 +53,7 @@ export function ImageViewerModal({ onClose, uri, visible }: ImageViewerModalProp
             <AppImage
               uri={uri}
               variant="full"
-              style={{ height: tokens.media.imageViewerHeight, width: "100%" }}
+              style={{ height: layoutTokens.media.imageViewerHeight, width: "100%" }}
               contentFit="contain"
             />
           ) : null}

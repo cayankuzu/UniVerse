@@ -1,11 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { FlatList, Pressable, Text, TextInput, View, useWindowDimensions } from "react-native";
+import { AppText as Text } from "./AppText";
+import { FlatList, Pressable, TextInput, View, useWindowDimensions } from "react-native";
 import { CheckCircle, ChevronDown, Circle, Search, SearchX, Shapes } from "lucide-react-native";
 import { tokens } from "../../shared/theme";
 import { t } from "../../shared/i18n";
 import { TEXT_LIMITS } from "../../shared/validation/textLimits";
 import { AppModalSheet } from "./AppModalSheet";
 import { useKeyboardSafeField, useKeyboardSafeFormActions } from "./KeyboardSafeForm";
+import { formatTurkishDisplayText } from "../i18n/turkishDisplay";
 
 interface CategorySelectorProps {
   errorText?: string;
@@ -56,7 +58,10 @@ export function CategorySelector({
   const filteredOptions = useMemo(() => {
     const q = normalize(query);
     if (!q) return sortedOptions;
-    return sortedOptions.filter((item) => normalize(item).includes(q));
+    return sortedOptions.filter(
+      (item) =>
+        normalize(item).includes(q) || normalize(formatTurkishDisplayText(item)).includes(q),
+    );
   }, [query, sortedOptions]);
 
   useEffect(() => {
@@ -130,7 +135,7 @@ export function CategorySelector({
           setVisible(true);
         }}
       >
-        <Shapes size={18} color={tokens.colors.mutedFg} />
+        <Shapes size={tokens.iconSize.lg} color={tokens.colors.mutedFg} />
         <Text
           style={{
             flex: 1,
@@ -143,23 +148,30 @@ export function CategorySelector({
             ? t("common.selected.count", { count: selected.length })
             : placeholder}
         </Text>
-        <ChevronDown size={20} color={tokens.colors.mutedFg} />
+        <ChevronDown size={tokens.iconSize.xl} color={tokens.colors.mutedFg} />
       </Pressable>
 
       {selected.length > 0 ? (
-        <View style={{ marginTop: 2, flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
+        <View
+          style={{
+            marginTop: tokens.spacing.micro,
+            flexDirection: "row",
+            flexWrap: "wrap",
+            gap: tokens.spacing.xsMinus,
+          }}
+        >
           {selected.slice(0, 8).map((item) => (
             <View
               key={item}
               style={{
-                borderRadius: 10,
-                paddingHorizontal: 10,
-                paddingVertical: 6,
+                borderRadius: tokens.radius.compact,
+                paddingHorizontal: tokens.spacing.compact,
+                paddingVertical: tokens.spacing.xsMinus,
                 backgroundColor: `${accent}1A`,
               }}
             >
               <Text style={{ fontSize: tokens.typography.tiny, fontWeight: "700", color: accent }}>
-                {item}
+                {formatTurkishDisplayText(item)}
               </Text>
             </View>
           ))}
@@ -170,7 +182,7 @@ export function CategorySelector({
         style={{
           color: isInvalid ? tokens.colors.danger : tokens.colors.mutedFg,
           fontSize: tokens.typography.caption,
-          minHeight: 16,
+          minHeight: tokens.lineHeight.caption,
         }}
       >
         {helperText}
@@ -191,7 +203,7 @@ export function CategorySelector({
             color: tokens.colors.muted,
             fontSize: tokens.typography.caption,
             fontWeight: "600",
-            marginBottom: 10,
+            marginBottom: tokens.spacing.compact,
           }}
         >
           {selected.length}/{maxSelections}
@@ -205,12 +217,12 @@ export function CategorySelector({
             borderWidth: 1,
             borderColor: tokens.colors.border,
             backgroundColor: tokens.colors.background,
-            paddingHorizontal: 10,
-            marginBottom: 10,
+            paddingHorizontal: tokens.spacing.compact,
+            marginBottom: tokens.spacing.compact,
             gap: tokens.spacing.xs,
           }}
         >
-          <Search size={16} color={tokens.colors.mutedFg} />
+          <Search size={tokens.iconSize.md} color={tokens.colors.mutedFg} />
           <TextInput
             ref={searchInputRef}
             accessibilityLabel={searchPlaceholder}
@@ -221,8 +233,9 @@ export function CategorySelector({
             onChangeText={setQuery}
             style={{
               flex: 1,
-              minHeight: tokens.minHeight.touchTarget,
+              minHeight: tokens.minHeight.inputMd,
               color: tokens.colors.foreground,
+              fontFamily: tokens.fontFamily.regular,
               fontSize: tokens.typography.body,
             }}
             placeholderTextColor={tokens.colors.mutedFg}
@@ -236,8 +249,15 @@ export function CategorySelector({
           style={{ maxHeight: listMaxHeight }}
           contentContainerStyle={{ paddingBottom: tokens.spacing.xs }}
           ListEmptyComponent={
-            <View style={{ minHeight: 64, alignItems: "center", justifyContent: "center", gap: 6 }}>
-              <SearchX size={18} color={tokens.colors.mutedFg} />
+            <View
+              style={{
+                minHeight: tokens.minHeight.touchTarget,
+                alignItems: "center",
+                justifyContent: "center",
+                gap: tokens.spacing.xsMinus,
+              }}
+            >
+              <SearchX size={tokens.iconSize.lg} color={tokens.colors.mutedFg} />
               <Text style={{ color: tokens.colors.mutedFg, fontSize: tokens.typography.caption }}>
                 {t("common.noResults")}
               </Text>
@@ -247,15 +267,15 @@ export function CategorySelector({
             const isSelected = selected.includes(item);
             return (
               <Pressable
-                accessibilityLabel={item}
+                accessibilityLabel={formatTurkishDisplayText(item)}
                 accessibilityRole="checkbox"
                 accessibilityState={{ checked: isSelected }}
                 onPress={() => toggle(item)}
                 style={{
-                  minHeight: tokens.minHeight.touchTarget,
-                  borderRadius: 10,
-                  paddingHorizontal: 10,
-                  paddingVertical: 10,
+                  minHeight: tokens.minHeight.row,
+                  borderRadius: tokens.radius.compact,
+                  paddingHorizontal: tokens.spacing.compact,
+                  paddingVertical: tokens.spacing.compact,
                   flexDirection: "row",
                   alignItems: "center",
                   gap: tokens.spacing.xs,
@@ -263,9 +283,9 @@ export function CategorySelector({
                 }}
               >
                 {isSelected ? (
-                  <CheckCircle size={18} color={accent} />
+                  <CheckCircle size={tokens.iconSize.lg} color={accent} />
                 ) : (
-                  <Circle size={18} color={tokens.colors.mutedFg} />
+                  <Circle size={tokens.iconSize.lg} color={tokens.colors.mutedFg} />
                 )}
                 <Text
                   style={{
@@ -276,7 +296,7 @@ export function CategorySelector({
                   }}
                   numberOfLines={2}
                 >
-                  {item}
+                  {formatTurkishDisplayText(item)}
                 </Text>
               </Pressable>
             );
@@ -287,7 +307,7 @@ export function CategorySelector({
           <Text
             accessibilityLiveRegion="polite"
             style={{
-              marginTop: 6,
+              marginTop: tokens.spacing.xsMinus,
               color: tokens.colors.dangerDark,
               fontSize: tokens.typography.caption,
               fontWeight: "600",
@@ -297,13 +317,19 @@ export function CategorySelector({
           </Text>
         ) : null}
 
-        <View style={{ marginTop: 10, flexDirection: "row", gap: 10 }}>
+        <View
+          style={{
+            marginTop: tokens.spacing.compact,
+            flexDirection: "row",
+            gap: tokens.spacing.compact,
+          }}
+        >
           <Pressable
             accessibilityRole="button"
             onPress={() => onChange([])}
             style={{
               flex: 1,
-              minHeight: tokens.minHeight.touchTarget,
+              minHeight: tokens.minHeight.buttonLg,
               borderRadius: tokens.radius.md,
               borderWidth: 1,
               borderColor: tokens.colors.border,
@@ -327,7 +353,7 @@ export function CategorySelector({
             onPress={() => setVisible(false)}
             style={{
               flex: 1,
-              minHeight: tokens.minHeight.touchTarget,
+              minHeight: tokens.minHeight.buttonLg,
               borderRadius: tokens.radius.md,
               backgroundColor: accent,
               alignItems: "center",

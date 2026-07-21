@@ -204,7 +204,7 @@ async function prepareLocalNormalizeUri(sourceUri: string) {
 
   const baseCacheDirectory = normalizeStorageText(cacheDirectory);
   if (!baseCacheDirectory) {
-    throw new Error("Fotograf hazirlanamadi.");
+    throw new Error("Fotoğraf hazırlanamadı.");
   }
   const tempDirectory = `${baseCacheDirectory.replace(/\/?$/, "/")}${STORAGE_NORMALIZE_CACHE_SEGMENT}/`;
   await makeDirectoryAsync(tempDirectory, { intermediates: true }).catch(() => null);
@@ -338,12 +338,12 @@ export async function normalizeStorageUploadFile(
   try {
     const info = await getInfoAsync(prepared.localUri).catch(() => null);
     if (!info?.exists || info.isDirectory) {
-      throw new Error("Fotograf bulunamadi.");
+      throw new Error("Fotoğraf bulunamadı.");
     }
 
     const constraints = STORAGE_IMAGE_CONSTRAINTS[folder];
     if (info.size > constraints.absoluteMaxSourceBytes) {
-      throw new Error("Fotograf boyutu cok buyuk. Lutfen daha kucuk bir gorsel sec.");
+      throw new Error("Fotoğraf boyutu çok büyük. Lütfen daha küçük bir görsel seç.");
     }
 
     const preferredFormat = inferPreferredSaveFormat(folder, file);

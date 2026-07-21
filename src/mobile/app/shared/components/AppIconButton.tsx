@@ -3,11 +3,13 @@ import type { StyleProp, ViewStyle } from "react-native";
 import { View } from "react-native";
 import { Badge, Surface, TouchableRipple } from "react-native-paper";
 import { tokens } from "../../shared/theme";
+import { triggerHapticFeedback, type AppHapticFeedback } from "../feedback/haptics";
 
 interface AppIconButtonProps {
   accessibilityLabel?: string;
   badgeContent?: number | string | null;
   disabled?: boolean;
+  haptic?: AppHapticFeedback;
   icon: (props: { color: string; size: number }) => ReactNode;
   iconColor?: string;
   iconSize?: number;
@@ -31,6 +33,7 @@ export const AppIconButton = memo(function AppIconButton({
   accessibilityLabel,
   badgeContent,
   disabled = false,
+  haptic,
   icon,
   iconColor,
   iconSize,
@@ -38,13 +41,13 @@ export const AppIconButton = memo(function AppIconButton({
   onPressIn,
   outlineColor,
   selected = false,
-  size = 36,
+  size = 32,
   style,
   surfaceColor,
   testID,
 }: AppIconButtonProps) {
   const resolvedBadge = normalizeBadgeContent(badgeContent);
-  const resolvedIconSize = iconSize ?? Math.max(16, Math.round(size * 0.48));
+  const resolvedIconSize = iconSize ?? Math.max(tokens.iconSize.md, Math.round(size * 0.48));
   const resolvedSurfaceColor =
     surfaceColor ?? (selected ? tokens.colors.accent : tokens.colors.surfaceVariant);
   const resolvedOutlineColor = outlineColor ?? tokens.colors.divider;
@@ -80,9 +83,17 @@ export const AppIconButton = memo(function AppIconButton({
           accessibilityLabel={accessibilityLabel || "Eylem"}
           accessibilityRole="button"
           accessibilityState={{ disabled, selected }}
+          accessibilityValue={resolvedBadge ? { text: resolvedBadge } : undefined}
           borderless={false}
           disabled={disabled}
-          onPress={onPress}
+          onPress={
+            onPress
+              ? () => {
+                  if (haptic) triggerHapticFeedback(haptic);
+                  onPress();
+                }
+              : undefined
+          }
           onPressIn={onPressIn}
           rippleColor={tokens.colors.divider}
           style={{ flex: 1, borderRadius: size / 2 }}
@@ -93,7 +104,7 @@ export const AppIconButton = memo(function AppIconButton({
               flex: 1,
               alignItems: "center",
               justifyContent: "center",
-              opacity: disabled ? 0.6 : 1,
+              opacity: disabled ? tokens.opacity.disabled : 1,
             }}
           >
             {icon({ color: resolvedIconColor, size: resolvedIconSize })}
@@ -109,9 +120,10 @@ export const AppIconButton = memo(function AppIconButton({
             right: badgeOffset,
             backgroundColor: tokens.colors.danger,
             color: tokens.colors.surface,
-            minWidth: 20,
-            height: 20,
-            paddingHorizontal: 5,
+            minWidth: 18,
+            height: 18,
+            paddingHorizontal: tokens.spacing.xxsPlus,
+            fontVariant: ["tabular-nums"],
           }}
         >
           {resolvedBadge}

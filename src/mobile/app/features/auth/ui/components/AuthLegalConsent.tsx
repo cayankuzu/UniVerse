@@ -1,13 +1,14 @@
 import React from "react";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import { Check, X } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   AppModalHost,
   AppScrollView as ScrollView,
   GradientButton,
 } from "../../../../shared/components";
-import { tokens } from "../../../../shared/theme";
+import { tokens, withAlpha } from "../../../../shared/theme";
 import { t } from "../../../../shared/i18n";
 import { LEGAL_DOCUMENTS, type LegalDocumentId } from "../../data/legalDocuments";
 
@@ -25,19 +26,31 @@ export function AuthLegalConsent({ accepted, onToggleAccepted }: Props) {
     <>
       <View
         style={{
-          borderRadius: 16,
+          borderRadius: tokens.radius.lg,
           borderWidth: 1,
           borderColor: accepted ? tokens.colors.primaryBorder : tokens.colors.primarySoft,
           backgroundColor: accepted ? tokens.colors.primarySofter : tokens.colors.surfaceTint,
-          gap: 12,
-          padding: 16,
+          gap: tokens.spacing.sm,
+          padding: tokens.spacing.md,
         }}
       >
-        <View style={{ gap: 6 }}>
-          <Text style={{ color: tokens.colors.foreground, fontSize: 14, fontWeight: "700" }}>
+        <View style={{ gap: tokens.spacing.xsMinus }}>
+          <Text
+            style={{
+              color: tokens.colors.foreground,
+              fontSize: tokens.typography.body,
+              fontWeight: "700",
+            }}
+          >
             {t("auth.legal.reviewTitle")}
           </Text>
-          <Text style={{ color: tokens.colors.dark600, fontSize: 13, lineHeight: 20 }}>
+          <Text
+            style={{
+              color: tokens.colors.dark600,
+              fontSize: tokens.typography.label,
+              lineHeight: tokens.lineHeight.body,
+            }}
+          >
             <Text
               onPress={() => setOpenDocumentId("terms")}
               style={{ color: tokens.colors.primary, fontWeight: "700" }}
@@ -70,8 +83,8 @@ export function AuthLegalConsent({ accepted, onToggleAccepted }: Props) {
           style={{
             alignItems: "flex-start",
             flexDirection: "row",
-            gap: 12,
-            minHeight: tokens.minHeight.touchTarget,
+            gap: tokens.spacing.sm,
+            minHeight: tokens.minHeight.row,
           }}
         >
           <View
@@ -79,29 +92,35 @@ export function AuthLegalConsent({ accepted, onToggleAccepted }: Props) {
               alignItems: "center",
               backgroundColor: accepted ? tokens.colors.primary : tokens.colors.surface,
               borderColor: accepted ? tokens.colors.primary : tokens.colors.mutedFg,
-              borderRadius: 8,
+              borderRadius: tokens.radius.sm,
               borderWidth: 1.5,
-              height: 24,
+              height: 20,
               justifyContent: "center",
-              marginTop: 2,
-              width: 24,
+              marginTop: tokens.spacing.micro,
+              width: 20,
             }}
           >
             {accepted ? <Check size={15} color={tokens.colors.surface} strokeWidth={2.5} /> : null}
           </View>
 
-          <View style={{ flex: 1, gap: 4 }}>
+          <View style={{ flex: 1, gap: tokens.spacing.xxs }}>
             <Text
               style={{
                 color: tokens.colors.foreground,
-                fontSize: 13,
+                fontSize: tokens.typography.label,
                 fontWeight: "700",
-                lineHeight: 18,
+                lineHeight: tokens.lineHeight.label,
               }}
             >
               {t("auth.legal.accepted")}
             </Text>
-            <Text style={{ color: tokens.colors.muted, fontSize: 12, lineHeight: 18 }}>
+            <Text
+              style={{
+                color: tokens.colors.muted,
+                fontSize: tokens.typography.caption,
+                lineHeight: tokens.lineHeight.label,
+              }}
+            >
               {t("auth.legal.acceptedHint")}
             </Text>
           </View>
@@ -123,7 +142,7 @@ export function AuthLegalConsent({ accepted, onToggleAccepted }: Props) {
             flex: 1,
             justifyContent: "flex-end",
             paddingBottom: Math.max(insets.bottom + 16, 16),
-            paddingHorizontal: 16,
+            paddingHorizontal: tokens.spacing.md,
             paddingTop: Math.max(insets.top + 16, 24),
           }}
         >
@@ -140,7 +159,7 @@ export function AuthLegalConsent({ accepted, onToggleAccepted }: Props) {
           <View
             style={{
               backgroundColor: tokens.colors.surface,
-              borderRadius: 24,
+              borderRadius: tokens.radius["2xl"],
               maxHeight: "82%",
               overflow: "hidden",
             }}
@@ -148,20 +167,32 @@ export function AuthLegalConsent({ accepted, onToggleAccepted }: Props) {
             <View
               style={{
                 alignItems: "center",
-                borderBottomColor: "rgba(148,163,184,0.24)",
+                borderBottomColor: withAlpha(tokens.colors.textSubtle, 0.24),
                 borderBottomWidth: 1,
                 flexDirection: "row",
-                gap: 12,
+                gap: tokens.spacing.sm,
                 justifyContent: "space-between",
-                paddingHorizontal: 18,
-                paddingVertical: 16,
+                paddingHorizontal: tokens.spacing.mdPlus,
+                paddingVertical: tokens.spacing.md,
               }}
             >
-              <View style={{ flex: 1, gap: 4 }}>
-                <Text style={{ color: tokens.colors.foreground, fontSize: 18, fontWeight: "800" }}>
+              <View style={{ flex: 1, gap: tokens.spacing.xxs }}>
+                <Text
+                  style={{
+                    color: tokens.colors.foreground,
+                    fontSize: tokens.typography.cardTitle,
+                    fontWeight: "800",
+                  }}
+                >
                   {activeDocument?.title}
                 </Text>
-                <Text style={{ color: tokens.colors.muted, fontSize: 13, lineHeight: 19 }}>
+                <Text
+                  style={{
+                    color: tokens.colors.muted,
+                    fontSize: tokens.typography.label,
+                    lineHeight: tokens.lineHeight.bodyCompact,
+                  }}
+                >
                   {activeDocument?.summary}
                 </Text>
               </View>
@@ -173,36 +204,44 @@ export function AuthLegalConsent({ accepted, onToggleAccepted }: Props) {
                 style={{
                   alignItems: "center",
                   backgroundColor: tokens.colors.surfaceVariant,
-                  borderRadius: 999,
-                  height: tokens.minHeight.touchTarget,
+                  borderRadius: tokens.radius.pill,
+                  height: tokens.minHeight.header,
                   justifyContent: "center",
-                  width: tokens.minHeight.touchTarget,
+                  width: tokens.minHeight.header,
                 }}
               >
-                <X size={18} color={tokens.colors.dark700} />
+                <X size={tokens.iconSize.lg} color={tokens.colors.dark700} />
               </Pressable>
             </View>
 
             <ScrollView
               contentContainerStyle={{
-                gap: 16,
-                paddingBottom: 18,
-                paddingHorizontal: 18,
-                paddingTop: 18,
+                gap: tokens.spacing.md,
+                paddingBottom: tokens.spacing.mdPlus,
+                paddingHorizontal: tokens.spacing.mdPlus,
+                paddingTop: tokens.spacing.mdPlus,
               }}
               showsVerticalScrollIndicator={false}
             >
               {activeDocument?.sections.map((section) => (
-                <View key={section.heading} style={{ gap: 8 }}>
+                <View key={section.heading} style={{ gap: tokens.spacing.xs }}>
                   <Text
-                    style={{ color: tokens.colors.foreground, fontSize: 15, fontWeight: "800" }}
+                    style={{
+                      color: tokens.colors.foreground,
+                      fontSize: tokens.typography.control,
+                      fontWeight: "800",
+                    }}
                   >
                     {section.heading}
                   </Text>
                   {section.body.map((paragraph) => (
                     <Text
                       key={`${section.heading}:${paragraph.slice(0, 24)}`}
-                      style={{ color: tokens.colors.dark600, fontSize: 13, lineHeight: 20 }}
+                      style={{
+                        color: tokens.colors.dark600,
+                        fontSize: tokens.typography.label,
+                        lineHeight: tokens.lineHeight.body,
+                      }}
                     >
                       {paragraph}
                     </Text>
@@ -213,10 +252,10 @@ export function AuthLegalConsent({ accepted, onToggleAccepted }: Props) {
 
             <View
               style={{
-                borderTopColor: "rgba(148,163,184,0.24)",
+                borderTopColor: withAlpha(tokens.colors.textSubtle, 0.24),
                 borderTopWidth: 1,
-                paddingHorizontal: 18,
-                paddingVertical: 16,
+                paddingHorizontal: tokens.spacing.mdPlus,
+                paddingVertical: tokens.spacing.md,
               }}
             >
               <GradientButton

@@ -73,8 +73,8 @@ function buildSettingsAccountCards(
     if (item.key === "privacy") {
       return {
         action: "navigate",
-        iconBackgroundColor: tokens.colors.successSoft,
-        iconColor: tokens.colors.successIcon,
+        iconBackgroundColor: tokens.colors.surfaceVariant,
+        iconColor: tokens.colors.textSecondary,
         Icon: Shield,
         key: item.key,
         route: item.route,
@@ -86,8 +86,8 @@ function buildSettingsAccountCards(
     if (item.key === "change-password") {
       return {
         action: "navigate",
-        iconBackgroundColor: tokens.colors.violetSoft,
-        iconColor: tokens.colors.violet,
+        iconBackgroundColor: tokens.colors.surfaceVariant,
+        iconColor: tokens.colors.textSecondary,
         Icon: Lock,
         key: item.key,
         route: item.route,
@@ -98,8 +98,8 @@ function buildSettingsAccountCards(
 
     return {
       action: "navigate",
-      iconBackgroundColor: tokens.colors.dangerSoft,
-      iconColor: tokens.colors.danger,
+      iconBackgroundColor: tokens.colors.surfaceVariant,
+      iconColor: tokens.colors.textSecondary,
       Icon: UserX,
       key: item.key,
       route: item.route,

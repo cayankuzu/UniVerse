@@ -1,5 +1,6 @@
 import React from "react";
-import { Text } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+
 import { tokens } from "../../../../shared/theme";
 
 type Props = {
@@ -12,10 +13,10 @@ export const NotificationsNotice = React.memo(function NotificationsNotice({ not
   return (
     <Text
       style={{
-        marginHorizontal: 16,
-        marginTop: 8,
-        color: notice.kind === "error" ? "#b91c1c" : tokens.colors.primary,
-        fontSize: 12,
+        marginHorizontal: tokens.spacing.md,
+        marginTop: tokens.spacing.xs,
+        color: notice.kind === "error" ? tokens.colors.dangerStrong : tokens.colors.primary,
+        fontSize: tokens.typography.caption,
         fontWeight: "700",
         textAlign: "center",
       }}

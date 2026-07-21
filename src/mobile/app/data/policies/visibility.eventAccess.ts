@@ -108,7 +108,7 @@ export function getEventActionAccess(
   const canOpenAlbum = canOpenDetail && (!eventIsMembersOnly || isOwnClub || viewerJoined);
   const canUploadAlbum = viewerJoined || isOwnClub;
   const reason = !canOpenDetail
-    ? "Bu etkinligi gormek icin kulübü takip etmelisiniz."
+    ? "Bu etkinliği görmek için kulübü takip etmelisiniz."
     : eventIsMembersOnly && !isOwnClub && !viewerJoined
       ? "Bu etkinlik sadece takipcilere Özeldir."
       : isEnded

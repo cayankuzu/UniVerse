@@ -73,7 +73,7 @@ const InteractiveAlbumFeedCard = memo(function InteractiveAlbumFeedCard({
     return [
       {
         key: isOwnPhoto ? "download" : "report",
-        label: isOwnPhoto ? "Indir" : "Şikayet Et",
+        label: isOwnPhoto ? "İndir" : "Şikâyet Et",
         destructive: !isOwnPhoto,
         onPress: () => {
           void (async () => {
@@ -89,7 +89,7 @@ const InteractiveAlbumFeedCard = memo(function InteractiveAlbumFeedCard({
               await reportAlbum({ photoId: photo.id, username: photo.username });
             } catch (error) {
               Alert.alert(
-                isOwnPhoto ? "Indirme başarısız" : "Şikayet gönderilemedi",
+                isOwnPhoto ? "İndirme başarısız" : "Şikâyet gönderilemedi",
                 String((error as { message?: string } | null)?.message || "İşlem tamamlanamadı."),
               );
             }

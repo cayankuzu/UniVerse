@@ -4,6 +4,7 @@ import { useScrollToTopOnReselect } from "../../../shared/hooks/useScrollToTopOn
 
 function Harness(props: {
   onReselect?: () => void;
+  onSecondReselect?: () => void;
   reselectCounter: number;
   scrollToOffset: jest.Mock;
 }) {
@@ -14,6 +15,7 @@ function Harness(props: {
   useScrollToTopOnReselect({
     listRef,
     onReselect: props.onReselect,
+    onSecondReselect: props.onSecondReselect,
     reselectCounter: props.reselectCounter,
   });
 
@@ -34,5 +36,36 @@ describe("useScrollToTopOnReselect", () => {
 
     expect(onReselect).toHaveBeenCalledTimes(1);
     expect(scrollToOffset).toHaveBeenCalledWith({ animated: false, offset: 0 });
+  });
+
+  it("runs the optional refresh action on a quick second reselect", () => {
+    const onSecondReselect = jest.fn();
+    const scrollToOffset = jest.fn();
+    const now = jest.spyOn(Date, "now").mockReturnValueOnce(10_000).mockReturnValueOnce(10_500);
+    const { rerender } = render(
+      <Harness
+        onSecondReselect={onSecondReselect}
+        reselectCounter={0}
+        scrollToOffset={scrollToOffset}
+      />,
+    );
+
+    rerender(
+      <Harness
+        onSecondReselect={onSecondReselect}
+        reselectCounter={1}
+        scrollToOffset={scrollToOffset}
+      />,
+    );
+    rerender(
+      <Harness
+        onSecondReselect={onSecondReselect}
+        reselectCounter={2}
+        scrollToOffset={scrollToOffset}
+      />,
+    );
+
+    expect(onSecondReselect).toHaveBeenCalledTimes(1);
+    now.mockRestore();
   });
 });

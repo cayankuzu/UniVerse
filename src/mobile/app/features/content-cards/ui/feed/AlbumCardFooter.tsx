@@ -1,7 +1,12 @@
 import { Calendar, Heart, MessageCircle } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
-import { OverflowActionMenu, type OverflowActionItem } from "../../../../shared/components";
-import { tokens } from "../../../../shared/theme";
+import { View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import {
+  InstantPressable,
+  OverflowActionMenu,
+  type OverflowActionItem,
+} from "../../../../shared/components";
+import { tokens, withAlpha } from "../../../../shared/theme";
 
 type Props = {
   liked: boolean;
@@ -36,29 +41,30 @@ export function AlbumCardFooter({
         flexDirection: "row",
         alignItems: "center",
         gap: tokens.spacing.xxs,
-        paddingHorizontal: 14,
+        paddingHorizontal: tokens.spacing.smPlus,
         paddingBottom: tokens.spacing.sm,
-        paddingTop: 10,
+        paddingTop: tokens.spacing.compact,
         borderTopWidth: 1,
         borderTopColor: tokens.colors.divider,
         marginTop: tokens.spacing.xs,
       }}
     >
-      <Pressable
+      <InstantPressable
         accessibilityLabel="Albüm beğenilerini aç"
         accessibilityRole="button"
         hitSlop={tokens.hitSlop.md}
         onPress={onLike}
         onLongPress={onLikeLongPress}
         delayLongPress={500}
+        haptic="light"
         style={{
           flexDirection: "row",
           alignItems: "center",
-          gap: 5,
+          gap: tokens.spacing.xxsPlus,
           borderRadius: tokens.radius.pill,
-          paddingHorizontal: 10,
-          minHeight: tokens.minHeight.touchTarget,
-          backgroundColor: liked ? "rgba(254,226,226,0.9)" : "transparent",
+          paddingHorizontal: tokens.spacing.compact,
+          minHeight: tokens.minHeight.buttonMd,
+          backgroundColor: liked ? withAlpha(tokens.colors.dangerSurface, 0.9) : "transparent",
         }}
       >
         <Heart
@@ -76,9 +82,9 @@ export function AlbumCardFooter({
         >
           {likes}
         </Text>
-      </Pressable>
+      </InstantPressable>
 
-      <Pressable
+      <InstantPressable
         accessibilityLabel="Albüm yorumlarını aç"
         accessibilityRole="button"
         hitSlop={tokens.hitSlop.md}
@@ -86,10 +92,10 @@ export function AlbumCardFooter({
         style={{
           flexDirection: "row",
           alignItems: "center",
-          gap: 5,
+          gap: tokens.spacing.xxsPlus,
           borderRadius: tokens.radius.pill,
-          paddingHorizontal: 10,
-          minHeight: tokens.minHeight.touchTarget,
+          paddingHorizontal: tokens.spacing.compact,
+          minHeight: tokens.minHeight.buttonMd,
         }}
       >
         <MessageCircle size={tokens.iconSize.lg} color={tokens.colors.mutedFg} strokeWidth={1.7} />
@@ -102,12 +108,12 @@ export function AlbumCardFooter({
         >
           {comments}
         </Text>
-      </Pressable>
+      </InstantPressable>
 
       <View style={{ flex: 1 }} />
 
       {!hideEventAction ? (
-        <Pressable
+        <InstantPressable
           accessibilityLabel={eventLabel}
           accessibilityRole="button"
           accessibilityState={{ disabled: eventDisabled }}
@@ -116,11 +122,11 @@ export function AlbumCardFooter({
           style={{
             minHeight: tokens.minHeight.header,
             borderRadius: tokens.radius.pill,
-            paddingHorizontal: 14,
+            paddingHorizontal: tokens.spacing.smPlus,
             alignItems: "center",
             justifyContent: "center",
             flexDirection: "row",
-            gap: 5,
+            gap: tokens.spacing.xxsPlus,
             backgroundColor: eventDisabled ? tokens.colors.background : tokens.colors.accent,
             borderWidth: 1,
             borderColor: eventDisabled ? tokens.colors.border : tokens.colors.primaryBorder,
@@ -140,7 +146,7 @@ export function AlbumCardFooter({
           >
             {eventLabel}
           </Text>
-        </Pressable>
+        </InstantPressable>
       ) : null}
 
       <OverflowActionMenu actions={menuActions || []} title="Albüm İşlemleri" buttonSize={32} />

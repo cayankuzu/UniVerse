@@ -1,5 +1,6 @@
 import React from "react";
-import { Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { View } from "react-native";
 import { Ban, Flag, Lock } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { tokens } from "../../../../shared/theme";
@@ -29,7 +30,9 @@ export function ViewProfileBlockedState({
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: tokens.colors.background }} edges={["bottom"]}>
       <BackHeader title={`@${username}`} onBack={onBack} />
-      <View style={{ flex: 1, paddingHorizontal: tokens.spacing.md, paddingTop: 14 }}>
+      <View
+        style={{ flex: 1, paddingHorizontal: tokens.spacing.md, paddingTop: tokens.spacing.smPlus }}
+      >
         <View
           style={{
             borderRadius: tokens.radius.lg,
@@ -44,12 +47,12 @@ export function ViewProfileBlockedState({
             borderColor={tokens.colors.background}
             borderWidth={3}
             name={resolvedName}
-            size={88}
+            size={72}
             uri={String(profile?.profileImage || "")}
           />
           <Text
             style={{
-              marginTop: 14,
+              marginTop: tokens.spacing.smPlus,
               color: tokens.colors.foreground,
               fontSize: tokens.typography.sectionTitle,
               fontWeight: tokens.fontWeight.extrabold,
@@ -59,7 +62,7 @@ export function ViewProfileBlockedState({
           </Text>
           <Text
             style={{
-              marginTop: 4,
+              marginTop: tokens.spacing.xxs,
               color: tokens.colors.muted,
               fontSize: tokens.typography.caption,
               fontWeight: tokens.fontWeight.bold,
@@ -72,9 +75,9 @@ export function ViewProfileBlockedState({
               style={{
                 marginTop: tokens.spacing.xs,
                 color: tokens.colors.muted,
-                fontSize: 13,
+                fontSize: tokens.typography.label,
                 textAlign: "center",
-                lineHeight: 20,
+                lineHeight: tokens.lineHeight.body,
               }}
             >
               {profile.university}
@@ -85,20 +88,24 @@ export function ViewProfileBlockedState({
 
           <View
             style={{
-              marginTop: 18,
+              marginTop: tokens.spacing.mdPlus,
               width: "100%",
-              borderRadius: 14,
+              borderRadius: tokens.radius.control,
               borderWidth: 1,
               borderColor: tokens.colors.dangerBorder,
               backgroundColor: tokens.colors.dangerSoft,
-              paddingHorizontal: 14,
-              paddingVertical: 14,
+              paddingHorizontal: tokens.spacing.smPlus,
+              paddingVertical: tokens.spacing.smPlus,
               flexDirection: "row",
               alignItems: "flex-start",
-              gap: 10,
+              gap: tokens.spacing.compact,
             }}
           >
-            <Ban size={tokens.iconSize.lg} color={tokens.colors.danger} style={{ marginTop: 1 }} />
+            <Ban
+              size={tokens.iconSize.lg}
+              color={tokens.colors.danger}
+              style={{ marginTop: tokens.spacing.hairline }}
+            />
             <View style={{ flex: 1 }}>
               <Text
                 style={{
@@ -111,10 +118,10 @@ export function ViewProfileBlockedState({
               </Text>
               <Text
                 style={{
-                  marginTop: 4,
+                  marginTop: tokens.spacing.xxs,
                   color: tokens.colors.dangerDeep,
                   fontSize: tokens.typography.caption,
-                  lineHeight: 18,
+                  lineHeight: tokens.lineHeight.label,
                 }}
               >
                 {t("viewProfile.blocked.subtitle")}
@@ -169,7 +176,7 @@ export function ViewProfileLockedState({
   isOwnProfile,
 }: LockedProps) {
   return (
-    <View style={{ paddingHorizontal: tokens.spacing.md, paddingTop: 14 }}>
+    <View style={{ paddingHorizontal: tokens.spacing.md, paddingTop: tokens.spacing.smPlus }}>
       <View
         style={{
           borderRadius: tokens.radius.lg,
@@ -186,12 +193,12 @@ export function ViewProfileLockedState({
               borderColor={tokens.colors.background}
               borderWidth={3}
               name={displayName}
-              size={88}
+              size={72}
               uri={profile.profileImage || ""}
             />
             <Text
               style={{
-                marginTop: 14,
+                marginTop: tokens.spacing.smPlus,
                 color: tokens.colors.foreground,
                 fontSize: tokens.typography.sectionTitle,
                 fontWeight: tokens.fontWeight.extrabold,
@@ -201,7 +208,7 @@ export function ViewProfileLockedState({
             </Text>
             <Text
               style={{
-                marginTop: 4,
+                marginTop: tokens.spacing.xxs,
                 color: tokens.colors.muted,
                 fontSize: tokens.typography.caption,
                 fontWeight: tokens.fontWeight.bold,
@@ -214,9 +221,9 @@ export function ViewProfileLockedState({
                 style={{
                   marginTop: tokens.spacing.xs,
                   color: tokens.colors.muted,
-                  fontSize: 13,
+                  fontSize: tokens.typography.label,
                   textAlign: "center",
-                  lineHeight: 20,
+                  lineHeight: tokens.lineHeight.body,
                 }}
               >
                 {profile.university}
@@ -243,17 +250,17 @@ export function ViewProfileLockedState({
         </Text>
         <Text
           style={{
-            marginTop: 6,
+            marginTop: tokens.spacing.xsMinus,
             color: tokens.colors.muted,
-            fontSize: 13,
-            lineHeight: 20,
+            fontSize: tokens.typography.label,
+            lineHeight: tokens.lineHeight.body,
             textAlign: "center",
           }}
         >
           {contentLockedMessage}
         </Text>
         {!isOwnProfile ? (
-          <View style={{ width: "100%", marginTop: 14, gap: tokens.spacing.xs }}>
+          <View style={{ width: "100%", marginTop: tokens.spacing.smPlus, gap: tokens.spacing.xs }}>
             <GradientButton
               accessibilityLabel={t("viewProfile.a11y.follow")}
               label={followLabel}

@@ -55,13 +55,13 @@ export function EventDetailScreen({ route, navigation }: Props) {
             ? {
                 paddingHorizontal: tokens.spacing.sm,
                 paddingTop: tokens.spacing.xs,
-                paddingBottom: 18,
+                paddingBottom: tokens.spacing.mdPlus,
               }
             : {
                 flexGrow: 1,
                 justifyContent: "center",
                 paddingHorizontal: tokens.spacing.xl,
-                paddingBottom: 18,
+                paddingBottom: tokens.spacing.mdPlus,
               }
         }
       >

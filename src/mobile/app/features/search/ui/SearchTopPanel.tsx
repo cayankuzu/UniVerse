@@ -1,5 +1,6 @@
 import React from "react";
-import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
+import { AppText as Text } from "../../../shared/components/AppText";
+import { ActivityIndicator, Pressable, TextInput, View } from "react-native";
 import { Search, SlidersHorizontal, X } from "lucide-react-native";
 import { tokens } from "../../../shared/theme";
 import { t } from "../../../shared/i18n";
@@ -52,20 +53,20 @@ export function SearchTopPanel({
     <>
       <View
         style={{
-          paddingHorizontal: 0,
-          paddingTop: 6,
+          paddingHorizontal: tokens.spacing.md,
+          paddingTop: tokens.spacing.xsMinus,
           paddingBottom: tokens.spacing.xs,
           backgroundColor: C.surface,
           borderBottomWidth: 1,
           borderBottomColor: C.border,
-          gap: 10,
+          gap: tokens.spacing.compact,
         }}
       >
         <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.xs }}>
           <TourAnchor tourId="search-bar" style={{ flex: 1 }}>
             <View
               style={{
-                height: tokens.minHeight.touchTarget,
+                height: tokens.minHeight.inputLg,
                 flexDirection: "row",
                 alignItems: "center",
                 backgroundColor: C.bg,
@@ -84,7 +85,12 @@ export function SearchTopPanel({
                 onChangeText={setQuery}
                 placeholder={t("search.placeholder")}
                 placeholderTextColor={tokens.colors.mutedFg}
-                style={{ flex: 1, fontSize: tokens.typography.body, color: C.text }}
+                style={{
+                  flex: 1,
+                  fontFamily: tokens.fontFamily.regular,
+                  fontSize: tokens.typography.body,
+                  color: C.text,
+                }}
                 value={query}
               />
               {topPanelBusy ? (
@@ -102,10 +108,10 @@ export function SearchTopPanel({
                   onPress={() => setQuery("")}
                   style={{
                     alignItems: "center",
-                    height: tokens.minHeight.touchTarget,
+                    height: tokens.minHeight.inputLg,
                     justifyContent: "center",
                     marginRight: -tokens.spacing.xs,
-                    width: tokens.minHeight.touchTarget,
+                    width: tokens.minHeight.inputLg,
                   }}
                 >
                   <X size={tokens.iconSize.md} color={C.muted} />
@@ -121,8 +127,8 @@ export function SearchTopPanel({
                 accessibilityState={{ expanded: showFilters }}
                 onPress={() => setShowFilters((prev) => !prev)}
                 style={{
-                  width: tokens.minHeight.touchTarget,
-                  height: tokens.minHeight.touchTarget,
+                  width: tokens.minHeight.inputLg,
+                  height: tokens.minHeight.inputLg,
                   borderRadius: tokens.radius.md,
                   backgroundColor: showFilters ? tokens.colors.primarySofter : C.bg,
                   borderWidth: 1,
@@ -152,7 +158,7 @@ export function SearchTopPanel({
                     <Text
                       style={{
                         color: tokens.colors.surface,
-                        fontSize: 8,
+                        fontSize: tokens.typography.overline,
                         fontWeight: tokens.fontWeight.bold,
                       }}
                     >
@@ -166,7 +172,7 @@ export function SearchTopPanel({
         </View>
 
         <TourAnchor tourId="search-tabs">
-          <View style={{ flexDirection: "row", gap: 6 }}>
+          <View style={{ flexDirection: "row", gap: tokens.spacing.xsMinus }}>
             {TABS.map((tab) => {
               const active = tab.key === type;
               return (
@@ -180,19 +186,21 @@ export function SearchTopPanel({
                     flex: 1,
                     minHeight: tokens.minHeight.header,
                     borderRadius: tokens.radius.pill,
-                    backgroundColor: active ? C.primary : C.border,
+                    backgroundColor: active ? tokens.colors.primarySofter : C.bg,
+                    borderColor: active ? tokens.colors.primaryBorder : C.border,
+                    borderWidth: 1,
                     alignItems: "center",
                     justifyContent: "center",
                     flexDirection: "row",
-                    gap: 4,
-                    paddingHorizontal: 4,
+                    gap: tokens.spacing.xxs,
+                    paddingHorizontal: tokens.spacing.xxs,
                   }}
                 >
                   {active ? tab.activeIcon : tab.icon}
                   <Text
                     style={{
-                      color: active ? tokens.colors.surface : C.muted,
-                      fontSize: tokens.typography.tiny,
+                      color: active ? tokens.colors.primary : C.muted,
+                      fontSize: tokens.typography.caption,
                       fontWeight: tokens.fontWeight.bold,
                     }}
                   >

@@ -83,7 +83,7 @@ export function createAlbumUploadProgress(eventId: string): UploadProgressState 
   return {
     hint: "Uygulamayi kullanmaya devam edebilirsin; kapanirsa sonraki acilista surer.",
     percent: 5,
-    stage: "Siraya alindi",
+    stage: "Sıraya alındı",
     target: {
       eventId,
       kind: "album-view",
@@ -96,7 +96,7 @@ export function createEventCreateProgress(): UploadProgressState {
   return {
     hint: "Uygulamayi kullanmaya devam edebilirsin; kapanirsa sonraki acilista surer.",
     percent: 5,
-    stage: "Siraya alindi",
+    stage: "Sıraya alındı",
     target: {
       kind: "event-feed",
     },

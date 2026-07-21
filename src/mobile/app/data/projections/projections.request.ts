@@ -2,6 +2,7 @@ export interface ProjectionRequestContext {
   cursor?: string | null;
   deltaToken?: string | null;
   limit?: number;
+  signal?: AbortSignal;
   since?: string | null;
 }
 

@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
-import { Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { tokens } from "../../../../shared/theme";
 import { useAuth } from "../../../../app-shell/auth";
@@ -91,14 +92,14 @@ export function EditProfileScreen({ navigation }: Props) {
         bottomInsetOwner="screen"
         contentContainerStyle={{
           paddingHorizontal: tokens.spacing.lg,
-          paddingTop: 10,
+          paddingTop: tokens.spacing.compact,
           paddingBottom: bottomPadding,
           gap: tokens.spacing.sm,
         }}
         scrollProps={{ keyboardShouldPersistTaps: "handled" }}
         focusRequest={state.fieldFocusRequest}
       >
-        <View style={{ gap: 4 }}>
+        <View style={{ gap: tokens.spacing.xxs }}>
           <Text
             style={{
               color: tokens.colors.foreground,
@@ -108,7 +109,9 @@ export function EditProfileScreen({ navigation }: Props) {
           >
             {STEP_LABELS[state.step - 1]}
           </Text>
-          <Text style={{ color: tokens.colors.muted, fontSize: 13 }}>{state.stepDescription}</Text>
+          <Text style={{ color: tokens.colors.muted, fontSize: tokens.typography.label }}>
+            {state.stepDescription}
+          </Text>
         </View>
 
         {state.step === 1 ? (
@@ -201,13 +204,13 @@ export function EditProfileScreen({ navigation }: Props) {
               borderColor: tokens.colors.primaryBorder,
               backgroundColor: tokens.colors.primarySofter,
               paddingHorizontal: tokens.spacing.sm,
-              paddingVertical: 10,
+              paddingVertical: tokens.spacing.compact,
             }}
           >
             <Text
               style={{
                 color: tokens.colors.primaryDark,
-                fontSize: 13,
+                fontSize: tokens.typography.label,
                 fontWeight: tokens.fontWeight.semibold,
               }}
             >
@@ -224,13 +227,13 @@ export function EditProfileScreen({ navigation }: Props) {
               borderColor: tokens.colors.dangerBorder,
               backgroundColor: tokens.colors.dangerSoft,
               paddingHorizontal: tokens.spacing.sm,
-              paddingVertical: 10,
+              paddingVertical: tokens.spacing.compact,
             }}
           >
             <Text
               style={{
                 color: tokens.colors.danger,
-                fontSize: 13,
+                fontSize: tokens.typography.label,
                 fontWeight: tokens.fontWeight.semibold,
               }}
             >

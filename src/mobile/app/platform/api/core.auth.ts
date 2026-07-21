@@ -23,7 +23,7 @@ export async function getToken(options: TokenOptions = {}): Promise<string> {
     if (recoveredAccessToken) {
       return recoveredAccessToken;
     }
-    throw new Error("Oturum tokeni alinamadi. Lutfen tekrar dene.");
+    throw new Error("Oturum anahtarı alınamadı. Lütfen tekrar dene.");
   }
 
   const sessionResult = await supabase.auth.getSession().catch(() => null);

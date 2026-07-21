@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronUp } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
-import { tokens } from "../../../../shared/theme";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { Pressable, View } from "react-native";
+import { tokens, withAlpha } from "../../../../shared/theme";
 import type { CommentItem } from "../../data";
 import { CommentPanelRow } from "./CommentPanelRow";
 
@@ -49,7 +50,7 @@ export function CommentThreadBlock({
         borderRadius: tokens.radius.xl,
         backgroundColor: tokens.colors.surface,
         borderWidth: 1,
-        borderColor: "rgba(15,23,42,0.06)",
+        borderColor: withAlpha(tokens.colors.foreground, 0.06),
         padding: tokens.spacing.sm,
         ...tokens.shadow.sm,
       }}
@@ -71,7 +72,7 @@ export function CommentThreadBlock({
         <View
           style={{
             marginTop: tokens.spacing.xs,
-            marginLeft: 22,
+            marginLeft: tokens.spacing.lgPlus,
             paddingLeft: tokens.spacing.md,
             borderLeftWidth: 1,
             borderLeftColor: tokens.colors.border,
@@ -109,7 +110,7 @@ export function CommentThreadBlock({
             paddingHorizontal: tokens.spacing.sm,
             flexDirection: "row",
             alignItems: "center",
-            gap: 6,
+            gap: tokens.spacing.xsMinus,
           }}
         >
           <ToggleIcon size={14} color={tokens.colors.mutedFg} strokeWidth={2.2} />

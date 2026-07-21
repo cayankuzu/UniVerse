@@ -1,7 +1,9 @@
 import React from "react";
-import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { FlatList, Pressable, RefreshControl, View } from "react-native";
 import { AppModalHost, Avatar } from "../../../../shared/components";
 import type { SearchUserResult } from "../../data";
+import { tokens, withAlpha } from "../../../../shared/theme";
 
 type Props = {
   count: number;
@@ -43,43 +45,59 @@ export function EventCardUserListModal({
         onPress={onClose}
         style={{
           flex: 1,
-          backgroundColor: "rgba(2,6,23,0.45)",
+          backgroundColor: withAlpha(tokens.colors.dark950, 0.45),
           justifyContent: "flex-end",
-          paddingHorizontal: 12,
-          paddingTop: 12,
+          paddingHorizontal: tokens.spacing.sm,
+          paddingTop: tokens.spacing.sm,
           paddingBottom: modalBottomPadding,
         }}
       >
         <Pressable
           onPress={(eventPress) => eventPress.stopPropagation()}
           style={{
-            borderRadius: 16,
-            backgroundColor: "#fff",
+            borderRadius: tokens.radius.lg,
+            backgroundColor: tokens.colors.onMedia,
             borderWidth: 1,
-            borderColor: "#e2e8f0",
+            borderColor: tokens.colors.border,
             height: "70%",
             overflow: "hidden",
           }}
         >
           <View
             style={{
-              minHeight: 50,
+              minHeight: tokens.minHeight.row,
               flexDirection: "row",
               alignItems: "center",
               justifyContent: "space-between",
-              paddingHorizontal: 14,
+              paddingHorizontal: tokens.spacing.smPlus,
               borderBottomWidth: 1,
-              borderBottomColor: "#e2e8f0",
+              borderBottomColor: tokens.colors.border,
             }}
           >
-            <Text style={{ color: "#0f172a", fontSize: 15, fontWeight: "700" }}>{title}</Text>
-            <Text style={{ color: "#64748b", fontSize: 12, fontWeight: "700" }}>
+            <Text
+              style={{
+                color: tokens.colors.foreground,
+                fontSize: tokens.typography.control,
+                fontWeight: "700",
+              }}
+            >
+              {title}
+            </Text>
+            <Text
+              style={{
+                color: tokens.colors.muted,
+                fontSize: tokens.typography.caption,
+                fontWeight: "700",
+              }}
+            >
               {resolvedCount}
             </Text>
           </View>
           {loading ? (
-            <View style={{ padding: 16 }}>
-              <Text style={{ color: "#64748b", fontSize: 13 }}>Yukleniyor...</Text>
+            <View style={{ padding: tokens.spacing.md }}>
+              <Text style={{ color: tokens.colors.muted, fontSize: tokens.typography.label }}>
+                Yükleniyor...
+              </Text>
             </View>
           ) : (
             <FlatList
@@ -87,31 +105,53 @@ export function EventCardUserListModal({
               keyExtractor={(item) => item.id}
               alwaysBounceVertical
               overScrollMode="always"
-              contentContainerStyle={{ flexGrow: 1, padding: 12, gap: 8 }}
+              contentContainerStyle={{
+                flexGrow: 1,
+                padding: tokens.spacing.sm,
+                gap: tokens.spacing.xs,
+              }}
               refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#2563eb" />
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  tintColor={tokens.colors.primary}
+                />
               }
               renderItem={({ item }) => (
                 <Pressable
                   onPress={() => onOpenUser(item.username)}
-                  style={{ minHeight: 44, flexDirection: "row", alignItems: "center", gap: 10 }}
+                  style={{
+                    minHeight: 44,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: tokens.spacing.compact,
+                  }}
                 >
-                  <Avatar uri={item.image} name={item.name} size={38} />
+                  <Avatar uri={item.image} name={item.name} size={32} />
                   <View style={{ flex: 1 }}>
                     <Text
-                      style={{ color: "#0f172a", fontSize: 13, fontWeight: "700" }}
+                      style={{
+                        color: tokens.colors.foreground,
+                        fontSize: tokens.typography.label,
+                        fontWeight: "700",
+                      }}
                       numberOfLines={1}
                     >
                       {item.name}
                     </Text>
-                    <Text style={{ color: "#64748b", fontSize: 11 }} numberOfLines={1}>
+                    <Text
+                      style={{ color: tokens.colors.muted, fontSize: tokens.typography.caption }}
+                      numberOfLines={1}
+                    >
                       {item.university || "Üniversite bilgisi yok"}
                     </Text>
                   </View>
                 </Pressable>
               )}
               ListEmptyComponent={
-                <Text style={{ color: "#64748b", fontSize: 12 }}>{emptyText}</Text>
+                <Text style={{ color: tokens.colors.muted, fontSize: tokens.typography.caption }}>
+                  {emptyText}
+                </Text>
               }
             />
           )}

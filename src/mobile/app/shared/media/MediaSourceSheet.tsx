@@ -1,10 +1,11 @@
 import React from "react";
-import { Pressable, Text, View, useWindowDimensions } from "react-native";
+import { AppText as Text } from "../components/AppText";
+import { Pressable, View, useWindowDimensions } from "react-native";
 import { Camera, Check, Film, ImagePlus, X } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppModalHost } from "../components/AppModalHost";
 import type { MediaSourceAction } from "./mediaPicker";
-import { tokens } from "../../shared/theme";
+import { tokens, withAlpha } from "../../shared/theme";
 import { t } from "../../shared/i18n";
 
 type Props = {
@@ -39,21 +40,21 @@ function SourceCard({
       onPress={onPress}
       style={{
         flex: 1,
-        minHeight: 120,
-        borderRadius: 22,
+        minHeight: 96,
+        borderRadius: tokens.radius.sheet,
         borderWidth: 1,
         borderColor: disabled ? tokens.colors.border : tokens.colors.border,
         backgroundColor: disabled ? tokens.colors.background : tokens.colors.background,
-        padding: 14,
+        padding: tokens.spacing.smPlus,
         justifyContent: "space-between",
         opacity: disabled ? 0.5 : 1,
       }}
     >
       <View
         style={{
-          width: tokens.minHeight.touchTarget,
-          height: tokens.minHeight.touchTarget,
-          borderRadius: 14,
+          width: tokens.minHeight.inputSm,
+          height: tokens.minHeight.inputSm,
+          borderRadius: tokens.radius.control,
           alignItems: "center",
           justifyContent: "center",
           backgroundColor: disabled ? tokens.colors.border : tokens.colors.primarySofter,
@@ -61,7 +62,7 @@ function SourceCard({
       >
         {icon}
       </View>
-      <View style={{ gap: 4 }}>
+      <View style={{ gap: tokens.spacing.xxs }}>
         <Text
           style={{
             color: tokens.colors.foreground,
@@ -72,12 +73,16 @@ function SourceCard({
           {label}
         </Text>
         <Text
-          style={{ color: tokens.colors.muted, fontSize: tokens.typography.tiny, lineHeight: 14 }}
+          style={{
+            color: tokens.colors.muted,
+            fontSize: tokens.typography.tiny,
+            lineHeight: tokens.lineHeight.micro,
+          }}
         >
           {hint}
         </Text>
       </View>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.xxs }}>
         <Check size={12} color={disabled ? tokens.colors.muted : tokens.colors.primary} />
         <Text
           style={{
@@ -119,7 +124,7 @@ export function MediaSourceSheet({
         onPress={onClose}
         style={{
           flex: 1,
-          backgroundColor: "rgba(2,6,23,0.56)",
+          backgroundColor: withAlpha(tokens.colors.dark950, 0.56),
           justifyContent: "flex-end",
           paddingHorizontal: tokens.spacing.sm,
           paddingTop: tokens.spacing.sm,
@@ -132,12 +137,12 @@ export function MediaSourceSheet({
           accessibilityViewIsModal
           onPress={(event) => event.stopPropagation()}
           style={{
-            borderRadius: 28,
+            borderRadius: tokens.radius["3xl"],
             backgroundColor: tokens.colors.surface,
             overflow: "hidden",
             borderWidth: 1,
-            borderColor: "rgba(226,232,240,0.9)",
-            shadowColor: "#020617",
+            borderColor: withAlpha(tokens.colors.border, 0.9),
+            shadowColor: tokens.colors.dark950,
             shadowOpacity: 0.18,
             shadowRadius: 24,
             shadowOffset: { width: 0, height: 18 },
@@ -147,7 +152,7 @@ export function MediaSourceSheet({
           <View
             style={{
               paddingHorizontal: tokens.spacing.md,
-              paddingTop: 14,
+              paddingTop: tokens.spacing.smPlus,
               paddingBottom: tokens.spacing.sm,
               backgroundColor: tokens.colors.background,
               borderBottomWidth: 1,
@@ -160,18 +165,24 @@ export function MediaSourceSheet({
             >
               <View
                 style={{
-                  width: tokens.minHeight.touchTarget,
-                  height: tokens.minHeight.touchTarget,
+                  width: tokens.minHeight.inputSm,
+                  height: tokens.minHeight.inputSm,
                   borderRadius: tokens.radius.lg,
                   backgroundColor: tokens.colors.primarySoft,
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                <ImagePlus size={20} color={tokens.colors.primary} />
+                <ImagePlus size={tokens.iconSize.xl} color={tokens.colors.primary} />
               </View>
-              <View style={{ flex: 1, gap: 4 }}>
-                <Text style={{ color: tokens.colors.foreground, fontSize: 18, fontWeight: "800" }}>
+              <View style={{ flex: 1, gap: tokens.spacing.xxs }}>
+                <Text
+                  style={{
+                    color: tokens.colors.foreground,
+                    fontSize: tokens.typography.cardTitle,
+                    fontWeight: "800",
+                  }}
+                >
                   {title}
                 </Text>
                 {subtitle ? (
@@ -191,8 +202,8 @@ export function MediaSourceSheet({
                 accessibilityRole="button"
                 onPress={onClose}
                 style={{
-                  width: tokens.minHeight.touchTarget,
-                  height: tokens.minHeight.touchTarget,
+                  width: tokens.minHeight.header,
+                  height: tokens.minHeight.header,
                   borderRadius: tokens.radius.md,
                   alignItems: "center",
                   justifyContent: "center",
@@ -207,7 +218,7 @@ export function MediaSourceSheet({
                 style={{
                   color: tokens.colors.muted,
                   fontSize: tokens.typography.caption,
-                  lineHeight: 17,
+                  lineHeight: tokens.lineHeight.caption,
                 }}
               >
                 {description}
@@ -215,16 +226,16 @@ export function MediaSourceSheet({
             ) : null}
           </View>
 
-          <View style={{ padding: tokens.spacing.md, gap: 14 }}>
+          <View style={{ padding: tokens.spacing.md, gap: tokens.spacing.smPlus }}>
             <View
               style={{
                 flexDirection: stackSources ? "column" : "row",
-                gap: 10,
+                gap: tokens.spacing.compact,
               }}
             >
               <SourceCard
                 hint={t("media.source.takePhotoHint")}
-                icon={<Camera size={20} color={tokens.colors.primary} />}
+                icon={<Camera size={tokens.iconSize.xl} color={tokens.colors.primary} />}
                 label={t("media.source.takePhoto")}
                 onPress={() => void onSelect("camera-photo")}
               />
@@ -236,7 +247,7 @@ export function MediaSourceSheet({
                 }
                 icon={
                   <Film
-                    size={20}
+                    size={tokens.iconSize.xl}
                     color={allowVideo ? tokens.colors.primary : tokens.colors.muted}
                   />
                 }
@@ -248,7 +259,7 @@ export function MediaSourceSheet({
               />
               <SourceCard
                 hint={t("media.source.addMediaHint")}
-                icon={<ImagePlus size={20} color={tokens.colors.primary} />}
+                icon={<ImagePlus size={tokens.iconSize.xl} color={tokens.colors.primary} />}
                 label={t("media.source.addMedia")}
                 onPress={() => void onSelect("library")}
               />
@@ -256,12 +267,12 @@ export function MediaSourceSheet({
 
             <View
               style={{
-                borderRadius: 20,
+                borderRadius: tokens.radius.xl,
                 backgroundColor: tokens.colors.background,
                 borderWidth: 1,
                 borderColor: tokens.colors.border,
                 paddingHorizontal: tokens.spacing.sm,
-                paddingVertical: 10,
+                paddingVertical: tokens.spacing.compact,
                 flexDirection: "row",
                 alignItems: "center",
                 gap: tokens.spacing.xs,
@@ -269,9 +280,9 @@ export function MediaSourceSheet({
             >
               <View
                 style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: 10,
+                  width: 24,
+                  height: 24,
+                  borderRadius: tokens.radius.compact,
                   backgroundColor: tokens.colors.primarySofter,
                   alignItems: "center",
                   justifyContent: "center",
@@ -284,7 +295,7 @@ export function MediaSourceSheet({
                   flex: 1,
                   color: tokens.colors.muted,
                   fontSize: tokens.typography.tiny,
-                  lineHeight: 16,
+                  lineHeight: tokens.lineHeight.compact,
                 }}
               >
                 {allowVideo ? t("media.source.videoLimit") : t("media.source.photoOnly")}

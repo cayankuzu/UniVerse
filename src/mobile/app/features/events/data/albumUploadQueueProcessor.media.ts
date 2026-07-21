@@ -185,7 +185,7 @@ export async function uploadPendingAlbumMedia(params: {
     folder: "albums",
     items: params.pendingUploads.map(({ index }) => {
       const fileInfo = preparedMedia.get(index);
-      if (!fileInfo) throw new Error("Medya dosyasi dogrulanamadi.");
+      if (!fileInfo) throw new Error("Medya dosyası doğrulanamadı.");
       return {
         checksum: fileInfo.checksumSha256,
         contentType: fileInfo.file.type || "application/octet-stream",
@@ -225,7 +225,7 @@ export async function uploadPendingAlbumMedia(params: {
     lastProgressPercent = Math.max(lastProgressPercent, percent);
     lastProgressWriteAt = timestamp;
     const progressPercent = lastProgressPercent;
-    const progressStage = `Medyalar yukleniyor (${completedUploads}/${params.pendingUploads.length}, %${Math.round(
+    const progressStage = `Medyalar yükleniyor (${completedUploads}/${params.pendingUploads.length}, %${Math.round(
       transferPercent * 100,
     )})`;
     progressWriteLane = progressWriteLane
@@ -256,7 +256,7 @@ export async function uploadPendingAlbumMedia(params: {
         await params.assertActive(payload);
         const prepared = preparedMedia.get(index);
         const sessionTicket = sessionTickets.get(index);
-        if (!prepared || !sessionTicket) throw new Error("Medya dosyasi dogrulanamadi.");
+        if (!prepared || !sessionTicket) throw new Error("Medya dosyası doğrulanamadı.");
         const mediaStartedAt = nowMs();
         const timeoutMs = resolvePreparedMediaUploadTimeoutMs({
           baseTimeoutMs: params.getTimeoutMs(mediaKind),
@@ -329,7 +329,7 @@ export async function uploadPendingAlbumMedia(params: {
         uploadSessionId: retryable ? session.sessionId : null,
       },
       percent: retryable ? lastProgressPercent : 22,
-      stage: "Yukleme tekrar denenecek",
+      stage: "Yükleme tekrar denenecek",
     });
     throw error;
   }

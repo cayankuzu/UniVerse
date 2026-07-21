@@ -11,6 +11,16 @@ import { useDeferredEventFeedCardState } from "../../content-cards/application/u
 import { useEventCardState } from "../../content-cards/ui/homeEventCard/useEventCardState";
 import { useAuth } from "../../../app-shell/auth";
 
+jest.mock("expo-image", () => {
+  const React = require("react");
+  const MockExpoImage = (props: Record<string, unknown>) => React.createElement("ExpoImage", props);
+  return {
+    Image: Object.assign(MockExpoImage, {
+      getCachePathAsync: jest.fn(() => new Promise(() => undefined)),
+    }),
+  };
+});
+
 jest.mock("../application/useHomeScreenState", () => ({
   useHomeScreenState: jest.fn(),
 }));

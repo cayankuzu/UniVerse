@@ -173,12 +173,12 @@ def configuredVersionCode =
     findProperty("android.versionCode") ?:
     localProperties.getProperty("android.versionCode") ?:
     System.getenv("ANDROID_VERSION_CODE") ?:
-    "127"
+    "128"
 def configuredVersionName =
     findProperty("android.versionName") ?:
     localProperties.getProperty("android.versionName") ?:
     System.getenv("ANDROID_VERSION_NAME") ?:
-    "1.0.127"
+    "1.0.128"
 def configuredApplicationId =
     findProperty("android.applicationId") ?:
     localProperties.getProperty("android.applicationId") ?:

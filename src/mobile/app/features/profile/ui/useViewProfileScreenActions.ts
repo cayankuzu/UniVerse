@@ -109,7 +109,7 @@ export function useViewProfileScreenActions(params: UseViewProfileScreenActionsP
       } catch (error) {
         reportProfileUiError(error, "report-submit");
         params.failReport();
-        showErrorAlert("Şikayet gönderilemedi.");
+        showErrorAlert("Şikâyet gönderilemedi.");
       }
     },
     [params],

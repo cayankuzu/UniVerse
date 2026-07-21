@@ -60,4 +60,64 @@ describe("createLoginHandler", () => {
     expect(clearAuthState).not.toHaveBeenCalled();
     expect(mockHardSignOut).not.toHaveBeenCalled();
   });
+
+  it("keeps the authenticated shell when profile hydration is not an auth failure", async () => {
+    const session = createSession();
+    const clearAuthState = jest.fn();
+    const releaseSignedOutSuppression = jest.fn();
+    const startSessionHydrationInBackground = jest.fn();
+    const suppressSignedOutRef = { current: false };
+    mockSignInWithPassword.mockResolvedValue({ data: { session }, error: null });
+
+    const { createLoginHandler } =
+      require("./useAuthSessionLifecycle.login") as typeof import("./useAuthSessionLifecycle.login");
+    const login = createLoginHandler({
+      applyDemoState: jest.fn(),
+      clearAuthState,
+      recoverAndHydrateSession: jest.fn().mockRejectedValue(new Error("Profil bulunamadı.")),
+      releaseSignedOutSuppression,
+      setIsLoading: jest.fn(),
+      startSessionHydrationInBackground,
+      suppressSignedOutRef,
+    });
+
+    await expect(login("alice@example.com", "secret")).resolves.toBeUndefined();
+
+    expect(startSessionHydrationInBackground).toHaveBeenCalledWith(
+      session,
+      "login-profile-sync-retry",
+    );
+    expect(releaseSignedOutSuppression).toHaveBeenCalledTimes(1);
+    expect(clearAuthState).not.toHaveBeenCalled();
+    expect(mockHardSignOut).not.toHaveBeenCalled();
+  });
+
+  it("clears an authenticated shell when the established session is invalid", async () => {
+    const session = createSession();
+    const clearAuthState = jest.fn();
+    const releaseSignedOutSuppression = jest.fn();
+    const startSessionHydrationInBackground = jest.fn();
+    const suppressSignedOutRef = { current: false };
+    mockSignInWithPassword.mockResolvedValue({ data: { session }, error: null });
+    mockHardSignOut.mockResolvedValue(undefined);
+
+    const { createLoginHandler } =
+      require("./useAuthSessionLifecycle.login") as typeof import("./useAuthSessionLifecycle.login");
+    const login = createLoginHandler({
+      applyDemoState: jest.fn(),
+      clearAuthState,
+      recoverAndHydrateSession: jest.fn().mockRejectedValue(new Error("invalid jwt")),
+      releaseSignedOutSuppression,
+      setIsLoading: jest.fn(),
+      startSessionHydrationInBackground,
+      suppressSignedOutRef,
+    });
+
+    await expect(login("alice@example.com", "secret")).rejects.toBeTruthy();
+
+    expect(startSessionHydrationInBackground).not.toHaveBeenCalled();
+    expect(releaseSignedOutSuppression).not.toHaveBeenCalled();
+    expect(mockHardSignOut).toHaveBeenCalledWith("sign-out");
+    expect(clearAuthState).toHaveBeenCalledTimes(1);
+  });
 });

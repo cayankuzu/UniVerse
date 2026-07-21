@@ -1,4 +1,5 @@
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import { tokens } from "../../../../shared/theme";
 import { t } from "../../../../shared/i18n";
 
@@ -13,25 +14,31 @@ export function ViewProfilePrivateNotice({ text, visible }: ViewProfilePrivateNo
   return (
     <View
       style={{
-        marginTop: 10,
+        marginTop: tokens.spacing.compact,
         marginHorizontal: tokens.spacing.sm,
         borderRadius: tokens.radius.md,
         borderWidth: 1,
-        borderColor: "#fed7aa",
+        borderColor: tokens.colors.orangeBorder,
         backgroundColor: tokens.colors.warningSurface,
         paddingHorizontal: tokens.spacing.sm,
-        paddingVertical: 10,
+        paddingVertical: tokens.spacing.compact,
       }}
     >
-      <Text style={{ color: "#9a3412", fontSize: 13, fontWeight: tokens.fontWeight.extrabold }}>
+      <Text
+        style={{
+          color: tokens.colors.orangeDeep,
+          fontSize: tokens.typography.label,
+          fontWeight: tokens.fontWeight.extrabold,
+        }}
+      >
         {t("viewProfile.private.notice.title")}
       </Text>
       <Text
         style={{
-          marginTop: 4,
-          color: "#9a3412",
+          marginTop: tokens.spacing.xxs,
+          color: tokens.colors.orangeDeep,
           fontSize: tokens.typography.caption,
-          lineHeight: 18,
+          lineHeight: tokens.lineHeight.label,
         }}
       >
         {text || t("viewProfile.private.notice.subtitle")}

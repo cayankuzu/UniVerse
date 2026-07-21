@@ -1,5 +1,6 @@
 import { Users } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { Pressable, View } from "react-native";
 import { Avatar } from "../../../../shared/components";
 import type { EventWithMeta } from "../../data";
 import { tokens } from "../../../../shared/theme";
@@ -32,15 +33,15 @@ export function EventDetailHeader({ event, onPress }: EventDetailHeaderProps) {
       style={{
         flexDirection: "row",
         alignItems: "center",
-        gap: 10,
-        paddingHorizontal: 14,
+        gap: tokens.spacing.compact,
+        paddingHorizontal: tokens.spacing.smPlus,
         paddingTop: tokens.spacing.sm,
-        paddingBottom: 10,
+        paddingBottom: tokens.spacing.compact,
       }}
     >
       <Pressable
         onPress={onPress}
-        style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 10 }}
+        style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: tokens.spacing.compact }}
       >
         <View
           style={{
@@ -54,7 +55,7 @@ export function EventDetailHeader({ event, onPress }: EventDetailHeaderProps) {
           }}
         >
           {event.clubImage ? (
-            <Avatar uri={event.clubImage} name={event.club} size={40} />
+            <Avatar uri={event.clubImage} name={event.club} size={34} />
           ) : (
             <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
               <Users size={tokens.iconSize.lg} color={tokens.colors.muted} strokeWidth={1.5} />
@@ -64,7 +65,7 @@ export function EventDetailHeader({ event, onPress }: EventDetailHeaderProps) {
         <View style={{ flex: 1 }}>
           <Text
             style={{
-              fontSize: 15,
+              fontSize: tokens.typography.control,
               fontWeight: tokens.fontWeight.bold,
               color: tokens.colors.foreground,
             }}
@@ -76,7 +77,7 @@ export function EventDetailHeader({ event, onPress }: EventDetailHeaderProps) {
             style={{
               fontSize: tokens.typography.caption,
               color: tokens.colors.muted,
-              marginTop: 1,
+              marginTop: tokens.spacing.hairline,
             }}
             numberOfLines={1}
           >
@@ -86,7 +87,13 @@ export function EventDetailHeader({ event, onPress }: EventDetailHeaderProps) {
       </Pressable>
 
       {dateLabel || timeLabel ? (
-        <View style={{ alignItems: "flex-end", gap: 1, marginRight: 2 }}>
+        <View
+          style={{
+            alignItems: "flex-end",
+            gap: tokens.spacing.hairline,
+            marginRight: tokens.spacing.micro,
+          }}
+        >
           {!!dateLabel && (
             <Text
               style={{

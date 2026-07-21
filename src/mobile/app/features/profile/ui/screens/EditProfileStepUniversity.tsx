@@ -1,5 +1,6 @@
 import React from "react";
-import { Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { View } from "react-native";
 import { tokens } from "../../../../shared/theme";
 import { TextField } from "../../../../shared/components";
 import { SelectField } from "../../../../shared/components/SelectField";

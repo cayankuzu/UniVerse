@@ -1,5 +1,6 @@
 import React from "react";
-import { Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { View } from "react-native";
 import { AppScrollView as ScrollView } from "../../../../shared/components";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
@@ -75,7 +76,7 @@ export function SettingsScreen({ navigation }: Props) {
           paddingHorizontal: tokens.spacing.sm + 2,
           paddingTop: tokens.spacing.md,
           paddingBottom: Math.max(bottomPadding, insets.bottom + tokens.spacing.xl),
-          gap: tokens.spacing.xs,
+          gap: tokens.spacing.lg,
         }}
       >
         {operationError && !showDeleteConfirm ? (
@@ -87,10 +88,16 @@ export function SettingsScreen({ navigation }: Props) {
               borderWidth: 1,
               backgroundColor: tokens.colors.dangerSoft,
               paddingHorizontal: tokens.spacing.sm,
-              paddingVertical: 10,
+              paddingVertical: tokens.spacing.compact,
             }}
           >
-            <Text style={{ color: tokens.colors.dangerDark, fontSize: 13, fontWeight: "600" }}>
+            <Text
+              style={{
+                color: tokens.colors.dangerDark,
+                fontSize: tokens.typography.label,
+                fontWeight: "600",
+              }}
+            >
               {operationError}
             </Text>
           </View>

@@ -1,7 +1,8 @@
 import { MoreHorizontal } from "lucide-react-native";
 import { useMemo, useState, type ReactNode } from "react";
 import { Pressable, View } from "react-native";
-import { Divider, Surface, Text, TouchableRipple } from "react-native-paper";
+import { Divider, Surface, TouchableRipple } from "react-native-paper";
+import { AppText as Text } from "./AppText";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { tokens } from "../../shared/theme";
 import { t } from "../../shared/i18n";

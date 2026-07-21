@@ -1,5 +1,6 @@
 import { Calendar, Image as ImageIcon, UserCheck, Users, X } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
+import { AppText as Text } from "../../../shared/components/AppText";
+import { Pressable, View } from "react-native";
 import { t } from "../../../shared/i18n";
 import { tokens } from "../../../shared/theme";
 import type { EntityFilter, SourceFilter, TypeFilter } from "../application/useHomeScreenUiState";
@@ -39,7 +40,7 @@ export function HomeFilterPanel({
         backgroundColor: tokens.colors.surface,
         borderBottomWidth: 1,
         borderBottomColor: tokens.colors.border,
-        paddingHorizontal: 0,
+        paddingHorizontal: tokens.spacing.md,
         paddingBottom: tokens.spacing.sm,
         gap: tokens.spacing.xs,
       }}

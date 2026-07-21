@@ -34,8 +34,8 @@ describe("buildNotificationCardContent", () => {
 
     expect(result).toEqual(
       expect.objectContaining({
-        actionText: "albumunuza yorum yapti",
-        contextLabel: "Album",
+        actionText: "albümünüze yorum yaptı",
+        contextLabel: "Albüm",
         contextSubtitle: "Tasarim Gecesi",
         contextTitle: "Bahar Sergisi Albumu",
         previewText: "Harika gorunuyor",
@@ -57,7 +57,7 @@ describe("buildNotificationCardContent", () => {
 
     expect(result).toEqual(
       expect.objectContaining({
-        actionText: "yorumunuza yanit verdi",
+        actionText: "yorumunuza yanıt verdi",
         contextLabel: "Etkinlik",
         contextTitle: "Hackathon Tanitim Toplantisi",
         previewText: "Aksam 8'de basliyor",
@@ -78,8 +78,8 @@ describe("buildNotificationCardContent", () => {
 
     expect(result).toEqual(
       expect.objectContaining({
-        actionText: "albumunuzu begendi",
-        contextLabel: "Album",
+        actionText: "albümünüzü beğendi",
+        contextLabel: "Albüm",
         contextTitle: "Kulup Anilari",
         previewText: undefined,
       }),
@@ -100,7 +100,7 @@ describe("buildNotificationCardContent", () => {
 
     expect(result).toEqual(
       expect.objectContaining({
-        actionText: "yeni bir etkinlik paylasti",
+        actionText: "yeni bir etkinlik paylaştı",
         contextLabel: "Etkinlik",
         contextTitle: "Yaz Kampusu Bulusmasi",
       }),

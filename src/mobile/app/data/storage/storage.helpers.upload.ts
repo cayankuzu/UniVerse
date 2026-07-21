@@ -373,7 +373,7 @@ async function confirmSignedUpload(params: {
   const payload = await readStorageResponse<StorageUploadConfirmResponse>(response);
   if (!response.ok) {
     throw markStorageRemoteError(
-      new Error(extractStorageErrorMessage(payload, `Upload dogrulanamadi (${response.status}).`)),
+      new Error(extractStorageErrorMessage(payload, `Yükleme doğrulanamadı (${response.status}).`)),
     );
   }
 
@@ -381,7 +381,7 @@ async function confirmSignedUpload(params: {
     payload && typeof payload === "object" ? (payload as StorageUploadConfirmResponse).path : "",
   );
   if (!confirmedPath || confirmedPath !== params.objectPath) {
-    throw markStorageRemoteError(new Error("Upload dogrulanamadi."));
+    throw markStorageRemoteError(new Error("Yükleme doğrulanamadı."));
   }
 }
 
@@ -450,7 +450,7 @@ export async function directUploadWithRest(
           }
           throw markStorageRemoteError(
             new Error(
-              extractStorageErrorMessage(payload, `Dosya yuklenemedi (${response.status}).`),
+              extractStorageErrorMessage(payload, `Dosya yüklenemedi (${response.status}).`),
             ),
           );
         }

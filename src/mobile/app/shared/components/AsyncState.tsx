@@ -1,9 +1,11 @@
 import React from "react";
 import { View } from "react-native";
 import { AlertCircle, Inbox } from "lucide-react-native";
-import { ActivityIndicator, Text } from "react-native-paper";
+import { ActivityIndicator } from "react-native-paper";
+import { AppText as Text } from "./AppText";
 import { tokens } from "../../shared/theme";
 import { t } from "../../shared/i18n";
+import { AppButton } from "./AppButton";
 import { EmptyState } from "./EmptyState";
 
 interface AsyncStateProps {
@@ -14,6 +16,8 @@ interface AsyncStateProps {
   emptyTitle?: string;
   emptySubtitle?: string;
   loadingFallback?: React.ReactNode;
+  onRetry?: () => void;
+  retryLabel?: string;
   children?: React.ReactNode;
 }
 
@@ -25,6 +29,8 @@ export function AsyncState({
   emptyTitle,
   emptySubtitle,
   loadingFallback,
+  onRetry,
+  retryLabel = "Tekrar dene",
   children,
 }: AsyncStateProps) {
   if (loading) {
@@ -36,10 +42,22 @@ export function AsyncState({
         accessibilityLiveRegion="polite"
         accessibilityRole="progressbar"
         accessible
-        style={{ paddingVertical: 28, alignItems: "center", justifyContent: "center", gap: 8 }}
+        style={{
+          paddingVertical: tokens.spacing.twoXl,
+          alignItems: "center",
+          justifyContent: "center",
+          gap: tokens.spacing.xs,
+        }}
       >
         <ActivityIndicator color={tokens.colors.primary} size="small" />
-        <Text style={{ color: tokens.colors.iconMuted, fontSize: 13, fontWeight: "500" }}>
+        <Text
+          style={{
+            color: tokens.colors.iconMuted,
+            fontSize: tokens.typography.label,
+            fontWeight: tokens.fontWeight.medium,
+            lineHeight: tokens.lineHeight.label,
+          }}
+        >
           {t("common.loading")}
         </Text>
       </View>
@@ -52,19 +70,28 @@ export function AsyncState({
         accessibilityLiveRegion="assertive"
         accessibilityRole="alert"
         accessible
-        style={{ paddingVertical: 28, alignItems: "center", justifyContent: "center", gap: 8 }}
+        style={{
+          paddingVertical: tokens.spacing.twoXl,
+          alignItems: "center",
+          justifyContent: "center",
+          gap: tokens.spacing.xs,
+        }}
       >
         <AlertCircle size={18} color={tokens.colors.danger} />
         <Text
           style={{
             color: tokens.colors.danger,
-            fontSize: 13,
-            fontWeight: "500",
+            fontSize: tokens.typography.label,
+            fontWeight: tokens.fontWeight.medium,
+            lineHeight: tokens.lineHeight.label,
             textAlign: "center",
           }}
         >
           {error}
         </Text>
+        {onRetry ? (
+          <AppButton fullWidth={false} label={retryLabel} mode="text" onPress={onRetry} size="sm" />
+        ) : null}
       </View>
     );
   }

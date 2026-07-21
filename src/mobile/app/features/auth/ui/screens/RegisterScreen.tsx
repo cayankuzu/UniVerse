@@ -1,10 +1,11 @@
 import { ChevronRight, GraduationCap, Users } from "lucide-react-native";
-import { Text, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { BackHeader } from "../../../../shared/components";
-import { tokens } from "../../../../shared/theme";
+import { AppScrollView, BackHeader } from "../../../../shared/components";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { tokens, withAlpha } from "../../../../shared/theme";
 import { useTranslation } from "../../../../shared/i18n";
 import type { RootStackParamList } from "../../../../app-shell/navigation/types";
 import { AuthBrandFooter } from "../components";
@@ -17,7 +18,13 @@ export function RegisterScreen({ navigation }: Props) {
   const options = [
     {
       chevronColor: tokens.colors.primary,
-      icon: <GraduationCap size={26} color={tokens.colors.primary} strokeWidth={1.5} />,
+      icon: (
+        <GraduationCap
+          size={tokens.iconSize["2xl"]}
+          color={tokens.colors.primary}
+          strokeWidth={1.5}
+        />
+      ),
       iconBg: tokens.colors.primarySofter,
       route: "StudentRegister" as const,
       subtitle: t("auth.register.student.subtitle"),
@@ -25,7 +32,7 @@ export function RegisterScreen({ navigation }: Props) {
     },
     {
       chevronColor: tokens.colors.violet,
-      icon: <Users size={26} color={tokens.colors.violet} strokeWidth={1.5} />,
+      icon: <Users size={tokens.iconSize["2xl"]} color={tokens.colors.violet} strokeWidth={1.5} />,
       iconBg: tokens.colors.violetSoft,
       route: "ClubRegister" as const,
       subtitle: t("auth.register.club.subtitle"),
@@ -37,43 +44,56 @@ export function RegisterScreen({ navigation }: Props) {
     <View style={{ flex: 1, backgroundColor: tokens.colors.background }}>
       <BackHeader onBack={() => navigation.navigate("Welcome")} />
 
-      <View
-        style={{
-          flex: 1,
+      <AppScrollView
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          flexGrow: 1,
           justifyContent: "center",
-          paddingHorizontal: 24,
+          paddingHorizontal: tokens.spacing.xl,
           paddingBottom: Math.max(insets.bottom + 20, 32),
+          paddingTop: tokens.spacing.md,
         }}
       >
         <LinearGradient
           colors={[tokens.colors.primaryLight, tokens.colors.primaryDark]}
           style={{
-            width: 56,
-            height: 56,
-            borderRadius: 16,
+            width: 46,
+            height: 46,
+            borderRadius: tokens.radius.lg,
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <GraduationCap size={28} color={tokens.colors.surface} strokeWidth={1.5} />
+          <GraduationCap
+            size={tokens.iconSize["2xl"]}
+            color={tokens.colors.surface}
+            strokeWidth={1.5}
+          />
         </LinearGradient>
 
         <Text
           style={{
-            marginTop: 14,
-            fontSize: 30,
+            marginTop: tokens.spacing.smPlus,
+            fontSize: tokens.typography.displayLarge,
             fontWeight: "800",
             color: tokens.colors.foreground,
-            letterSpacing: -0.5,
+            letterSpacing: tokens.letterSpacing.displayTight,
           }}
         >
           {t("auth.register.title")}
         </Text>
-        <Text style={{ marginTop: 4, fontSize: 14, color: tokens.colors.muted }}>
+        <Text
+          style={{
+            marginTop: tokens.spacing.xxs,
+            fontSize: tokens.typography.body,
+            color: tokens.colors.muted,
+          }}
+        >
           {t("auth.register.subtitle")}
         </Text>
 
-        <View style={{ marginTop: 28, gap: 12 }}>
+        <View style={{ marginTop: tokens.spacing.twoXl, gap: tokens.spacing.sm }}>
           {options.map((option) => (
             <TouchableOpacity
               accessibilityLabel={`${option.title}. ${option.subtitle}`}
@@ -84,21 +104,21 @@ export function RegisterScreen({ navigation }: Props) {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                gap: 14,
-                borderRadius: 16,
+                gap: tokens.spacing.smPlus,
+                borderRadius: tokens.radius.lg,
                 backgroundColor: tokens.colors.surface,
                 borderWidth: 1,
-                borderColor: "rgba(15,23,42,0.06)",
-                padding: 16,
-                minHeight: tokens.minHeight.touchTarget,
+                borderColor: withAlpha(tokens.colors.foreground, 0.06),
+                padding: tokens.spacing.md,
+                minHeight: tokens.minHeight.row,
                 ...tokens.shadow.sm,
               }}
             >
               <View
                 style={{
-                  width: 52,
-                  height: 52,
-                  borderRadius: 14,
+                  width: 44,
+                  height: 44,
+                  borderRadius: tokens.radius.control,
                   alignItems: "center",
                   justifyContent: "center",
                   backgroundColor: option.iconBg,
@@ -107,10 +127,22 @@ export function RegisterScreen({ navigation }: Props) {
                 {option.icon}
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 16, fontWeight: "700", color: tokens.colors.foreground }}>
+                <Text
+                  style={{
+                    fontSize: tokens.typography.subtitle,
+                    fontWeight: "700",
+                    color: tokens.colors.foreground,
+                  }}
+                >
                   {option.title}
                 </Text>
-                <Text style={{ marginTop: 2, fontSize: 13, color: tokens.colors.muted }}>
+                <Text
+                  style={{
+                    marginTop: tokens.spacing.micro,
+                    fontSize: tokens.typography.label,
+                    color: tokens.colors.muted,
+                  }}
+                >
                   {option.subtitle}
                 </Text>
               </View>
@@ -118,7 +150,7 @@ export function RegisterScreen({ navigation }: Props) {
                 style={{
                   width: 32,
                   height: 32,
-                  borderRadius: 999,
+                  borderRadius: tokens.radius.pill,
                   alignItems: "center",
                   justifyContent: "center",
                   backgroundColor: option.iconBg,
@@ -132,10 +164,10 @@ export function RegisterScreen({ navigation }: Props) {
 
         <Text
           style={{
-            marginTop: 28,
+            marginTop: tokens.spacing.twoXl,
             textAlign: "center",
             color: tokens.colors.muted,
-            fontSize: 14,
+            fontSize: tokens.typography.body,
           }}
         >
           {t("auth.register.haveAccount")}{" "}
@@ -148,7 +180,7 @@ export function RegisterScreen({ navigation }: Props) {
           </Text>
         </Text>
         <AuthBrandFooter />
-      </View>
+      </AppScrollView>
     </View>
   );
 }

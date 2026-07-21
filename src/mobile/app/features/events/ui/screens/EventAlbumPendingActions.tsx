@@ -1,5 +1,6 @@
 import React from "react";
-import { ActivityIndicator, Alert, Pressable, Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { ActivityIndicator, Alert, Pressable, View } from "react-native";
 import type { PendingAlbumPhoto } from "../../data";
 import { tokens } from "../../../../shared/theme";
 import { t } from "../../../../shared/i18n";
@@ -30,15 +31,15 @@ function isRetryableAlbumUploadError(message: string | undefined) {
 
 function formatAlbumUploadError(message: string | undefined) {
   const normalized = String(message || "").trim();
-  if (!normalized) return "Yukleme basarisiz oldu.";
+  if (!normalized) return "Yükleme başarısız oldu.";
   if (/^unauthorized$/i.test(normalized)) {
-    return "Oturum dogrulanamadi. Uygulamayi yeniden acip tekrar dene.";
+    return "Oturum doğrulanamadı. Uygulamayı yeniden açıp tekrar dene.";
   }
   return normalized.length > 120 ? `${normalized.slice(0, 117).trimEnd()}...` : normalized;
 }
 
 function confirmCancelPendingUpload(onRemove: () => void) {
-  Alert.alert("Yukleme iptal edilsin mi?", "Bu album kartinin bekleyen yuklemesi iptal edilecek.", [
+  Alert.alert("Yükleme iptal edilsin mi?", "Bu albüm kartının bekleyen yüklemesi iptal edilecek.", [
     {
       style: "cancel",
       text: t("common.cancel"),
@@ -46,13 +47,13 @@ function confirmCancelPendingUpload(onRemove: () => void) {
     {
       onPress: onRemove,
       style: "destructive",
-      text: "Iptal Et",
+      text: "İptal Et",
     },
   ]);
 }
 
 function confirmRemoveFailedUpload(onRemove: () => void) {
-  Alert.alert("Kart silinsin mi?", "Bu basarisiz album karti kuyruktan kaldirilacak.", [
+  Alert.alert("Kart silinsin mi?", "Bu başarısız albüm kartı kuyruktan kaldırılacak.", [
     {
       style: "cancel",
       text: t("common.cancel"),
@@ -94,7 +95,7 @@ export function EventAlbumPendingActions({ pending, onRemove, onRetry }: Props) 
               color: tokens.colors.surface,
               fontSize: tokens.typography.micro,
               fontWeight: tokens.fontWeight.medium,
-              lineHeight: 14,
+              lineHeight: tokens.lineHeight.micro,
             }}
           >
             {errorMessage}
@@ -182,7 +183,7 @@ export function EventAlbumPendingActions({ pending, onRemove, onRetry }: Props) 
                   fontWeight: tokens.fontWeight.bold,
                 }}
               >
-                Paylasiliyor
+                Paylaşılıyor
               </Text>
             </View>
           </View>
@@ -202,7 +203,7 @@ export function EventAlbumPendingActions({ pending, onRemove, onRetry }: Props) 
                 fontWeight: tokens.fontWeight.bold,
               }}
             >
-              Iptal Et
+              İptal Et
             </Text>
           </Pressable>
         </View>

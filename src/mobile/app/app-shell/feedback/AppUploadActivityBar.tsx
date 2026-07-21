@@ -42,7 +42,7 @@ function normalizeQueueText(value: unknown, fallback = "") {
 }
 
 function formatQueueErrorMessage(message: unknown) {
-  const normalized = normalizeQueueText(message, "Islem tamamlanamadi.");
+  const normalized = normalizeQueueText(message, "İşlem tamamlanamadı.");
   return normalized.length > 140 ? `${normalized.slice(0, 137).trimEnd()}...` : normalized;
 }
 
@@ -66,10 +66,10 @@ function pickVisibleQueueEntry(entries: UploadQueueEntry[]) {
 }
 
 function resolveQueueFallbackTitle(entry: UploadQueueEntry) {
-  if (entry.kind === "album-photo") return "Album karti paylasiliyor";
-  if (entry.kind === "event-create") return "Etkinlik paylasiliyor";
+  if (entry.kind === "album-photo") return "Albüm kartı paylaşılıyor";
+  if (entry.kind === "event-create") return "Etkinlik paylaşılıyor";
   if (entry.kind === "profile-update") return "Profil guncelleniyor";
-  return "Yukleme suruyor";
+  return "Yükleme sürüyor";
 }
 
 function resolveQueueFallbackTarget(entry: UploadQueueEntry): UploadProgressTarget | undefined {
@@ -158,11 +158,11 @@ export function AppUploadActivityBar({ navigationRef }: Props) {
 
   const handleCancelEntry = useCallback(
     (entry: UploadQueueEntry) => {
-      Alert.alert("Yukleme iptal edilsin mi?", "Bu bekleyen gonderi kuyruktan kaldirilacak.", [
+      Alert.alert("Yükleme iptal edilsin mi?", "Bu bekleyen gönderi kuyruktan kaldırılacak.", [
         { style: "cancel", text: "Vazgec" },
         {
           style: "destructive",
-          text: "Iptal Et",
+          text: "İptal Et",
           onPress: () => {
             void (async () => {
               if (entry.kind === "album-photo") {
@@ -216,7 +216,7 @@ export function AppUploadActivityBar({ navigationRef }: Props) {
     if (target) {
       actions.push({
         key: "open",
-        label: "Gonderiye git",
+        label: "Gönderiye git",
         onPress: () => handleOpenTarget(visibleQueueEntry),
       });
     }
@@ -230,7 +230,7 @@ export function AppUploadActivityBar({ navigationRef }: Props) {
     actions.push({
       destructive: true,
       key: "cancel",
-      label: "Iptal et",
+      label: "İptal et",
       onPress: () => handleCancelEntry(visibleQueueEntry),
     });
 
@@ -238,7 +238,7 @@ export function AppUploadActivityBar({ navigationRef }: Props) {
     if (visibleQueueEntry.status === "failed") {
       return {
         actions,
-        hint: "Tekrar deneyebilir veya gonderi ekranina gidebilirsin.",
+        hint: "Tekrar deneyebilir veya gönderi ekranına gidebilirsin.",
         percent: progress?.percent ?? 100,
         stage: formatQueueErrorMessage(visibleQueueEntry.errorMessage),
         title,
@@ -254,7 +254,7 @@ export function AppUploadActivityBar({ navigationRef }: Props) {
       percent: progress?.percent ?? (visibleQueueEntry.status === "uploading" ? 18 : 5),
       stage:
         progress?.stage ||
-        (visibleQueueEntry.status === "uploading" ? "Yukleme devam ediyor" : "Siraya alindi"),
+        (visibleQueueEntry.status === "uploading" ? "Yükleme devam ediyor" : "Sıraya alındı"),
       title,
       tone: "info",
     };

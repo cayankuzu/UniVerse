@@ -49,7 +49,7 @@ async function waitForReadyCapturedVideoUri(uri: string) {
     await new Promise((resolve) => setTimeout(resolve, CAPTURE_READY_POLL_MS));
   }
 
-  throw new Error("Video dosyasi hazirlanamadi. Lutfen tekrar dene.");
+  throw new Error("Video dosyası hazırlanamadı. Lütfen tekrar dene.");
 }
 
 async function captureWithExpoPicker(maxDurationSeconds: number) {

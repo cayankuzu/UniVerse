@@ -118,7 +118,7 @@ export function useCommentPanelState({
     } catch (error) {
       setSubmitError(
         String(
-          (error as { message?: string } | null)?.message || "Yorum gonderilemedi. Tekrar dene.",
+          (error as { message?: string } | null)?.message || "Yorum gönderilemedi. Tekrar dene.",
         ),
       );
     } finally {

@@ -195,7 +195,7 @@ describe("resumable storage upload", () => {
     await fileReader.openFile({ uri: "file:///video.mp4" });
     fileReader.closeAll();
     await expect(fileReader.openFile({ uri: "file:///missing.mp4" })).rejects.toThrow(
-      "medya dosyasi okunamadi",
+      "medya dosyası okunamadı",
     );
   });
 

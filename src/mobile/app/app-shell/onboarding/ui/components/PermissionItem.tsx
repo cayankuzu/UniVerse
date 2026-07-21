@@ -1,5 +1,7 @@
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import { PermissionToggle } from "./PermissionToggle";
+import { tokens, withAlpha } from "../../../../shared/theme";
 
 interface PermissionItemProps {
   icon: React.ReactNode;
@@ -27,19 +29,19 @@ export function PermissionItem({
         {
           flexDirection: "row",
           alignItems: "center",
-          gap: 14,
-          borderRadius: 16,
-          padding: 16,
+          gap: tokens.spacing.smPlus,
+          borderRadius: tokens.radius.lg,
+          padding: tokens.spacing.md,
           borderWidth: 1,
         },
         granted
           ? {
-              backgroundColor: "rgba(37,99,235,0.15)",
-              borderColor: "rgba(96,165,250,0.3)",
+              backgroundColor: withAlpha(tokens.colors.primary, 0.15),
+              borderColor: withAlpha(tokens.colors.blueMuted, 0.3),
             }
           : {
-              backgroundColor: "rgba(255,255,255,0.05)",
-              borderColor: "rgba(255,255,255,0.1)",
+              backgroundColor: withAlpha(tokens.colors.onMedia, 0.05),
+              borderColor: withAlpha(tokens.colors.onMedia, 0.1),
             },
       ]}
     >
@@ -47,10 +49,12 @@ export function PermissionItem({
         style={{
           width: 44,
           height: 44,
-          borderRadius: 12,
+          borderRadius: tokens.radius.md,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: granted ? "rgba(37,99,235,0.2)" : "rgba(255,255,255,0.1)",
+          backgroundColor: granted
+            ? withAlpha(tokens.colors.primary, 0.2)
+            : withAlpha(tokens.colors.onMedia, 0.1),
         }}
       >
         {icon}
@@ -59,18 +63,18 @@ export function PermissionItem({
       <View style={{ flex: 1 }}>
         <Text
           style={{
-            fontSize: 14,
+            fontSize: tokens.typography.body,
             fontWeight: "600",
-            color: granted ? "#93c5fd" : "rgba(255,255,255,0.9)",
+            color: granted ? tokens.colors.blueSubtle : withAlpha(tokens.colors.onMedia, 0.9),
           }}
         >
           {label}
         </Text>
         <Text
           style={{
-            fontSize: 12,
-            color: "rgba(255,255,255,0.4)",
-            marginTop: 2,
+            fontSize: tokens.typography.caption,
+            color: withAlpha(tokens.colors.onMedia, 0.4),
+            marginTop: tokens.spacing.micro,
           }}
         >
           {description}
@@ -78,9 +82,9 @@ export function PermissionItem({
         {statusLabel ? (
           <Text
             style={{
-              fontSize: 11,
-              marginTop: 4,
-              color: granted ? "#93c5fd" : "rgba(255,255,255,0.55)",
+              fontSize: tokens.typography.caption,
+              marginTop: tokens.spacing.xxs,
+              color: granted ? tokens.colors.blueSubtle : withAlpha(tokens.colors.onMedia, 0.55),
               fontWeight: "600",
             }}
           >

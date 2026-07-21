@@ -43,12 +43,12 @@ export function useAlbumViewAccessState({
   const eventErrorMessage = String((eventQueryError as { message?: string } | null)?.message || "");
   const accessMessage =
     eventAccess && !eventAccess.canOpenAlbum && !hasViewerOwnedPhotos
-      ? eventAccess.albumReason || eventAccess.reason || "Bu album sadece takipcilere acik."
+      ? eventAccess.albumReason || eventAccess.reason || "Bu albüm sadece takipçilere açık."
       : eventErrorMessage.includes("not visible")
-        ? "Bu album sadece takipcilere acik."
+        ? "Bu albüm sadece takipçilere açık."
         : null;
   const uploadMessage = !event
-    ? `${t("events.detail.title")} bilgisi yukleniyor. Lutfen tekrar deneyin.`
+    ? `${t("events.detail.title")} bilgisi yükleniyor. Lütfen tekrar deneyin.`
     : hasUploadAccess
       ? ""
       : eventAccess?.uploadReason ||

@@ -1,5 +1,6 @@
 import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker";
-import { Platform, Pressable, Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { Platform, Pressable, View } from "react-native";
 
 import { t } from "../../../../shared/i18n";
 import { tokens } from "../../../../shared/theme";
@@ -27,7 +28,7 @@ export function CreateEventSchedulePicker({
     <View
       style={{
         marginTop: tokens.spacing.xxs,
-        borderRadius: 14,
+        borderRadius: tokens.radius.control,
         borderWidth: 1,
         borderColor: tokens.colors.border,
         backgroundColor: tokens.colors.surface,
@@ -40,14 +41,14 @@ export function CreateEventSchedulePicker({
             flexDirection: "row",
             justifyContent: "space-between",
             paddingHorizontal: tokens.spacing.sm,
-            paddingTop: 10,
+            paddingTop: tokens.spacing.compact,
           }}
         >
           <Pressable onPress={onClose} hitSlop={tokens.hitSlop.sm}>
             <Text
               style={{
                 color: tokens.colors.muted,
-                fontSize: 13,
+                fontSize: tokens.typography.label,
                 fontWeight: tokens.fontWeight.bold,
               }}
             >
@@ -58,7 +59,7 @@ export function CreateEventSchedulePicker({
             <Text
               style={{
                 color: tokens.colors.primary,
-                fontSize: 13,
+                fontSize: tokens.typography.label,
                 fontWeight: tokens.fontWeight.bold,
               }}
             >

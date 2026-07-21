@@ -1,8 +1,9 @@
 import { MessageSquare } from "lucide-react-native";
 import type { RefObject } from "react";
-import { Text, TextInput, View } from "react-native";
+import { TextInput, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import { AppFlatList } from "../../../../shared/components";
-import { tokens } from "../../../../shared/theme";
+import { tokens, withAlpha } from "../../../../shared/theme";
 import type { CommentItem } from "../../data";
 import type { CommentPanelCurrentUser } from "./commentPanel.shared";
 import { CommentPanelComposer } from "./CommentPanelComposer";
@@ -58,15 +59,15 @@ function renderEmptyState() {
     >
       <View
         style={{
-          width: 72,
-          height: 72,
-          borderRadius: 999,
+          width: 56,
+          height: 56,
+          borderRadius: tokens.radius.pill,
           backgroundColor: tokens.colors.primarySofter,
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <MessageSquare size={28} color={tokens.colors.primary} />
+        <MessageSquare size={tokens.iconSize["2xl"]} color={tokens.colors.primary} />
       </View>
       <Text
         style={{
@@ -83,7 +84,7 @@ function renderEmptyState() {
           fontSize: tokens.typography.body,
           color: tokens.colors.mutedFg,
           textAlign: "center",
-          lineHeight: 20,
+          lineHeight: tokens.lineHeight.body,
         }}
       >
         Konuşmayı ilk başlatan sen ol.
@@ -142,7 +143,7 @@ export function CommentPanelSheet({
         borderTopRightRadius: 28,
         backgroundColor: tokens.colors.surface,
         borderWidth: 1,
-        borderColor: "rgba(15,23,42,0.08)",
+        borderColor: withAlpha(tokens.colors.foreground, 0.08),
         overflow: "hidden",
       }}
     >

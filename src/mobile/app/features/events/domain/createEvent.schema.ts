@@ -2,14 +2,14 @@ import { z } from "zod";
 
 export const createEventSchema = z
   .object({
-    access: z.string().min(1, "Erisim secimi zorunlu."),
+    access: z.string().min(1, "Erişim seçimi zorunlu."),
     address: z.string().optional(),
     capacity: z.string().min(1, "Kontenjan zorunlu."),
     description: z
       .string()
       .trim()
-      .min(10, "Etkinlik aciklamasi en az 10 karakter olmali.")
-      .max(4000, "Etkinlik aciklamasi en fazla 4000 karakter olabilir."),
+      .min(10, "Etkinlik açıklaması en az 10 karakter olmalı.")
+      .max(4000, "Etkinlik açıklaması en fazla 4000 karakter olabilir."),
     endDate: z.string().optional(),
     endTime: z.string().optional(),
     fee: z.string().min(1, "Ucret bilgisi zorunlu."),

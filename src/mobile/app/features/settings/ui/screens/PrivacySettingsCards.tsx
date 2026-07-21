@@ -1,14 +1,15 @@
 import React from "react";
-import { Pressable, Text, View } from "react-native";
-import { tokens } from "../../../../shared/theme";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { Pressable, View } from "react-native";
+import { tokens, withAlpha } from "../../../../shared/theme";
 
 export const privacySettingsColors = {
-  bg: "#f8fafc",
-  blueText: "#1d4ed8",
-  border: "rgba(15,23,42,0.08)",
-  muted: "#64748b",
-  surface: "#ffffff",
-  text: "#0f172a",
+  bg: tokens.colors.background,
+  blueText: tokens.colors.primaryDark,
+  border: withAlpha(tokens.colors.foreground, 0.08),
+  muted: tokens.colors.muted,
+  surface: tokens.colors.onMedia,
+  text: tokens.colors.foreground,
 } as const;
 
 type PrivacySettingsNoticeProps = {
@@ -21,14 +22,14 @@ export function PrivacySettingsNotice({ body, icon, title }: PrivacySettingsNoti
   return (
     <View
       style={{
-        borderRadius: 16,
+        borderRadius: tokens.radius.lg,
         borderWidth: 1,
-        borderColor: "#bfdbfe",
-        backgroundColor: "#eff6ff",
-        padding: 14,
+        borderColor: tokens.colors.primaryBorder,
+        backgroundColor: tokens.colors.primarySofter,
+        padding: tokens.spacing.smPlus,
         flexDirection: "row",
         alignItems: "flex-start",
-        gap: 10,
+        gap: tokens.spacing.compact,
       }}
     >
       {icon}
@@ -36,7 +37,7 @@ export function PrivacySettingsNotice({ body, icon, title }: PrivacySettingsNoti
         <Text
           style={{
             color: privacySettingsColors.blueText,
-            fontSize: 14,
+            fontSize: tokens.typography.body,
             fontWeight: "700",
           }}
         >
@@ -44,10 +45,10 @@ export function PrivacySettingsNotice({ body, icon, title }: PrivacySettingsNoti
         </Text>
         <Text
           style={{
-            marginTop: 3,
-            color: "#1e40af",
-            fontSize: 12,
-            lineHeight: 18,
+            marginTop: tokens.spacing.microPlus,
+            color: tokens.colors.blueStrong,
+            fontSize: tokens.typography.caption,
+            lineHeight: tokens.lineHeight.label,
           }}
         >
           {body}
@@ -82,9 +83,9 @@ export function PrivacySettingsToggleCard({
   subtitle,
   title,
 }: PrivacySettingsToggleCardProps) {
-  const statusBg = enabled ? "#fff7ed" : "#f8fafc";
-  const statusBorder = enabled ? "#fdba74" : "#cbd5e1";
-  const statusText = enabled ? "#c2410c" : "#475569";
+  const statusBg = enabled ? tokens.colors.warningSurface : tokens.colors.background;
+  const statusBorder = enabled ? tokens.colors.orangeBorderStrong : tokens.colors.borderStrong;
+  const statusText = enabled ? tokens.colors.warning : tokens.colors.dark600;
 
   return (
     <Pressable
@@ -94,16 +95,16 @@ export function PrivacySettingsToggleCard({
       onPress={onPress}
       disabled={disabled}
       style={{
-        borderRadius: 16,
+        borderRadius: tokens.radius.lg,
         borderWidth: 1,
         borderColor: privacySettingsColors.border,
         backgroundColor: privacySettingsColors.surface,
-        paddingHorizontal: 14,
-        paddingVertical: 14,
-        minHeight: tokens.minHeight.touchTarget,
+        paddingHorizontal: tokens.spacing.smPlus,
+        paddingVertical: tokens.spacing.smPlus,
+        minHeight: tokens.minHeight.row,
         flexDirection: "row",
         alignItems: "center",
-        gap: 12,
+        gap: tokens.spacing.sm,
         opacity: disabled ? 0.85 : 1,
       }}
     >
@@ -111,7 +112,7 @@ export function PrivacySettingsToggleCard({
         style={{
           width: 46,
           height: 46,
-          borderRadius: 14,
+          borderRadius: tokens.radius.control,
           alignItems: "center",
           justifyContent: "center",
           backgroundColor: iconBg,
@@ -124,7 +125,7 @@ export function PrivacySettingsToggleCard({
         <Text
           style={{
             color: privacySettingsColors.text,
-            fontSize: 15,
+            fontSize: tokens.typography.control,
             fontWeight: "700",
           }}
         >
@@ -132,27 +133,31 @@ export function PrivacySettingsToggleCard({
         </Text>
         <Text
           style={{
-            marginTop: 3,
+            marginTop: tokens.spacing.microPlus,
             color: privacySettingsColors.muted,
-            fontSize: 12,
-            lineHeight: 17,
+            fontSize: tokens.typography.caption,
+            lineHeight: tokens.lineHeight.caption,
           }}
         >
           {subtitle}
         </Text>
         <View
           style={{
-            marginTop: 9,
-            borderRadius: 12,
+            marginTop: tokens.spacing.xsPlus,
+            borderRadius: tokens.radius.md,
             borderWidth: 1,
             borderColor: statusBorder,
             backgroundColor: statusBg,
-            paddingHorizontal: 10,
-            paddingVertical: 8,
-            gap: 3,
+            paddingHorizontal: tokens.spacing.compact,
+            paddingVertical: tokens.spacing.xs,
+            gap: tokens.spacing.microPlus,
           }}
         >
-          <Text style={{ color: statusText, fontSize: 11, fontWeight: "700" }}>{stateSummary}</Text>
+          <Text
+            style={{ color: statusText, fontSize: tokens.typography.caption, fontWeight: "700" }}
+          >
+            {stateSummary}
+          </Text>
           {pending ? (
             <Text
               style={{ color: statusText, fontSize: tokens.typography.caption, fontWeight: "700" }}
@@ -160,7 +165,15 @@ export function PrivacySettingsToggleCard({
               Değişiklik kaydediliyor...
             </Text>
           ) : null}
-          <Text style={{ color: statusText, fontSize: 11, lineHeight: 15 }}>{stateDetail}</Text>
+          <Text
+            style={{
+              color: statusText,
+              fontSize: tokens.typography.caption,
+              lineHeight: tokens.lineHeight.tiny,
+            }}
+          >
+            {stateDetail}
+          </Text>
         </View>
       </View>
 
@@ -169,9 +182,9 @@ export function PrivacySettingsToggleCard({
         style={{
           width: 48,
           height: 28,
-          borderRadius: 999,
-          backgroundColor: enabled ? "#f59e0b" : "#e2e8f0",
-          padding: 2,
+          borderRadius: tokens.radius.pill,
+          backgroundColor: enabled ? tokens.colors.amber : tokens.colors.border,
+          padding: tokens.spacing.micro,
           justifyContent: "center",
         }}
       >
@@ -179,8 +192,8 @@ export function PrivacySettingsToggleCard({
           style={{
             width: 24,
             height: 24,
-            borderRadius: 999,
-            backgroundColor: "#ffffff",
+            borderRadius: tokens.radius.pill,
+            backgroundColor: tokens.colors.onMedia,
             transform: [{ translateX: enabled ? 20 : 0 }],
           }}
         />
@@ -207,26 +220,26 @@ export function PrivacySettingsExplainCard({
   return (
     <View
       style={{
-        borderRadius: 16,
+        borderRadius: tokens.radius.lg,
         borderWidth: 1,
         borderColor: privacySettingsColors.border,
         backgroundColor: privacySettingsColors.surface,
-        padding: 14,
+        padding: tokens.spacing.smPlus,
       }}
     >
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
-          gap: 10,
-          marginBottom: 8,
+          gap: tokens.spacing.compact,
+          marginBottom: tokens.spacing.xs,
         }}
       >
         <View
           style={{
             width: 32,
             height: 32,
-            borderRadius: 10,
+            borderRadius: tokens.radius.compact,
             backgroundColor: iconBg,
             alignItems: "center",
             justifyContent: "center",
@@ -237,7 +250,7 @@ export function PrivacySettingsExplainCard({
         <Text
           style={{
             color: privacySettingsColors.text,
-            fontSize: 14,
+            fontSize: tokens.typography.body,
             fontWeight: "700",
           }}
         >
@@ -245,15 +258,30 @@ export function PrivacySettingsExplainCard({
         </Text>
       </View>
 
-      <View style={{ gap: 6 }}>
+      <View style={{ gap: tokens.spacing.xsMinus }}>
         {items.map((item) => (
-          <View key={item} style={{ flexDirection: "row", alignItems: "flex-start", gap: 7 }}>
-            <Text style={{ color: bulletColor, fontSize: 12, marginTop: 2 }}>*</Text>
+          <View
+            key={item}
+            style={{
+              flexDirection: "row",
+              alignItems: "flex-start",
+              gap: tokens.spacing.xsCompact,
+            }}
+          >
+            <Text
+              style={{
+                color: bulletColor,
+                fontSize: tokens.typography.caption,
+                marginTop: tokens.spacing.micro,
+              }}
+            >
+              *
+            </Text>
             <Text
               style={{
                 color: privacySettingsColors.muted,
-                fontSize: 12,
-                lineHeight: 17,
+                fontSize: tokens.typography.caption,
+                lineHeight: tokens.lineHeight.caption,
                 flex: 1,
               }}
             >

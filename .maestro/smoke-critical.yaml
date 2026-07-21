@@ -4,6 +4,28 @@ appId: com.ogrencisosyalagi.app
     clearState: false
     stopApp: true
 
+- runFlow:
+    when:
+      visible: "http://10.0.2.2:8081"
+    commands:
+      - openLink: "ogrencisosyalagi://expo-development-client/?url=http%3A%2F%2F127.0.0.1%3A8081"
+
+- extendedWaitUntil:
+    visible: "Continue|Close|Kulüpler|Ana Sayfa"
+    timeout: 90000
+
+- runFlow:
+    when:
+      visible: "Continue"
+    commands:
+      - tapOn: "Continue"
+
+- runFlow:
+    when:
+      visible: "Close"
+    commands:
+      - tapOn: "Close"
+
 - extendedWaitUntil:
     visible: "UniVerse"
     timeout: 20000

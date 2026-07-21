@@ -1,8 +1,10 @@
 import React from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { Pressable, TextInput, View } from "react-native";
 import { Check, Eye, Search, Sparkles } from "lucide-react-native";
 import { tokens } from "../../../../shared/theme";
 import { EditProfilePreviewCard } from "./EditProfilePreviewCard";
+import { formatTurkishDisplayText } from "../../../../shared/i18n/turkishDisplay";
 
 type Props = {
   accountType: "student" | "club";
@@ -59,7 +61,7 @@ export function EditProfileStepCategories({
             flexDirection: "row",
             borderRadius: tokens.radius.md,
             backgroundColor: tokens.colors.border,
-            padding: 4,
+            padding: tokens.spacing.xxs,
           }}
         >
           <Pressable
@@ -72,7 +74,7 @@ export function EditProfileStepCategories({
               alignItems: "center",
               justifyContent: "center",
               flexDirection: "row",
-              gap: 5,
+              gap: tokens.spacing.xxsPlus,
             }}
           >
             <Sparkles
@@ -101,7 +103,7 @@ export function EditProfileStepCategories({
               alignItems: "center",
               justifyContent: "center",
               flexDirection: "row",
-              gap: 5,
+              gap: tokens.spacing.xxsPlus,
             }}
           >
             <Eye
@@ -146,8 +148,9 @@ export function EditProfileStepCategories({
               style={{
                 flex: 1,
                 color: tokens.colors.foreground,
+                fontFamily: tokens.fontFamily.regular,
                 fontSize: tokens.typography.body,
-                paddingVertical: 10,
+                paddingVertical: tokens.spacing.compact,
               }}
             />
           </View>
@@ -160,13 +163,13 @@ export function EditProfileStepCategories({
                   key={category}
                   onPress={() => onToggleCategory(category)}
                   style={{
-                    borderRadius: 10,
+                    borderRadius: tokens.radius.compact,
                     backgroundColor: selected ? tokens.colors.primary : tokens.colors.border,
-                    paddingHorizontal: 10,
+                    paddingHorizontal: tokens.spacing.compact,
                     paddingVertical: tokens.spacing.xs,
                     flexDirection: "row",
                     alignItems: "center",
-                    gap: 4,
+                    gap: tokens.spacing.xxs,
                   }}
                 >
                   {selected ? (
@@ -183,7 +186,7 @@ export function EditProfileStepCategories({
                       fontWeight: tokens.fontWeight.bold,
                     }}
                   >
-                    {category}
+                    {formatTurkishDisplayText(category)}
                   </Text>
                 </Pressable>
               );
@@ -192,13 +195,13 @@ export function EditProfileStepCategories({
 
           <View
             style={{
-              borderRadius: 10,
+              borderRadius: tokens.radius.compact,
               backgroundColor: tokens.colors.primarySofter,
-              paddingHorizontal: 10,
+              paddingHorizontal: tokens.spacing.compact,
               paddingVertical: tokens.spacing.xs,
               flexDirection: "row",
               alignItems: "center",
-              gap: 6,
+              gap: tokens.spacing.xsMinus,
             }}
           >
             <View

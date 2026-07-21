@@ -1,5 +1,7 @@
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import { AppModalHost } from "../../../../shared/components";
+import { tokens, withAlpha } from "../../../../shared/theme";
 
 type Props = {
   modalBottomPadding: number;
@@ -36,38 +38,49 @@ export function EventDetailReportModal({
         onPress={onClose}
         style={{
           flex: 1,
-          backgroundColor: "rgba(2,6,23,0.45)",
+          backgroundColor: withAlpha(tokens.colors.dark950, 0.45),
           justifyContent: "flex-end",
-          paddingHorizontal: 12,
-          paddingTop: 12,
+          paddingHorizontal: tokens.spacing.sm,
+          paddingTop: tokens.spacing.sm,
           paddingBottom: modalBottomPadding,
         }}
       >
         <Pressable
           onPress={(eventPress) => eventPress.stopPropagation()}
           style={{
-            borderRadius: 16,
-            backgroundColor: "#fff",
+            borderRadius: tokens.radius.lg,
+            backgroundColor: tokens.colors.onMedia,
             borderWidth: 1,
-            borderColor: "#e2e8f0",
+            borderColor: tokens.colors.border,
             overflow: "hidden",
           }}
         >
-          <View style={{ paddingHorizontal: 14, paddingTop: 14, paddingBottom: 8 }}>
+          <View
+            style={{
+              paddingHorizontal: tokens.spacing.smPlus,
+              paddingTop: tokens.spacing.smPlus,
+              paddingBottom: tokens.spacing.xs,
+            }}
+          >
             {reportSubmitted ? (
               <>
                 <Text
-                  style={{ color: "#0f172a", fontSize: 16, fontWeight: "800", textAlign: "center" }}
+                  style={{
+                    color: tokens.colors.foreground,
+                    fontSize: tokens.typography.subtitle,
+                    fontWeight: "800",
+                    textAlign: "center",
+                  }}
                 >
                   Bildirim gönderildi
                 </Text>
                 <Text
                   style={{
-                    color: "#64748b",
-                    fontSize: 12,
+                    color: tokens.colors.muted,
+                    fontSize: tokens.typography.caption,
                     textAlign: "center",
-                    marginTop: 6,
-                    marginBottom: 8,
+                    marginTop: tokens.spacing.xsMinus,
+                    marginBottom: tokens.spacing.xs,
                   }}
                 >
                   Inceleme icin ekibe iletildi.
@@ -77,14 +90,14 @@ export function EventDetailReportModal({
               <>
                 <Text
                   style={{
-                    color: "#0f172a",
-                    fontSize: 16,
+                    color: tokens.colors.foreground,
+                    fontSize: tokens.typography.subtitle,
                     fontWeight: "800",
                     textAlign: "center",
-                    marginBottom: 10,
+                    marginBottom: tokens.spacing.compact,
                   }}
                 >
-                  Sikayet et
+                  Şikâyet et
                 </Text>
                 {REPORT_REASONS.map((reason, index) => (
                   <Pressable
@@ -92,14 +105,20 @@ export function EventDetailReportModal({
                     onPress={() => void onReport(reason)}
                     style={{
                       minHeight: 44,
-                      paddingHorizontal: 12,
+                      paddingHorizontal: tokens.spacing.sm,
                       flexDirection: "row",
                       alignItems: "center",
                       borderTopWidth: index === 0 ? 0 : 1,
-                      borderTopColor: "#f1f5f9",
+                      borderTopColor: tokens.colors.surfaceVariant,
                     }}
                   >
-                    <Text style={{ color: "#334155", fontSize: 13, fontWeight: "600" }}>
+                    <Text
+                      style={{
+                        color: tokens.colors.dark700,
+                        fontSize: tokens.typography.label,
+                        fontWeight: "600",
+                      }}
+                    >
                       {reason}
                     </Text>
                   </Pressable>
@@ -109,12 +128,20 @@ export function EventDetailReportModal({
                   style={{
                     minHeight: 44,
                     borderTopWidth: 1,
-                    borderTopColor: "#f1f5f9",
+                    borderTopColor: tokens.colors.surfaceVariant,
                     alignItems: "center",
                     justifyContent: "center",
                   }}
                 >
-                  <Text style={{ color: "#64748b", fontSize: 13, fontWeight: "700" }}>Vazgec</Text>
+                  <Text
+                    style={{
+                      color: tokens.colors.muted,
+                      fontSize: tokens.typography.label,
+                      fontWeight: "700",
+                    }}
+                  >
+                    Vazgec
+                  </Text>
                 </Pressable>
               </>
             )}

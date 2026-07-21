@@ -1,6 +1,6 @@
 import { Bell, GraduationCap, SlidersHorizontal } from "lucide-react-native";
 import { View } from "react-native";
-import { Text } from "react-native-paper";
+import { AppText as Text } from "../../../shared/components/AppText";
 import { TourAnchor } from "../../../app-shell/onboarding";
 import { AppIconButton } from "../../../shared/components";
 import { t } from "../../../shared/i18n";
@@ -29,19 +29,21 @@ export function HomeScreenHeader({
       style={{
         flexDirection: "row",
         alignItems: "center",
-        paddingHorizontal: 0,
-        paddingVertical: 8,
+        paddingHorizontal: tokens.spacing.md,
+        paddingVertical: tokens.spacing.xs,
         backgroundColor: tokens.colors.surface,
         borderBottomWidth: 1,
         borderBottomColor: tokens.colors.border,
       }}
     >
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 10, flex: 1 }}>
+      <View
+        style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.compact, flex: 1 }}
+      >
         <View
           style={{
             width: 38,
             height: 38,
-            borderRadius: 999,
+            borderRadius: tokens.radius.pill,
             backgroundColor: tokens.colors.primary,
             alignItems: "center",
             justifyContent: "center",
@@ -50,17 +52,26 @@ export function HomeScreenHeader({
           <GraduationCap size={18} color={tokens.colors.surface} strokeWidth={1.5} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: 17, fontWeight: "800", color: tokens.colors.text }}>
+          <Text
+            style={{
+              fontSize: tokens.typography.header,
+              fontWeight: "800",
+              color: tokens.colors.text,
+            }}
+          >
             {APP_NAME}
           </Text>
           {APP_SLOGAN ? (
-            <Text style={{ fontSize: 12, color: tokens.colors.muted }} numberOfLines={1}>
+            <Text
+              style={{ fontSize: tokens.typography.caption, color: tokens.colors.muted }}
+              numberOfLines={1}
+            >
               {APP_SLOGAN}
             </Text>
           ) : null}
         </View>
       </View>
-      <View style={{ flexDirection: "row", gap: 8 }}>
+      <View style={{ flexDirection: "row", gap: tokens.spacing.xs }}>
         <TourAnchor tourId="feed-filter">
           <AppIconButton
             accessibilityLabel={t("home.a11y.filters")}

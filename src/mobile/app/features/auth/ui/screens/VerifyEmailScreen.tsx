@@ -1,5 +1,6 @@
 import React from "react";
-import { Pressable, Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { Pressable, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Mail, RefreshCw, ExternalLink, CheckCircle, AlertCircle } from "lucide-react-native";
@@ -64,7 +65,7 @@ export function VerifyEmailScreen({ navigation, route }: Props) {
 
       <ScrollView
         contentContainerStyle={{
-          paddingHorizontal: 24,
+          paddingHorizontal: tokens.spacing.xl,
           alignItems: "center",
           paddingBottom: Math.max(insets.bottom + 16, 24),
         }}
@@ -72,9 +73,9 @@ export function VerifyEmailScreen({ navigation, route }: Props) {
       >
         <View
           style={{
-            width: 108,
-            height: 108,
-            marginTop: 10,
+            width: 88,
+            height: 88,
+            marginTop: tokens.spacing.compact,
             alignItems: "center",
             justifyContent: "center",
           }}
@@ -82,9 +83,9 @@ export function VerifyEmailScreen({ navigation, route }: Props) {
           <View
             style={{
               position: "absolute",
-              width: 108,
-              height: 108,
-              borderRadius: 28,
+              width: 88,
+              height: 88,
+              borderRadius: tokens.radius["3xl"],
               backgroundColor: tokens.colors.primaryBorder,
               opacity: 0.45,
               transform: [{ scale: 1.15 }],
@@ -92,9 +93,9 @@ export function VerifyEmailScreen({ navigation, route }: Props) {
           />
           <View
             style={{
-              width: 96,
-              height: 96,
-              borderRadius: 24,
+              width: 78,
+              height: 78,
+              borderRadius: tokens.radius["2xl"],
               backgroundColor: tokens.colors.primary,
               alignItems: "center",
               justifyContent: "center",
@@ -105,15 +106,15 @@ export function VerifyEmailScreen({ navigation, route }: Props) {
               elevation: 6,
             }}
           >
-            <Mail size={38} color={tokens.colors.surface} strokeWidth={1.5} />
+            <Mail size={tokens.iconSize["3xl"]} color={tokens.colors.surface} strokeWidth={1.5} />
           </View>
         </View>
 
         <Text
           style={{
-            marginTop: 22,
+            marginTop: tokens.spacing.lgPlus,
             color: tokens.colors.foreground,
-            fontSize: 30,
+            fontSize: tokens.typography.displayLarge,
             fontWeight: "700",
             textAlign: "center",
           }}
@@ -122,10 +123,10 @@ export function VerifyEmailScreen({ navigation, route }: Props) {
         </Text>
         <Text
           style={{
-            marginTop: 10,
+            marginTop: tokens.spacing.compact,
             color: tokens.colors.muted,
-            fontSize: 14,
-            lineHeight: 21,
+            fontSize: tokens.typography.body,
+            lineHeight: tokens.lineHeight.bodyRelaxed,
             textAlign: "center",
             maxWidth: 310,
           }}
@@ -134,35 +135,45 @@ export function VerifyEmailScreen({ navigation, route }: Props) {
           {t("auth.verify.sentTo", { email: "" }).replace("{email} ", "")}
         </Text>
 
-        <View style={{ width: "100%", marginTop: 24, gap: 10 }}>
+        <View style={{ width: "100%", marginTop: tokens.spacing.xl, gap: tokens.spacing.compact }}>
           {VERIFY_EMAIL_STEPS.map((step, index) => (
             <View
               key={step}
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                gap: 12,
-                borderRadius: 12,
+                gap: tokens.spacing.sm,
+                borderRadius: tokens.radius.md,
                 backgroundColor: tokens.colors.surface,
-                paddingHorizontal: 14,
-                paddingVertical: 12,
+                paddingHorizontal: tokens.spacing.smPlus,
+                paddingVertical: tokens.spacing.sm,
               }}
             >
               <View
                 style={{
                   width: 28,
                   height: 28,
-                  borderRadius: 999,
+                  borderRadius: tokens.radius.pill,
                   backgroundColor: tokens.colors.primarySoft,
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                <Text style={{ color: tokens.colors.primary, fontSize: 12, fontWeight: "800" }}>
+                <Text
+                  style={{
+                    color: tokens.colors.primary,
+                    fontSize: tokens.typography.caption,
+                    fontWeight: "800",
+                  }}
+                >
                   {index + 1}
                 </Text>
               </View>
-              <Text style={{ flex: 1, color: tokens.colors.dark700, fontSize: 14 }}>{step}</Text>
+              <Text
+                style={{ flex: 1, color: tokens.colors.dark700, fontSize: tokens.typography.body }}
+              >
+                {step}
+              </Text>
             </View>
           ))}
         </View>
@@ -171,13 +182,13 @@ export function VerifyEmailScreen({ navigation, route }: Props) {
           <View
             style={{
               width: "100%",
-              marginTop: 14,
-              borderRadius: 12,
-              paddingHorizontal: 12,
-              paddingVertical: 10,
+              marginTop: tokens.spacing.smPlus,
+              borderRadius: tokens.radius.md,
+              paddingHorizontal: tokens.spacing.sm,
+              paddingVertical: tokens.spacing.compact,
               flexDirection: "row",
               alignItems: "center",
-              gap: 8,
+              gap: tokens.spacing.xs,
               backgroundColor: checkSuccess
                 ? tokens.colors.successSurface
                 : tokens.colors.warningSoft,
@@ -191,7 +202,7 @@ export function VerifyEmailScreen({ navigation, route }: Props) {
             <Text
               style={{
                 flex: 1,
-                fontSize: 13,
+                fontSize: tokens.typography.label,
                 fontWeight: "500",
                 color: checkSuccess ? tokens.colors.successText : tokens.colors.warningIcon,
               }}
@@ -205,19 +216,24 @@ export function VerifyEmailScreen({ navigation, route }: Props) {
           <View
             style={{
               width: "100%",
-              marginTop: 14,
-              borderRadius: 12,
-              paddingHorizontal: 12,
-              paddingVertical: 10,
+              marginTop: tokens.spacing.smPlus,
+              borderRadius: tokens.radius.md,
+              paddingHorizontal: tokens.spacing.sm,
+              paddingVertical: tokens.spacing.compact,
               flexDirection: "row",
               alignItems: "center",
-              gap: 8,
+              gap: tokens.spacing.xs,
               backgroundColor: tokens.colors.successSurface,
             }}
           >
             <CheckCircle size={16} color={tokens.colors.successText} strokeWidth={1.5} />
             <Text
-              style={{ flex: 1, fontSize: 13, fontWeight: "500", color: tokens.colors.successText }}
+              style={{
+                flex: 1,
+                fontSize: tokens.typography.label,
+                fontWeight: "500",
+                color: tokens.colors.successText,
+              }}
             >
               {t("auth.verify.resent")}
             </Text>
@@ -228,22 +244,28 @@ export function VerifyEmailScreen({ navigation, route }: Props) {
           <View
             style={{
               width: "100%",
-              marginTop: 14,
-              borderRadius: 12,
+              marginTop: tokens.spacing.smPlus,
+              borderRadius: tokens.radius.md,
               borderWidth: 1,
               borderColor: tokens.colors.dangerBorder,
               backgroundColor: tokens.colors.dangerSoft,
-              paddingHorizontal: 12,
-              paddingVertical: 10,
+              paddingHorizontal: tokens.spacing.sm,
+              paddingVertical: tokens.spacing.compact,
             }}
           >
-            <Text style={{ color: tokens.colors.dangerDark, fontSize: 13, fontWeight: "500" }}>
+            <Text
+              style={{
+                color: tokens.colors.dangerDark,
+                fontSize: tokens.typography.label,
+                fontWeight: "500",
+              }}
+            >
               {resendError}
             </Text>
           </View>
         ) : null}
 
-        <View style={{ width: "100%", marginTop: 20, gap: 10 }}>
+        <View style={{ width: "100%", marginTop: tokens.spacing.lg, gap: tokens.spacing.compact }}>
           <GradientButton
             label={checking ? t("auth.verify.checking") : t("auth.verify.checkButton")}
             loading={checking}
@@ -256,16 +278,22 @@ export function VerifyEmailScreen({ navigation, route }: Props) {
             onPress={handleOpenMail}
             style={{
               minHeight: 48,
-              borderRadius: 16,
+              borderRadius: tokens.radius.lg,
               backgroundColor: tokens.colors.surfaceVariant,
               flexDirection: "row",
               alignItems: "center",
               justifyContent: "center",
-              gap: 8,
+              gap: tokens.spacing.xs,
             }}
           >
             <ExternalLink size={16} color={tokens.colors.dark600} strokeWidth={1.5} />
-            <Text style={{ color: tokens.colors.dark600, fontSize: 15, fontWeight: "700" }}>
+            <Text
+              style={{
+                color: tokens.colors.dark600,
+                fontSize: tokens.typography.control,
+                fontWeight: "700",
+              }}
+            >
               {t("auth.verify.openMailApp")}
             </Text>
           </Pressable>
@@ -282,19 +310,25 @@ export function VerifyEmailScreen({ navigation, route }: Props) {
             disabled={resending || countdown > 0}
             style={{
               minHeight: 48,
-              borderRadius: 16,
+              borderRadius: tokens.radius.lg,
               borderWidth: 1,
               borderColor: tokens.colors.border,
               backgroundColor: tokens.colors.surface,
               flexDirection: "row",
               alignItems: "center",
               justifyContent: "center",
-              gap: 8,
+              gap: tokens.spacing.xs,
               opacity: resending || countdown > 0 ? 0.6 : 1,
             }}
           >
             <RefreshCw size={16} color={tokens.colors.muted} strokeWidth={1.5} />
-            <Text style={{ color: tokens.colors.muted, fontSize: 15, fontWeight: "700" }}>
+            <Text
+              style={{
+                color: tokens.colors.muted,
+                fontSize: tokens.typography.control,
+                fontWeight: "700",
+              }}
+            >
               {countdown > 0
                 ? t("auth.verify.resendCountdown", { countdown: String(countdown) })
                 : resending
@@ -310,10 +344,16 @@ export function VerifyEmailScreen({ navigation, route }: Props) {
             style={{
               alignItems: "center",
               justifyContent: "center",
-              minHeight: tokens.minHeight.touchTarget,
+              minHeight: tokens.minHeight.buttonLg,
             }}
           >
-            <Text style={{ color: tokens.colors.mutedFg, fontSize: 13, fontWeight: "500" }}>
+            <Text
+              style={{
+                color: tokens.colors.mutedFg,
+                fontSize: tokens.typography.label,
+                fontWeight: "500",
+              }}
+            >
               {t("auth.verify.backToLogin")}
             </Text>
           </Pressable>
@@ -321,10 +361,10 @@ export function VerifyEmailScreen({ navigation, route }: Props) {
 
         <Text
           style={{
-            marginTop: 16,
+            marginTop: tokens.spacing.md,
             color: tokens.colors.mutedFg,
-            fontSize: 12,
-            lineHeight: 18,
+            fontSize: tokens.typography.caption,
+            lineHeight: tokens.lineHeight.label,
             textAlign: "center",
             maxWidth: 300,
           }}

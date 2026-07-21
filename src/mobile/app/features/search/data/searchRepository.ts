@@ -26,6 +26,7 @@ import { SEARCH_DISCOVERY_SCOPE } from "./searchConstants";
 import { getSearchResults } from "./searchProjectionApi";
 
 const INITIAL_SEARCH_PAGE_SIZE = INITIAL_PAGE_SIZES.search;
+const activeSearchRequests = new Map<string, AbortController>();
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -72,7 +73,20 @@ export function fetchSearchResults(
   params: SearchProjectionParams,
   context: ProjectionRequestContext = {},
 ): Promise<ProjectionEnvelope<SearchProjectionItem>> {
-  return getSearchResults(params, context);
+  const requestScope = `${getViewerKey({ id: params.viewerId, username: params.viewerUsername })}:${params.kind}`;
+  activeSearchRequests.get(requestScope)?.abort();
+  const controller = new AbortController();
+  activeSearchRequests.set(requestScope, controller);
+  const abortFromCaller = () => controller.abort();
+  context.signal?.addEventListener("abort", abortFromCaller, { once: true });
+
+  const request = getSearchResults(params, { ...context, signal: controller.signal });
+  return request.finally(() => {
+    context.signal?.removeEventListener("abort", abortFromCaller);
+    if (activeSearchRequests.get(requestScope) === controller) {
+      activeSearchRequests.delete(requestScope);
+    }
+  });
 }
 
 // ─── Query Definitions ──────────────────────────────────────────────────────

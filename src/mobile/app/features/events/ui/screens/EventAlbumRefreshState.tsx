@@ -1,6 +1,7 @@
 import React from "react";
 import { FlatList, View } from "react-native";
 import { EmptyState } from "../../../../shared/components";
+import { tokens } from "../../../../shared/theme";
 
 type Props = {
   children?: React.ReactNode;
@@ -27,10 +28,14 @@ export function EventAlbumRefreshState({
       style={{ flex: 1 }}
       alwaysBounceVertical
       overScrollMode="always"
-      contentContainerStyle={{ flexGrow: 1, justifyContent: "center", paddingBottom: 32 }}
+      contentContainerStyle={{
+        flexGrow: 1,
+        justifyContent: "center",
+        paddingBottom: tokens.spacing.xxl,
+      }}
       renderItem={() => null}
       ListEmptyComponent={
-        <View style={{ paddingHorizontal: 16 }}>
+        <View style={{ paddingHorizontal: tokens.spacing.md }}>
           <EmptyState title={title} subtitle={subtitle} />
           {children}
         </View>

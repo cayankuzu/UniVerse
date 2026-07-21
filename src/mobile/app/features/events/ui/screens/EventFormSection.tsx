@@ -1,5 +1,6 @@
 import React from "react";
-import { Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { View } from "react-native";
 import { tokens } from "../../../../shared/theme";
 
 interface Props {
@@ -11,10 +12,10 @@ interface Props {
 export function EventFormSection({ title, subtitle, children }: Props) {
   return (
     <View style={{ gap: tokens.spacing.sm }}>
-      <View style={{ gap: 6 }}>
+      <View style={{ gap: tokens.spacing.xsMinus }}>
         <View
           style={{
-            width: 56,
+            width: 46,
             height: 4,
             borderRadius: tokens.radius.pill,
             backgroundColor: tokens.colors.primaryBorder,
@@ -25,7 +26,7 @@ export function EventFormSection({ title, subtitle, children }: Props) {
             fontSize: tokens.typography.title,
             fontWeight: tokens.fontWeight.extrabold,
             color: tokens.colors.foreground,
-            letterSpacing: 0.1,
+            letterSpacing: tokens.letterSpacing.label,
           }}
         >
           {title}
@@ -36,7 +37,7 @@ export function EventFormSection({ title, subtitle, children }: Props) {
               fontSize: tokens.typography.body,
               color: tokens.colors.muted,
               fontWeight: tokens.fontWeight.medium,
-              lineHeight: 20,
+              lineHeight: tokens.lineHeight.body,
             }}
           >
             {subtitle}

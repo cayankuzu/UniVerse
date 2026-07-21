@@ -7,7 +7,6 @@ import {
 } from "@react-navigation/native";
 import { BackHandler, View } from "react-native";
 import { useAuth } from "../auth";
-import { OnboardingCoordinator } from "../onboarding";
 import { AppNetworkStatusBanner } from "../feedback/AppNetworkStatusBanner";
 import { AppUploadActivityBar } from "../feedback/AppUploadActivityBar";
 import { useAppStartupState } from "../startup/AppStartupState";
@@ -132,8 +131,6 @@ export function RootNavigator() {
     controller.handleStateChange();
   }, [controller]);
 
-  const showOnboardingCoordinator = authBootState === "signed_in_hydrated" && queryCacheReady;
-
   return (
     <View style={{ flex: 1, backgroundColor: appTheme.colors.background }}>
       {canRenderNavigation ? (
@@ -164,8 +161,6 @@ export function RootNavigator() {
           ) : null}
 
           <FeedToast message={controller.exitMessage} />
-
-          {showOnboardingCoordinator ? <OnboardingCoordinator /> : null}
         </NavigationContainer>
       ) : null}
 

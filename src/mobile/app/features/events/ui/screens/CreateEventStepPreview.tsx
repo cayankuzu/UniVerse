@@ -1,4 +1,5 @@
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import type { EventWithMeta } from "../../data";
 import { HomeEventCard } from "../../../content-cards/public/cards";
 import { EventFormSection } from "./EventFormSection";

@@ -1,8 +1,10 @@
 import type { ReactElement, RefObject } from "react";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import { ArrowLeft, X } from "lucide-react-native";
-import { Pressable, Text, View, type ViewStyle } from "react-native";
+import { Pressable, View, type ViewStyle } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AppFlatList, type AppFlatListRef } from "../../../../shared/components";
+import { tokens, withAlpha } from "../../../../shared/theme";
 
 type DetailViewerOverlayLayoutProps<T extends { id: string }> = {
   contentContainerStyle: ViewStyle;
@@ -31,18 +33,21 @@ export function DetailViewerOverlayLayout<T extends { id: string }>(
       pointerEvents="box-none"
       style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: 30 }}
     >
-      <View style={{ flex: 1, backgroundColor: "rgba(2,6,23,0.28)" }}>
-        <SafeAreaView style={{ flex: 1, backgroundColor: "#f8fafc" }} edges={["top"]}>
+      <View style={{ flex: 1, backgroundColor: withAlpha(tokens.colors.dark950, 0.28) }}>
+        <SafeAreaView
+          style={{ flex: 1, backgroundColor: tokens.colors.background }}
+          edges={["top"]}
+        >
           <View
             style={{
               flexDirection: "row",
               alignItems: "center",
-              gap: 10,
-              paddingHorizontal: 10,
-              paddingVertical: 8,
+              gap: tokens.spacing.compact,
+              paddingHorizontal: tokens.spacing.compact,
+              paddingVertical: tokens.spacing.xs,
               borderBottomWidth: 1,
-              borderBottomColor: "#e2e8f0",
-              backgroundColor: "#fff",
+              borderBottomColor: tokens.colors.border,
+              backgroundColor: tokens.colors.onMedia,
             }}
           >
             <Pressable
@@ -51,16 +56,21 @@ export function DetailViewerOverlayLayout<T extends { id: string }>(
                 width: 36,
                 height: 36,
                 borderRadius: 11,
-                backgroundColor: "#f1f5f9",
+                backgroundColor: tokens.colors.surfaceVariant,
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <ArrowLeft size={18} color="#334155" />
+              <ArrowLeft size={18} color={tokens.colors.dark700} />
             </Pressable>
 
             <Text
-              style={{ flex: 1, color: "#0f172a", fontSize: 15, fontWeight: "700" }}
+              style={{
+                flex: 1,
+                color: tokens.colors.foreground,
+                fontSize: tokens.typography.control,
+                fontWeight: "700",
+              }}
               numberOfLines={1}
             >
               {props.headerTitle}
@@ -71,13 +81,13 @@ export function DetailViewerOverlayLayout<T extends { id: string }>(
               style={{
                 width: 32,
                 height: 32,
-                borderRadius: 999,
-                backgroundColor: "#f1f5f9",
+                borderRadius: tokens.radius.pill,
+                backgroundColor: tokens.colors.surfaceVariant,
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <X size={16} color="#64748b" />
+              <X size={16} color={tokens.colors.muted} />
             </Pressable>
           </View>
 

@@ -9,6 +9,7 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react-native";
+import { tokens } from "../../../shared/theme";
 import type { AlbumPhotoWithMeta, EventWithMeta } from "../../../data/contracts/content";
 import type { AlbumVisibilityLabel } from "../../../data/contracts/entities";
 import {
@@ -92,6 +93,30 @@ export function formatEventHeaderTime(value?: string | null) {
   });
 }
 
+export function formatContentAgeLabel(value?: string | null, now = new Date()) {
+  const normalized = normalizeText(value);
+  if (!normalized) return "";
+  const date = new Date(normalized);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const elapsedMs = Math.max(0, now.getTime() - date.getTime());
+  const elapsedMinutes = Math.floor(elapsedMs / 60_000);
+  if (elapsedMinutes < 1) return "Şimdi";
+  if (elapsedMinutes < 60) return `${elapsedMinutes} dk.`;
+
+  const elapsedHours = Math.floor(elapsedMinutes / 60);
+  if (elapsedHours < 24) return `${elapsedHours} sa.`;
+
+  const elapsedDays = Math.floor(elapsedHours / 24);
+  if (elapsedDays < 7) return `${elapsedDays} gün`;
+
+  return date.toLocaleDateString("tr-TR", {
+    day: "numeric",
+    month: "short",
+    ...(date.getFullYear() === now.getFullYear() ? {} : { year: "numeric" as const }),
+  });
+}
+
 export function formatAlbumCreatedAtLabel(value?: string | null) {
   const normalized = normalizeText(value);
   if (!normalized) return "";
@@ -126,8 +151,8 @@ export function resolvePreparedEventAccessChipDisplay(
 ): PreparedEventAccessChipDisplay {
   if (chip.kind === "public") {
     return {
-      backgroundColor: "#ecfdf5",
-      color: "#047857",
+      backgroundColor: tokens.colors.successSoft,
+      color: tokens.colors.success,
       icon: Globe,
       label: chip.label,
     };
@@ -135,16 +160,16 @@ export function resolvePreparedEventAccessChipDisplay(
 
   if (chip.kind === "members_only") {
     return {
-      backgroundColor: "#fef2f2",
-      color: "#dc2626",
+      backgroundColor: tokens.colors.primarySofter,
+      color: tokens.colors.primaryDeep,
       icon: Lock,
       label: chip.label,
     };
   }
 
   return {
-    backgroundColor: "#eff6ff",
-    color: "#1d4ed8",
+    backgroundColor: tokens.colors.surfaceVariant,
+    color: tokens.colors.textSecondary,
     icon: Users,
     label: chip.label,
   };
@@ -182,15 +207,9 @@ export function buildPreparedEventInfoSlides(
   const isFree = normalizeText(event.fee).toLowerCase().includes("Ücretsiz");
   const slides: PreparedEventInfoSlide[] = [
     {
-      kind: "fee",
-      label: normalizeText(event.fee) || "Ücretsiz",
-      sub: "Ücret",
-      tone: isFree ? "success" : "warning",
-    },
-    {
       kind: "date",
       label: dateLabel,
-      sub: event.endDate && event.endDate !== event.startDate ? `-> ${event.endDate}` : "Başlangıç",
+      sub: event.endDate && event.endDate !== event.startDate ? `→ ${event.endDate}` : "Başlangıç",
       tone: "blue",
     },
     {
@@ -198,6 +217,12 @@ export function buildPreparedEventInfoSlides(
       label: timeLabel,
       sub: "Saat",
       tone: "indigo",
+    },
+    {
+      kind: "fee",
+      label: normalizeText(event.fee) || "Ücretsiz",
+      sub: "Ücret",
+      tone: isFree ? "success" : "warning",
     },
   ];
 
@@ -230,48 +255,48 @@ export function resolvePreparedEventInfoSlideDisplay(
   switch (slide.kind) {
     case "fee":
       return {
-        backgroundColor: slide.tone === "success" ? "#ecfdf5" : "#fffbeb",
+        backgroundColor: tokens.colors.primarySofter,
         icon: DollarSign,
-        iconColor: slide.tone === "success" ? "#059669" : "#d97706",
+        iconColor: tokens.colors.primary,
         label: slide.label,
         sub: slide.sub,
-        textColor: slide.tone === "success" ? "#047857" : "#b45309",
+        textColor: tokens.colors.primaryDark,
       };
     case "date":
       return {
-        backgroundColor: "#eff6ff",
+        backgroundColor: tokens.colors.primarySofter,
         icon: Calendar,
-        iconColor: "#2563eb",
+        iconColor: tokens.colors.primary,
         label: slide.label,
         sub: slide.sub,
-        textColor: "#1d4ed8",
+        textColor: tokens.colors.primaryDark,
       };
     case "time":
       return {
-        backgroundColor: "#eef2ff",
+        backgroundColor: tokens.colors.surfaceTint,
         icon: Clock,
-        iconColor: "#4f46e5",
+        iconColor: tokens.colors.primary,
         label: slide.label,
         sub: slide.sub,
-        textColor: "#4338ca",
+        textColor: tokens.colors.primaryDark,
       };
     case "level":
       return {
-        backgroundColor: "#ecfeff",
+        backgroundColor: tokens.colors.surfaceVariant,
         icon: BarChart3,
-        iconColor: "#0891b2",
+        iconColor: tokens.colors.primary,
         label: slide.label,
         sub: slide.sub,
-        textColor: "#0e7490",
+        textColor: tokens.colors.textSecondary,
       };
     case "materials":
       return {
-        backgroundColor: "#fff7ed",
+        backgroundColor: tokens.colors.surfaceVariant,
         icon: Package,
-        iconColor: "#ea580c",
+        iconColor: tokens.colors.primary,
         label: slide.label,
         sub: slide.sub,
-        textColor: "#c2410c",
+        textColor: tokens.colors.textSecondary,
       };
   }
 }

@@ -69,7 +69,7 @@ export function useCreateEventScreenState(params: {
       cancelLabel: "Vazgec",
       confirmLabel: "Cik",
       destructive: true,
-      message: "Kaydedilmeyen etkinlik taslagi silinecek.",
+      message: "Kaydedilmeyen etkinlik taslağı silinecek.",
       onConfirm: leaveScreen,
       title: "Taslak kapatilsin mi?",
     });
@@ -131,8 +131,8 @@ export function useCreateEventScreenState(params: {
       const message = mapAppDataErrorMessage(
         error,
         {
-          forbidden: "Bu etkinligi yayinlama iznin yok.",
-          invalid_state: "Etkinlik taslagi gecerli degil.",
+          forbidden: "Bu etkinliği yayımlama iznin yok.",
+          invalid_state: "Etkinlik taslağı geçerli değil.",
           network: "Baglanti sorunu nedeniyle etkinlik olusturulamadi.",
         },
         "Etkinlik olusturulamadi.",

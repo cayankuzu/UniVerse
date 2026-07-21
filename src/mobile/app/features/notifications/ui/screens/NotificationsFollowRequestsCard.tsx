@@ -1,5 +1,6 @@
 import React from "react";
-import { Pressable, Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { Pressable, View } from "react-native";
 import { UserPlus } from "lucide-react-native";
 import { Avatar } from "../../../../shared/components";
 import { tokens } from "../../../../shared/theme";
@@ -30,11 +31,11 @@ export function NotificationsFollowRequestsCard({
   return (
     <View
       style={{
-        marginBottom: 10,
-        borderRadius: 14,
+        marginBottom: tokens.spacing.compact,
+        borderRadius: tokens.radius.control,
         borderWidth: 1,
-        borderColor: "#ddd6fe",
-        backgroundColor: "#faf5ff",
+        borderColor: tokens.colors.primaryBorder,
+        backgroundColor: tokens.colors.primarySofter,
         overflow: "hidden",
       }}
     >
@@ -42,24 +43,37 @@ export function NotificationsFollowRequestsCard({
         style={{
           flexDirection: "row",
           alignItems: "center",
-          gap: 6,
-          paddingHorizontal: 12,
-          paddingVertical: 10,
+          gap: tokens.spacing.xsMinus,
+          paddingHorizontal: tokens.spacing.sm,
+          paddingVertical: tokens.spacing.compact,
         }}
       >
-        <UserPlus size={15} color="#7c3aed" />
-        <Text style={{ flex: 1, color: "#581c87", fontSize: 13, fontWeight: "700" }}>
+        <UserPlus size={15} color={tokens.colors.primary} />
+        <Text
+          style={{
+            flex: 1,
+            color: tokens.colors.primaryDeep,
+            fontSize: tokens.typography.label,
+            fontWeight: "700",
+          }}
+        >
           Takip istekleri
         </Text>
         <View
           style={{
-            borderRadius: 999,
-            backgroundColor: "#ede9fe",
-            paddingHorizontal: 8,
-            paddingVertical: 2,
+            borderRadius: tokens.radius.pill,
+            backgroundColor: tokens.colors.primarySoft,
+            paddingHorizontal: tokens.spacing.xs,
+            paddingVertical: tokens.spacing.micro,
           }}
         >
-          <Text style={{ color: "#6d28d9", fontSize: tokens.typography.tiny, fontWeight: "800" }}>
+          <Text
+            style={{
+              color: tokens.colors.primaryDark,
+              fontSize: tokens.typography.tiny,
+              fontWeight: "800",
+            }}
+          >
             {requests.length > 99 ? "99+" : requests.length}
           </Text>
         </View>
@@ -84,29 +98,33 @@ export function NotificationsFollowRequestsCard({
             style={{
               flexDirection: "row",
               alignItems: "center",
-              gap: 10,
-              paddingHorizontal: 12,
-              paddingVertical: 10,
+              gap: tokens.spacing.compact,
+              paddingHorizontal: tokens.spacing.sm,
+              paddingVertical: tokens.spacing.compact,
               borderTopWidth: index === 0 ? 0 : 1,
-              borderTopColor: "#ede9fe",
-              backgroundColor: "#ffffff",
+              borderTopColor: tokens.colors.primarySoft,
+              backgroundColor: tokens.colors.onMedia,
             }}
           >
             <Pressable
-              accessibilityLabel={`${request.name} profilini ac`}
+              accessibilityLabel={`${request.name} profilini aç`}
               accessibilityRole="button"
               onPress={() => onOpenProfile(request.username)}
               style={{
-                minHeight: tokens.minHeight.touchTarget,
-                minWidth: tokens.minHeight.touchTarget,
+                minHeight: tokens.minHeight.row,
+                minWidth: tokens.minHeight.row,
               }}
             >
-              <Avatar uri={request.image} name={request.name} size={42} />
+              <Avatar uri={request.image} name={request.name} size={34} />
             </Pressable>
             <View style={{ flex: 1 }}>
               <Pressable accessibilityRole="button" onPress={() => onOpenProfile(request.username)}>
                 <Text
-                  style={{ color: "#0f172a", fontSize: 13, fontWeight: "700" }}
+                  style={{
+                    color: tokens.colors.foreground,
+                    fontSize: tokens.typography.label,
+                    fontWeight: "700",
+                  }}
                   numberOfLines={1}
                 >
                   {request.name}
@@ -119,7 +137,7 @@ export function NotificationsFollowRequestsCard({
                 style={{
                   color: tokens.colors.muted,
                   fontSize: tokens.typography.caption,
-                  marginTop: 1,
+                  marginTop: tokens.spacing.hairline,
                 }}
               >
                 {request.time}

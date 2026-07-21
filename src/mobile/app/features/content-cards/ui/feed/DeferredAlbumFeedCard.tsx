@@ -1,6 +1,7 @@
 import { memo, useCallback } from "react";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import { Play } from "lucide-react-native";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { AppImage } from "../../../../shared/components";
 import { isVideoMediaUri } from "../../../../shared/media/mediaVideoUtils";
 import { VideoThumbnailPreview } from "../../../../shared/media/VideoThumbnailPreview";
@@ -12,6 +13,7 @@ import {
   type AlbumFeedCardProps,
 } from "./AlbumFeedCard.shared";
 import { AlbumCardFooter } from "./AlbumCardFooter";
+import { tokens, withAlpha } from "../../../../shared/theme";
 
 export const DeferredAlbumFeedCard = memo(function DeferredAlbumFeedCard({
   photo,
@@ -89,7 +91,11 @@ export const DeferredAlbumFeedCard = memo(function DeferredAlbumFeedCard({
                 style={{ width: "100%", height: "100%" }}
               />
               <View style={styles.videoOverlay}>
-                <Play size={34} color="#fff" strokeWidth={1.8} />
+                <Play
+                  size={tokens.iconSize["3xl"]}
+                  color={tokens.colors.onMedia}
+                  strokeWidth={1.8}
+                />
               </View>
             </View>
           ) : (
@@ -132,13 +138,13 @@ export const DeferredAlbumFeedCard = memo(function DeferredAlbumFeedCard({
 
 const styles = StyleSheet.create({
   countBadge: {
-    backgroundColor: "rgba(15,23,42,0.62)",
-    borderRadius: 999,
-    color: "#fff",
-    fontSize: 10,
+    backgroundColor: withAlpha(tokens.colors.foreground, 0.62),
+    borderRadius: tokens.radius.pill,
+    color: tokens.colors.onMedia,
+    fontSize: tokens.typography.micro,
     fontWeight: "700",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: tokens.spacing.xs,
+    paddingVertical: tokens.spacing.xxs,
   },
   countBadgeContainer: {
     position: "absolute",
@@ -146,14 +152,14 @@ const styles = StyleSheet.create({
     top: 8,
   },
   heroFrame: {
-    backgroundColor: "#e2e8f0",
-    height: 210,
+    backgroundColor: tokens.colors.border,
+    height: 176,
     position: "relative",
     width: "100%",
   },
   videoOverlay: {
     alignItems: "center",
-    backgroundColor: "rgba(15,23,42,0.18)",
+    backgroundColor: withAlpha(tokens.colors.foreground, 0.18),
     bottom: 0,
     justifyContent: "center",
     left: 0,

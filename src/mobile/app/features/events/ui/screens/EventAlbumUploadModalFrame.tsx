@@ -1,6 +1,7 @@
 import type { PropsWithChildren } from "react";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import React from "react";
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from "react-native";
 import { ArrowLeft, ImagePlus, Sparkles } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppModalHost, AppScrollView as ScrollView } from "../../../../shared/components";
@@ -10,7 +11,7 @@ import {
   MAX_VIDEO_UPLOAD_LIMIT_MB,
   MAX_VIDEO_UPLOAD_GRACE_SECONDS,
 } from "../../../../shared/media/mediaVideoUtils";
-import { tokens } from "../../../../shared/theme";
+import { tokens, withAlpha } from "../../../../shared/theme";
 
 interface EventAlbumUploadModalFrameProps extends PropsWithChildren {
   modalBottomPadding: number;
@@ -50,7 +51,7 @@ export function EventAlbumUploadModalFrame({
             onPress={onClose}
             style={{
               ...StyleSheet.absoluteFillObject,
-              backgroundColor: "rgba(2,6,23,0.5)",
+              backgroundColor: withAlpha(tokens.colors.dark950, 0.5),
             }}
           />
 
@@ -72,7 +73,7 @@ export function EventAlbumUploadModalFrame({
                 backgroundColor: tokens.colors.surface,
                 borderWidth: 1,
                 borderColor: tokens.colors.border,
-                minHeight: 320,
+                minHeight: 260,
                 maxHeight: safeSheetMaxHeight,
                 overflow: "hidden",
                 ...tokens.shadow.lg,
@@ -80,17 +81,17 @@ export function EventAlbumUploadModalFrame({
               contentContainerStyle={{
                 flexGrow: 1,
                 padding: tokens.spacing.md,
-                gap: 14,
+                gap: tokens.spacing.smPlus,
                 paddingBottom: modalBottomPadding + 12,
               }}
             >
               <View
                 style={{
-                  borderRadius: 22,
+                  borderRadius: tokens.radius.sheet,
                   backgroundColor: tokens.colors.surfaceTint,
                   borderWidth: 1,
                   borderColor: tokens.colors.border,
-                  padding: 14,
+                  padding: tokens.spacing.smPlus,
                   gap: tokens.spacing.sm,
                 }}
               >
@@ -104,7 +105,7 @@ export function EventAlbumUploadModalFrame({
                     style={{
                       width: 38,
                       height: 38,
-                      borderRadius: 14,
+                      borderRadius: tokens.radius.control,
                       alignItems: "center",
                       justifyContent: "center",
                       backgroundColor: tokens.colors.surface,
@@ -126,7 +127,7 @@ export function EventAlbumUploadModalFrame({
                   >
                     <ImagePlus size={tokens.iconSize.xl} color={tokens.colors.primary} />
                   </View>
-                  <View style={{ flex: 1, gap: 4 }}>
+                  <View style={{ flex: 1, gap: tokens.spacing.xxs }}>
                     <Text
                       style={{
                         color: tokens.colors.foreground,
@@ -150,11 +151,11 @@ export function EventAlbumUploadModalFrame({
                     style={{
                       flexDirection: "row",
                       alignItems: "center",
-                      gap: 4,
+                      gap: tokens.spacing.xxs,
                       borderRadius: tokens.radius.pill,
                       backgroundColor: tokens.colors.primarySofter,
-                      paddingHorizontal: 10,
-                      paddingVertical: 6,
+                      paddingHorizontal: tokens.spacing.compact,
+                      paddingVertical: tokens.spacing.xsMinus,
                     }}
                   >
                     <Sparkles size={tokens.iconSize.xs} color={tokens.colors.primary} />
@@ -175,8 +176,8 @@ export function EventAlbumUploadModalFrame({
                     style={{
                       borderRadius: tokens.radius.pill,
                       backgroundColor: tokens.colors.primarySofter,
-                      paddingHorizontal: 10,
-                      paddingVertical: 6,
+                      paddingHorizontal: tokens.spacing.compact,
+                      paddingVertical: tokens.spacing.xsMinus,
                     }}
                   >
                     <Text
@@ -193,8 +194,8 @@ export function EventAlbumUploadModalFrame({
                     style={{
                       borderRadius: tokens.radius.pill,
                       backgroundColor: tokens.colors.warningSurface,
-                      paddingHorizontal: 10,
-                      paddingVertical: 6,
+                      paddingHorizontal: tokens.spacing.compact,
+                      paddingVertical: tokens.spacing.xsMinus,
                     }}
                   >
                     <Text

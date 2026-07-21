@@ -1,10 +1,11 @@
 import React, { type ReactNode, useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { Pressable, View } from "react-native";
 import { Calendar } from "lucide-react-native";
 import { AppImage } from "../../../../shared/components/AppImage";
 import { AccessChip, OwnerRow } from "./DiscoveryGridCardPrimitives";
 import { DISCOVERY_GRID_CARD_COLORS } from "./discoveryCardTokens";
-import { tokens } from "../../../../shared/theme";
+import { tokens, withAlpha } from "../../../../shared/theme";
 
 type ImageVariants = {
   full?: string | null;
@@ -69,7 +70,7 @@ export const DiscoveryEventGridCard = React.memo(function DiscoveryEventGridCard
         width: cardWidth,
         borderRadius: tokens.radius.md,
         borderWidth: 1,
-        borderColor: "rgba(15,23,42,0.08)",
+        borderColor: withAlpha(tokens.colors.foreground, 0.08),
         backgroundColor: DISCOVERY_GRID_CARD_COLORS.surface,
         overflow: "hidden",
         paddingBottom: tokens.spacing.xs,
@@ -115,12 +116,12 @@ export const DiscoveryEventGridCard = React.memo(function DiscoveryEventGridCard
 
       <Text
         style={{
-          marginTop: 6,
+          marginTop: tokens.spacing.xsMinus,
           paddingHorizontal: tokens.spacing.xs,
           color: DISCOVERY_GRID_CARD_COLORS.text,
           fontSize: tokens.typography.caption,
           fontWeight: tokens.fontWeight.bold,
-          lineHeight: 15,
+          lineHeight: tokens.lineHeight.tiny,
         }}
         numberOfLines={2}
       >

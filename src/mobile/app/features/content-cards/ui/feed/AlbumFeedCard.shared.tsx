@@ -1,11 +1,11 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { Pressable, StyleSheet, View } from "react-native";
 import { Avatar } from "../../../../shared/components";
 import type { OverflowActionItem } from "../../../../shared/components";
 import {
   buildPreparedAlbumVisibility,
-  formatEventHeaderDate,
-  formatEventHeaderTime,
+  formatContentAgeLabel,
   resolveAlbumUniversityLabel,
   type PreparedAlbumVisibility,
 } from "../../application/feedCardPresentation";
@@ -13,7 +13,7 @@ import type { RelationSnapshot } from "../../application/eventPresentation";
 import type { AlbumPhotoWithMeta, ContentViewer } from "../../data";
 import { renderTourAnchor, type TourAnchorRenderer } from "../tourAnchorRenderer";
 import { ExpandableCardText } from "../shared/ExpandableCardText";
-import { tokens } from "../../../../shared/theme";
+import { tokens, withAlpha } from "../../../../shared/theme";
 
 export type AlbumFeedCardPresentation = {
   avatarInitials: string;
@@ -48,11 +48,11 @@ export interface AlbumFeedCardProps {
 }
 
 const ALBUM_CARD_CONTAINER_STYLE = {
-  borderRadius: 18,
+  borderRadius: tokens.radius.card,
   overflow: "hidden" as const,
   backgroundColor: tokens.colors.surface,
   borderWidth: 1,
-  borderColor: "rgba(15,23,42,0.07)",
+  borderColor: withAlpha(tokens.colors.foreground, 0.07),
   marginBottom: tokens.spacing.sm,
 };
 
@@ -73,7 +73,7 @@ function AlbumMetaChip(props: { color: string; label: string; surface: string; b
       <Text
         style={{
           color: props.color,
-          fontSize: tokens.typography.micro,
+          fontSize: tokens.typography.caption,
           fontWeight: tokens.fontWeight.bold,
         }}
       >
@@ -101,10 +101,7 @@ export function AlbumCardHeaderSection(props: {
   menuActions?: OverflowActionItem[] | null;
   onOpenProfile: (username: string) => void;
 }) {
-  const dateLabel =
-    props.presentation?.createdAtDateLabel || formatEventHeaderDate(props.photo.createdAt);
-  const timeLabel =
-    props.presentation?.createdAtTimeLabel || formatEventHeaderTime(props.photo.createdAt);
+  const ageLabel = formatContentAgeLabel(props.photo.createdAt);
 
   return (
     <View style={styles.header}>
@@ -112,7 +109,7 @@ export function AlbumCardHeaderSection(props: {
         <Avatar
           uri={props.photo.userImage}
           name={props.photo.name}
-          size={38}
+          size={32}
           fallbackInitials={props.presentation?.avatarInitials}
         />
       </Pressable>
@@ -124,10 +121,9 @@ export function AlbumCardHeaderSection(props: {
           {props.presentation?.universityLabel || resolveAlbumUniversityLabel(props.photo)}
         </Text>
       </Pressable>
-      {dateLabel || timeLabel ? (
+      {ageLabel ? (
         <View style={styles.timeCopy}>
-          {dateLabel ? <Text style={styles.timeLabel}>{dateLabel}</Text> : null}
-          {timeLabel ? <Text style={styles.timeLabel}>{timeLabel}</Text> : null}
+          <Text style={styles.timeLabel}>{ageLabel}</Text>
         </View>
       ) : null}
     </View>
@@ -144,6 +140,7 @@ export function AlbumCardDetails(props: {
 
   return (
     <View style={styles.details}>
+      <Text style={styles.contentType}>ALBÜM</Text>
       <Text style={styles.detailsTitle} numberOfLines={2}>
         {props.photo.title || props.photo.eventTitle || "Album"}
       </Text>
@@ -178,22 +175,30 @@ const styles = StyleSheet.create({
   copy: {
     flex: 1,
   },
+  contentType: {
+    color: tokens.colors.primary,
+    fontSize: tokens.typography.caption,
+    fontWeight: tokens.fontWeight.bold,
+    letterSpacing: tokens.letterSpacing.section,
+    lineHeight: tokens.lineHeight.caption,
+    marginBottom: tokens.spacing.xxs,
+  },
   details: {
     paddingBottom: tokens.spacing.sm,
-    paddingHorizontal: 14,
-    paddingTop: 10,
+    paddingHorizontal: tokens.spacing.smPlus,
+    paddingTop: tokens.spacing.compact,
   },
   detailsTitle: {
     color: tokens.colors.foreground,
-    fontSize: 15,
+    fontSize: tokens.typography.control,
     fontWeight: tokens.fontWeight.bold,
   },
   header: {
     alignItems: "center",
     flexDirection: "row",
-    gap: 10,
+    gap: tokens.spacing.compact,
     paddingBottom: tokens.spacing.xs,
-    paddingHorizontal: 14,
+    paddingHorizontal: tokens.spacing.smPlus,
     paddingTop: tokens.spacing.sm,
   },
   name: {
@@ -208,16 +213,16 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     color: tokens.colors.muted,
-    fontSize: tokens.typography.tiny,
+    fontSize: tokens.typography.caption,
   },
   timeCopy: {
     alignItems: "flex-end",
-    gap: 1,
-    marginRight: 2,
+    gap: tokens.spacing.hairline,
+    marginRight: tokens.spacing.micro,
   },
   timeLabel: {
     color: tokens.colors.mutedFg,
-    fontSize: tokens.typography.micro,
+    fontSize: tokens.typography.caption,
     fontWeight: tokens.fontWeight.semibold,
   },
 });

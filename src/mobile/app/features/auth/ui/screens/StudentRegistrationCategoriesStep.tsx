@@ -1,5 +1,6 @@
 import { GraduationCap } from "lucide-react-native";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
 
 import { categories } from "../../../../shared/catalog/taxonomy";
 import { CategorySelector, GradientButton } from "../../../../shared/components";
@@ -10,6 +11,7 @@ import {
   RegistrationUploadProgressCard,
 } from "../components";
 import type { StudentRegistrationStepProps } from "../studentRegistrationSections.shared";
+import { tokens } from "../../../../shared/theme";
 
 export function StudentRegistrationCategoriesStep({
   selectedCategories,
@@ -21,11 +23,32 @@ export function StudentRegistrationCategoriesStep({
 }: StudentRegistrationStepProps) {
   return (
     <>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 4 }}>
-        <GraduationCap size={18} color="#2563eb" strokeWidth={1.5} />
-        <Text style={{ color: "#0f172a", fontSize: 20, fontWeight: "700" }}>İlgi Alanları</Text>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: tokens.spacing.xs,
+          marginBottom: tokens.spacing.xxs,
+        }}
+      >
+        <GraduationCap size={18} color={tokens.colors.primary} strokeWidth={1.5} />
+        <Text
+          style={{
+            color: tokens.colors.foreground,
+            fontSize: tokens.typography.sectionTitle,
+            fontWeight: "700",
+          }}
+        >
+          İlgi Alanları
+        </Text>
       </View>
-      <Text style={{ color: "#64748b", fontSize: 14, marginBottom: 20 }}>
+      <Text
+        style={{
+          color: tokens.colors.muted,
+          fontSize: tokens.typography.body,
+          marginBottom: tokens.spacing.lg,
+        }}
+      >
         İlgilendiğin konuları seç
       </Text>
 
@@ -36,25 +59,25 @@ export function StudentRegistrationCategoriesStep({
         selected={selectedCategories}
         options={categories}
         onChange={setSelectedCategories}
-        accent="#2563eb"
+        accent={tokens.colors.primary}
         maxSelections={TEXT_LIMITS.category.maxSelections}
         searchPlaceholder="İlgi alanı ara..."
       />
       <RegistrationSelectionBadge
-        accent="#3b82f6"
-        backgroundColor="#eff6ff"
-        textColor="#1d4ed8"
+        accent={tokens.colors.blue}
+        backgroundColor={tokens.colors.primarySofter}
+        textColor={tokens.colors.primaryDark}
         label={`${selectedCategories.length} kategori seçildi`}
       />
       <RegistrationUploadProgressCard
-        accent="#2563eb"
-        backgroundColor="#eff6ff"
-        textColor="#1d4ed8"
+        accent={tokens.colors.primary}
+        backgroundColor={tokens.colors.primarySofter}
+        textColor={tokens.colors.primaryDark}
         message={uploadProgress}
       />
       <RegistrationSubmitError message={selectedCategories.length === 0 ? "" : submitError} />
 
-      <View style={{ marginTop: 20 }}>
+      <View style={{ marginTop: tokens.spacing.lg }}>
         <GradientButton
           label="Kayıt Ol"
           onPress={() => void submit()}

@@ -1,10 +1,17 @@
 import { useState } from "react";
-import { BookOpen, Cog, GraduationCap, ImageIcon, Mail, MapPin } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
-import { tokens } from "../../../../shared/theme";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { BookOpen, Cog, GraduationCap, Mail, MapPin } from "lucide-react-native";
+import { Pressable, View } from "react-native";
+import { tokens, withAlpha } from "../../../../shared/theme";
 import { t } from "../../../../shared/i18n";
 import { TourAnchor } from "../../../../app-shell/onboarding";
-import { AppImage, Avatar } from "../../../../shared/components";
+import {
+  AppImage,
+  Avatar,
+  ProfileCoverPlaceholder,
+  ProfileRoleBadge,
+} from "../../../../shared/components";
+import { ProfileCategoryChips } from "./ProfileCategoryChips";
 
 type ProfileHeaderUserData = {
   bio?: string;
@@ -33,6 +40,7 @@ type ProfileHeaderUserData = {
 };
 
 interface Props {
+  accountType: "club" | "student";
   userData: ProfileHeaderUserData;
   displayName: string;
   onOpenCover: () => void;
@@ -43,6 +51,7 @@ interface Props {
 }
 
 export function ProfileHeaderSection({
+  accountType,
   userData,
   displayName,
   onOpenCover,
@@ -51,7 +60,8 @@ export function ProfileHeaderSection({
   onOpenFollowers,
   onOpenFollowing,
 }: Props) {
-  const [coverFailed, setCoverFailed] = useState(false);
+  const [failedCoverSource, setFailedCoverSource] = useState<string | null>(null);
+  const coverFailed = failedCoverSource === userData.coverImage;
   const canShowCover = !!userData.coverImage && !coverFailed;
 
   return (
@@ -61,47 +71,48 @@ export function ProfileHeaderSection({
           accessibilityLabel={t("profile.a11y.cover")}
           accessibilityRole="button"
           onPress={onOpenCover}
-          style={{ height: 176, backgroundColor: tokens.colors.border }}
+          style={{ height: 144, backgroundColor: tokens.colors.border }}
         >
           {canShowCover ? (
             <AppImage
               contentFit="cover"
-              onError={() => setCoverFailed(true)}
-              onLoad={() => setCoverFailed(false)}
+              onError={() => setFailedCoverSource(userData.coverImage || null)}
               style={{ width: "100%", height: "100%" }}
               uri={userData.coverImage}
               variant="medium"
               variants={userData.coverImageVariants}
             />
           ) : (
-            <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-              <ImageIcon size={32} color={tokens.colors.mutedFg} />
-            </View>
+            <ProfileCoverPlaceholder accountType={accountType} />
           )}
         </Pressable>
 
         <View
           style={{
             backgroundColor: tokens.colors.background,
-            paddingTop: 50,
+            paddingTop: 42,
             paddingHorizontal: tokens.spacing.sm,
             paddingBottom: tokens.spacing.sm,
           }}
         >
-          <Text
-            style={{
-              color: tokens.colors.foreground,
-              fontSize: tokens.typography.subtitle + 2,
-              fontWeight: tokens.fontWeight.bold,
-            }}
-          >
-            {displayName}
-          </Text>
+          <View style={{ alignItems: "center", flexDirection: "row", gap: tokens.spacing.xs }}>
+            <Text
+              style={{
+                color: tokens.colors.foreground,
+                flexShrink: 1,
+                fontSize: tokens.typography.cardTitle,
+                fontWeight: tokens.fontWeight.bold,
+              }}
+            >
+              {displayName}
+            </Text>
+            <ProfileRoleBadge accountType={accountType} />
+          </View>
 
           {userData.username ? (
             <Text
               style={{
-                marginTop: 2,
+                marginTop: tokens.spacing.micro,
                 color: tokens.colors.muted,
                 fontSize: tokens.typography.caption,
                 fontWeight: tokens.fontWeight.semibold,
@@ -111,11 +122,31 @@ export function ProfileHeaderSection({
             </Text>
           ) : null}
 
+          {userData.description || userData.bio ? (
+            <Text
+              style={{
+                marginTop: tokens.spacing.xs,
+                color: tokens.colors.dark600,
+                fontSize: tokens.typography.caption,
+                lineHeight: tokens.lineHeight.label,
+              }}
+            >
+              {userData.description || userData.bio}
+            </Text>
+          ) : null}
+
           {!userData.hideEmail && userData.email ? (
-            <View style={{ marginTop: 6, flexDirection: "row", alignItems: "center", gap: 5 }}>
-              <Mail size={tokens.iconSize.xs} color={tokens.colors.mutedFg} />
+            <View
+              style={{
+                marginTop: tokens.spacing.xsMinus,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: tokens.spacing.xxsPlus,
+              }}
+            >
+              <Mail size={tokens.iconSize.xs} color={tokens.colors.textSubtle} />
               <Text
-                style={{ color: tokens.colors.muted, fontSize: tokens.typography.caption }}
+                style={{ color: tokens.colors.textSubtle, fontSize: tokens.typography.caption }}
                 numberOfLines={1}
               >
                 {userData.email}
@@ -123,21 +154,13 @@ export function ProfileHeaderSection({
             </View>
           ) : null}
 
-          {userData.description || userData.bio ? (
-            <Text
-              style={{
-                marginTop: tokens.spacing.xs,
-                color: tokens.colors.dark600,
-                fontSize: tokens.typography.caption,
-                lineHeight: 18,
-              }}
-            >
-              {userData.description || userData.bio}
-            </Text>
-          ) : null}
-
           <View
-            style={{ marginTop: tokens.spacing.xs, flexDirection: "row", gap: 6, flexWrap: "wrap" }}
+            style={{
+              marginTop: tokens.spacing.xs,
+              flexDirection: "row",
+              gap: tokens.spacing.xsMinus,
+              flexWrap: "wrap",
+            }}
           >
             {userData.university ? (
               <View
@@ -146,18 +169,18 @@ export function ProfileHeaderSection({
                   backgroundColor: tokens.colors.surface,
                   borderWidth: 1,
                   borderColor: tokens.colors.border,
-                  paddingHorizontal: 10,
-                  paddingVertical: 5,
+                  paddingHorizontal: tokens.spacing.compact,
+                  paddingVertical: tokens.spacing.xxsPlus,
                   flexDirection: "row",
                   alignItems: "center",
-                  gap: 4,
+                  gap: tokens.spacing.xxs,
                 }}
               >
                 <MapPin size={tokens.iconSize.xs} color={tokens.colors.muted} />
                 <Text
                   style={{
                     color: tokens.colors.muted,
-                    fontSize: tokens.typography.tiny,
+                    fontSize: tokens.typography.caption,
                     fontWeight: tokens.fontWeight.semibold,
                   }}
                 >
@@ -172,18 +195,18 @@ export function ProfileHeaderSection({
                   backgroundColor: tokens.colors.surface,
                   borderWidth: 1,
                   borderColor: tokens.colors.border,
-                  paddingHorizontal: 10,
-                  paddingVertical: 5,
+                  paddingHorizontal: tokens.spacing.compact,
+                  paddingVertical: tokens.spacing.xxsPlus,
                   flexDirection: "row",
                   alignItems: "center",
-                  gap: 4,
+                  gap: tokens.spacing.xxs,
                 }}
               >
                 <BookOpen size={tokens.iconSize.xs} color={tokens.colors.muted} />
                 <Text
                   style={{
                     color: tokens.colors.muted,
-                    fontSize: tokens.typography.tiny,
+                    fontSize: tokens.typography.caption,
                     fontWeight: tokens.fontWeight.semibold,
                   }}
                 >
@@ -198,18 +221,18 @@ export function ProfileHeaderSection({
                   backgroundColor: tokens.colors.surface,
                   borderWidth: 1,
                   borderColor: tokens.colors.border,
-                  paddingHorizontal: 10,
-                  paddingVertical: 5,
+                  paddingHorizontal: tokens.spacing.compact,
+                  paddingVertical: tokens.spacing.xxsPlus,
                   flexDirection: "row",
                   alignItems: "center",
-                  gap: 4,
+                  gap: tokens.spacing.xxs,
                 }}
               >
                 <GraduationCap size={tokens.iconSize.xs} color={tokens.colors.muted} />
                 <Text
                   style={{
                     color: tokens.colors.muted,
-                    fontSize: tokens.typography.tiny,
+                    fontSize: tokens.typography.caption,
                     fontWeight: tokens.fontWeight.semibold,
                   }}
                 >
@@ -236,14 +259,15 @@ export function ProfileHeaderSection({
                   minHeight: tokens.minHeight.inputSm,
                   alignItems: "center",
                   justifyContent: "center",
-                  gap: 1,
+                  gap: tokens.spacing.hairline,
                 }}
               >
                 <Text
                   style={{
                     color: tokens.colors.foreground,
-                    fontSize: 13,
+                    fontSize: tokens.typography.label,
                     fontWeight: tokens.fontWeight.extrabold,
+                    fontVariant: ["tabular-nums"],
                   }}
                 >
                   {userData.followers || 0}
@@ -251,7 +275,7 @@ export function ProfileHeaderSection({
                 <Text
                   style={{
                     color: tokens.colors.muted,
-                    fontSize: tokens.typography.micro,
+                    fontSize: tokens.typography.caption,
                     fontWeight: tokens.fontWeight.bold,
                   }}
                 >
@@ -271,14 +295,15 @@ export function ProfileHeaderSection({
                   minHeight: tokens.minHeight.inputSm,
                   alignItems: "center",
                   justifyContent: "center",
-                  gap: 1,
+                  gap: tokens.spacing.hairline,
                 }}
               >
                 <Text
                   style={{
                     color: tokens.colors.foreground,
-                    fontSize: 13,
+                    fontSize: tokens.typography.label,
                     fontWeight: tokens.fontWeight.extrabold,
+                    fontVariant: ["tabular-nums"],
                   }}
                 >
                   {userData.following || 0}
@@ -286,7 +311,7 @@ export function ProfileHeaderSection({
                 <Text
                   style={{
                     color: tokens.colors.muted,
-                    fontSize: tokens.typography.micro,
+                    fontSize: tokens.typography.caption,
                     fontWeight: tokens.fontWeight.bold,
                   }}
                 >
@@ -296,31 +321,7 @@ export function ProfileHeaderSection({
             </View>
           </TourAnchor>
 
-          {userData.categories?.length ? (
-            <View style={{ marginTop: 10, flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
-              {userData.categories.slice(0, 10).map((category) => (
-                <View
-                  key={category}
-                  style={{
-                    borderRadius: tokens.radius.sm,
-                    backgroundColor: tokens.colors.primarySofter,
-                    paddingHorizontal: tokens.spacing.xs,
-                    paddingVertical: 5,
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: tokens.colors.primary,
-                      fontSize: tokens.typography.tiny,
-                      fontWeight: tokens.fontWeight.bold,
-                    }}
-                  >
-                    {category}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          ) : null}
+          <ProfileCategoryChips accountType={accountType} categories={userData.categories} />
         </View>
 
         <TourAnchor
@@ -339,16 +340,27 @@ export function ProfileHeaderSection({
             hitSlop={tokens.hitSlop.sm}
             onPress={onOpenSettings}
             style={{
-              width: 36,
-              height: 36,
-              borderRadius: 18,
-              backgroundColor: "rgba(15,23,42,0.5)",
+              width: tokens.minHeight.touchTarget,
+              height: tokens.minHeight.touchTarget,
               alignItems: "center",
               justifyContent: "center",
             }}
             testID="profile-settings-button"
           >
-            <Cog size={tokens.iconSize.md} color={tokens.colors.surface} />
+            <View
+              style={{
+                alignItems: "center",
+                backgroundColor: withAlpha(tokens.colors.surface, 0.92),
+                borderColor: withAlpha(tokens.colors.foreground, 0.1),
+                borderRadius: tokens.radius.card,
+                borderWidth: 1,
+                height: 32,
+                justifyContent: "center",
+                width: 32,
+              }}
+            >
+              <Cog size={tokens.iconSize.md} color={tokens.colors.textSecondary} />
+            </View>
           </Pressable>
         </TourAnchor>
 
@@ -356,7 +368,7 @@ export function ProfileHeaderSection({
           style={{
             position: "absolute",
             left: tokens.spacing.sm,
-            top: 132,
+            top: 108,
             zIndex: 65,
             elevation: 12,
           }}
@@ -370,7 +382,7 @@ export function ProfileHeaderSection({
               borderColor={tokens.colors.background}
               borderWidth={4}
               name={displayName}
-              size={88}
+              size={72}
               uri={userData.profileImage}
               variants={userData.profileImageVariants}
             />

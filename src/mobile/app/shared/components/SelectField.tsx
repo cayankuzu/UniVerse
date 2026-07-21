@@ -1,10 +1,12 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
-import { FlatList, Pressable, Text, TextInput, View, useWindowDimensions } from "react-native";
+import { AppText as Text } from "./AppText";
+import { FlatList, Pressable, TextInput, View, useWindowDimensions } from "react-native";
 import { CheckCircle, ChevronDown, Circle, Search, SearchX } from "lucide-react-native";
 import { tokens } from "../../shared/theme";
 import { t } from "../../shared/i18n";
 import { AppModalSheet } from "./AppModalSheet";
 import { useKeyboardSafeField, useKeyboardSafeFormActions } from "./KeyboardSafeForm";
+import { formatTurkishDisplayText } from "../i18n/turkishDisplay";
 
 interface SelectFieldProps {
   disabled?: boolean;
@@ -51,7 +53,11 @@ export const SelectField = React.memo(function SelectField({
   const filteredOptions = useMemo(() => {
     const normalized = normalizeText(query);
     if (!normalized) return uniqueOptions;
-    return uniqueOptions.filter((option) => normalizeText(option).includes(normalized));
+    return uniqueOptions.filter(
+      (option) =>
+        normalizeText(option).includes(normalized) ||
+        normalizeText(formatTurkishDisplayText(option)).includes(normalized),
+    );
   }, [query, uniqueOptions]);
 
   const selected = value.trim();
@@ -81,9 +87,18 @@ export const SelectField = React.memo(function SelectField({
   }, [fieldName, keyboardActions, openSheet]);
   const emptyState = useMemo(
     () => (
-      <View style={{ minHeight: 64, alignItems: "center", justifyContent: "center", gap: 6 }}>
-        <SearchX size={18} color={tokens.colors.mutedFg} />
-        <Text style={{ color: tokens.colors.mutedFg, fontSize: 13 }}>{emptyText}</Text>
+      <View
+        style={{
+          minHeight: tokens.minHeight.touchTarget,
+          alignItems: "center",
+          justifyContent: "center",
+          gap: tokens.spacing.xsMinus,
+        }}
+      >
+        <SearchX size={tokens.iconSize.lg} color={tokens.colors.mutedFg} />
+        <Text style={{ color: tokens.colors.mutedFg, fontSize: tokens.typography.label }}>
+          {emptyText}
+        </Text>
       </View>
     ),
     [emptyText],
@@ -135,20 +150,20 @@ export const SelectField = React.memo(function SelectField({
             color: selected ? tokens.colors.foreground : tokens.colors.mutedFg,
             fontSize: tokens.typography.body,
             fontWeight: selected ? "500" : "400",
-            lineHeight: 19,
+            lineHeight: tokens.lineHeight.bodyCompact,
           }}
           numberOfLines={2}
         >
-          {selected || placeholder}
+          {selected ? formatTurkishDisplayText(selected) : placeholder}
         </Text>
-        <ChevronDown size={20} color={tokens.colors.iconMuted} />
+        <ChevronDown size={tokens.iconSize.xl} color={tokens.colors.iconMuted} />
       </Pressable>
       <Text
         accessibilityLiveRegion={isInvalid ? "polite" : undefined}
         style={{
           color: isInvalid ? tokens.colors.danger : tokens.colors.mutedFg,
           fontSize: tokens.typography.caption,
-          minHeight: 16,
+          minHeight: tokens.lineHeight.caption,
         }}
       >
         {helperText}
@@ -169,7 +184,7 @@ export const SelectField = React.memo(function SelectField({
             color: tokens.colors.muted,
             fontSize: tokens.typography.caption,
             fontWeight: "500",
-            marginBottom: 10,
+            marginBottom: tokens.spacing.compact,
           }}
         >
           {t("common.options.count", { count: filteredOptions.length })}
@@ -183,12 +198,12 @@ export const SelectField = React.memo(function SelectField({
             borderWidth: 1,
             borderColor: tokens.colors.border,
             backgroundColor: tokens.colors.background,
-            paddingHorizontal: 10,
-            marginBottom: 10,
+            paddingHorizontal: tokens.spacing.compact,
+            marginBottom: tokens.spacing.compact,
             gap: tokens.spacing.xs,
           }}
         >
-          <Search size={16} color={tokens.colors.iconMuted} />
+          <Search size={tokens.iconSize.md} color={tokens.colors.iconMuted} />
           <TextInput
             ref={searchInputRef}
             accessibilityLabel={searchPlaceholder}
@@ -199,8 +214,9 @@ export const SelectField = React.memo(function SelectField({
             autoCorrect={false}
             style={{
               flex: 1,
-              minHeight: tokens.minHeight.touchTarget,
+              minHeight: tokens.minHeight.inputMd,
               color: tokens.colors.foreground,
+              fontFamily: tokens.fontFamily.regular,
               fontSize: tokens.typography.body,
             }}
             placeholderTextColor={tokens.colors.mutedFg}
@@ -217,15 +233,15 @@ export const SelectField = React.memo(function SelectField({
             const isSelected = item === selected;
             return (
               <Pressable
-                accessibilityLabel={item}
+                accessibilityLabel={formatTurkishDisplayText(item)}
                 accessibilityRole="menuitem"
                 accessibilityState={{ selected: isSelected }}
                 onPress={() => handleSelect(item)}
                 style={{
-                  minHeight: tokens.minHeight.touchTarget,
-                  paddingHorizontal: 10,
-                  paddingVertical: 10,
-                  borderRadius: 10,
+                  minHeight: tokens.minHeight.row,
+                  paddingHorizontal: tokens.spacing.compact,
+                  paddingVertical: tokens.spacing.compact,
+                  borderRadius: tokens.radius.compact,
                   flexDirection: "row",
                   alignItems: "center",
                   gap: tokens.spacing.xs,
@@ -233,9 +249,9 @@ export const SelectField = React.memo(function SelectField({
                 }}
               >
                 {isSelected ? (
-                  <CheckCircle size={18} color={tokens.colors.primary} />
+                  <CheckCircle size={tokens.iconSize.lg} color={tokens.colors.primary} />
                 ) : (
-                  <Circle size={18} color={tokens.colors.iconMuted} />
+                  <Circle size={tokens.iconSize.lg} color={tokens.colors.iconMuted} />
                 )}
                 <Text
                   style={{
@@ -246,7 +262,7 @@ export const SelectField = React.memo(function SelectField({
                   }}
                   numberOfLines={2}
                 >
-                  {item}
+                  {formatTurkishDisplayText(item)}
                 </Text>
               </Pressable>
             );
@@ -257,8 +273,8 @@ export const SelectField = React.memo(function SelectField({
         <Pressable
           accessibilityRole="button"
           style={{
-            marginTop: 6,
-            minHeight: tokens.minHeight.touchTarget,
+            marginTop: tokens.spacing.xsMinus,
+            minHeight: tokens.minHeight.row,
             borderRadius: tokens.radius.md,
             borderWidth: 1,
             borderColor: tokens.colors.border,

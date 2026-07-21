@@ -1,8 +1,9 @@
-import { memo } from "react";
-import { Pressable, TextInput, View } from "react-native";
+import { memo, useState } from "react";
+import { TextInput, View } from "react-native";
 import { Search, X } from "lucide-react-native";
 import { t } from "../../shared/i18n";
 import { tokens } from "../../shared/theme";
+import { InstantPressable } from "./InstantPressable";
 
 type Props = {
   accessibilityLabel?: string;
@@ -17,12 +18,14 @@ export const ListSearchBar = memo(function ListSearchBar({
   placeholder,
   value,
 }: Props) {
+  const [focused, setFocused] = useState(false);
+
   return (
     <View
       style={{
         alignItems: "center",
         backgroundColor: tokens.colors.surface,
-        borderColor: tokens.colors.border,
+        borderColor: focused ? tokens.colors.ring : tokens.colors.border,
         borderRadius: tokens.radius.lg,
         borderWidth: 1,
         flexDirection: "row",
@@ -31,36 +34,41 @@ export const ListSearchBar = memo(function ListSearchBar({
         paddingHorizontal: tokens.spacing.sm,
       }}
     >
-      <Search size={18} color={tokens.colors.mutedFg} strokeWidth={1.8} />
+      <Search size={tokens.iconSize.lg} color={tokens.colors.mutedFg} strokeWidth={1.8} />
       <TextInput
         accessibilityLabel={accessibilityLabel}
         autoCapitalize="none"
         autoCorrect={false}
         clearButtonMode="never"
         onChangeText={onChangeText}
+        onBlur={() => setFocused(false)}
+        onFocus={() => setFocused(true)}
         placeholder={placeholder}
         placeholderTextColor={tokens.colors.mutedFg}
         returnKeyType="search"
         style={{
           color: tokens.colors.foreground,
           flex: 1,
+          fontFamily: tokens.fontFamily.semibold,
           fontSize: tokens.typography.body,
-          fontWeight: "600",
-          minHeight: tokens.minHeight.touchTarget,
+          fontWeight: tokens.fontWeight.semibold,
+          minHeight: tokens.minHeight.inputLg,
           paddingVertical: 0,
         }}
         value={value}
       />
       {value ? (
-        <Pressable
+        <InstantPressable
           accessibilityLabel={t("common.clearSearch")}
           accessibilityRole="button"
+          haptic="selection"
+          hitSlop={tokens.hitSlop.sm}
           onPress={() => onChangeText("")}
           style={{
             alignItems: "center",
             justifyContent: "center",
-            minHeight: tokens.minHeight.touchTarget,
-            minWidth: tokens.minHeight.touchTarget,
+            minHeight: tokens.minHeight.inputLg,
+            minWidth: tokens.minHeight.inputLg,
           }}
         >
           <View
@@ -68,14 +76,14 @@ export const ListSearchBar = memo(function ListSearchBar({
               alignItems: "center",
               backgroundColor: tokens.colors.surfaceVariant,
               borderRadius: tokens.radius.pill,
-              height: 28,
+              height: tokens.iconSize["2xl"],
               justifyContent: "center",
-              width: 28,
+              width: tokens.iconSize["2xl"],
             }}
           >
-            <X size={15} color={tokens.colors.muted} strokeWidth={2} />
+            <X size={tokens.iconSize.sm} color={tokens.colors.muted} strokeWidth={2} />
           </View>
-        </Pressable>
+        </InstantPressable>
       ) : null}
     </View>
   );

@@ -4,16 +4,38 @@ appId: com.ogrencisosyalagi.app
     clearState: true
     stopApp: true
 
+- runFlow:
+    when:
+      visible: "http://10.0.2.2:8081"
+    commands:
+      - openLink: "ogrencisosyalagi://expo-development-client/?url=http%3A%2F%2F127.0.0.1%3A8081"
+
 - extendedWaitUntil:
-    visible: "Kulupler"
+    visible: "Continue|Close|Kulüpler"
+    timeout: 90000
+
+- runFlow:
+    when:
+      visible: "Continue"
+    commands:
+      - tapOn: "Continue"
+
+- runFlow:
+    when:
+      visible: "Close"
+    commands:
+      - tapOn: "Close"
+
+- extendedWaitUntil:
+    visible: "Kulüpler"
     timeout: 20000
 
 - assertVisible: "Etkinlikler"
 - assertVisible: "Takip Et"
-- tapOn: "Giris Yap"
-- assertVisible: "Hosgeldin"
+- tapOn: "Giriş Yap"
+- assertVisible: "Hoş geldin"
 - assertVisible: "E-posta Adresi"
-- assertVisible: "Sifre"
-- assertVisible: "Sifremi Unuttum"
+- assertVisible: "Şifre"
+- assertVisible: "Şifremi Unuttum"
 - back
-- assertVisible: "Kulupler"
+- assertVisible: "Kulüpler"

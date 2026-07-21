@@ -374,7 +374,7 @@ describe("persistAlbumUpload auth recovery", () => {
         showOnOwnProfile: true,
       }),
     ).rejects.toMatchObject({
-      message: "Oturum dogrulanamadi. Uygulamayi yeniden acip tekrar dene.",
+      message: "Oturum doğrulanamadı. Uygulamayı yeniden açıp tekrar dene.",
       retryableQueueError: true,
     });
   });

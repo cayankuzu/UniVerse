@@ -124,7 +124,7 @@ export function EventCardModals({
     ? [
         {
           key: isOwnEventMedia ? "download" : "report",
-          label: isOwnEventMedia ? "Indir" : "Şikayet Et",
+          label: isOwnEventMedia ? "İndir" : "Şikâyet Et",
           destructive: !isOwnEventMedia,
           onPress: () => {
             void (async () => {
@@ -142,7 +142,7 @@ export function EventCardModals({
                 });
               } catch (error) {
                 Alert.alert(
-                  isOwnEventMedia ? "Indirme başarısız" : "Şikayet gönderilemedi",
+                  isOwnEventMedia ? "İndirme başarısız" : "Şikâyet gönderilemedi",
                   String((error as { message?: string } | null)?.message || "İşlem tamamlanamadı."),
                 );
               }
@@ -232,12 +232,12 @@ export function EventCardModals({
 
       <DangerConfirmSheet
         busy={deleteBusy}
-        confirmLabel="Etkinligi Sil"
+        confirmLabel="Etkinliği Sil"
         description="Etkinlik sayfasını kapatacaksın. Bu kararı vermeden önce etkisini net gör."
         note="Silinen etkinlik geri yüklenmez. İşlem tamamlandığında ana sayfa kartı kaldırılır."
         onClose={onCloseDeleteConfirm}
         onConfirm={() => void onDeleteEvent()}
-        title="Etkinligi kaldir"
+        title="Etkinliği kaldır"
         visible={interactive && showDeleteConfirmModal}
         warningItems={[
           "Etkinlik sayfası ve etkinliğe ait akış kartı kaldırılır.",

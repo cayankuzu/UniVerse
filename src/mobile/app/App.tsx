@@ -27,6 +27,7 @@ import { queryClient } from "./data/query/queryClient";
 import { I18nBootstrap } from "./shared/i18n/I18nBootstrap";
 import { appTheme } from "./shared/theme";
 import { DeferredVideoCameraCaptureHost } from "./shared/components/DeferredVideoCameraCaptureHost";
+import { AppFontGate } from "./shared/components/AppFontGate";
 
 const PERSIST_QUERY_CLIENT_OPTIONS = {
   buster: QUERY_CACHE_BUSTER,
@@ -43,39 +44,41 @@ function handlePersistQueryRestoreSuccess() {
 
 export default function App() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <StatusBar backgroundColor={appTheme.colors.background} style="dark" />
-        <PaperProvider theme={appTheme}>
-          <PersistQueryClientProvider
-            client={queryClient}
-            persistOptions={PERSIST_QUERY_CLIENT_OPTIONS}
-            onSuccess={handlePersistQueryRestoreSuccess}
-          >
-            <AppStartupStateProvider>
-              <AppTransientActivityProvider>
-                <ChromeVisibilityProvider>
-                  <AuthProvider>
-                    <I18nBootstrap />
-                    <AppObservabilityBridge />
-                    <AppRuntimePerformanceBridge />
-                    <AppSecurityBridge />
-                    <OnboardingProvider>
-                      <TabReselectProvider>
-                        <DeferredAppServices />
-                        <DeferredVideoCameraCaptureHost />
-                        <AppErrorBoundary>
-                          <RootNavigator />
-                        </AppErrorBoundary>
-                      </TabReselectProvider>
-                    </OnboardingProvider>
-                  </AuthProvider>
-                </ChromeVisibilityProvider>
-              </AppTransientActivityProvider>
-            </AppStartupStateProvider>
-          </PersistQueryClientProvider>
-        </PaperProvider>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <AppFontGate>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <StatusBar backgroundColor={appTheme.colors.background} style="dark" />
+          <PaperProvider theme={appTheme}>
+            <PersistQueryClientProvider
+              client={queryClient}
+              persistOptions={PERSIST_QUERY_CLIENT_OPTIONS}
+              onSuccess={handlePersistQueryRestoreSuccess}
+            >
+              <AppStartupStateProvider>
+                <AppTransientActivityProvider>
+                  <ChromeVisibilityProvider>
+                    <AuthProvider>
+                      <I18nBootstrap />
+                      <AppObservabilityBridge />
+                      <AppRuntimePerformanceBridge />
+                      <AppSecurityBridge />
+                      <OnboardingProvider>
+                        <TabReselectProvider>
+                          <DeferredAppServices />
+                          <DeferredVideoCameraCaptureHost />
+                          <AppErrorBoundary>
+                            <RootNavigator />
+                          </AppErrorBoundary>
+                        </TabReselectProvider>
+                      </OnboardingProvider>
+                    </AuthProvider>
+                  </ChromeVisibilityProvider>
+                </AppTransientActivityProvider>
+              </AppStartupStateProvider>
+            </PersistQueryClientProvider>
+          </PaperProvider>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    </AppFontGate>
   );
 }

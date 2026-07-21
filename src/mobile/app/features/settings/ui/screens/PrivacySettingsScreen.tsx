@@ -1,5 +1,6 @@
 import React from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { ActivityIndicator, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Globe, Lock, Shield } from "lucide-react-native";
@@ -15,6 +16,7 @@ import {
   PrivacySettingsToggleCard,
   privacySettingsColors as C,
 } from "./PrivacySettingsCards";
+import { tokens } from "../../../../shared/theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PrivacySettings">;
 
@@ -48,9 +50,13 @@ export function PrivacySettingsScreen({ navigation }: Props) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }} edges={["bottom"]}>
         <BackHeader title={t("settings.privacy.title")} onBack={handleBack} />
-        <View style={{ paddingHorizontal: 14, paddingTop: 14 }}>
+        <View
+          style={{ paddingHorizontal: tokens.spacing.smPlus, paddingTop: tokens.spacing.smPlus }}
+        >
           <PrivacySettingsNotice
-            icon={<Shield size={20} color={C.blueText} style={{ marginTop: 1 }} />}
+            icon={
+              <Shield size={20} color={C.blueText} style={{ marginTop: tokens.spacing.hairline }} />
+            }
             title={t("settings.privacy.club.title")}
             body={t("settings.privacy.club.body")}
           />
@@ -66,14 +72,16 @@ export function PrivacySettingsScreen({ navigation }: Props) {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingHorizontal: 14,
-          paddingTop: 14,
+          paddingHorizontal: tokens.spacing.smPlus,
+          paddingTop: tokens.spacing.smPlus,
           paddingBottom: Math.max(bottomPadding, insets.bottom + 24),
-          gap: 10,
+          gap: tokens.spacing.compact,
         }}
       >
         <PrivacySettingsNotice
-          icon={<Shield size={20} color={C.blueText} style={{ marginTop: 1 }} />}
+          icon={
+            <Shield size={20} color={C.blueText} style={{ marginTop: tokens.spacing.hairline }} />
+          }
           title={t("settings.privacy.account.title")}
           body={t("settings.privacy.account.body")}
         />
@@ -102,12 +110,20 @@ export function PrivacySettingsScreen({ navigation }: Props) {
           enabled={isPrivateAccount}
           icon={
             isPrivateAccount ? (
-              <Lock size={24} color="#d97706" strokeWidth={1.9} />
+              <Lock
+                size={tokens.iconSize["2xl"]}
+                color={tokens.colors.warningIcon}
+                strokeWidth={1.9}
+              />
             ) : (
-              <Globe size={24} color="#059669" strokeWidth={1.9} />
+              <Globe
+                size={tokens.iconSize["2xl"]}
+                color={tokens.colors.successIcon}
+                strokeWidth={1.9}
+              />
             )
           }
-          iconBg={isPrivateAccount ? "#fffbeb" : "#ecfdf5"}
+          iconBg={isPrivateAccount ? tokens.colors.warningSoft : tokens.colors.successSoft}
           onPress={handleTogglePrivacy}
           pending={savingPrivacy}
         />
@@ -118,12 +134,14 @@ export function PrivacySettingsScreen({ navigation }: Props) {
               flexDirection: "row",
               alignItems: "center",
               justifyContent: "center",
-              gap: 8,
-              paddingVertical: 4,
+              gap: tokens.spacing.xs,
+              paddingVertical: tokens.spacing.xxs,
             }}
           >
-            <ActivityIndicator size="small" color="#2563eb" />
-            <Text style={{ color: C.muted, fontSize: 12 }}>{t("settings.privacy.saving")}</Text>
+            <ActivityIndicator size="small" color={tokens.colors.primary} />
+            <Text style={{ color: C.muted, fontSize: tokens.typography.caption }}>
+              {t("settings.privacy.saving")}
+            </Text>
           </View>
         ) : null}
 
@@ -151,22 +169,30 @@ export function PrivacySettingsScreen({ navigation }: Props) {
           enabled={hideEmail}
           icon={
             hideEmail ? (
-              <Lock size={24} color="#d97706" strokeWidth={1.9} />
+              <Lock
+                size={tokens.iconSize["2xl"]}
+                color={tokens.colors.warningIcon}
+                strokeWidth={1.9}
+              />
             ) : (
-              <Globe size={24} color="#059669" strokeWidth={1.9} />
+              <Globe
+                size={tokens.iconSize["2xl"]}
+                color={tokens.colors.successIcon}
+                strokeWidth={1.9}
+              />
             )
           }
-          iconBg={hideEmail ? "#fffbeb" : "#ecfdf5"}
+          iconBg={hideEmail ? tokens.colors.warningSoft : tokens.colors.successSoft}
           onPress={() => void handleHideEmailToggle()}
           disabled={savingHideEmail}
         />
 
-        <View style={{ gap: 8, marginTop: 4 }}>
+        <View style={{ gap: tokens.spacing.xs, marginTop: tokens.spacing.xxs }}>
           <PrivacySettingsExplainCard
             title={t("settings.privacy.explain.public.title")}
-            icon={<Globe size={15} color="#059669" strokeWidth={2} />}
-            iconBg="#ecfdf5"
-            bulletColor="#059669"
+            icon={<Globe size={15} color={tokens.colors.successIcon} strokeWidth={2} />}
+            iconBg={tokens.colors.successSoft}
+            bulletColor={tokens.colors.successIcon}
             items={[
               t("settings.privacy.explain.public.item1"),
               t("settings.privacy.explain.public.item2"),
@@ -176,9 +202,9 @@ export function PrivacySettingsScreen({ navigation }: Props) {
 
           <PrivacySettingsExplainCard
             title={t("settings.privacy.explain.private.title")}
-            icon={<Lock size={15} color="#d97706" strokeWidth={2} />}
-            iconBg="#fffbeb"
-            bulletColor="#d97706"
+            icon={<Lock size={15} color={tokens.colors.warningIcon} strokeWidth={2} />}
+            iconBg={tokens.colors.warningSoft}
+            bulletColor={tokens.colors.warningIcon}
             items={[
               t("settings.privacy.explain.private.item1"),
               t("settings.privacy.explain.private.item2"),

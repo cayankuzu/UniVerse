@@ -13,6 +13,7 @@ import {
 import { scheduleAfterInteractions } from "../utils/scheduleAfterInteractions";
 import { getCachedVideoThumbnail, resolveVideoThumbnail } from "./videoThumbnailCache";
 import { isImageMediaUri } from "./mediaVideoUtils";
+import { tokens } from "../theme";
 
 const VIDEO_THUMBNAIL_RESOLVE_RETRY_DELAYS_MS = [120, 320, 900, 1800];
 
@@ -157,7 +158,7 @@ export function VideoThumbnailPreview({
   const imageSource = useMemo(() => (thumbnail ? (thumbnail as never) : null), [thumbnail]);
 
   return (
-    <View style={[{ backgroundColor: "#0f172a", overflow: "hidden" }, style]}>
+    <View style={[{ backgroundColor: tokens.colors.foreground, overflow: "hidden" }, style]}>
       {imageSource ? (
         <ExpoImage
           cachePolicy="memory-disk"
@@ -169,7 +170,11 @@ export function VideoThumbnailPreview({
         />
       ) : (
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-          {loading ? <ActivityIndicator color="#ffffff" /> : <Play size={18} color="#ffffff" />}
+          {loading ? (
+            <ActivityIndicator color={tokens.colors.onMedia} />
+          ) : (
+            <Play size={18} color={tokens.colors.onMedia} />
+          )}
         </View>
       )}
     </View>

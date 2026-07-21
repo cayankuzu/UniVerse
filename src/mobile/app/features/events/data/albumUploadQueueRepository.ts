@@ -115,7 +115,7 @@ function shouldAutoRetryFailedAlbumUpload(entry: UploadQueueEntry) {
       payload: entry.payload,
     }),
   ).toLowerCase();
-  return !visibleError.includes("erisilemiyor");
+  return !visibleError.includes("erisilemiyor") && !visibleError.includes("erişilemiyor");
 }
 
 async function recoverRetryableFailedAlbumUploads(entries: UploadQueueEntry[]) {
@@ -166,13 +166,13 @@ export function mapAlbumUploadEntryToPendingPhoto(params: {
     comments: 0,
     createdAt,
     eventId,
-    eventTitle: normalizeAlbumUploadText(payload.eventTitle || event?.title || "Etkinlik Albumu"),
+    eventTitle: normalizeAlbumUploadText(payload.eventTitle || event?.title || "Etkinlik Albümü"),
     id: entryId,
     image: payloadImages[0] || "",
     images: payloadImages,
     liked: false,
     likes: 0,
-    name: userData.name || userData.clubName || userData.username || "Kullanici",
+    name: userData.name || userData.clubName || userData.username || "Kullanıcı",
     photoCount: payloadImages.length || 1,
     showOnClubProfile: surfaceVisibility.showOnClubProfile,
     showOnOwnProfile: surfaceVisibility.showOnOwnProfile,

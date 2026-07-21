@@ -180,7 +180,7 @@ async function hydrateAlbumPhotosFromTable(
           canOpenAlbum: context === "profile",
           canOpenAlbumEventDetail: false,
           lockedReasonCode: "EVENT_REMOVED" as const,
-          lockedReasonText: "Bu albümün bagli oldugu etkinlik artik mevcut degil.",
+          lockedReasonText: "Bu albümün bağlı olduğu etkinlik artık mevcut değil.",
         }
       : {};
 

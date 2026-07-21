@@ -16,16 +16,22 @@ function normalizeText(value: unknown) {
 }
 
 function isReplyMessage(message: string) {
-  return message.toLowerCase().includes("yanit");
+  const normalized = message.toLocaleLowerCase("tr");
+  return normalized.includes("yanit") || normalized.includes("yanıt");
 }
 
 function isEventPublishMessage(message: string) {
   const normalized = message.toLowerCase();
-  return normalized.includes("yeni etkinlik") || normalized.includes("etkinlik paylas");
+  return (
+    normalized.includes("yeni etkinlik") ||
+    normalized.includes("etkinlik paylas") ||
+    normalized.includes("etkinlik paylaş")
+  );
 }
 
 function isEventAttendanceMessage(message: string) {
-  return message.toLowerCase().includes("katildi");
+  const normalized = message.toLocaleLowerCase("tr");
+  return normalized.includes("katildi") || normalized.includes("katıldı");
 }
 
 function buildActionText(item: NotificationItem, message: string) {
@@ -33,42 +39,42 @@ function buildActionText(item: NotificationItem, message: string) {
     case "comment":
       if (isReplyMessage(message)) {
         return item.targetType === "album"
-          ? "album yorumunuza yanit verdi"
-          : "yorumunuza yanit verdi";
+          ? "albüm yorumunuza yanıt verdi"
+          : "yorumunuza yanıt verdi";
       }
-      if (item.targetType === "album") return "albumunuza yorum yapti";
-      if (item.targetType === "event") return "etkinliginize yorum yapti";
-      return message || "yorum yapti";
+      if (item.targetType === "album") return "albümünüze yorum yaptı";
+      if (item.targetType === "event") return "etkinliğinize yorum yaptı";
+      return message || "yorum yaptı";
     case "like":
-      if (item.targetType === "album") return "albumunuzu begendi";
-      if (item.targetType === "event") return "etkinliginizi begendi";
-      return message || "begeni birakti";
+      if (item.targetType === "album") return "albümünüzü beğendi";
+      if (item.targetType === "event") return "etkinliğinizi beğendi";
+      return message || "beğeni bıraktı";
     case "event":
       if (item.targetType === "album" || item.photoId) {
-        return "etkinliginize album ekledi";
+        return "etkinliğinize albüm ekledi";
       }
       if (isEventPublishMessage(message)) {
-        return "yeni bir etkinlik paylasti";
+        return "yeni bir etkinlik paylaştı";
       }
       if (isEventAttendanceMessage(message)) {
-        return "etkinliginize katildi";
+        return "etkinliğinize katıldı";
       }
-      return message || "etkinlik bildirimi gonderdi";
+      return message || "etkinlik bildirimi gönderdi";
     case "join":
-      return "etkinlige katildi";
+      return "etkinliğe katıldı";
     case "join_request":
-      return "etkinlige katilmak istiyor";
+      return "etkinliğe katılmak istiyor";
     case "join_accepted":
-      return "katilim isteginizi kabul etti";
+      return "katılım isteğinizi kabul etti";
     case "join_rejected":
-      return "katilim isteginizi reddetti";
+      return "katılım isteğinizi reddetti";
     case "follow":
     case "follow_accepted":
     case "follow_request":
     case "system":
-      return message || "yeni bir bildirim gonderdi";
+      return message || "yeni bir bildirim gönderdi";
     default:
-      return message || "yeni bir bildirim gonderdi";
+      return message || "yeni bir bildirim gönderdi";
   }
 }
 
@@ -81,7 +87,7 @@ function buildContext(item: NotificationItem, detail: string) {
     const contextTitle = directTitle || "";
     if (contextTitle) {
       return {
-        contextLabel: "Album",
+        contextLabel: "Albüm",
         contextSubtitle:
           directSubtitle || (eventTitle && eventTitle !== contextTitle ? eventTitle : undefined),
         contextTitle,
@@ -95,7 +101,7 @@ function buildContext(item: NotificationItem, detail: string) {
     }
     if (item.type !== "comment" && detail) {
       return {
-        contextLabel: "Album",
+        contextLabel: "Albüm",
         contextTitle: detail,
       };
     }
@@ -122,7 +128,7 @@ function buildPreview(item: NotificationItem, detail: string, contextTitle?: str
 }
 
 export function buildNotificationCardContent(item: NotificationItem): NotificationCardContent {
-  const actorName = normalizeText(item.fromName || item.fromUsername || "Bir kullanici");
+  const actorName = normalizeText(item.fromName || item.fromUsername || "Bir kullanıcı");
   const message = normalizeText(item.message);
   const detail = normalizeText(item.detail);
   const context = buildContext(item, detail);

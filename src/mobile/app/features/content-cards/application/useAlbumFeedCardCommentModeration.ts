@@ -92,7 +92,7 @@ export function useAlbumFeedCardCommentModeration({
       Alert.alert("Yorumu Şikâyet Et", "Bu yorumu şikâyet etmek istiyor musunuz?", [
         { text: "Vazgeç", style: "cancel" },
         {
-          text: "Şikayet Et",
+          text: "Şikâyet Et",
           style: "destructive",
           onPress: () => {
             void (async () => {
@@ -101,7 +101,7 @@ export function useAlbumFeedCardCommentModeration({
                   commentId: comment.id,
                   username: comment.username,
                 });
-                onShowWarning?.("Şikayetiniz alindi.");
+                onShowWarning?.("Şikâyetiniz alındı.");
               } catch (error) {
                 debugWarn("CONTENT-CARDS", "album-comment-report-failed", {
                   commentId: String(comment.id || ""),
@@ -111,7 +111,7 @@ export function useAlbumFeedCardCommentModeration({
                   ),
                   photoId,
                 });
-                onShowWarning?.("Şikayet gönderilemedi.");
+                onShowWarning?.("Şikâyet gönderilemedi.");
               }
             })();
           },

@@ -6,10 +6,13 @@ import { useResolvedMediaUri } from "../media/useResolvedMediaUri";
 const expoImageProps: Array<Record<string, unknown>> = [];
 
 jest.mock("expo-image", () => ({
-  Image: (props: Record<string, unknown>) => {
-    expoImageProps.push(props);
-    return null;
-  },
+  Image: Object.assign(
+    (props: Record<string, unknown>) => {
+      expoImageProps.push(props);
+      return null;
+    },
+    { getCachePathAsync: jest.fn(() => new Promise(() => undefined)) },
+  ),
 }));
 
 jest.mock("../media/useResolvedMediaUri", () => ({

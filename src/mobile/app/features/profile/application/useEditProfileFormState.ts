@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type Path, type PathValue } from "react-hook-form";
 
 import { categories } from "../../../shared/catalog/taxonomy";
+import { formatTurkishDisplayText } from "../../../shared/i18n/turkishDisplay";
 import { TEXT_LIMITS } from "../../../shared/validation/textLimits";
 import {
   captureCameraImageSelection,
@@ -91,8 +92,12 @@ export function useEditProfileFormState({ isClub, userData }: UseEditProfileForm
 
   const filteredCategories = useMemo(
     () =>
-      categories.filter((category) =>
-        category.toLowerCase().includes(categorySearch.toLowerCase()),
+      categories.filter(
+        (category) =>
+          category.toLocaleLowerCase("tr").includes(categorySearch.toLocaleLowerCase("tr")) ||
+          formatTurkishDisplayText(category)
+            .toLocaleLowerCase("tr")
+            .includes(categorySearch.toLocaleLowerCase("tr")),
       ),
     [categorySearch],
   );

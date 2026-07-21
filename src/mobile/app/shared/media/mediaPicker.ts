@@ -32,7 +32,7 @@ export type PickerMediaLibraryAsset = MediaLibrary.Asset & {
   thumbnailUri?: string | null;
 };
 
-export const MAX_ALBUM_MEDIA_ITEMS = 9;
+export const MAX_ALBUM_MEDIA_ITEMS = 6;
 
 function normalizeText(value: unknown) {
   return String(value || "").trim();

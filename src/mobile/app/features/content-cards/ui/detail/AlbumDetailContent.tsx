@@ -1,23 +1,27 @@
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import { buildPreparedAlbumVisibility } from "../../application/feedCardPresentation";
 import type { AlbumPhotoWithMeta } from "../../data";
 import { ExpandableCardText } from "../shared/ExpandableCardText";
+import { tokens } from "../../../../shared/theme";
 
 function AlbumMetaChip(props: { border: string; color: string; label: string; surface: string }) {
   return (
     <View
       style={{
-        marginTop: 8,
+        marginTop: tokens.spacing.xs,
         alignSelf: "flex-start",
-        borderRadius: 999,
+        borderRadius: tokens.radius.pill,
         borderWidth: 1,
         borderColor: props.border,
         backgroundColor: props.surface,
-        paddingHorizontal: 8,
-        paddingVertical: 4,
+        paddingHorizontal: tokens.spacing.xs,
+        paddingVertical: tokens.spacing.xxs,
       }}
     >
-      <Text style={{ color: props.color, fontSize: 10, fontWeight: "700" }}>{props.label}</Text>
+      <Text style={{ color: props.color, fontSize: tokens.typography.micro, fontWeight: "700" }}>
+        {props.label}
+      </Text>
     </View>
   );
 }
@@ -35,12 +39,40 @@ export function AlbumDetailContent({
 }: AlbumDetailContentProps) {
   if (!showSecondaryContent) {
     return (
-      <View style={{ paddingHorizontal: 14, paddingTop: 12, paddingBottom: 12, gap: 8 }}>
-        <Text style={{ color: "#0f172a", fontSize: 15, fontWeight: "700" }} numberOfLines={2}>
+      <View
+        style={{
+          paddingHorizontal: tokens.spacing.smPlus,
+          paddingTop: tokens.spacing.sm,
+          paddingBottom: tokens.spacing.sm,
+          gap: tokens.spacing.xs,
+        }}
+      >
+        <Text
+          style={{
+            color: tokens.colors.foreground,
+            fontSize: tokens.typography.control,
+            fontWeight: "700",
+          }}
+          numberOfLines={2}
+        >
           {photo.title || photo.eventTitle || "Album"}
         </Text>
-        <View style={{ height: 11, width: "64%", borderRadius: 999, backgroundColor: "#e2e8f0" }} />
-        <View style={{ height: 11, width: "42%", borderRadius: 999, backgroundColor: "#e2e8f0" }} />
+        <View
+          style={{
+            height: 11,
+            width: "64%",
+            borderRadius: tokens.radius.pill,
+            backgroundColor: tokens.colors.border,
+          }}
+        />
+        <View
+          style={{
+            height: 11,
+            width: "42%",
+            borderRadius: tokens.radius.pill,
+            backgroundColor: tokens.colors.border,
+          }}
+        />
       </View>
     );
   }
@@ -48,23 +80,48 @@ export function AlbumDetailContent({
   const visibility = buildPreparedAlbumVisibility(photo, context);
 
   return (
-    <View style={{ paddingHorizontal: 14, paddingTop: 10, paddingBottom: 12 }}>
-      <Text style={{ color: "#0f172a", fontSize: 15, fontWeight: "700" }} numberOfLines={2}>
+    <View
+      style={{
+        paddingHorizontal: tokens.spacing.smPlus,
+        paddingTop: tokens.spacing.compact,
+        paddingBottom: tokens.spacing.sm,
+      }}
+    >
+      <Text
+        style={{
+          color: tokens.colors.foreground,
+          fontSize: tokens.typography.control,
+          fontWeight: "700",
+        }}
+        numberOfLines={2}
+      >
         {photo.title || photo.eventTitle || "Album"}
       </Text>
       {photo.caption ? (
         <ExpandableCardText
-          containerStyle={{ marginTop: 4 }}
+          containerStyle={{ marginTop: tokens.spacing.xxs }}
           text={photo.caption}
-          textStyle={{ color: "#64748b", fontSize: 12, lineHeight: 18 }}
-          toggleTextStyle={{ color: "#2563eb", fontSize: 12, fontWeight: "700" }}
+          textStyle={{
+            color: tokens.colors.muted,
+            fontSize: tokens.typography.caption,
+            lineHeight: tokens.lineHeight.label,
+          }}
+          toggleTextStyle={{
+            color: tokens.colors.primary,
+            fontSize: tokens.typography.caption,
+            fontWeight: "700",
+          }}
         />
       ) : null}
       <AlbumMetaChip
         label={`Görünürlük: ${visibility.text}`}
-        color={visibility.type === "club" ? "#047857" : "#c2410c"}
-        surface={visibility.type === "club" ? "#ecfdf5" : "#fff7ed"}
-        border={visibility.type === "club" ? "#bbf7d0" : "#fed7aa"}
+        color={visibility.type === "club" ? tokens.colors.successText : tokens.colors.warning}
+        surface={
+          visibility.type === "club" ? tokens.colors.successSoft : tokens.colors.warningSurface
+        }
+        border={
+          visibility.type === "club" ? tokens.colors.successBorderSoft : tokens.colors.orangeBorder
+        }
       />
     </View>
   );

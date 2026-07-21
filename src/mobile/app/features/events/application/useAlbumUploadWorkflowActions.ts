@@ -85,7 +85,7 @@ export function useAlbumUploadWorkflowActions({
     }
     if (remainingAlbumSlots <= 0) {
       showAlbumUploadAlert(
-        "Her kullanici bu etkinlige en fazla 3 album karti ekleyebilir.",
+        "Her kullanıcı bu etkinliğe en fazla 3 albüm kartı ekleyebilir.",
         setWarningMessage,
       );
       return;
@@ -193,7 +193,7 @@ export function useAlbumUploadWorkflowActions({
         showAlbumUploadAlert(
           String(
             (error as { message?: string } | null)?.message ||
-              "Medya eklenemedi. Lutfen tekrar dene.",
+              "Medya eklenemedi. Lütfen tekrar dene.",
           ),
           setWarningMessage,
         );
@@ -289,7 +289,7 @@ export function useAlbumUploadWorkflowActions({
     }
     if (remainingAlbumSlots <= 0) {
       showAlbumUploadAlert(
-        "Her kullanici bu etkinlige en fazla 3 album karti ekleyebilir.",
+        "Her kullanıcı bu etkinliğe en fazla 3 albüm kartı ekleyebilir.",
         setWarningMessage,
       );
       return;
@@ -324,7 +324,7 @@ export function useAlbumUploadWorkflowActions({
       showAlbumUploadAlert(
         String(
           (error as { message?: string } | null)?.message ||
-            "Medya yuklenemedi. Lutfen tekrar dene.",
+            "Medya yüklenemedi. Lütfen tekrar dene.",
         ),
         setWarningMessage,
       );

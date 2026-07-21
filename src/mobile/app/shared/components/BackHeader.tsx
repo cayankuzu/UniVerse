@@ -1,8 +1,10 @@
 import { useNavigation } from "@react-navigation/native";
 import { ChevronLeft } from "lucide-react-native";
-import { Text, TouchableOpacity, View } from "react-native";
+import { View } from "react-native";
+import { AppText as Text } from "./AppText";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { tokens } from "../../shared/theme";
+import { tokens, withAlpha } from "../../shared/theme";
+import { InstantPressable } from "./InstantPressable";
 
 interface Props {
   title?: string;
@@ -18,7 +20,7 @@ export function BackHeader({
   right,
   onBack,
   transparent,
-  horizontalPadding = 10,
+  horizontalPadding = tokens.spacing.compact,
   ownsTopInset = true,
 }: Props) {
   const insets = useSafeAreaInsets();
@@ -29,8 +31,8 @@ export function BackHeader({
       style={{
         paddingTop: ownsTopInset ? insets.top : 0,
         paddingHorizontal: horizontalPadding,
-        paddingBottom: 10,
-        minHeight: tokens.minHeight.touchTarget + (ownsTopInset ? insets.top : 0) + 10,
+        paddingBottom: tokens.spacing.xs,
+        minHeight: tokens.minHeight.header + (ownsTopInset ? insets.top : 0),
         flexDirection: "row",
         alignItems: "center",
         backgroundColor: transparent ? "transparent" : tokens.colors.surface,
@@ -38,9 +40,11 @@ export function BackHeader({
         borderBottomColor: tokens.colors.border,
       }}
     >
-      <TouchableOpacity
+      <InstantPressable
         accessibilityLabel="Geri git"
         accessibilityRole="button"
+        haptic="selection"
+        hitSlop={tokens.hitSlop.sm}
         onPress={
           onBack ??
           (() => {
@@ -50,20 +54,22 @@ export function BackHeader({
           })
         }
         style={{
-          width: tokens.minHeight.touchTarget,
-          height: tokens.minHeight.touchTarget,
-          borderRadius: 10,
-          backgroundColor: transparent ? "rgba(255,255,255,0.15)" : tokens.colors.surfaceVariant,
+          width: tokens.minHeight.header,
+          height: tokens.minHeight.header,
+          borderRadius: tokens.radius.compact,
+          backgroundColor: transparent
+            ? withAlpha(tokens.colors.onMedia, 0.15)
+            : tokens.colors.surfaceVariant,
           alignItems: "center",
           justifyContent: "center",
         }}
       >
         <ChevronLeft
-          size={20}
+          size={tokens.iconSize.xl}
           color={transparent ? tokens.colors.surface : tokens.colors.foreground}
-          strokeWidth={2.5}
+          strokeWidth={tokens.strokeWidth.emphasis}
         />
-      </TouchableOpacity>
+      </InstantPressable>
 
       {title && (
         <Text
@@ -71,11 +77,11 @@ export function BackHeader({
           style={{
             flex: 1,
             textAlign: "center",
-            fontSize: 15,
-            lineHeight: 20,
-            fontWeight: "700",
+            fontSize: tokens.typography.control,
+            lineHeight: tokens.lineHeight.control,
+            fontWeight: tokens.fontWeight.bold,
             color: transparent ? tokens.colors.surface : tokens.colors.foreground,
-            marginHorizontal: 8,
+            marginHorizontal: tokens.spacing.xs,
           }}
           numberOfLines={2}
         >
@@ -83,7 +89,7 @@ export function BackHeader({
         </Text>
       )}
 
-      <View style={{ width: tokens.minHeight.touchTarget, alignItems: "flex-end" }}>{right}</View>
+      <View style={{ width: tokens.minHeight.header, alignItems: "flex-end" }}>{right}</View>
     </View>
   );
 }

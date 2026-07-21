@@ -88,7 +88,7 @@ export function useEventModerationActions(params: UseEventModerationActionsParam
     if (!interactive || !canDeleteEvent || deleteBusy) return;
     setDeleteBusy(true);
     const activityId = showActivity({
-      hint: "Etkinlik karti listelerden ve veritabanindan kaldiriliyor.",
+      hint: "Etkinlik kartı listelerden ve veritabanından kaldırılıyor.",
       percent: 32,
       stage: "Etkinlik siliniyor",
       title: "Etkinlik silme islemi basladi",
@@ -104,7 +104,7 @@ export function useEventModerationActions(params: UseEventModerationActionsParam
       updateActivity(activityId, {
         dismissAfterMs: 1800,
         percent: 100,
-        stage: "Etkinlik kaldirildi",
+        stage: "Etkinlik kaldırıldı",
         title: "Etkinlik silindi",
         tone: "success",
       });
@@ -173,7 +173,7 @@ export function useEventModerationActions(params: UseEventModerationActionsParam
       Alert.alert("Yorumu Şikâyet Et", "Bu yorumu şikâyet etmek istiyor musunuz?", [
         { text: "Vazgeç", style: "cancel" },
         {
-          text: "Şikayet Et",
+          text: "Şikâyet Et",
           style: "destructive",
           onPress: () => {
             void (async () => {
@@ -182,7 +182,7 @@ export function useEventModerationActions(params: UseEventModerationActionsParam
                   commentId: comment.id,
                   username: comment.username,
                 });
-                onShowWarning?.("Şikayetiniz alindi.");
+                onShowWarning?.("Şikâyetiniz alındı.");
               } catch (error) {
                 debugWarn("CONTENT-CARDS", "event-comment-report-failed", {
                   commentId: String(comment.id || ""),
@@ -192,7 +192,7 @@ export function useEventModerationActions(params: UseEventModerationActionsParam
                       "event-comment-report-failed",
                   ),
                 });
-                onShowWarning?.("Şikayet gönderilemedi.");
+                onShowWarning?.("Şikâyet gönderilemedi.");
               }
             })();
           },
@@ -208,7 +208,7 @@ export function useEventModerationActions(params: UseEventModerationActionsParam
         ? [
             {
               key: "delete",
-              label: deleteBusy ? "Siliniyor..." : "Etkinligi Sil",
+              label: deleteBusy ? "Siliniyor..." : "Etkinliği Sil",
               destructive: true,
               onPress: openDeleteConfirmModal,
             },
@@ -216,7 +216,7 @@ export function useEventModerationActions(params: UseEventModerationActionsParam
         : [
             {
               key: "report",
-              label: "Etkinligi Şikayet Et",
+              label: "Etkinliği Şikâyet Et",
               onPress: () => setShowReportModal(true),
             },
           ],

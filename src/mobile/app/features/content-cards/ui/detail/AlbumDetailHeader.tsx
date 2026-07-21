@@ -1,4 +1,5 @@
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import { Avatar } from "../../../../shared/components";
 import type { AlbumPhotoWithMeta } from "../../data";
 import { tokens } from "../../../../shared/theme";
@@ -45,15 +46,15 @@ export function AlbumDetailHeader({
       style={{
         flexDirection: "row",
         alignItems: "center",
-        paddingHorizontal: 14,
+        paddingHorizontal: tokens.spacing.smPlus,
         paddingTop: tokens.spacing.sm,
         paddingBottom: tokens.spacing.xs,
-        gap: 10,
+        gap: tokens.spacing.compact,
       }}
     >
       {showAvatar ? (
         <Pressable onPress={() => onOpenProfile(photo.username)}>
-          <Avatar uri={photo.userImage} name={photo.name} size={38} />
+          <Avatar uri={photo.userImage} name={photo.name} size={32} />
         </Pressable>
       ) : null}
       <Pressable onPress={() => onOpenProfile(photo.username)} style={{ flex: 1 }}>
@@ -75,7 +76,13 @@ export function AlbumDetailHeader({
         </Text>
       </Pressable>
       {dateLabel || timeLabel ? (
-        <View style={{ alignItems: "flex-end", gap: 1, marginRight: 2 }}>
+        <View
+          style={{
+            alignItems: "flex-end",
+            gap: tokens.spacing.hairline,
+            marginRight: tokens.spacing.micro,
+          }}
+        >
           {!!dateLabel && (
             <Text
               style={{

@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { AppText as Text } from "../../../shared/components/AppText";
 import {
   FlatList,
   Pressable,
-  Text,
   View,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
@@ -11,6 +11,7 @@ import { Image as ImageIcon, Play } from "lucide-react-native";
 import { AppImage } from "../../../shared/components";
 import { isVideoMediaUri } from "../../../shared/media/mediaVideoUtils";
 import { VideoThumbnailPreview } from "../../../shared/media/VideoThumbnailPreview";
+import { tokens, withAlpha } from "../../../shared/theme";
 
 type Props = {
   firstImageUri?: string;
@@ -81,7 +82,7 @@ export function AlbumMediaCarousel({
       style={{
         width: "100%",
         height: mediaFrameHeight,
-        backgroundColor: "#e2e8f0",
+        backgroundColor: tokens.colors.border,
         position: "relative",
       }}
     >
@@ -115,7 +116,13 @@ export function AlbumMediaCarousel({
               >
                 {isNearViewport ? (
                   isVideoMediaUri(item) ? (
-                    <View style={{ width: "100%", height: "100%", backgroundColor: "#0f172a" }}>
+                    <View
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        backgroundColor: tokens.colors.foreground,
+                      }}
+                    >
                       <VideoThumbnailPreview
                         candidateUris={
                           isLeadImage
@@ -142,9 +149,14 @@ export function AlbumMediaCarousel({
                           justifyContent: "center",
                         }}
                       >
-                        <Play size={34} color="#fff" />
+                        <Play size={tokens.iconSize["3xl"]} color={tokens.colors.onMedia} />
                         <Text
-                          style={{ marginTop: 8, color: "#fff", fontSize: 12, fontWeight: "700" }}
+                          style={{
+                            marginTop: tokens.spacing.xs,
+                            color: tokens.colors.onMedia,
+                            fontSize: tokens.typography.caption,
+                            fontWeight: "700",
+                          }}
                         >
                           Video
                         </Text>
@@ -160,7 +172,9 @@ export function AlbumMediaCarousel({
                     />
                   )
                 ) : (
-                  <View style={{ width: "100%", height: "100%", backgroundColor: "#e2e8f0" }} />
+                  <View
+                    style={{ width: "100%", height: "100%", backgroundColor: tokens.colors.border }}
+                  />
                 )}
               </Pressable>
             );
@@ -174,13 +188,13 @@ export function AlbumMediaCarousel({
         <View style={{ position: "absolute", top: 8, right: 8 }}>
           <Text
             style={{
-              color: "#fff",
-              fontSize: 10,
+              color: tokens.colors.onMedia,
+              fontSize: tokens.typography.micro,
               fontWeight: "700",
-              backgroundColor: "rgba(15,23,42,0.62)",
-              paddingHorizontal: 8,
-              paddingVertical: 4,
-              borderRadius: 999,
+              backgroundColor: withAlpha(tokens.colors.foreground, 0.62),
+              paddingHorizontal: tokens.spacing.xs,
+              paddingVertical: tokens.spacing.xxs,
+              borderRadius: tokens.radius.pill,
             }}
           >
             {Math.min(previewIndex + 1, photoCount)}/{photoCount}
@@ -189,21 +203,35 @@ export function AlbumMediaCarousel({
       ) : null}
 
       {mediaCounts.photoItems > 0 || mediaCounts.videoItems > 0 ? (
-        <View style={{ position: "absolute", top: 8, left: 8, flexDirection: "row", gap: 6 }}>
+        <View
+          style={{
+            position: "absolute",
+            top: 8,
+            left: 8,
+            flexDirection: "row",
+            gap: tokens.spacing.xsMinus,
+          }}
+        >
           {mediaCounts.photoItems > 0 ? (
             <View
               style={{
-                borderRadius: 999,
-                backgroundColor: "rgba(15,23,42,0.72)",
-                paddingHorizontal: 8,
-                paddingVertical: 4,
+                borderRadius: tokens.radius.pill,
+                backgroundColor: withAlpha(tokens.colors.foreground, 0.72),
+                paddingHorizontal: tokens.spacing.xs,
+                paddingVertical: tokens.spacing.xxs,
                 flexDirection: "row",
                 alignItems: "center",
-                gap: 4,
+                gap: tokens.spacing.xxs,
               }}
             >
-              <ImageIcon size={10} color="#fff" />
-              <Text style={{ color: "#fff", fontSize: 10, fontWeight: "800" }}>
+              <ImageIcon size={10} color={tokens.colors.onMedia} />
+              <Text
+                style={{
+                  color: tokens.colors.onMedia,
+                  fontSize: tokens.typography.micro,
+                  fontWeight: "800",
+                }}
+              >
                 {mediaCounts.photoItems}
               </Text>
             </View>
@@ -211,17 +239,23 @@ export function AlbumMediaCarousel({
           {mediaCounts.videoItems > 0 ? (
             <View
               style={{
-                borderRadius: 999,
-                backgroundColor: "rgba(15,23,42,0.72)",
-                paddingHorizontal: 8,
-                paddingVertical: 4,
+                borderRadius: tokens.radius.pill,
+                backgroundColor: withAlpha(tokens.colors.foreground, 0.72),
+                paddingHorizontal: tokens.spacing.xs,
+                paddingVertical: tokens.spacing.xxs,
                 flexDirection: "row",
                 alignItems: "center",
-                gap: 4,
+                gap: tokens.spacing.xxs,
               }}
             >
-              <Play size={10} color="#fff" fill="#fff" />
-              <Text style={{ color: "#fff", fontSize: 10, fontWeight: "800" }}>
+              <Play size={10} color={tokens.colors.onMedia} fill={tokens.colors.onMedia} />
+              <Text
+                style={{
+                  color: tokens.colors.onMedia,
+                  fontSize: tokens.typography.micro,
+                  fontWeight: "800",
+                }}
+              >
                 {mediaCounts.videoItems}
               </Text>
             </View>
@@ -238,7 +272,7 @@ export function AlbumMediaCarousel({
             bottom: 10,
             flexDirection: "row",
             justifyContent: "center",
-            gap: 6,
+            gap: tokens.spacing.xsMinus,
           }}
         >
           {dots.map((_, index) => (
@@ -247,8 +281,11 @@ export function AlbumMediaCarousel({
               style={{
                 width: index === previewIndex ? 18 : 6,
                 height: 6,
-                borderRadius: 999,
-                backgroundColor: index === previewIndex ? "#fff" : "rgba(255,255,255,0.48)",
+                borderRadius: tokens.radius.pill,
+                backgroundColor:
+                  index === previewIndex
+                    ? tokens.colors.onMedia
+                    : withAlpha(tokens.colors.onMedia, 0.48),
               }}
             />
           ))}

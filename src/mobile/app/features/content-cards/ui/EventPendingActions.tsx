@@ -1,5 +1,7 @@
 import React from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { AppText as Text } from "../../../shared/components/AppText";
+import { ActivityIndicator, View } from "react-native";
+import { tokens, withAlpha } from "../../../shared/theme";
 
 type Props = {
   status: "failed" | "pending" | "uploading";
@@ -7,7 +9,9 @@ type Props = {
 
 export function EventPendingActions({ status }: Props) {
   const isFailed = status === "failed";
-  const backgroundColor = isFailed ? "rgba(127,29,29,0.9)" : "rgba(15,23,42,0.78)";
+  const backgroundColor = isFailed
+    ? withAlpha(tokens.colors.dangerDeep, 0.9)
+    : withAlpha(tokens.colors.foreground, 0.78);
   const label = isFailed ? "Yükleme Hatasi" : "Yükleniyor";
 
   return (
@@ -18,20 +22,28 @@ export function EventPendingActions({ status }: Props) {
         bottom: 10,
         flexDirection: "row",
         alignItems: "center",
-        gap: 6,
+        gap: tokens.spacing.xsMinus,
       }}
     >
       <View
         style={{
-          borderRadius: 10,
+          borderRadius: tokens.radius.compact,
           backgroundColor,
-          paddingHorizontal: 10,
-          paddingVertical: 6,
+          paddingHorizontal: tokens.spacing.compact,
+          paddingVertical: tokens.spacing.xsMinus,
         }}
       >
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-          {isFailed ? null : <ActivityIndicator size="small" color="#fff" />}
-          <Text style={{ color: "#fff", fontSize: 11, fontWeight: "700" }}>{label}</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.xsMinus }}>
+          {isFailed ? null : <ActivityIndicator size="small" color={tokens.colors.onMedia} />}
+          <Text
+            style={{
+              color: tokens.colors.onMedia,
+              fontSize: tokens.typography.tiny,
+              fontWeight: "700",
+            }}
+          >
+            {label}
+          </Text>
         </View>
       </View>
     </View>

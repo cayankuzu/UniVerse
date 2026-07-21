@@ -12,12 +12,13 @@ import { useRegistrationWizard } from "../../application/useRegistrationWizard";
 import { clubRegisterSchema } from "../../domain/schemas";
 import { completeRegistrationFlow } from "../../application/completeRegistrationFlow";
 import { ClubRegistrationSections } from "./ClubRegistrationSections";
+import { tokens } from "../../../../shared/theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ClubRegister">;
 
 const TOTAL_STEPS = 4;
 const STEP_LABELS = ["Bilgiler", "Üniversite", "Profil", "Kategoriler"] as const;
-const GRADIENT_COLORS = ["#8b5cf6", "#7c3aed"] as const;
+const GRADIENT_COLORS = [tokens.colors.violet, tokens.colors.violetBrand] as const;
 const clubRegisterFormSchema = clubRegisterSchema;
 
 type ClubRegisterValues = z.infer<typeof clubRegisterFormSchema>;

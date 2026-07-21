@@ -1,5 +1,6 @@
 import React from "react";
-import { Pressable, Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { Pressable, View } from "react-native";
 
 import { AppModalHost } from "../../../../shared/components";
 import { t } from "../../../../shared/i18n";
@@ -81,7 +82,7 @@ export function ProfileReportModal({
                     color: tokens.colors.muted,
                     fontSize: tokens.typography.caption,
                     textAlign: "center",
-                    marginTop: 6,
+                    marginTop: tokens.spacing.xsMinus,
                     marginBottom: tokens.spacing.xs,
                   }}
                 >
@@ -96,7 +97,7 @@ export function ProfileReportModal({
                     fontSize: tokens.typography.subtitle,
                     fontWeight: tokens.fontWeight.extrabold,
                     textAlign: "center",
-                    marginBottom: 10,
+                    marginBottom: tokens.spacing.compact,
                   }}
                 >
                   {t("profile.report.title")}
@@ -106,7 +107,7 @@ export function ProfileReportModal({
                     key={reasonKey}
                     onPress={() => void onReport(t(reasonKey))}
                     style={{
-                      minHeight: tokens.minHeight.touchTarget,
+                      minHeight: tokens.minHeight.row,
                       paddingHorizontal: tokens.spacing.sm,
                       flexDirection: "row",
                       alignItems: "center",
@@ -128,7 +129,7 @@ export function ProfileReportModal({
                 <Pressable
                   onPress={onClose}
                   style={{
-                    minHeight: tokens.minHeight.touchTarget,
+                    minHeight: tokens.minHeight.buttonLg,
                     borderTopWidth: 1,
                     borderTopColor: tokens.colors.divider,
                     alignItems: "center",

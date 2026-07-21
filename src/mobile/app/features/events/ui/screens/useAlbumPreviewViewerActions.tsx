@@ -48,7 +48,7 @@ export function useAlbumPreviewViewerActions({
               destructive: true,
               icon: <Trash2 size={tokens.iconSize.md} color={tokens.colors.dangerDark} />,
               onPress: () => {
-                Alert.alert("Medyayi sil", "Bu se??ili medyay?? kald??rmak istiyor musun?", [
+                Alert.alert("Medyayı sil", "Bu seçili medyayı kaldırmak istiyor musun?", [
                   { text: "Vazge??", style: "cancel" },
                   {
                     text: "Sil",

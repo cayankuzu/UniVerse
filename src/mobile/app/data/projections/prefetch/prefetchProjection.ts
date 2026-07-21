@@ -36,7 +36,7 @@ function hasFreshQueryData(params: {
 
 export async function prefetchProjectionScreen<T extends { id?: string }>(params: {
   entity: string;
-  fetchProjection: () => Promise<ProjectionEnvelope<T>>;
+  fetchProjection: (signal?: AbortSignal) => Promise<ProjectionEnvelope<T>>;
   getId?: (item: T) => string;
   queryClient: QueryClient;
   queryKey: QueryKey;
@@ -73,8 +73,8 @@ export async function prefetchProjectionScreen<T extends { id?: string }>(params
     task: () =>
       queryClient.prefetchQuery({
         queryKey,
-        queryFn: async () => {
-          const envelope = await fetchProjection();
+        queryFn: async ({ signal }) => {
+          const envelope = await fetchProjection(signal);
           const nextState = applyProjectionEnvelope({
             entity,
             envelope,

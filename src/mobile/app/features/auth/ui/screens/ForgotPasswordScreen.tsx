@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { Pressable, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -79,28 +80,28 @@ export function ForgotPasswordScreen({ navigation }: Props) {
             flex: 1,
             alignItems: "center",
             justifyContent: "center",
-            paddingHorizontal: 24,
-            paddingVertical: 20,
+            paddingHorizontal: tokens.spacing.xl,
+            paddingVertical: tokens.spacing.lg,
           }}
         >
           <View
             style={{
-              width: 80,
-              height: 80,
-              borderRadius: 24,
+              width: 64,
+              height: 64,
+              borderRadius: tokens.radius["2xl"],
               backgroundColor: tokens.colors.successSurface,
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <CheckCircle size={44} color={tokens.colors.successDark} strokeWidth={1.5} />
+            <CheckCircle size={32} color={tokens.colors.successDark} strokeWidth={1.5} />
           </View>
 
           <Text
             style={{
-              marginTop: 24,
+              marginTop: tokens.spacing.xl,
               color: tokens.colors.foreground,
-              fontSize: 24,
+              fontSize: tokens.typography.heading,
               fontWeight: "700",
               textAlign: "center",
             }}
@@ -109,10 +110,10 @@ export function ForgotPasswordScreen({ navigation }: Props) {
           </Text>
           <Text
             style={{
-              marginTop: 10,
+              marginTop: tokens.spacing.compact,
               color: tokens.colors.muted,
-              fontSize: 14,
-              lineHeight: 21,
+              fontSize: tokens.typography.body,
+              lineHeight: tokens.lineHeight.bodyRelaxed,
               textAlign: "center",
               maxWidth: 300,
             }}
@@ -120,7 +121,9 @@ export function ForgotPasswordScreen({ navigation }: Props) {
             {t("auth.password.forgot.sentSubtitle", { email: submittedEmail })}
           </Text>
 
-          <View style={{ width: "100%", marginTop: 28, gap: 10 }}>
+          <View
+            style={{ width: "100%", marginTop: tokens.spacing.twoXl, gap: tokens.spacing.compact }}
+          >
             <GradientButton
               label={t("auth.password.forgot.back")}
               onPress={() => navigation.navigate("Login")}
@@ -130,17 +133,23 @@ export function ForgotPasswordScreen({ navigation }: Props) {
               onPress={() => void resendResetMail()}
               style={{
                 minHeight: 48,
-                borderRadius: 16,
+                borderRadius: tokens.radius.lg,
                 backgroundColor: tokens.colors.surfaceVariant,
                 flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: 8,
+                gap: tokens.spacing.xs,
                 opacity: isSubmitting ? 0.6 : 1,
               }}
             >
               <RefreshCw size={16} color={tokens.colors.muted} strokeWidth={1.5} />
-              <Text style={{ color: tokens.colors.dark600, fontSize: 15, fontWeight: "700" }}>
+              <Text
+                style={{
+                  color: tokens.colors.dark600,
+                  fontSize: tokens.typography.control,
+                  fontWeight: "700",
+                }}
+              >
                 {t("auth.password.forgot.resend")}
               </Text>
             </Pressable>
@@ -149,8 +158,8 @@ export function ForgotPasswordScreen({ navigation }: Props) {
                 style={{
                   color: tokens.colors.dangerDark,
                   textAlign: "center",
-                  fontSize: 13,
-                  marginTop: 2,
+                  fontSize: tokens.typography.label,
+                  marginTop: tokens.spacing.micro,
                 }}
               >
                 {errors.root.message}
@@ -174,35 +183,42 @@ export function ForgotPasswordScreen({ navigation }: Props) {
         />
       }
       contentContainerStyle={{
-        paddingHorizontal: 24,
-        paddingVertical: 22,
+        paddingHorizontal: tokens.spacing.xl,
+        paddingVertical: tokens.spacing.lgPlus,
       }}
     >
       <View
         style={{
-          width: 56,
-          height: 56,
-          borderRadius: 16,
+          width: 46,
+          height: 46,
+          borderRadius: tokens.radius.lg,
           backgroundColor: tokens.colors.primary,
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <Mail size={30} color={tokens.colors.surface} strokeWidth={1.5} />
+        <Mail size={tokens.iconSize["2xl"]} color={tokens.colors.surface} strokeWidth={1.5} />
       </View>
 
       <Text
         style={{
-          marginTop: 14,
+          marginTop: tokens.spacing.smPlus,
           color: tokens.colors.foreground,
-          fontSize: 30,
+          fontSize: tokens.typography.displayLarge,
           fontWeight: "700",
-          letterSpacing: 0.2,
+          letterSpacing: tokens.letterSpacing.helper,
         }}
       >
         {t("auth.password.forgot.heading")}
       </Text>
-      <Text style={{ marginTop: 4, color: tokens.colors.muted, fontSize: 14, lineHeight: 21 }}>
+      <Text
+        style={{
+          marginTop: tokens.spacing.xxs,
+          color: tokens.colors.muted,
+          fontSize: tokens.typography.body,
+          lineHeight: tokens.lineHeight.bodyRelaxed,
+        }}
+      >
         {t("auth.password.forgot.subtitle")}
       </Text>
 
@@ -222,16 +238,22 @@ export function ForgotPasswordScreen({ navigation }: Props) {
       {errors.root?.message ? (
         <View
           style={{
-            marginTop: 14,
-            borderRadius: 12,
+            marginTop: tokens.spacing.smPlus,
+            borderRadius: tokens.radius.md,
             borderWidth: 1,
             borderColor: tokens.colors.dangerBorder,
             backgroundColor: tokens.colors.dangerSoft,
-            paddingHorizontal: 12,
-            paddingVertical: 10,
+            paddingHorizontal: tokens.spacing.sm,
+            paddingVertical: tokens.spacing.compact,
           }}
         >
-          <Text style={{ color: tokens.colors.dangerDark, fontSize: 13, fontWeight: "500" }}>
+          <Text
+            style={{
+              color: tokens.colors.dangerDark,
+              fontSize: tokens.typography.label,
+              fontWeight: "500",
+            }}
+          >
             {errors.root.message}
           </Text>
         </View>

@@ -1,5 +1,6 @@
 import React from "react";
-import { Pressable, Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { Pressable, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -33,25 +34,29 @@ export function AuthCallbackScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: tokens.colors.surface, paddingHorizontal: 24 }}
+      style={{
+        flex: 1,
+        backgroundColor: tokens.colors.surface,
+        paddingHorizontal: tokens.spacing.xl,
+      }}
       edges={["top", "bottom"]}
     >
       {status === "loading" ? (
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
           <View
             style={{
-              width: 100,
-              height: 100,
+              width: 80,
+              height: 80,
               alignItems: "center",
               justifyContent: "center",
-              marginBottom: 24,
+              marginBottom: tokens.spacing.xl,
             }}
           >
             <View
               style={{
                 position: "absolute",
-                width: 100,
-                height: 100,
+                width: 80,
+                height: 80,
                 borderRadius: 26,
                 backgroundColor: tokens.colors.primarySoft,
                 opacity: 0.55,
@@ -60,20 +65,20 @@ export function AuthCallbackScreen({ navigation }: Props) {
             <LinearGradient
               colors={[tokens.colors.primaryLight, tokens.colors.primaryDark]}
               style={{
-                width: 84,
-                height: 84,
-                borderRadius: 24,
+                width: 68,
+                height: 68,
+                borderRadius: tokens.radius["2xl"],
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <GraduationCap size={42} color={tokens.colors.surface} strokeWidth={1.5} />
+              <GraduationCap size={32} color={tokens.colors.surface} strokeWidth={1.5} />
             </LinearGradient>
           </View>
           <Text
             style={{
               color: tokens.colors.foreground,
-              fontSize: 28,
+              fontSize: tokens.typography.display,
               fontWeight: "700",
               textAlign: "center",
             }}
@@ -82,22 +87,28 @@ export function AuthCallbackScreen({ navigation }: Props) {
           </Text>
           <Text
             style={{
-              marginTop: 10,
+              marginTop: tokens.spacing.compact,
               color: tokens.colors.muted,
-              fontSize: 14,
-              lineHeight: 21,
+              fontSize: tokens.typography.body,
+              lineHeight: tokens.lineHeight.bodyRelaxed,
               textAlign: "center",
               maxWidth: 300,
             }}
           >
             {t("auth.callback.verifyingSubtitle")}
           </Text>
-          <View style={{ marginTop: 18, flexDirection: "row", gap: 8 }}>
+          <View
+            style={{
+              marginTop: tokens.spacing.mdPlus,
+              flexDirection: "row",
+              gap: tokens.spacing.xs,
+            }}
+          >
             <View
               style={{
                 width: 8,
                 height: 8,
-                borderRadius: 999,
+                borderRadius: tokens.radius.pill,
                 backgroundColor: tokens.colors.primaryLight,
                 opacity: 0.9,
               }}
@@ -106,7 +117,7 @@ export function AuthCallbackScreen({ navigation }: Props) {
               style={{
                 width: 8,
                 height: 8,
-                borderRadius: 999,
+                borderRadius: tokens.radius.pill,
                 backgroundColor: tokens.colors.primaryLight,
                 opacity: 0.6,
               }}
@@ -115,7 +126,7 @@ export function AuthCallbackScreen({ navigation }: Props) {
               style={{
                 width: 8,
                 height: 8,
-                borderRadius: 999,
+                borderRadius: tokens.radius.pill,
                 backgroundColor: tokens.colors.primaryLight,
                 opacity: 0.4,
               }}
@@ -128,21 +139,21 @@ export function AuthCallbackScreen({ navigation }: Props) {
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
           <View
             style={{
-              width: 84,
-              height: 84,
+              width: 68,
+              height: 68,
               borderRadius: 42,
               backgroundColor: tokens.colors.successSurface,
               alignItems: "center",
               justifyContent: "center",
-              marginBottom: 24,
+              marginBottom: tokens.spacing.xl,
             }}
           >
-            <CheckCircle size={52} color={tokens.colors.successDark} />
+            <CheckCircle size={40} color={tokens.colors.successDark} />
           </View>
           <Text
             style={{
               color: tokens.colors.foreground,
-              fontSize: 28,
+              fontSize: tokens.typography.display,
               fontWeight: "700",
               textAlign: "center",
             }}
@@ -151,10 +162,10 @@ export function AuthCallbackScreen({ navigation }: Props) {
           </Text>
           <Text
             style={{
-              marginTop: 10,
+              marginTop: tokens.spacing.compact,
               color: tokens.colors.muted,
-              fontSize: 14,
-              lineHeight: 21,
+              fontSize: tokens.typography.body,
+              lineHeight: tokens.lineHeight.bodyRelaxed,
               textAlign: "center",
               maxWidth: 300,
             }}
@@ -168,21 +179,21 @@ export function AuthCallbackScreen({ navigation }: Props) {
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
           <View
             style={{
-              width: 84,
-              height: 84,
+              width: 68,
+              height: 68,
               borderRadius: 42,
               backgroundColor: tokens.colors.dangerSoft,
               alignItems: "center",
               justifyContent: "center",
-              marginBottom: 24,
+              marginBottom: tokens.spacing.xl,
             }}
           >
-            <XCircle size={52} color={tokens.colors.danger} />
+            <XCircle size={40} color={tokens.colors.danger} />
           </View>
           <Text
             style={{
               color: tokens.colors.foreground,
-              fontSize: 28,
+              fontSize: tokens.typography.display,
               fontWeight: "700",
               textAlign: "center",
             }}
@@ -191,29 +202,37 @@ export function AuthCallbackScreen({ navigation }: Props) {
           </Text>
           <Text
             style={{
-              marginTop: 10,
+              marginTop: tokens.spacing.compact,
               color: tokens.colors.muted,
-              fontSize: 14,
-              lineHeight: 21,
+              fontSize: tokens.typography.body,
+              lineHeight: tokens.lineHeight.bodyRelaxed,
               textAlign: "center",
               maxWidth: 300,
             }}
           >
             {errorMessage || t("auth.callback.errorFallback")}
           </Text>
-          <View style={{ width: "100%", marginTop: 24, gap: 10 }}>
+          <View
+            style={{ width: "100%", marginTop: tokens.spacing.xl, gap: tokens.spacing.compact }}
+          >
             <GradientButton label={t("auth.callback.goToLogin")} onPress={goToLogin} />
             <Pressable
               onPress={goToWelcome}
               style={{
                 minHeight: 48,
-                borderRadius: 16,
+                borderRadius: tokens.radius.lg,
                 backgroundColor: tokens.colors.surfaceVariant,
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <Text style={{ color: tokens.colors.dark600, fontSize: 15, fontWeight: "700" }}>
+              <Text
+                style={{
+                  color: tokens.colors.dark600,
+                  fontSize: tokens.typography.control,
+                  fontWeight: "700",
+                }}
+              >
                 {t("auth.callback.goToHome")}
               </Text>
             </Pressable>

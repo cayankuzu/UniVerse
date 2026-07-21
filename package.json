@@ -1,7 +1,7 @@
 {
   "name": "ogrencisosyalagi-mobile",
   "private": true,
-  "version": "1.0.127",
+  "version": "1.0.128",
   "expo": {
     "doctor": {
       "appConfigFieldsNotSyncedCheck": {
@@ -36,6 +36,7 @@
     "guard:no-onboarding-leak": "node ./utils/guards/check-onboarding-mock.cjs",
     "guard:runtime-hygiene": "node ./utils/guards/check-runtime-hygiene.cjs",
     "guard:performance-contract": "node ./utils/guards/check-performance-contract.cjs",
+    "guard:ui-system": "node ./utils/guards/check-ui-system.cjs",
     "guard:server-route-size": "node ./utils/guards/check-server-route-size.cjs",
     "guard:security-mobile": "node ./utils/guards/check-security-mobile.cjs",
     "guard:secure-upload": "node ./utils/guards/check-secure-upload-state-machine.cjs",
@@ -52,7 +53,7 @@
     "guard:release-hardening": "node ./utils/guards/check-release-hardening.cjs",
     "guard:native-config-materialize": "node ./utils/guards/check-materialize-native-config.cjs",
     "guard:utf8": "node ./utils/guards/check-utf8-mojibake.cjs",
-    "check": "npm run check:types && npm run guard:max-lines && npm run guard:architecture-boundaries && npm run guard:no-legacy-hooks && npm run guard:no-onboarding-leak && npm run guard:runtime-hygiene && npm run guard:performance-contract && npm run guard:server-route-size && npm run guard:security-mobile && npm run guard:secure-upload && npm run guard:diff-coverage:self-test && npm run guard:native-config-materialize && npm run guard:utf8",
+    "check": "npm run check:types && npm run guard:max-lines && npm run guard:architecture-boundaries && npm run guard:no-legacy-hooks && npm run guard:no-onboarding-leak && npm run guard:runtime-hygiene && npm run guard:performance-contract && npm run guard:ui-system && npm run guard:server-route-size && npm run guard:security-mobile && npm run guard:secure-upload && npm run guard:diff-coverage:self-test && npm run guard:native-config-materialize && npm run guard:utf8",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --cache --cache-location .eslintcache --max-warnings=0",
     "format:check": "node ./utils/guards/check-prettier-changed.cjs",
     "format:check:all": "node ./utils/guards/check-prettier-all.cjs",
@@ -89,6 +90,7 @@
     "deploy:supabase": "node ./utils/ops/deploy-supabase-functions.cjs --all"
   },
   "dependencies": {
+    "@expo-google-fonts/inter": "^0.4.2",
     "@hookform/resolvers": "^5.2.2",
     "@noble/hashes": "2.2.0",
     "@react-native-async-storage/async-storage": "^2.2.0",
@@ -103,12 +105,14 @@
     "@tanstack/react-query": "^5.90.21",
     "@tanstack/react-query-persist-client": "^5.90.22",
     "expo": "~55.0.28",
+    "expo-asset": "~55.0.18",
     "expo-camera": "~55.0.21",
     "expo-clipboard": "~55.0.15",
     "expo-constants": "~55.0.17",
     "expo-dev-client": "~55.0.37",
     "expo-file-system": "~55.0.24",
     "expo-font": "~55.0.8",
+    "expo-haptics": "~55.0.16",
     "expo-image": "~55.0.11",
     "expo-image-manipulator": "~55.0.19",
     "expo-image-picker": "~55.0.22",

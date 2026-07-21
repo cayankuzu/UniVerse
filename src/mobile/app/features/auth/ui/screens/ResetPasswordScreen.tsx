@@ -1,5 +1,6 @@
 import React from "react";
-import { Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { CheckCircle, Lock } from "lucide-react-native";
@@ -32,9 +33,16 @@ export function ResetPasswordScreen({ navigation }: Props) {
         style={{ flex: 1, backgroundColor: tokens.colors.background }}
         edges={["top", "bottom"]}
       >
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", gap: 12 }}>
-          <Lock size={34} color={tokens.colors.primary} strokeWidth={1.5} />
-          <Text style={{ color: tokens.colors.muted, fontSize: 14 }}>
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+            gap: tokens.spacing.sm,
+          }}
+        >
+          <Lock size={tokens.iconSize["3xl"]} color={tokens.colors.primary} strokeWidth={1.5} />
+          <Text style={{ color: tokens.colors.muted, fontSize: tokens.typography.body }}>
             {t("auth.password.reset.checking")}
           </Text>
           <AuthBrandFooter />
@@ -50,25 +58,30 @@ export function ResetPasswordScreen({ navigation }: Props) {
         edges={["top", "bottom"]}
       >
         <View
-          style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 24 }}
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+            paddingHorizontal: tokens.spacing.xl,
+          }}
         >
           <View
             style={{
-              width: 80,
-              height: 80,
-              borderRadius: 24,
-              backgroundColor: "#f0fdf4",
+              width: 64,
+              height: 64,
+              borderRadius: tokens.radius["2xl"],
+              backgroundColor: tokens.colors.successSurface,
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <CheckCircle size={48} color="#22c55e" strokeWidth={1.5} />
+            <CheckCircle size={36} color={tokens.colors.successDark} strokeWidth={1.5} />
           </View>
           <Text
             style={{
-              marginTop: 24,
+              marginTop: tokens.spacing.xl,
               color: tokens.colors.foreground,
-              fontSize: 24,
+              fontSize: tokens.typography.heading,
               fontWeight: "700",
               textAlign: "center",
             }}
@@ -77,16 +90,16 @@ export function ResetPasswordScreen({ navigation }: Props) {
           </Text>
           <Text
             style={{
-              marginTop: 10,
+              marginTop: tokens.spacing.compact,
               color: tokens.colors.muted,
-              fontSize: 14,
-              lineHeight: 21,
+              fontSize: tokens.typography.body,
+              lineHeight: tokens.lineHeight.bodyRelaxed,
               textAlign: "center",
             }}
           >
             {t("auth.password.reset.successSubtitle")}
           </Text>
-          <View style={{ marginTop: 24, width: "100%" }}>
+          <View style={{ marginTop: tokens.spacing.xl, width: "100%" }}>
             <GradientButton label={t("auth.login.submit")} onPress={goToLogin} />
           </View>
           <AuthBrandFooter />
@@ -103,17 +116,17 @@ export function ResetPasswordScreen({ navigation }: Props) {
           style={{
             flexDirection: "row",
             alignItems: "center",
-            gap: 12,
-            paddingHorizontal: 20,
-            paddingTop: 8,
-            paddingBottom: 8,
+            gap: tokens.spacing.sm,
+            paddingHorizontal: tokens.spacing.lg,
+            paddingTop: tokens.spacing.xs,
+            paddingBottom: tokens.spacing.xs,
           }}
         >
           <View
             style={{
               width: 40,
               height: 40,
-              borderRadius: 12,
+              borderRadius: tokens.radius.md,
               backgroundColor: tokens.colors.primary,
               alignItems: "center",
               justifyContent: "center",
@@ -121,17 +134,29 @@ export function ResetPasswordScreen({ navigation }: Props) {
           >
             <Lock size={20} color={tokens.colors.surface} strokeWidth={1.5} />
           </View>
-          <Text style={{ color: tokens.colors.foreground, fontSize: 18, fontWeight: "700" }}>
+          <Text
+            style={{
+              color: tokens.colors.foreground,
+              fontSize: tokens.typography.cardTitle,
+              fontWeight: "700",
+            }}
+          >
             {t("auth.password.reset.title")}
           </Text>
         </View>
       }
       contentContainerStyle={{
-        paddingHorizontal: 24,
-        paddingVertical: 24,
+        paddingHorizontal: tokens.spacing.xl,
+        paddingVertical: tokens.spacing.xl,
       }}
     >
-      <Text style={{ color: tokens.colors.muted, fontSize: 14, marginBottom: 20 }}>
+      <Text
+        style={{
+          color: tokens.colors.muted,
+          fontSize: tokens.typography.body,
+          marginBottom: tokens.spacing.lg,
+        }}
+      >
         {t("auth.password.reset.subtitle")}
       </Text>
 
@@ -152,7 +177,7 @@ export function ResetPasswordScreen({ navigation }: Props) {
       <AppTextField
         autoCapitalize="none"
         autoComplete="new-password"
-        containerStyle={{ marginTop: 12 }}
+        containerStyle={{ marginTop: tokens.spacing.sm }}
         control={control}
         label={t("auth.password.reset.confirm")}
         name="confirmPassword"
@@ -163,16 +188,22 @@ export function ResetPasswordScreen({ navigation }: Props) {
       {errors.root?.message ? (
         <View
           style={{
-            borderRadius: 12,
+            borderRadius: tokens.radius.md,
             borderWidth: 1,
-            borderColor: "#fecaca",
-            backgroundColor: "#fef2f2",
-            paddingHorizontal: 12,
-            paddingVertical: 10,
-            marginTop: 12,
+            borderColor: tokens.colors.dangerBorder,
+            backgroundColor: tokens.colors.dangerSoft,
+            paddingHorizontal: tokens.spacing.sm,
+            paddingVertical: tokens.spacing.compact,
+            marginTop: tokens.spacing.sm,
           }}
         >
-          <Text style={{ color: "#dc2626", fontSize: 13, fontWeight: "500" }}>
+          <Text
+            style={{
+              color: tokens.colors.danger,
+              fontSize: tokens.typography.label,
+              fontWeight: "500",
+            }}
+          >
             {errors.root.message}
           </Text>
         </View>

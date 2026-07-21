@@ -1,5 +1,6 @@
 import React from "react";
-import { Pressable, Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { Pressable, View } from "react-native";
 import { ArrowLeft, CheckCheck } from "lucide-react-native";
 import { AppScrollView as ScrollView } from "../../../../shared/components";
 import { t } from "../../../../shared/i18n";
@@ -35,40 +36,53 @@ export const NotificationsHeader = React.memo(function NotificationsHeader({
         borderBottomWidth: 1,
         borderBottomColor: tokens.colors.border,
         backgroundColor: tokens.colors.surface,
-        paddingHorizontal: 14,
-        paddingTop: 8,
-        paddingBottom: 10,
-        gap: 8,
+        paddingHorizontal: tokens.spacing.smPlus,
+        paddingTop: tokens.spacing.xs,
+        paddingBottom: tokens.spacing.compact,
+        gap: tokens.spacing.xs,
       }}
     >
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.xs }}>
         <Pressable
           accessibilityLabel={t("notifications.a11y.back")}
           accessibilityRole="button"
           onPress={onBack}
           style={{
-            width: tokens.minHeight.touchTarget,
-            height: tokens.minHeight.touchTarget,
-            borderRadius: 12,
+            width: tokens.minHeight.header,
+            height: tokens.minHeight.header,
+            borderRadius: tokens.radius.md,
             backgroundColor: tokens.colors.surfaceVariant,
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <ArrowLeft size={20} color={tokens.colors.iconMuted} />
+          <ArrowLeft size={tokens.iconSize.xl} color={tokens.colors.iconMuted} />
         </Pressable>
-        <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 6 }}>
-          <Text style={{ color: tokens.colors.foreground, fontSize: 20, fontWeight: "700" }}>
+        <View
+          style={{
+            flex: 1,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: tokens.spacing.xsMinus,
+          }}
+        >
+          <Text
+            style={{
+              color: tokens.colors.foreground,
+              fontSize: tokens.typography.sectionTitle,
+              fontWeight: "700",
+            }}
+          >
             {t("notifications.title")}
           </Text>
           {unreadCount > 0 ? (
             <View
               style={{
                 minWidth: 22,
-                borderRadius: 999,
-                backgroundColor: tokens.colors.danger,
-                paddingHorizontal: 6,
-                paddingVertical: 2,
+                borderRadius: tokens.radius.pill,
+                backgroundColor: tokens.colors.primary,
+                paddingHorizontal: tokens.spacing.xsMinus,
+                paddingVertical: tokens.spacing.micro,
               }}
             >
               <Text
@@ -91,15 +105,15 @@ export const NotificationsHeader = React.memo(function NotificationsHeader({
             onPress={onMarkAllRead}
             disabled={markAllPending}
             style={{
-              minHeight: tokens.minHeight.touchTarget,
-              borderRadius: 999,
+              minHeight: tokens.minHeight.buttonSm,
+              borderRadius: tokens.radius.pill,
               backgroundColor: tokens.colors.primarySofter,
               borderWidth: 1,
               borderColor: tokens.colors.primaryBorder,
               flexDirection: "row",
               alignItems: "center",
-              gap: 5,
-              paddingHorizontal: 10,
+              gap: tokens.spacing.xxsPlus,
+              paddingHorizontal: tokens.spacing.compact,
               opacity: markAllPending ? 0.65 : 1,
             }}
           >
@@ -120,7 +134,10 @@ export const NotificationsHeader = React.memo(function NotificationsHeader({
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 6, paddingHorizontal: 2 }}
+        contentContainerStyle={{
+          gap: tokens.spacing.xsMinus,
+          paddingHorizontal: tokens.spacing.micro,
+        }}
       >
         {visibleFilters.map((item) => {
           const Icon = item.icon;
@@ -133,24 +150,28 @@ export const NotificationsHeader = React.memo(function NotificationsHeader({
               key={item.key}
               onPress={() => onSelectFilter(item.key)}
               style={{
-                minHeight: tokens.minHeight.touchTarget,
-                borderRadius: 999,
-                paddingHorizontal: 12,
-                backgroundColor: active ? tokens.colors.primary : tokens.colors.surfaceVariant,
+                minHeight: tokens.minHeight.chipMd,
+                borderRadius: tokens.radius.pill,
+                paddingHorizontal: tokens.spacing.sm,
+                backgroundColor: active
+                  ? tokens.colors.primarySofter
+                  : tokens.colors.surfaceVariant,
+                borderColor: active ? tokens.colors.primaryBorder : tokens.colors.border,
+                borderWidth: 1,
                 alignItems: "center",
                 justifyContent: "center",
                 flexDirection: "row",
-                gap: 5,
+                gap: tokens.spacing.xxsPlus,
               }}
             >
               <Icon
                 size={13}
-                color={active ? tokens.colors.surface : item.color}
+                color={active ? tokens.colors.primary : item.color}
                 strokeWidth={1.8}
               />
               <Text
                 style={{
-                  color: active ? tokens.colors.surface : tokens.colors.muted,
+                  color: active ? tokens.colors.primary : tokens.colors.muted,
                   fontSize: tokens.typography.caption,
                   fontWeight: "700",
                 }}

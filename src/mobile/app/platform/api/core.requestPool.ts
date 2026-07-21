@@ -24,7 +24,7 @@ let activeApiRequestCount = 0;
 const requestSlotQueue: RequestSlotWaiter[] = [];
 
 function createQueuedRequestAbortError() {
-  const error = new Error("Istek kuyrukta iptal edildi.");
+  const error = new Error("İstek kuyrukta iptal edildi.");
   error.name = "AbortError";
   return error;
 }

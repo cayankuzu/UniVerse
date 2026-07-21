@@ -1,12 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Platform,
-  Pressable,
-  Text,
-  View,
-  useWindowDimensions,
-} from "react-native";
+import { AppText as Text } from "../components/AppText";
+import { ActivityIndicator, Platform, Pressable, View, useWindowDimensions } from "react-native";
 import * as MediaLibrary from "expo-media-library";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppFlatList } from "../components/AppFlatList";

@@ -1,12 +1,14 @@
 import { LinearGradient } from "expo-linear-gradient";
+import { StatusBar } from "expo-status-bar";
 import { ArrowRight, Calendar, GraduationCap, TrendingUp, Users } from "lucide-react-native";
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../../../app-shell/navigation/types";
 import { AppScrollView as ScrollView, GradientButton } from "../../../../shared/components";
-import { tokens } from "../../../../shared/theme";
+import { tokens, withAlpha } from "../../../../shared/theme";
 import { useTranslation } from "../../../../shared/i18n";
 import { AuthBrandFooter } from "../components/AuthBrandFooter";
 import { AuthLegalConsent } from "../components/AuthLegalConsent";
@@ -40,16 +42,17 @@ export function WelcomeScreen({ navigation }: Props) {
   ];
 
   const handleNavigate = (route: "Login" | "Register") => {
-    if (!acceptedLegalTerms) return;
+    if (route === "Register" && !acceptedLegalTerms) return;
     navigation.navigate(route);
   };
 
   return (
     <View style={{ flex: 1, backgroundColor: tokens.colors.surface }}>
+      <StatusBar backgroundColor={tokens.colors.primary} style="light" />
       <LinearGradient
         colors={[tokens.colors.primary, tokens.colors.primaryLight, tokens.colors.primaryDark]}
         style={{
-          paddingHorizontal: 24,
+          paddingHorizontal: tokens.spacing.xl,
           paddingTop: insets.top + 36,
           paddingBottom: 48,
           overflow: "hidden",
@@ -60,10 +63,10 @@ export function WelcomeScreen({ navigation }: Props) {
             position: "absolute",
             right: -40,
             top: -40,
-            width: 160,
-            height: 160,
-            borderRadius: 999,
-            backgroundColor: "rgba(255,255,255,0.12)",
+            width: 132,
+            height: 132,
+            borderRadius: tokens.radius.pill,
+            backgroundColor: withAlpha(tokens.colors.onMedia, 0.12),
           }}
         />
         <View
@@ -71,41 +74,45 @@ export function WelcomeScreen({ navigation }: Props) {
             position: "absolute",
             left: -20,
             bottom: 24,
-            width: 96,
-            height: 96,
-            borderRadius: 999,
-            backgroundColor: "rgba(255,255,255,0.12)",
+            width: 78,
+            height: 78,
+            borderRadius: tokens.radius.pill,
+            backgroundColor: withAlpha(tokens.colors.onMedia, 0.12),
           }}
         />
         <View style={{ alignItems: "center" }}>
           <View
             style={{
-              width: 64,
-              height: 64,
-              borderRadius: 18,
-              backgroundColor: "rgba(255,255,255,0.22)",
+              width: 52,
+              height: 52,
+              borderRadius: tokens.radius.card,
+              backgroundColor: withAlpha(tokens.colors.onMedia, 0.22),
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <GraduationCap size={30} color={tokens.colors.surface} strokeWidth={1.5} />
+            <GraduationCap
+              size={tokens.iconSize["2xl"]}
+              color={tokens.colors.surface}
+              strokeWidth={1.5}
+            />
           </View>
           <Text
             style={{
-              marginTop: 18,
+              marginTop: tokens.spacing.mdPlus,
               color: tokens.colors.surface,
-              fontSize: 32,
+              fontSize: tokens.typography.hero,
               fontWeight: "800",
-              letterSpacing: -0.5,
+              letterSpacing: tokens.letterSpacing.displayTight,
             }}
           >
             {APP_NAME}
           </Text>
           <Text
             style={{
-              marginTop: 6,
+              marginTop: tokens.spacing.xsMinus,
               color: tokens.colors.primarySoft,
-              fontSize: 14,
+              fontSize: tokens.typography.body,
               fontWeight: "500",
               textAlign: "center",
             }}
@@ -118,10 +125,10 @@ export function WelcomeScreen({ navigation }: Props) {
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
-          paddingBottom: 24,
-          paddingHorizontal: 20,
-          paddingTop: 24,
-          gap: 10,
+          paddingBottom: tokens.spacing.xl,
+          paddingHorizontal: tokens.spacing.lg,
+          paddingTop: tokens.spacing.xl,
+          gap: tokens.spacing.compact,
         }}
       >
         {features.map((feature) => (
@@ -130,20 +137,19 @@ export function WelcomeScreen({ navigation }: Props) {
             style={{
               flexDirection: "row",
               alignItems: "center",
-              gap: 14,
-              borderRadius: 16,
+              gap: tokens.spacing.smPlus,
+              borderRadius: tokens.radius.lg,
               borderWidth: 1,
-              borderColor: "rgba(15,23,42,0.06)",
+              borderColor: withAlpha(tokens.colors.foreground, 0.06),
               backgroundColor: tokens.colors.surface,
-              padding: 16,
-              ...tokens.shadow.sm,
+              padding: tokens.spacing.md,
             }}
           >
             <View
               style={{
                 width: 48,
                 height: 48,
-                borderRadius: 12,
+                borderRadius: tokens.radius.md,
                 alignItems: "center",
                 justifyContent: "center",
                 backgroundColor: feature.bg,
@@ -152,10 +158,22 @@ export function WelcomeScreen({ navigation }: Props) {
               {feature.icon}
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 16, fontWeight: "700", color: tokens.colors.foreground }}>
+              <Text
+                style={{
+                  fontSize: tokens.typography.subtitle,
+                  fontWeight: "700",
+                  color: tokens.colors.foreground,
+                }}
+              >
                 {feature.title}
               </Text>
-              <Text style={{ fontSize: 13, color: tokens.colors.muted, marginTop: 2 }}>
+              <Text
+                style={{
+                  fontSize: tokens.typography.label,
+                  color: tokens.colors.muted,
+                  marginTop: tokens.spacing.micro,
+                }}
+              >
                 {feature.desc}
               </Text>
             </View>
@@ -169,7 +187,11 @@ export function WelcomeScreen({ navigation }: Props) {
       </ScrollView>
 
       <View
-        style={{ paddingHorizontal: 20, paddingBottom: Math.max(insets.bottom + 16, 24), gap: 10 }}
+        style={{
+          paddingHorizontal: tokens.spacing.lg,
+          paddingBottom: Math.max(insets.bottom + 16, 24),
+          gap: tokens.spacing.compact,
+        }}
       >
         <GradientButton
           disabled={!acceptedLegalTerms}
@@ -179,7 +201,6 @@ export function WelcomeScreen({ navigation }: Props) {
           icon={<ArrowRight size={16} color={tokens.colors.surface} />}
         />
         <GradientButton
-          disabled={!acceptedLegalTerms}
           label={t("auth.login.submit")}
           onPress={() => handleNavigate("Login")}
           variant="secondary"

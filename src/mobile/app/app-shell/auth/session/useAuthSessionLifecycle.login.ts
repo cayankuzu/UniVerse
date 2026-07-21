@@ -10,6 +10,7 @@ import { buildDemoAuthState, DEMO_CREDENTIALS } from "./authFixtureSeed";
 import {
   LOGIN_PROFILE_SYNC_WAIT_MS,
   LOGIN_STEP_TIMEOUT_MS,
+  shouldRetryHydrationWithRefresh,
   toErrorMessage,
   withTimeout,
 } from "./authContext.shared";
@@ -67,10 +68,18 @@ export function createLoginHandler(params: CreateLoginHandlerParams) {
           LOGIN_PROFILE_SYNC_WAIT_MS,
           "login-profile-sync-wait-timeout",
         ).catch((error) => {
+          const isSessionFailure = shouldRetryHydrationWithRefresh(error);
           if (
             toErrorMessage(error) === "login-profile-sync-wait-timeout" ||
-            isRetryableQueryError(error)
+            isRetryableQueryError(error) ||
+            !isSessionFailure
           ) {
+            reportRecoverableAuthSessionError(
+              error,
+              "auth-login-profile-hydration-deferred",
+              "Profile hydration was deferred after login.",
+              "login-profile-sync",
+            );
             params.startSessionHydrationInBackground(session, "login-profile-sync-retry");
             return;
           }

@@ -1,5 +1,6 @@
 import { memo } from "react";
-import { Pressable, Text } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { Pressable } from "react-native";
 import { Ban, Flag } from "lucide-react-native";
 import { tokens } from "../../../../shared/theme";
 import { AppModalHost } from "../../../../shared/components";
@@ -14,7 +15,7 @@ type Props = {
 };
 
 const MENU_ACTIONS = [
-  { key: "report", label: "Şikayet Et", icon: <Flag size={16} color={tokens.colors.amber} /> },
+  { key: "report", label: "Şikâyet Et", icon: <Flag size={16} color={tokens.colors.amber} /> },
   { key: "block", label: "", icon: <Ban size={16} color={tokens.colors.danger} /> },
 ] as const;
 
@@ -52,15 +53,15 @@ export const ProfileActionMenu = memo(function ProfileActionMenu({
           flex: 1,
           backgroundColor: tokens.colors.overlay,
           justifyContent: "flex-end",
-          paddingHorizontal: 14,
-          paddingTop: 14,
+          paddingHorizontal: tokens.spacing.smPlus,
+          paddingTop: tokens.spacing.smPlus,
           paddingBottom: Math.max(bottomPadding + 14, 14),
         }}
       >
         <Pressable
           onPress={(event) => event.stopPropagation()}
           style={{
-            borderRadius: 18,
+            borderRadius: tokens.radius.card,
             overflow: "hidden",
             backgroundColor: tokens.colors.surface,
             borderWidth: 1,
@@ -76,10 +77,10 @@ export const ProfileActionMenu = memo(function ProfileActionMenu({
               }}
               style={{
                 minHeight: tokens.minHeight.buttonLg,
-                paddingHorizontal: 14,
+                paddingHorizontal: tokens.spacing.smPlus,
                 flexDirection: "row",
                 alignItems: "center",
-                gap: 10,
+                gap: tokens.spacing.compact,
                 borderBottomWidth: index === menuItems.length - 1 ? 0 : 1,
                 borderBottomColor: tokens.colors.border,
               }}

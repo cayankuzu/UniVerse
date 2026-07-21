@@ -1,8 +1,9 @@
 import { Clock3, Play } from "lucide-react-native";
+import { AppText as Text } from "../components/AppText";
 import { useEffect, useState } from "react";
 import { Image as ExpoImage } from "expo-image";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
-import { tokens } from "../../shared/theme";
+import { ActivityIndicator, Pressable, View } from "react-native";
+import { tokens, withAlpha } from "../../shared/theme";
 import { t } from "../../shared/i18n";
 import type { PickerMediaLibraryAsset } from "./mediaPicker";
 import { formatMediaDuration } from "./mediaVideoUtils";
@@ -100,7 +101,7 @@ export function MediaTile({
                   left: 0,
                   alignItems: "center",
                   justifyContent: "center",
-                  backgroundColor: "rgba(238,243,255,0.72)",
+                  backgroundColor: withAlpha(tokens.colors.coolSurface, 0.72),
                 }}
               >
                 <ActivityIndicator color={tokens.colors.primary} />
@@ -140,7 +141,7 @@ export function MediaTile({
             style={{
               width: 34,
               height: 34,
-              borderRadius: 999,
+              borderRadius: tokens.radius.pill,
               backgroundColor: tokens.colors.overlay,
               alignItems: "center",
               justifyContent: "center",
@@ -155,7 +156,7 @@ export function MediaTile({
           position: "absolute",
           left: tokens.spacing.xs,
           top: tokens.spacing.xs,
-          borderRadius: 999,
+          borderRadius: tokens.radius.pill,
           backgroundColor: tokens.colors.overlay,
           paddingHorizontal: tokens.spacing.xs,
           paddingVertical: tokens.spacing.xxs,
@@ -180,7 +181,7 @@ export function MediaTile({
             position: "absolute",
             right: tokens.spacing.xs,
             bottom: tokens.spacing.xs,
-            borderRadius: 999,
+            borderRadius: tokens.radius.pill,
             backgroundColor: tokens.colors.overlay,
             paddingHorizontal: tokens.spacing.sm,
             paddingVertical: tokens.spacing.xxs,
@@ -211,13 +212,19 @@ export function MediaTile({
             top: tokens.spacing.xs,
             width: 24,
             height: 24,
-            borderRadius: 999,
+            borderRadius: tokens.radius.pill,
             backgroundColor: tokens.colors.primary,
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <Text style={{ color: tokens.colors.surface, fontSize: 11, fontWeight: "800" }}>
+          <Text
+            style={{
+              color: tokens.colors.surface,
+              fontSize: tokens.typography.tiny,
+              fontWeight: "800",
+            }}
+          >
             {selectedNumber}
           </Text>
         </View>

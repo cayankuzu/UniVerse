@@ -2,9 +2,9 @@ import { supabase } from "../../platform/supabase";
 import { createTrackedAuthRedirectUrl } from "../../platform/security/authRedirectState";
 import { AuthAPI } from "./auth.api";
 
-const PASSWORD_RESET_NOT_FOUND_MESSAGE = "Bu e-posta adresi ile kayitli hesap bulunamadi.";
+const PASSWORD_RESET_NOT_FOUND_MESSAGE = "Bu e-posta adresi ile kayıtlı hesap bulunamadı.";
 const PASSWORD_RESET_CHECK_FAILED_MESSAGE =
-  "Sifre sifirlama istegi su anda dogrulanamiyor. Lutfen tekrar deneyin.";
+  "Şifre sıfırlama isteği şu anda doğrulanamıyor. Lütfen tekrar deneyin.";
 
 export function getPasswordResetNotFoundMessage() {
   return PASSWORD_RESET_NOT_FOUND_MESSAGE;

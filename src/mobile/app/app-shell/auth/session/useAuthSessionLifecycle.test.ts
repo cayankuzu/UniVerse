@@ -118,7 +118,7 @@ describe("useAuthSessionLifecycle", () => {
     jest.restoreAllMocks();
   });
 
-  it("rolls auth state back when profile hydration fails after sign in", async () => {
+  it("keeps auth state when profile hydration fails after sign in", async () => {
     const setAccountType = jest.fn();
     const setBlockedUsers = jest.fn();
     const setIsDemoMode = jest.fn();
@@ -170,15 +170,13 @@ describe("useAuthSessionLifecycle", () => {
     mockQueryClientClear.mockClear();
 
     await act(async () => {
-      await expect(result.current.login("alice@example.com", "secret")).rejects.toThrow(
-        "Profil bulunamadı",
-      );
+      await expect(result.current.login("alice@example.com", "secret")).resolves.toBeUndefined();
     });
 
-    expect(mockHardSignOut).toHaveBeenCalledWith("sign-out");
-    expect(setIsLoggedIn).toHaveBeenNthCalledWith(1, true);
-    expect(setIsLoggedIn).toHaveBeenLastCalledWith(false);
-    expect(mockQueryClientClear).toHaveBeenCalledTimes(1);
+    expect(mockHardSignOut).not.toHaveBeenCalled();
+    expect(setIsLoggedIn).toHaveBeenCalledWith(true);
+    expect(setIsLoggedIn).not.toHaveBeenCalledWith(false);
+    expect(mockQueryClientClear).not.toHaveBeenCalled();
   });
 
   it("continues session hydration in the background after a hydrate timeout", async () => {
@@ -433,13 +431,17 @@ describe("useAuthSessionLifecycle", () => {
     );
   });
 
-  it("logs sign-out cleanup failures while preserving auth rollback after login hydration errors", async () => {
+  it("logs sign-out cleanup failures while rolling back an invalid session", async () => {
     const setIsLoggedIn = jest.fn();
     const session = createSession();
 
     mockSignInWithPassword.mockResolvedValue({
       data: { session },
       error: null,
+    });
+    mockRefreshSession.mockResolvedValue({
+      data: { session: null },
+      error: new Error("invalid refresh token"),
     });
     mockHardSignOut.mockRejectedValue(new Error("cleanup failed"));
 
@@ -448,7 +450,7 @@ describe("useAuthSessionLifecycle", () => {
       activeHydrationKeyRef: { current: "" },
       activeHydrationPromiseRef: { current: null },
       clearDemoStorage: jest.fn().mockResolvedValue(undefined),
-      fetchProfile: jest.fn().mockRejectedValue(new Error("Profil bulunamadı")),
+      fetchProfile: jest.fn().mockRejectedValue(new Error("invalid jwt")),
       hydratedSessionKey: { current: "" },
       isDemoRef: { current: false },
       isLoading: false,
@@ -472,7 +474,7 @@ describe("useAuthSessionLifecycle", () => {
 
     await act(async () => {
       await expect(result.current.login("alice@example.com", "secret")).rejects.toThrow(
-        "Profil bulunamadı",
+        "invalid refresh token",
       );
     });
 

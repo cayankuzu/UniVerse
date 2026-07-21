@@ -18,10 +18,17 @@ function contrast(foreground: string, background: string) {
 }
 
 describe("UI tokens", () => {
-  it("keeps the product touch target at the Android/iOS safe minimum", () => {
+  it("keeps compact controls inside an accessible 48dp interaction target", () => {
     expect(tokens.minHeight.touchTarget).toBeGreaterThanOrEqual(48);
-    expect(tokens.minHeight.buttonSm).toBeGreaterThanOrEqual(48);
-    expect(tokens.minHeight.row).toBeGreaterThanOrEqual(48);
+    expect(tokens.minHeight.buttonSm).toBeLessThan(tokens.minHeight.touchTarget);
+    expect(tokens.minHeight.buttonLg).toBeLessThanOrEqual(44);
+    expect(tokens.minHeight.row).toBeGreaterThanOrEqual(44);
+  });
+
+  it("uses the compact two-step product density scale", () => {
+    expect(tokens.typography.body).toBe(12);
+    expect(tokens.spacing.md).toBe(12);
+    expect(tokens.iconSize.xl).toBe(18);
   });
 
   it("keeps semantic text colors above WCAG normal-text contrast on white", () => {
@@ -30,5 +37,11 @@ describe("UI tokens", () => {
     expect(contrast(tokens.colors.primary, tokens.colors.surface)).toBeGreaterThanOrEqual(4.5);
     expect(contrast(tokens.colors.danger, tokens.colors.surface)).toBeGreaterThanOrEqual(4.5);
     expect(contrast(tokens.colors.successText, tokens.colors.surface)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("defines complete typography metrics for reusable UI roles", () => {
+    expect(tokens.lineHeight.body).toBeGreaterThan(tokens.typography.body);
+    expect(tokens.lineHeight.label).toBeGreaterThan(tokens.typography.label);
+    expect(tokens.opacity.disabled).toBeLessThan(tokens.opacity.muted);
   });
 });

@@ -78,7 +78,7 @@ function createExpoTusFileReader() {
       const uri = String(input?.uri || "").trim();
       const file = new ExpoFile(uri);
       if (!uri || !file.exists || file.size <= 0) {
-        throw new Error("Resumable upload medya dosyasi okunamadi.");
+        throw new Error("Sürdürülebilir yüklemede medya dosyası okunamadı.");
       }
       const handle = file.open();
       activeHandles.add(handle);

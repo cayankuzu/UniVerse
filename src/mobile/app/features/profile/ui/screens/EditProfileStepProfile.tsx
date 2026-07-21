@@ -1,7 +1,8 @@
 import React from "react";
-import { Pressable, Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { Pressable, View } from "react-native";
 import { Camera, User, Users } from "lucide-react-native";
-import { tokens } from "../../../../shared/theme";
+import { tokens, withAlpha } from "../../../../shared/theme";
 import { AppImage, TextField } from "../../../../shared/components";
 import { TEXT_LIMITS } from "../../../../shared/validation/textLimits";
 
@@ -37,7 +38,7 @@ export function EditProfileStepProfile({
         <Text
           style={{
             color: tokens.colors.dark700,
-            fontSize: 13,
+            fontSize: tokens.typography.label,
             fontWeight: tokens.fontWeight.semibold,
           }}
         >
@@ -46,8 +47,8 @@ export function EditProfileStepProfile({
         <Pressable
           onPress={onPickCover}
           style={{
-            height: 132,
-            borderRadius: 14,
+            height: 108,
+            borderRadius: tokens.radius.control,
             borderWidth: 1,
             borderColor: tokens.colors.border,
             backgroundColor: tokens.colors.border,
@@ -69,12 +70,12 @@ export function EditProfileStepProfile({
                   right: tokens.spacing.xs,
                   bottom: tokens.spacing.xs,
                   borderRadius: tokens.radius.sm,
-                  backgroundColor: "rgba(0,0,0,0.55)",
-                  paddingHorizontal: 9,
-                  paddingVertical: 4,
+                  backgroundColor: withAlpha(tokens.colors.mediaBlack, 0.55),
+                  paddingHorizontal: tokens.spacing.xsPlus,
+                  paddingVertical: tokens.spacing.xxs,
                   flexDirection: "row",
                   alignItems: "center",
-                  gap: 4,
+                  gap: tokens.spacing.xxs,
                 }}
               >
                 <Camera size={tokens.iconSize.xs} color={tokens.colors.surface} />
@@ -90,9 +91,11 @@ export function EditProfileStepProfile({
               </View>
             </>
           ) : (
-            <View style={{ alignItems: "center", gap: 6 }}>
-              <Camera size={26} color={tokens.colors.muted} />
-              <Text style={{ color: tokens.colors.muted, fontSize: 13 }}>Kapak fotoğrafı ekle</Text>
+            <View style={{ alignItems: "center", gap: tokens.spacing.xsMinus }}>
+              <Camera size={tokens.iconSize["2xl"]} color={tokens.colors.muted} />
+              <Text style={{ color: tokens.colors.muted, fontSize: tokens.typography.label }}>
+                Kapak fotoğrafı ekle
+              </Text>
             </View>
           )}
         </Pressable>
@@ -102,7 +105,7 @@ export function EditProfileStepProfile({
         <Text
           style={{
             color: tokens.colors.dark700,
-            fontSize: 13,
+            fontSize: tokens.typography.label,
             fontWeight: tokens.fontWeight.semibold,
           }}
         >
@@ -111,9 +114,9 @@ export function EditProfileStepProfile({
         <Pressable
           onPress={onPickProfile}
           style={{
-            width: 84,
-            height: 84,
-            borderRadius: 18,
+            width: 68,
+            height: 68,
+            borderRadius: tokens.radius.card,
             borderWidth: 2,
             borderColor: tokens.colors.surface,
             backgroundColor: tokens.colors.border,
@@ -123,11 +126,11 @@ export function EditProfileStepProfile({
           }}
         >
           {profileImageUri ? (
-            <AppImage uri={profileImageUri} contentFit="cover" style={{ width: 84, height: 84 }} />
+            <AppImage uri={profileImageUri} contentFit="cover" style={{ width: 68, height: 68 }} />
           ) : isClub ? (
-            <Users size={30} color={tokens.colors.muted} />
+            <Users size={tokens.iconSize["2xl"]} color={tokens.colors.muted} />
           ) : (
-            <User size={30} color={tokens.colors.muted} />
+            <User size={tokens.iconSize["2xl"]} color={tokens.colors.muted} />
           )}
 
           <View
@@ -135,8 +138,8 @@ export function EditProfileStepProfile({
               position: "absolute",
               right: 0,
               bottom: 0,
-              width: 24,
-              height: 24,
+              width: 20,
+              height: 20,
               borderRadius: tokens.radius.pill,
               backgroundColor: tokens.colors.primary,
               alignItems: "center",

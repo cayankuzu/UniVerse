@@ -23,24 +23,24 @@ export const TABS: Array<{
     key: "albums",
     label: t("search.tab.albums"),
     icon: <ImageIcon size={13} color={C.muted} />,
-    activeIcon: <ImageIcon size={13} color={tokens.colors.surface} />,
+    activeIcon: <ImageIcon size={13} color={tokens.colors.primary} />,
   },
   {
     key: "events",
     label: t("search.tab.events"),
     icon: <Calendar size={13} color={C.muted} />,
-    activeIcon: <Calendar size={13} color={tokens.colors.surface} />,
+    activeIcon: <Calendar size={13} color={tokens.colors.primary} />,
   },
   {
     key: "clubs",
     label: t("search.tab.clubs"),
     icon: <Users size={13} color={C.muted} />,
-    activeIcon: <Users size={13} color={tokens.colors.surface} />,
+    activeIcon: <Users size={13} color={tokens.colors.primary} />,
   },
   {
     key: "students",
     label: t("search.tab.students"),
     icon: <User size={13} color={C.muted} />,
-    activeIcon: <User size={13} color={tokens.colors.surface} />,
+    activeIcon: <User size={13} color={tokens.colors.primary} />,
   },
 ];

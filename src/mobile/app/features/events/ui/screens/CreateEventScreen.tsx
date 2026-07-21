@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo } from "react";
-import { Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../../../../app-shell/auth";
@@ -102,7 +103,13 @@ export function CreateEventScreen({ navigation }: Props) {
         horizontalPadding={0}
         onBack={handleBack}
         right={
-          <Text style={{ fontSize: 12, color: tokens.colors.muted, fontWeight: "600" }}>
+          <Text
+            style={{
+              fontSize: tokens.typography.caption,
+              color: tokens.colors.muted,
+              fontWeight: "600",
+            }}
+          >
             {step}/{TOTAL_CREATE_EVENT_STEPS}
           </Text>
         }
@@ -114,7 +121,7 @@ export function CreateEventScreen({ navigation }: Props) {
           backgroundColor: tokens.colors.border,
           marginHorizontal: 0,
           borderRadius: 2,
-          marginBottom: 4,
+          marginBottom: tokens.spacing.xxs,
         }}
       >
         <View
@@ -133,9 +140,9 @@ export function CreateEventScreen({ navigation }: Props) {
         style={{ flex: 1 }}
         contentContainerStyle={{
           paddingHorizontal: 0,
-          paddingTop: 10,
+          paddingTop: tokens.spacing.compact,
           paddingBottom: bottomPadding,
-          gap: 16,
+          gap: tokens.spacing.md,
         }}
         scrollProps={{ keyboardShouldPersistTaps: "handled" }}
         focusRequest={fieldFocusRequest}
@@ -168,18 +175,24 @@ export function CreateEventScreen({ navigation }: Props) {
 
         <View
           style={{
-            marginTop: 4,
-            gap: 8,
+            marginTop: tokens.spacing.xxs,
+            gap: tokens.spacing.xs,
             borderTopWidth: 1,
             borderTopColor: tokens.colors.border,
-            paddingTop: 10,
+            paddingTop: tokens.spacing.compact,
           }}
         >
-          <Text style={{ color: tokens.colors.muted, fontSize: 10 }}>
+          <Text style={{ color: tokens.colors.muted, fontSize: tokens.typography.micro }}>
             {CREATE_EVENT_STEP_LABELS[step - 1]}
           </Text>
           {visibleSubmitError ? (
-            <Text style={{ color: tokens.colors.danger, fontSize: 13, fontWeight: "600" }}>
+            <Text
+              style={{
+                color: tokens.colors.danger,
+                fontSize: tokens.typography.label,
+                fontWeight: "600",
+              }}
+            >
               {visibleSubmitError}
             </Text>
           ) : null}

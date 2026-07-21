@@ -36,7 +36,7 @@ describe("resolveSearchAlbumOpenDecision", () => {
       }),
     ).toEqual({
       kind: "warning",
-      message: "Gizli hesap albumleri arama listesinde gösterilmez.",
+      message: "Gizli hesap albümleri arama listesinde gösterilmez.",
     });
   });
 });

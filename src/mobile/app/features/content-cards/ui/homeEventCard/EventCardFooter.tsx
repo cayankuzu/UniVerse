@@ -1,9 +1,14 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { Heart, Images, MapPin, MessageCircle } from "lucide-react-native";
-import { Text, TouchableOpacity, View } from "react-native";
-import { OverflowActionMenu, type OverflowActionItem } from "../../../../shared/components";
+import { View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import {
+  InstantPressable,
+  OverflowActionMenu,
+  type OverflowActionItem,
+} from "../../../../shared/components";
 import { renderTourAnchor, type TourAnchorRenderer } from "../tourAnchorRenderer";
-import { tokens } from "../../../../shared/theme";
+import { tokens, withAlpha } from "../../../../shared/theme";
 
 interface Props {
   liked: boolean;
@@ -59,7 +64,7 @@ export function EventCardFooter({
   renderTourAnchor: anchorRenderer,
 }: Props) {
   const joinLabel =
-    joinLabelOverride || (joined ? "Katildin" : joinDisabled ? "Takip Gerekli" : "Katil");
+    joinLabelOverride || (joined ? "Katıldın" : joinDisabled ? "Takip Gerekli" : "Katıl");
   const joinPressHandler = joinDisabled ? onJoinDisabledPress || onJoin : onJoin;
   const joinButtonDisabled = !joinPressHandler;
 
@@ -72,9 +77,9 @@ export function EventCardFooter({
           flexDirection: "row",
           alignItems: "center",
           gap: tokens.spacing.xxs,
-          paddingHorizontal: 14,
+          paddingHorizontal: tokens.spacing.smPlus,
           paddingBottom: tokens.spacing.sm,
-          paddingTop: 10,
+          paddingTop: tokens.spacing.compact,
           borderTopWidth: 1,
           borderTopColor: tokens.colors.divider,
           marginTop: tokens.spacing.xs,
@@ -92,23 +97,25 @@ export function EventCardFooter({
             enabled: isTourTarget,
             tourId: "like-button",
             children: (
-              <TouchableOpacity
+              <InstantPressable
                 accessibilityLabel="Etkinlik beğenilerini aç"
                 accessibilityRole="button"
                 hitSlop={tokens.hitSlop.md}
                 onPress={onLike}
                 onLongPress={onLikeLongPress}
                 delayLongPress={420}
+                haptic="light"
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
-                  gap: 5,
+                  gap: tokens.spacing.xxsPlus,
                   borderRadius: tokens.radius.pill,
-                  paddingHorizontal: 10,
-                  minHeight: tokens.minHeight.touchTarget,
-                  backgroundColor: liked ? "rgba(254,226,226,0.9)" : "transparent",
+                  paddingHorizontal: tokens.spacing.compact,
+                  minHeight: tokens.minHeight.buttonMd,
+                  backgroundColor: liked
+                    ? withAlpha(tokens.colors.dangerSurface, 0.9)
+                    : "transparent",
                 }}
-                activeOpacity={0.7}
               >
                 <Heart
                   size={tokens.iconSize.lg}
@@ -125,7 +132,7 @@ export function EventCardFooter({
                 >
                   {likes}
                 </Text>
-              </TouchableOpacity>
+              </InstantPressable>
             ),
           })}
 
@@ -133,7 +140,7 @@ export function EventCardFooter({
             enabled: isTourTarget,
             tourId: "comment-button",
             children: (
-              <TouchableOpacity
+              <InstantPressable
                 accessibilityLabel="Etkinlik yorumlarını aç"
                 accessibilityRole="button"
                 hitSlop={tokens.hitSlop.md}
@@ -141,12 +148,11 @@ export function EventCardFooter({
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
-                  gap: 5,
+                  gap: tokens.spacing.xxsPlus,
                   borderRadius: tokens.radius.pill,
-                  paddingHorizontal: 10,
-                  minHeight: tokens.minHeight.touchTarget,
+                  paddingHorizontal: tokens.spacing.compact,
+                  minHeight: tokens.minHeight.buttonMd,
                 }}
-                activeOpacity={0.7}
               >
                 <MessageCircle
                   size={tokens.iconSize.lg}
@@ -162,11 +168,11 @@ export function EventCardFooter({
                 >
                   {comments}
                 </Text>
-              </TouchableOpacity>
+              </InstantPressable>
             ),
           })}
 
-          <TouchableOpacity
+          <InstantPressable
             accessibilityLabel="Etkinlik albümünü aç"
             accessibilityRole="button"
             accessibilityState={{ disabled: albumDisabled }}
@@ -175,13 +181,12 @@ export function EventCardFooter({
             style={{
               flexDirection: "row",
               alignItems: "center",
-              gap: 5,
+              gap: tokens.spacing.xxsPlus,
               borderRadius: tokens.radius.pill,
-              paddingHorizontal: 10,
-              minHeight: tokens.minHeight.touchTarget,
+              paddingHorizontal: tokens.spacing.compact,
+              minHeight: tokens.minHeight.buttonMd,
               opacity: albumDisabled ? 0.45 : 1,
             }}
-            activeOpacity={0.7}
           >
             <Images size={tokens.iconSize.lg} color={tokens.colors.mutedFg} strokeWidth={1.7} />
             <Text
@@ -193,10 +198,10 @@ export function EventCardFooter({
             >
               {albumCount}
             </Text>
-          </TouchableOpacity>
+          </InstantPressable>
 
           {showLocation ? (
-            <TouchableOpacity
+            <InstantPressable
               accessibilityLabel="Etkinlik konumunu aç"
               accessibilityRole="button"
               accessibilityState={{ disabled: locationDisabled }}
@@ -204,17 +209,16 @@ export function EventCardFooter({
               onPress={locationDisabled ? onLocationDisabledPress || onLocation : onLocation}
               disabled={!onLocation && !onLocationDisabledPress}
               style={{
-                minHeight: tokens.minHeight.touchTarget,
-                minWidth: tokens.minHeight.touchTarget,
+                minHeight: tokens.minHeight.buttonMd,
+                minWidth: tokens.minHeight.buttonMd,
                 alignItems: "center",
                 justifyContent: "center",
-                paddingHorizontal: 6,
+                paddingHorizontal: tokens.spacing.xsMinus,
                 opacity: locationDisabled ? 0.45 : 1,
               }}
-              activeOpacity={0.7}
             >
               <MapPin size={tokens.iconSize.md} color={tokens.colors.muted} strokeWidth={1.7} />
-            </TouchableOpacity>
+            </InstantPressable>
           ) : null}
         </View>
 
@@ -233,7 +237,7 @@ export function EventCardFooter({
                 enabled: isTourTarget,
                 tourId: "join-button",
                 children: (
-                  <TouchableOpacity
+                  <InstantPressable
                     accessibilityLabel={joinLabel}
                     accessibilityRole="button"
                     accessibilityState={{
@@ -242,12 +246,12 @@ export function EventCardFooter({
                     hitSlop={tokens.hitSlop.md}
                     onPress={joinPressHandler}
                     disabled={joinButtonDisabled}
-                    activeOpacity={0.8}
+                    haptic="selection"
                     style={{
                       borderRadius: tokens.radius.md,
                       overflow: "hidden",
-                      minWidth: 96,
-                      maxWidth: 118,
+                      minWidth: 80,
+                      maxWidth: 98,
                       flexShrink: 1,
                       opacity: joinDisabled || joinHardDisabled ? 0.7 : 1,
                     }}
@@ -256,7 +260,7 @@ export function EventCardFooter({
                       <View
                         style={{
                           minHeight: tokens.minHeight.header,
-                          paddingHorizontal: 14,
+                          paddingHorizontal: tokens.spacing.smPlus,
                           alignItems: "center",
                           justifyContent: "center",
                           backgroundColor: tokens.colors.successSoft,
@@ -272,7 +276,7 @@ export function EventCardFooter({
                             color: tokens.colors.successIcon,
                           }}
                         >
-                          Katildin
+                          Katıldın
                         </Text>
                       </View>
                     ) : (
@@ -281,7 +285,7 @@ export function EventCardFooter({
                           <View
                             style={{
                               minHeight: tokens.minHeight.header,
-                              paddingHorizontal: 14,
+                              paddingHorizontal: tokens.spacing.smPlus,
                               alignItems: "center",
                               justifyContent: "center",
                               backgroundColor: tokens.colors.border,
@@ -307,7 +311,7 @@ export function EventCardFooter({
                             end={{ x: 1, y: 0.5 }}
                             style={{
                               minHeight: tokens.minHeight.header,
-                              paddingHorizontal: 14,
+                              paddingHorizontal: tokens.spacing.smPlus,
                               alignItems: "center",
                               justifyContent: "center",
                             }}
@@ -326,7 +330,7 @@ export function EventCardFooter({
                         )}
                       </>
                     )}
-                  </TouchableOpacity>
+                  </InstantPressable>
                 ),
               })
             : null}

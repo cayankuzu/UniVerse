@@ -1,5 +1,6 @@
 import { memo, useCallback, useMemo, type ReactElement } from "react";
-import { StyleSheet, Text, View, type LayoutChangeEvent } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { StyleSheet, View, type LayoutChangeEvent } from "react-native";
 import {
   AppListSkeleton,
   AsyncState,
@@ -178,15 +179,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingBottom: 20,
+    paddingBottom: tokens.spacing.lg,
   },
   emptyContent: {
-    minHeight: 280,
+    minHeight: 224,
   },
   footer: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 14,
+    paddingVertical: tokens.spacing.smPlus,
   },
   footerText: {
     color: tokens.colors.muted,

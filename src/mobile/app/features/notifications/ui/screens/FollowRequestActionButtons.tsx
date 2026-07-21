@@ -1,6 +1,7 @@
 import React from "react";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import type { GestureResponderEvent } from "react-native";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { Check, X } from "lucide-react-native";
 import { tokens } from "../../../../shared/theme";
 
@@ -19,9 +20,9 @@ type Props = {
 const BUTTON_VARIANTS = {
   card: {
     acceptIconSize: 13,
-    borderRadius: 10,
+    borderRadius: tokens.radius.compact,
     buttonGap: 4,
-    buttonMinHeight: tokens.minHeight.touchTarget,
+    buttonMinHeight: tokens.minHeight.buttonSm,
     rejectBackgroundColor: tokens.colors.surfaceVariant,
     rejectIconSize: 14,
     rejectIdleColor: tokens.colors.muted,
@@ -30,7 +31,7 @@ const BUTTON_VARIANTS = {
     acceptIconSize: 12,
     borderRadius: 9,
     buttonGap: 4,
-    buttonMinHeight: tokens.minHeight.touchTarget,
+    buttonMinHeight: tokens.minHeight.buttonSm,
     rejectBackgroundColor: tokens.colors.background,
     rejectIconSize: 12,
     rejectIdleColor: tokens.colors.dark600,
@@ -49,8 +50,13 @@ export const FollowRequestActionButtons = React.memo(function FollowRequestActio
   const config = BUTTON_VARIANTS[variant];
 
   return (
-    <View style={{ alignItems: variant === "card" ? "flex-end" : "flex-start", gap: 5 }}>
-      <View style={{ flexDirection: "row", gap: 6 }}>
+    <View
+      style={{
+        alignItems: variant === "card" ? "flex-end" : "flex-start",
+        gap: tokens.spacing.xxsPlus,
+      }}
+    >
+      <View style={{ flexDirection: "row", gap: tokens.spacing.xsMinus }}>
         <Pressable
           accessibilityLabel="Takip istegini kabul et"
           accessibilityRole="button"
@@ -63,7 +69,7 @@ export const FollowRequestActionButtons = React.memo(function FollowRequestActio
               acceptSelected || (!disabled && !rejectSelected)
                 ? tokens.colors.primary
                 : tokens.colors.border,
-            paddingHorizontal: 10,
+            paddingHorizontal: tokens.spacing.compact,
             alignItems: "center",
             justifyContent: "center",
             flexDirection: "row",
@@ -105,7 +111,7 @@ export const FollowRequestActionButtons = React.memo(function FollowRequestActio
             backgroundColor: rejectSelected
               ? tokens.colors.dangerSurface
               : config.rejectBackgroundColor,
-            paddingHorizontal: 10,
+            paddingHorizontal: tokens.spacing.compact,
             alignItems: "center",
             justifyContent: "center",
             flexDirection: "row",

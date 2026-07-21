@@ -1,7 +1,8 @@
 import { useMemo, useState, type ComponentType } from "react";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import { Camera, Crop, Play, Trash2 } from "lucide-react-native";
-import { Image, Pressable, Text, View } from "react-native";
-import { tokens } from "../../../../shared/theme";
+import { Image, Pressable, View } from "react-native";
+import { tokens, withAlpha } from "../../../../shared/theme";
 import { TourAnchor } from "../../../../app-shell/onboarding";
 import { CategorySelector, TextField } from "../../../../shared/components";
 import { useTranslation } from "../../../../shared/i18n";
@@ -67,7 +68,11 @@ function ActionButton(props: {
       }}
     >
       <Icon size={tokens.iconSize.md} color={color} strokeWidth={1.8} />
-      <Text style={{ color, fontSize: 13, fontWeight: tokens.fontWeight.bold }}>{props.label}</Text>
+      <Text
+        style={{ color, fontSize: tokens.typography.label, fontWeight: tokens.fontWeight.bold }}
+      >
+        {props.label}
+      </Text>
     </Pressable>
   );
 }
@@ -121,7 +126,7 @@ export function CreateEventStepBasic({
               onPickCoverImage();
             }}
             style={{
-              height: 220,
+              height: 180,
               borderRadius: tokens.radius.lg,
               backgroundColor: tokens.colors.border,
               overflow: "hidden",
@@ -149,10 +154,14 @@ export function CreateEventStepBasic({
                       left: 0,
                       alignItems: "center",
                       justifyContent: "center",
-                      backgroundColor: "rgba(15,23,42,0.18)",
+                      backgroundColor: withAlpha(tokens.colors.foreground, 0.18),
                     }}
                   >
-                    <Play size={34} color={tokens.colors.surface} strokeWidth={1.8} />
+                    <Play
+                      size={tokens.iconSize["3xl"]}
+                      color={tokens.colors.surface}
+                      strokeWidth={1.8}
+                    />
                   </View>
                   {coverDurationLabel ? (
                     <View
@@ -162,8 +171,8 @@ export function CreateEventStepBasic({
                         bottom: tokens.spacing.sm,
                         borderRadius: tokens.radius.pill,
                         backgroundColor: tokens.colors.backdropLight,
-                        paddingHorizontal: 10,
-                        paddingVertical: 6,
+                        paddingHorizontal: tokens.spacing.compact,
+                        paddingVertical: tokens.spacing.xsMinus,
                       }}
                     >
                       <Text
@@ -192,8 +201,8 @@ export function CreateEventStepBasic({
                       bottom: tokens.spacing.sm,
                       borderRadius: tokens.radius.pill,
                       backgroundColor: tokens.colors.backdropLight,
-                      paddingHorizontal: 10,
-                      paddingVertical: 6,
+                      paddingHorizontal: tokens.spacing.compact,
+                      paddingVertical: tokens.spacing.xsMinus,
                     }}
                   >
                     <Text
@@ -210,11 +219,11 @@ export function CreateEventStepBasic({
               )
             ) : (
               <View style={{ alignItems: "center", gap: tokens.spacing.xs }}>
-                <Camera size={30} color={tokens.colors.muted} />
+                <Camera size={tokens.iconSize["2xl"]} color={tokens.colors.muted} />
                 <Text
                   style={{
                     color: tokens.colors.muted,
-                    fontSize: 13,
+                    fontSize: tokens.typography.label,
                     fontWeight: tokens.fontWeight.medium,
                   }}
                 >
@@ -228,7 +237,7 @@ export function CreateEventStepBasic({
           </Pressable>
         </TourAnchor>
 
-        <View style={{ flexDirection: "row", gap: 10 }}>
+        <View style={{ flexDirection: "row", gap: tokens.spacing.compact }}>
           <ActionButton
             icon={Camera}
             label={
@@ -267,7 +276,7 @@ export function CreateEventStepBasic({
           onChangeText={(value) => onSetField("title", value)}
         />
 
-        <View style={{ gap: 4 }}>
+        <View style={{ gap: tokens.spacing.xxs }}>
           <TextField
             fieldName="description"
             errorText={fieldErrors.description}
@@ -278,7 +287,7 @@ export function CreateEventStepBasic({
             multiline
             numberOfLines={4}
             maxLength={4000}
-            style={{ minHeight: 120, textAlignVertical: "top" }}
+            style={{ minHeight: 96, textAlignVertical: "top" }}
           />
           <Text
             style={{

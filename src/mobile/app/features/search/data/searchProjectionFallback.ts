@@ -91,10 +91,10 @@ export async function trySearchProjectionEnvelope(
   queryText: string,
   context: ProjectionRequestContext = {},
 ): Promise<ProjectionEnvelope<SearchProjectionItem> | null> {
-  const rpcEnvelope = await tryProjectionRpc<unknown>(
-    "search_results_projection_v2",
-    buildSearchProjectionRpcArgs(params, queryText, context),
-  );
+  const rpcArgs = buildSearchProjectionRpcArgs(params, queryText, context);
+  const rpcEnvelope = context.signal
+    ? await tryProjectionRpc<unknown>("search_results_projection_v2", rpcArgs, context.signal)
+    : await tryProjectionRpc<unknown>("search_results_projection_v2", rpcArgs);
   if (!rpcEnvelope) return null;
   const idsNeedingHydration = new Set<string>();
   const mappedEnvelope =

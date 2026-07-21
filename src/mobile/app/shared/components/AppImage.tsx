@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import { Image as ExpoImage, type ImageProps as ExpoImageProps } from "expo-image";
 import { StyleSheet, View, type ImageStyle, type StyleProp, type ViewStyle } from "react-native";
 import { tokens } from "../theme";
@@ -122,8 +122,7 @@ export const AppImage = memo(function AppImage({
     previewResolvedUri ||
     undefined;
   const [isLoaded, setIsLoaded] = useState(false);
-  // Track if this image was served from cache for zero-transition display
-  const wasCachedRef = useRef(Boolean(signedResolvedUri));
+  const [cacheState, setCacheState] = useState<"hit" | "miss" | "unknown">("unknown");
   const flattenedStyle = StyleSheet.flatten(style);
   const hasImageCandidate = Boolean(resolvedUri || previewCandidateUri);
   const showPreviewLayer = Boolean(
@@ -137,8 +136,8 @@ export const AppImage = memo(function AppImage({
     !showPreviewLayer,
   );
 
-  // Instagram trick: if image was available from cache immediately, use zero transition
-  const effectiveTransition = wasCachedRef.current ? 0 : transitionMs;
+  const isLocalSource = /^(?:asset|content|file|ph):/i.test(String(signedResolvedUri || ""));
+  const effectiveTransition = cacheState === "hit" || isLocalSource ? 0 : transitionMs;
   const previewSource = useMemo(
     () =>
       previewResolvedUri
@@ -169,9 +168,25 @@ export const AppImage = memo(function AppImage({
   );
 
   useEffect(() => {
-    wasCachedRef.current = Boolean(signedResolvedUri);
     setIsLoaded(false);
-  }, [signedResolvedUri]);
+    setCacheState("unknown");
+    if (!stableCacheKey || isLocalSource) {
+      setCacheState(isLocalSource ? "hit" : "miss");
+      return;
+    }
+
+    let cancelled = false;
+    void ExpoImage.getCachePathAsync(stableCacheKey)
+      .then((cachedPath) => {
+        if (!cancelled) setCacheState(cachedPath ? "hit" : "miss");
+      })
+      .catch(() => {
+        if (!cancelled) setCacheState("miss");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isLocalSource, signedResolvedUri, stableCacheKey]);
 
   if (!hasImageCandidate && !showPlaceholderWhenEmpty) return null;
 
@@ -196,7 +211,7 @@ export const AppImage = memo(function AppImage({
           cachePolicy={cachePolicy}
           contentFit={contentFit}
           onError={(event) => {
-            setIsLoaded(true);
+            setIsLoaded(false);
             props.onError?.(event);
           }}
           onLoad={(event) => {

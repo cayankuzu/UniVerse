@@ -6,6 +6,8 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
+import { triggerHapticFeedback, type AppHapticFeedback } from "../feedback/haptics";
+import { tokens } from "../theme";
 
 type PressableStyleState = {
   focused?: boolean;
@@ -16,6 +18,7 @@ type PressableStyleState = {
 type InstantPressableProps = Omit<PressableProps, "onPress" | "style"> & {
   busy?: boolean;
   feedbackOpacity?: number;
+  haptic?: AppHapticFeedback;
   onPress?: (event: GestureResponderEvent) => unknown;
   preventRepeatMs?: number;
   style?: StyleProp<ViewStyle> | ((state: PressableStyleState) => StyleProp<ViewStyle>);
@@ -30,7 +33,8 @@ export const InstantPressable = memo(function InstantPressable({
   busy = false,
   children,
   disabled = false,
-  feedbackOpacity = 0.72,
+  feedbackOpacity = tokens.opacity.pressed,
+  haptic,
   onPress,
   preventRepeatMs = 650,
   style,
@@ -47,22 +51,30 @@ export const InstantPressable = memo(function InstantPressable({
       const now = Date.now();
       if (now - lastPressAtRef.current < preventRepeatMs) return;
       lastPressAtRef.current = now;
+      if (haptic) triggerHapticFeedback(haptic);
       const result = onPress(event);
       if (!isPromiseLike(result)) return;
       inFlightRef.current = true;
       setInternalBusy(true);
-      result.finally(() => {
-        inFlightRef.current = false;
-        setInternalBusy(false);
-      });
+      void result.then(
+        () => {
+          inFlightRef.current = false;
+          setInternalBusy(false);
+        },
+        () => {
+          inFlightRef.current = false;
+          setInternalBusy(false);
+        },
+      );
     },
-    [isDisabled, onPress, preventRepeatMs],
+    [haptic, isDisabled, onPress, preventRepeatMs],
   );
 
   const resolveStyle = useCallback(
     (state: PressableStyleState) => {
       const baseStyle = typeof style === "function" ? style(state) : style;
-      const activeOpacity = state.pressed && !isDisabled ? feedbackOpacity : isDisabled ? 0.55 : 1;
+      const activeOpacity =
+        state.pressed && !isDisabled ? feedbackOpacity : isDisabled ? tokens.opacity.disabled : 1;
       return [baseStyle, { opacity: activeOpacity }];
     },
     [feedbackOpacity, isDisabled, style],

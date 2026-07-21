@@ -1,4 +1,5 @@
-import { Text, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import { LinearGradient } from "expo-linear-gradient";
 import { GraduationCap } from "lucide-react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -31,56 +32,62 @@ export function LoginScreen({ navigation }: Props) {
       backgroundColor={tokens.colors.background}
       header={<BackHeader onBack={() => navigation.navigate("Welcome")} />}
       contentContainerStyle={{
-        gap: 16,
+        gap: tokens.spacing.md,
         paddingBottom: 36,
-        paddingHorizontal: 24,
-        paddingTop: 24,
+        paddingHorizontal: tokens.spacing.xl,
+        paddingTop: tokens.spacing.xl,
       }}
     >
       <LinearGradient
         colors={[tokens.colors.primaryLight, tokens.colors.primary]}
         style={{
-          width: 56,
-          height: 56,
-          borderRadius: 16,
+          width: 46,
+          height: 46,
+          borderRadius: tokens.radius.lg,
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <GraduationCap size={28} color={tokens.colors.surface} strokeWidth={1.5} />
+        <GraduationCap
+          size={tokens.iconSize["2xl"]}
+          color={tokens.colors.surface}
+          strokeWidth={1.5}
+        />
       </LinearGradient>
 
-      <View style={{ gap: 4 }}>
+      <View style={{ gap: tokens.spacing.xxs }}>
         <Text
           style={{
-            fontSize: 30,
+            fontSize: tokens.typography.displayLarge,
             fontWeight: "800",
             color: tokens.colors.foreground,
-            letterSpacing: -0.5,
+            letterSpacing: tokens.letterSpacing.displayTight,
           }}
         >
           {t("auth.login.title")}
         </Text>
-        <Text style={{ fontSize: 14, color: tokens.colors.muted }}>{t("auth.login.subtitle")}</Text>
+        <Text style={{ fontSize: tokens.typography.body, color: tokens.colors.muted }}>
+          {t("auth.login.subtitle")}
+        </Text>
       </View>
 
       {errors.root?.message ? (
         <View
           style={{
-            borderRadius: 12,
+            borderRadius: tokens.radius.md,
             borderWidth: 1,
             borderColor: tokens.colors.dangerBorder,
             backgroundColor: tokens.colors.dangerSoft,
-            padding: 12,
+            padding: tokens.spacing.sm,
           }}
         >
-          <Text style={{ fontSize: 13, color: tokens.colors.dangerDark }}>
+          <Text style={{ fontSize: tokens.typography.label, color: tokens.colors.dangerDark }}>
             {errors.root.message}
           </Text>
         </View>
       ) : null}
 
-      <View style={{ gap: 12 }}>
+      <View style={{ gap: tokens.spacing.sm }}>
         <AppTextField
           autoCapitalize="none"
           autoComplete="email"
@@ -89,7 +96,7 @@ export function LoginScreen({ navigation }: Props) {
           label={t("common.requiredEmail")}
           name="email"
           nextFieldName="password"
-          placeholder="isim@gmail.com"
+          placeholder="ornek@universite.edu.tr"
           returnKeyType="next"
           supportingText={t("auth.password.forgot.emailHint")}
         />
@@ -112,10 +119,16 @@ export function LoginScreen({ navigation }: Props) {
         style={{
           alignSelf: "flex-start",
           justifyContent: "center",
-          minHeight: tokens.minHeight.touchTarget,
+          minHeight: tokens.minHeight.buttonSm,
         }}
       >
-        <Text style={{ fontSize: 14, fontWeight: "600", color: tokens.colors.primary }}>
+        <Text
+          style={{
+            fontSize: tokens.typography.body,
+            fontWeight: "600",
+            color: tokens.colors.primary,
+          }}
+        >
           {t("auth.login.forgotPassword")}
         </Text>
       </TouchableOpacity>
@@ -128,7 +141,13 @@ export function LoginScreen({ navigation }: Props) {
         size="lg"
       />
 
-      <Text style={{ textAlign: "center", color: tokens.colors.muted, fontSize: 14 }}>
+      <Text
+        style={{
+          textAlign: "center",
+          color: tokens.colors.muted,
+          fontSize: tokens.typography.body,
+        }}
+      >
         {t("auth.login.noAccount")}{" "}
         <Text
           accessibilityRole="button"

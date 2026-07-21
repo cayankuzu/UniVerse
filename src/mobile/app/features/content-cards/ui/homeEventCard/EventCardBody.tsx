@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { StyleSheet, View } from "react-native";
 
 import type { EventWithMeta } from "../../data";
 import { EventCardAttendanceBar } from "./EventCardAttendanceBar";
@@ -17,6 +18,7 @@ import {
   resolvePreparedEventInfoSlideDisplay,
 } from "../../application/feedCardPresentation";
 import type { HomeEventCardPresentation } from "./eventCard.types";
+import { tokens } from "../../../../shared/theme";
 
 interface Props {
   event: EventWithMeta;
@@ -60,6 +62,7 @@ export function EventCardBody({
 
   return (
     <View style={styles.container}>
+      <Text style={styles.contentType}>ETKİNLİK</Text>
       <Text style={styles.title} numberOfLines={2}>
         {event.title}
       </Text>
@@ -85,14 +88,22 @@ export function EventCardBody({
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 4,
-    paddingHorizontal: 14,
-    paddingTop: 12,
+    paddingBottom: tokens.spacing.xxs,
+    paddingHorizontal: tokens.spacing.smPlus,
+    paddingTop: tokens.spacing.sm,
+  },
+  contentType: {
+    color: tokens.colors.primary,
+    fontSize: tokens.typography.caption,
+    fontWeight: tokens.fontWeight.bold,
+    letterSpacing: tokens.letterSpacing.section,
+    lineHeight: tokens.lineHeight.caption,
+    marginBottom: tokens.spacing.xxs,
   },
   title: {
-    color: "#0f172a",
-    fontSize: 18,
+    color: tokens.colors.foreground,
+    fontSize: tokens.typography.cardTitle,
     fontWeight: "700",
-    lineHeight: 24,
+    lineHeight: tokens.lineHeight.cardTitle,
   },
 });

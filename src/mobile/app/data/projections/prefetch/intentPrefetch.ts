@@ -73,11 +73,12 @@ export async function prefetchProfileExperience(params: {
 
   const overview = await params.queryClient.fetchQuery({
     queryKey: projectionKeys.profileOverview(targetUsername, params.viewerKey),
-    queryFn: () =>
+    queryFn: ({ signal }) =>
       getProfileOverviewProjection(
         targetUsername,
         normalizeValue(params.viewerUsername),
         params.viewerId,
+        signal,
       ),
     staleTime: 15_000,
   });
@@ -106,7 +107,7 @@ export async function prefetchEventExperience(params: {
 
   await prefetchProjectionScreen({
     entity: "event-detail",
-    fetchProjection: () => ProjectionAPI.getEventDetail(eventId, params.viewerId),
+    fetchProjection: (signal) => ProjectionAPI.getEventDetail(eventId, params.viewerId, { signal }),
     queryClient: params.queryClient,
     queryKey: projectionKeys.eventDetail(eventId, params.viewerKey),
     source: params.source || "intent",
@@ -135,7 +136,8 @@ export async function prefetchAlbumViewExperience(params: {
     }),
     prefetchProjectionScreen({
       entity: "album-event",
-      fetchProjection: () => ProjectionAPI.getAlbumEvent(eventId, { limit: 20 }, params.viewerId),
+      fetchProjection: (signal) =>
+        ProjectionAPI.getAlbumEvent(eventId, { limit: 20, signal }, params.viewerId),
       queryClient: params.queryClient,
       queryKey: projectionKeys.albumEvent(eventId, params.viewerKey),
       source: params.source || "route",

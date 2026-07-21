@@ -121,7 +121,7 @@ export function EventDetailInteractions({
     ? [
         {
           key: isOwnEventMedia ? "download" : "report",
-          label: isOwnEventMedia ? "Indir" : "Şikayet Et",
+          label: isOwnEventMedia ? "İndir" : "Şikâyet Et",
           destructive: !isOwnEventMedia,
           onPress: () => {
             void (async () => {
@@ -139,7 +139,7 @@ export function EventDetailInteractions({
                 });
               } catch (error) {
                 Alert.alert(
-                  isOwnEventMedia ? "Indirme başarısız" : "Şikayet gönderilemedi",
+                  isOwnEventMedia ? "İndirme başarısız" : "Şikâyet gönderilemedi",
                   String((error as { message?: string } | null)?.message || "İşlem tamamlanamadı."),
                 );
               }
@@ -245,12 +245,12 @@ export function EventDetailInteractions({
 
       <DangerConfirmSheet
         busy={deleteBusy}
-        confirmLabel="Etkinligi Sil"
+        confirmLabel="Etkinliği Sil"
         description="Etkinlik sayfasını kapatacaksın. Bu karar etkinlik akışından hemen yansır."
         note="Silinen etkinlik geri alınamaz. Eminsen sadece tek adım kaldı."
         onClose={onCloseDeleteConfirm}
         onConfirm={() => void onDeleteEvent()}
-        title="Etkinligi kaldir"
+        title="Etkinliği kaldır"
         visible={showDeleteConfirmModal}
         warningItems={[
           "Etkinlik kartı ve detay sayfası kullanıcılardan gizlenir.",

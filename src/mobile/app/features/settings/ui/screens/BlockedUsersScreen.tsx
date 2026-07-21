@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { AccessibilityInfo, Alert, Pressable, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { Text } from "react-native-paper";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ban, Lock } from "lucide-react-native";
 import { useAuth } from "../../../../app-shell/auth";
@@ -107,7 +107,7 @@ export function BlockedUsersScreen({ navigation }: Props) {
         ListEmptyComponent={
           !shouldShowInitialSkeleton ? (
             <EmptyState
-              icon={<Ban size={42} color={tokens.colors.iconMuted} strokeWidth={1.7} />}
+              icon={<Ban size={32} color={tokens.colors.iconMuted} strokeWidth={1.7} />}
               subtitle={t("settings.blockedUsers.empty.subtitle")}
               title={t("settings.blockedUsers.empty.title")}
             />
@@ -179,7 +179,9 @@ export function BlockedUsersScreen({ navigation }: Props) {
               style={{ flex: 1 }}
               onPress={() => openProfile(user.username)}
             >
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+              <View
+                style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.xsMinus }}
+              >
                 <Text
                   style={{
                     flex: 1,
@@ -196,13 +198,13 @@ export function BlockedUsersScreen({ navigation }: Props) {
                     borderRadius: tokens.radius.pill,
                     backgroundColor: tokens.colors.dangerSurface,
                     paddingHorizontal: tokens.spacing.xs,
-                    paddingVertical: 3,
+                    paddingVertical: tokens.spacing.microPlus,
                   }}
                 >
                   <Text
                     style={{
                       color: tokens.colors.danger,
-                      fontSize: tokens.typography.micro,
+                      fontSize: tokens.typography.caption,
                       fontWeight: tokens.fontWeight.extrabold,
                     }}
                   >
@@ -212,7 +214,7 @@ export function BlockedUsersScreen({ navigation }: Props) {
               </View>
               <Text
                 style={{
-                  marginTop: 2,
+                  marginTop: tokens.spacing.micro,
                   color: tokens.colors.muted,
                   fontSize: tokens.typography.caption,
                 }}
@@ -222,7 +224,7 @@ export function BlockedUsersScreen({ navigation }: Props) {
               </Text>
               <Text
                 style={{
-                  marginTop: 2,
+                  marginTop: tokens.spacing.micro,
                   color: tokens.colors.muted,
                   fontSize: tokens.typography.caption,
                 }}
@@ -233,7 +235,7 @@ export function BlockedUsersScreen({ navigation }: Props) {
               {user.isPrivate ? (
                 <View
                   style={{
-                    marginTop: 5,
+                    marginTop: tokens.spacing.xxsPlus,
                     flexDirection: "row",
                     alignItems: "center",
                     gap: tokens.spacing.xxs,
@@ -243,7 +245,7 @@ export function BlockedUsersScreen({ navigation }: Props) {
                   <Text
                     style={{
                       color: tokens.colors.warning,
-                      fontSize: tokens.typography.tiny,
+                      fontSize: tokens.typography.caption,
                       fontWeight: tokens.fontWeight.bold,
                     }}
                   >

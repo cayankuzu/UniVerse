@@ -5,6 +5,7 @@ import { GradientButton, TextField } from "../../../../shared/components";
 import { RegistrationAvailabilityHint, RegistrationStepHeading, SelectField } from "../components";
 import { TEXT_LIMITS } from "../../../../shared/validation/textLimits";
 import type { ClubRegistrationStepProps } from "../clubRegistrationSections.shared";
+import { tokens } from "../../../../shared/theme";
 
 export function ClubRegistrationUniversityStep({
   emailAvailabilityError,
@@ -32,7 +33,7 @@ export function ClubRegistrationUniversityStep({
       />
       <RegistrationAvailabilityHint active={emailChecking} text="E-posta kontrol ediliyor..." />
 
-      <View style={{ marginTop: 12 }}>
+      <View style={{ marginTop: tokens.spacing.sm }}>
         <SelectField
           errorText={errors.university?.message}
           fieldName="university"
@@ -45,7 +46,7 @@ export function ClubRegistrationUniversityStep({
         />
       </View>
 
-      <View style={{ marginTop: 20 }}>
+      <View style={{ marginTop: tokens.spacing.lg }}>
         <GradientButton
           label="Devam Et"
           onPress={() => void goNext()}

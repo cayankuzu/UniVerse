@@ -12,7 +12,7 @@ function yieldToRuntime() {
 export async function calculateLocalFileIntegrity(uri: string) {
   const file = new File(uri);
   if (!file.exists || file.size <= 0) {
-    throw new Error("Medya dosyasi okunamadi veya bos.");
+    throw new Error("Medya dosyası okunamadı veya boş.");
   }
 
   const handle = file.open();
@@ -23,7 +23,7 @@ export async function calculateLocalFileIntegrity(uri: string) {
     while (bytesRead < file.size) {
       const chunk = handle.readBytes(Math.min(FILE_HASH_CHUNK_BYTES, file.size - bytesRead));
       if (chunk.length === 0) {
-        throw new Error("Medya dosyasi tamamen okunamadi.");
+        throw new Error("Medya dosyası tamamen okunamadı.");
       }
       hash.update(chunk);
       bytesRead += chunk.length;
@@ -37,7 +37,7 @@ export async function calculateLocalFileIntegrity(uri: string) {
   }
 
   if (bytesRead !== file.size) {
-    throw new Error("Medya dosyasi boyutu dogrulanamadi.");
+    throw new Error("Medya dosyası boyutu doğrulanamadı.");
   }
   return {
     checksumSha256: bytesToHex(hash.digest()),

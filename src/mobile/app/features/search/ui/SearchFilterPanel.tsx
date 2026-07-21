@@ -1,4 +1,5 @@
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import { AppText as Text } from "../../../shared/components/AppText";
 import { X } from "lucide-react-native";
 import { SelectField } from "../../../shared/components/SelectField";
 import { categories, universities } from "../../../shared/catalog/taxonomy";
@@ -48,7 +49,7 @@ function renderSortChips(
           <Text
             style={{
               color: sortOption === item.key ? tokens.colors.primary : tokens.colors.muted,
-              fontSize: tokens.typography.tiny,
+              fontSize: tokens.typography.caption,
               fontWeight: tokens.fontWeight.bold,
             }}
           >
@@ -106,7 +107,7 @@ export function SearchFilterPanel({
         backgroundColor: tokens.colors.surface,
         borderBottomWidth: 1,
         borderBottomColor: tokens.colors.border,
-        paddingHorizontal: 0,
+        paddingHorizontal: tokens.spacing.md,
         paddingBottom: tokens.spacing.sm,
         gap: tokens.spacing.xs,
       }}
@@ -166,7 +167,7 @@ export function SearchFilterPanel({
                   style={{
                     color:
                       selectedFee === item.key ? tokens.colors.successIcon : tokens.colors.muted,
-                    fontSize: tokens.typography.tiny,
+                    fontSize: tokens.typography.caption,
                     fontWeight: tokens.fontWeight.bold,
                   }}
                 >

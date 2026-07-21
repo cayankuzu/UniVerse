@@ -1,5 +1,6 @@
 import React from "react";
 import { Image, StyleSheet, View } from "react-native";
+import { tokens } from "../../shared/theme";
 
 const splashImage = require("../../../../../assets/splash/brand-screen.png");
 
@@ -14,7 +15,7 @@ export function StartupSplashScreen() {
 const styles = StyleSheet.create({
   container: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: tokens.colors.onMedia,
   },
   image: {
     width: "100%",

@@ -113,9 +113,9 @@ export function useAlbumDetailMenuActions({
           void (async () => {
             setDeleteBusy(true);
             const activityId = showActivity({
-              hint: "Album karti listelerden ve veritabanindan kaldiriliyor.",
+              hint: "Albüm kartı listelerden ve veritabanından kaldırılıyor.",
               percent: 32,
-              stage: "Album karti siliniyor",
+              stage: "Albüm kartı siliniyor",
               title: "Album silme islemi basladi",
               tone: "info",
             });
@@ -130,16 +130,16 @@ export function useAlbumDetailMenuActions({
               updateActivity(activityId, {
                 dismissAfterMs: 1800,
                 percent: 100,
-                stage: "Album karti kaldirildi",
-                title: "Album silindi",
+                stage: "Albüm kartı kaldırıldı",
+                title: "Albüm silindi",
                 tone: "success",
               });
             } catch (error) {
               updateActivity(activityId, {
                 dismissAfterMs: 2600,
                 percent: 100,
-                stage: String((error as { message?: string })?.message || "Album silinemedi."),
-                title: "Album silinemedi",
+                stage: String((error as { message?: string })?.message || "Albüm silinemedi."),
+                title: "Albüm silinemedi",
                 tone: "error",
               });
             } finally {
@@ -154,14 +154,14 @@ export function useAlbumDetailMenuActions({
   };
 
   const handleReportPhoto = () => {
-    Alert.alert("Albumu Sikayet Et", "Bu album kartini sikayet etmek istiyor musunuz?", [
+    Alert.alert("Albümü Şikâyet Et", "Bu albüm kartını şikâyet etmek istiyor musunuz?", [
       { style: "cancel", text: "Vazgec" },
       {
         onPress: () => {
           void (async () => {
             try {
               await reportAlbum({ photoId: photo.id, username: photo.username });
-              onShowWarning?.("Sikayetiniz alindi.");
+              onShowWarning?.("Şikâyetiniz alındı.");
             } catch (error) {
               debugWarn("CONTENT-CARDS", "album-detail-report-failed", {
                 message: String(
@@ -169,12 +169,12 @@ export function useAlbumDetailMenuActions({
                 ),
                 photoId: photo.id,
               });
-              onShowWarning?.("Sikayet gonderilemedi.");
+              onShowWarning?.("Şikâyet gönderilemedi.");
             }
           })();
         },
         style: "destructive",
-        text: "Sikayet Et",
+        text: "Şikâyet Et",
       },
     ]);
   };
@@ -184,14 +184,14 @@ export function useAlbumDetailMenuActions({
         {
           destructive: true,
           key: "delete",
-          label: deleteBusy ? "Siliniyor..." : "Albumu Sil",
+          label: deleteBusy ? "Siliniyor..." : "Albümü Sil",
           onPress: handleDeletePhoto,
         },
       ]
     : [
         {
           key: "report",
-          label: "Albumu Sikayet Et",
+          label: "Albümü Şikâyet Et",
           onPress: handleReportPhoto,
         },
       ];

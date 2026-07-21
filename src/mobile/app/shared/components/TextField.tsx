@@ -126,10 +126,10 @@ export const TextField = forwardRef<NativeTextInput, Props>(
         return <ActivityIndicator color={tokens.colors.primary} size="small" />;
       }
       if (resolvedStatus === "valid") {
-        return <CheckCircle2 size={18} color={tokens.colors.successText} />;
+        return <CheckCircle2 size={tokens.iconSize.lg} color={tokens.colors.successText} />;
       }
       if (isInvalid) {
-        return <XCircle size={18} color={tokens.colors.danger} />;
+        return <XCircle size={tokens.iconSize.lg} color={tokens.colors.danger} />;
       }
       return undefined;
     }, [isInvalid, resolvedStatus]);
@@ -168,7 +168,7 @@ export const TextField = forwardRef<NativeTextInput, Props>(
         ref={keyboardField.ref}
         collapsable={false}
         onLayout={handleContainerLayout}
-        style={[{ gap: 4 }, containerStyle]}
+        style={[{ gap: tokens.spacing.xxs }, containerStyle]}
       >
         <TextInput
           {...rest}
@@ -184,18 +184,19 @@ export const TextField = forwardRef<NativeTextInput, Props>(
           }}
           contentStyle={[
             {
-              fontSize: 15,
-              minHeight: isMultiline ? 108 : 50,
+              fontSize: tokens.typography.control,
+              minHeight: isMultiline ? 88 : tokens.minHeight.inputMd,
               color: textColor,
               textAlignVertical: isMultiline ? "top" : "center",
             },
             style,
           ]}
           disabled={!isEditable}
+          dense
           editable={isEditable}
           label={resolvedLabel}
           mode="outlined"
-          outlineStyle={{ borderRadius: 14 }}
+          outlineStyle={{ borderRadius: tokens.radius.md + 2 }}
           placeholderTextColor={placeholderColor}
           onBlur={(event) => {
             setFocused(false);
@@ -221,9 +222,9 @@ export const TextField = forwardRef<NativeTextInput, Props>(
                 forceTextInputFocus={false}
                 icon={() =>
                   hidden ? (
-                    <EyeOff size={18} color={iconColor} />
+                    <EyeOff size={tokens.iconSize.lg} color={iconColor} />
                   ) : (
-                    <Eye size={18} color={iconColor} />
+                    <Eye size={tokens.iconSize.lg} color={iconColor} />
                   )
                 }
                 onPress={() => setHidden((value) => !value)}
@@ -256,7 +257,12 @@ export const TextField = forwardRef<NativeTextInput, Props>(
             isInvalid || resolvedStatus === "validating" ? "polite" : undefined
           }
           padding="none"
-          style={{ color: helperColor, lineHeight: 18, minHeight: 18 }}
+          style={{
+            color: helperColor,
+            fontSize: tokens.typography.caption,
+            lineHeight: tokens.lineHeight.label,
+            minHeight: tokens.lineHeight.caption,
+          }}
           type={isInvalid ? "error" : "info"}
           visible
         >

@@ -23,17 +23,22 @@ export async function getProfileOverviewProjection(
   username: string,
   viewerUsername: string,
   viewerId?: string,
+  signal?: AbortSignal,
 ): Promise<ProfileOverviewProjection> {
   const normalizedUsername = normalizeProjectionValue(username);
   const normalizedViewer = normalizeProjectionValue(viewerUsername);
-  const rpcEnvelope = await tryProjectionRpc<ProfileOverviewProjection>(
-    "profile_overview_projection",
-    {
-      since: null,
-      target_username: normalizedUsername,
-      viewer_id: viewerId || null,
-    },
-  );
+  const rpcArgs = {
+    since: null,
+    target_username: normalizedUsername,
+    viewer_id: viewerId || null,
+  };
+  const rpcEnvelope = signal
+    ? await tryProjectionRpc<ProfileOverviewProjection>(
+        "profile_overview_projection",
+        rpcArgs,
+        signal,
+      )
+    : await tryProjectionRpc<ProfileOverviewProjection>("profile_overview_projection", rpcArgs);
   if (rpcEnvelope?.items?.[0]) {
     if (isBlockedProfileOverview(rpcEnvelope.items[0])) {
       throw new Error("PROFILE_BLOCKED");

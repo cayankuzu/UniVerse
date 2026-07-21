@@ -8,6 +8,16 @@ import { HomeEventCard } from "./homeEventCard";
 import { useAlbumFeedCardState } from "./feed/useAlbumFeedCardState";
 import { useEventCardState } from "./homeEventCard/useEventCardState";
 
+jest.mock("expo-image", () => {
+  const React = require("react");
+  const MockExpoImage = (props: Record<string, unknown>) => React.createElement("ExpoImage", props);
+  return {
+    Image: Object.assign(MockExpoImage, {
+      getCachePathAsync: jest.fn(() => new Promise(() => undefined)),
+    }),
+  };
+});
+
 jest.mock("./homeEventCard/useEventCardState", () => ({
   useEventCardState: jest.fn(),
 }));

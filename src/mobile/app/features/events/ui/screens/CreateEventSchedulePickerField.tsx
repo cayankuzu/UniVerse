@@ -1,5 +1,6 @@
 import { Calendar, Clock } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { Pressable, View } from "react-native";
 import { tokens } from "../../../../shared/theme";
 import { useKeyboardSafeField, useKeyboardSafeFormActions } from "../../../../shared/components";
 import { useEffect, useRef } from "react";
@@ -38,11 +39,11 @@ export function CreateEventSchedulePickerField({
       ref={keyboardField.ref}
       collapsable={false}
       onLayout={keyboardField.onLayout}
-      style={{ gap: 6 }}
+      style={{ gap: tokens.spacing.xsMinus }}
     >
       <Text
         style={{
-          fontSize: 13,
+          fontSize: tokens.typography.label,
           fontWeight: tokens.fontWeight.semibold,
           color: tokens.colors.dark700,
         }}
@@ -55,11 +56,11 @@ export function CreateEventSchedulePickerField({
         onPress={onPress}
         style={{
           height: tokens.minHeight.buttonXl,
-          borderRadius: 14,
+          borderRadius: tokens.radius.control,
           borderWidth: 1,
           borderColor: isInvalid ? tokens.colors.danger : tokens.colors.border,
           backgroundColor: tokens.colors.surface,
-          paddingHorizontal: 14,
+          paddingHorizontal: tokens.spacing.smPlus,
           flexDirection: "row",
           alignItems: "center",
           gap: tokens.spacing.xs,

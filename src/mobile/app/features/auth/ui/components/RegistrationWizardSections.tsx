@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { CheckCircle2, Circle, GraduationCap, XCircle } from "lucide-react-native";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BackHeader, KeyboardSafeForm, TextField } from "../../../../shared/components";
 import type { KeyboardSafeFormFocusRequest } from "../../../../shared/components";
@@ -12,6 +13,7 @@ import {
 import { AuthBrandFooter } from "./AuthBrandFooter";
 import { AuthStepProgress } from "./AuthStepProgress";
 import { ImagePickerField } from "./ImagePickerField";
+import { tokens } from "../../../../shared/theme";
 
 type RegistrationScreenLayoutProps = {
   title: string;
@@ -88,12 +90,21 @@ export function RegistrationScreenLayout({
   totalSteps,
 }: RegistrationScreenLayoutProps) {
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#f8fafc" }} edges={["top", "bottom"]}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: tokens.colors.background }}
+      edges={["top", "bottom"]}
+    >
       <BackHeader
         title={title}
         right={
-          <View style={{ paddingRight: 4 }}>
-            <Text style={{ color: "#64748b", fontSize: 12, fontWeight: "500" }}>
+          <View style={{ paddingRight: tokens.spacing.xxs }}>
+            <Text
+              style={{
+                color: tokens.colors.muted,
+                fontSize: tokens.typography.caption,
+                fontWeight: "500",
+              }}
+            >
               {step}/{totalSteps} - {stepLabels[step - 1]}
             </Text>
           </View>
@@ -102,11 +113,11 @@ export function RegistrationScreenLayout({
       />
       <AuthStepProgress total={totalSteps} current={step} colors={colors} />
       <KeyboardSafeForm
-        backgroundColor="#f8fafc"
+        backgroundColor={tokens.colors.background}
         bottomInsetOwner="screen"
         contentContainerStyle={{
-          paddingHorizontal: 24,
-          paddingTop: 16,
+          paddingHorizontal: tokens.spacing.xl,
+          paddingTop: tokens.spacing.md,
           paddingBottom: Math.max(bottomInset + 16, 28),
         }}
         focusRequest={focusRequest}
@@ -121,22 +132,57 @@ export function RegistrationScreenLayout({
 export function RegistrationStepHeading({ subtitle, title }: StepHeadingProps) {
   return (
     <>
-      <Text style={{ color: "#0f172a", fontSize: 20, fontWeight: "700", marginBottom: 4 }}>
+      <Text
+        style={{
+          color: tokens.colors.foreground,
+          fontSize: tokens.typography.sectionTitle,
+          fontWeight: "700",
+          marginBottom: tokens.spacing.xxs,
+        }}
+      >
         {title}
       </Text>
-      <Text style={{ color: "#64748b", fontSize: 14, marginBottom: 20 }}>{subtitle}</Text>
+      <Text
+        style={{
+          color: tokens.colors.muted,
+          fontSize: tokens.typography.body,
+          marginBottom: tokens.spacing.lg,
+        }}
+      >
+        {subtitle}
+      </Text>
     </>
   );
 }
 
 export function RegistrationAvailabilityHint({ active, text }: AvailabilityHintProps) {
   if (!active) return null;
-  return <Text style={{ color: "#64748b", fontSize: 12, marginTop: 4 }}>{text}</Text>;
+  return (
+    <Text
+      style={{
+        color: tokens.colors.muted,
+        fontSize: tokens.typography.caption,
+        marginTop: tokens.spacing.xxs,
+      }}
+    >
+      {text}
+    </Text>
+  );
 }
 
 export function RegistrationFieldError({ message }: FieldErrorProps) {
   if (!message) return null;
-  return <Text style={{ color: "#ef4444", fontSize: 12, marginTop: 4 }}>{message}</Text>;
+  return (
+    <Text
+      style={{
+        color: tokens.colors.red,
+        fontSize: tokens.typography.caption,
+        marginTop: tokens.spacing.xxs,
+      }}
+    >
+      {message}
+    </Text>
+  );
 }
 
 export function RegistrationProfileMediaFields({
@@ -178,7 +224,7 @@ export function RegistrationPasswordField({
 
   return (
     <>
-      <View style={{ marginTop: 12 }}>
+      <View style={{ marginTop: tokens.spacing.sm }}>
         <TextField
           autoCapitalize="none"
           autoComplete="new-password"
@@ -193,7 +239,10 @@ export function RegistrationPasswordField({
           value={password}
         />
       </View>
-      <View accessibilityLiveRegion="polite" style={{ gap: 6, marginTop: 8 }}>
+      <View
+        accessibilityLiveRegion="polite"
+        style={{ gap: tokens.spacing.xsMinus, marginTop: tokens.spacing.xs }}
+      >
         {(Object.keys(PASSWORD_RULE_LABELS) as PasswordPolicyIssue[]).map((rule) => {
           const passed = touched && !issues.includes(rule);
           const failed = touched && !passed;
@@ -202,12 +251,12 @@ export function RegistrationPasswordField({
             <View
               accessibilityLabel={`${PASSWORD_RULE_LABELS[rule]}: ${statusText}`}
               key={rule}
-              style={{ alignItems: "center", flexDirection: "row", gap: 7 }}
+              style={{ alignItems: "center", flexDirection: "row", gap: tokens.spacing.xsCompact }}
             >
               {passed ? (
                 <CheckCircle2
                   accessibilityElementsHidden
-                  color="#047857"
+                  color={tokens.colors.successText}
                   importantForAccessibility="no"
                   size={14}
                   strokeWidth={1.8}
@@ -215,7 +264,7 @@ export function RegistrationPasswordField({
               ) : failed ? (
                 <XCircle
                   accessibilityElementsHidden
-                  color="#64748b"
+                  color={tokens.colors.muted}
                   importantForAccessibility="no"
                   size={14}
                   strokeWidth={1.8}
@@ -223,13 +272,18 @@ export function RegistrationPasswordField({
               ) : (
                 <Circle
                   accessibilityElementsHidden
-                  color="#64748b"
+                  color={tokens.colors.muted}
                   importantForAccessibility="no"
                   size={14}
                   strokeWidth={1.8}
                 />
               )}
-              <Text style={{ color: passed ? "#047857" : "#64748b", fontSize: 12 }}>
+              <Text
+                style={{
+                  color: passed ? tokens.colors.successText : tokens.colors.muted,
+                  fontSize: tokens.typography.caption,
+                }}
+              >
                 {PASSWORD_RULE_LABELS[rule]} - {statusText}
               </Text>
             </View>
@@ -251,16 +305,16 @@ export function RegistrationSelectionBadge({
       style={{
         flexDirection: "row",
         alignItems: "center",
-        gap: 8,
-        marginTop: 12,
+        gap: tokens.spacing.xs,
+        marginTop: tokens.spacing.sm,
         backgroundColor,
-        borderRadius: 10,
-        paddingHorizontal: 12,
-        paddingVertical: 8,
+        borderRadius: tokens.radius.compact,
+        paddingHorizontal: tokens.spacing.sm,
+        paddingVertical: tokens.spacing.xs,
       }}
     >
       <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: accent }} />
-      <Text style={{ color: textColor, fontSize: 13 }}>{label}</Text>
+      <Text style={{ color: textColor, fontSize: tokens.typography.label }}>{label}</Text>
     </View>
   );
 }
@@ -277,16 +331,16 @@ export function RegistrationUploadProgressCard({
       style={{
         flexDirection: "row",
         alignItems: "center",
-        gap: 8,
-        marginTop: 14,
+        gap: tokens.spacing.xs,
+        marginTop: tokens.spacing.smPlus,
         backgroundColor,
-        borderRadius: 10,
-        paddingHorizontal: 12,
-        paddingVertical: 10,
+        borderRadius: tokens.radius.compact,
+        paddingHorizontal: tokens.spacing.sm,
+        paddingVertical: tokens.spacing.compact,
       }}
     >
       <GraduationCap size={16} color={accent} strokeWidth={1.5} />
-      <Text style={{ color: textColor, fontSize: 13 }}>{message}</Text>
+      <Text style={{ color: textColor, fontSize: tokens.typography.label }}>{message}</Text>
     </View>
   );
 }
@@ -296,16 +350,24 @@ export function RegistrationSubmitError({ message }: FieldErrorProps) {
   return (
     <View
       style={{
-        marginTop: 12,
-        borderRadius: 12,
+        marginTop: tokens.spacing.sm,
+        borderRadius: tokens.radius.md,
         borderWidth: 1,
-        borderColor: "#fecaca",
-        backgroundColor: "#fef2f2",
-        paddingHorizontal: 12,
-        paddingVertical: 10,
+        borderColor: tokens.colors.dangerBorder,
+        backgroundColor: tokens.colors.dangerSoft,
+        paddingHorizontal: tokens.spacing.sm,
+        paddingVertical: tokens.spacing.compact,
       }}
     >
-      <Text style={{ color: "#dc2626", fontSize: 13, fontWeight: "500" }}>{message}</Text>
+      <Text
+        style={{
+          color: tokens.colors.danger,
+          fontSize: tokens.typography.label,
+          fontWeight: "500",
+        }}
+      >
+        {message}
+      </Text>
     </View>
   );
 }

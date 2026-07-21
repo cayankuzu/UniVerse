@@ -1,6 +1,7 @@
 import { Heart, MessageCircle } from "lucide-react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import { useMemo } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { Avatar, OverflowActionMenu } from "../../../../shared/components";
 import { tokens } from "../../../../shared/theme";
 import { formatAbsoluteDateTime } from "../../../../shared/utils/dateTime";
@@ -39,9 +40,9 @@ function CommentText({
   return (
     <Text
       style={{
-        marginTop: 7,
+        marginTop: tokens.spacing.xsCompact,
         fontSize: tokens.typography.body,
-        lineHeight: 20,
+        lineHeight: tokens.lineHeight.body,
         color: tokens.colors.foreground,
       }}
     >
@@ -141,7 +142,9 @@ export function CommentPanelRow({
             paddingVertical: tokens.spacing.xs,
           }}
         >
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}>
+          <View
+            style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.xsCompact }}
+          >
             <Pressable
               onPress={() => onPressUser?.(comment.username)}
               style={{ flexShrink: 1, minWidth: 0 }}
@@ -162,8 +165,8 @@ export function CommentPanelRow({
                 style={{
                   borderRadius: tokens.radius.pill,
                   backgroundColor: tokens.colors.primarySofter,
-                  paddingHorizontal: 7,
-                  paddingVertical: 2,
+                  paddingHorizontal: tokens.spacing.xsCompact,
+                  paddingVertical: tokens.spacing.micro,
                 }}
               >
                 <Text
@@ -181,7 +184,7 @@ export function CommentPanelRow({
 
           <Text
             style={{
-              marginTop: 2,
+              marginTop: tokens.spacing.micro,
               fontSize: tokens.typography.caption,
               color: tokens.colors.mutedFg,
               fontWeight: tokens.fontWeight.semibold,
@@ -196,7 +199,7 @@ export function CommentPanelRow({
 
         <View
           style={{
-            marginTop: 7,
+            marginTop: tokens.spacing.xsCompact,
             flexDirection: "row",
             alignItems: "center",
             gap: tokens.spacing.xs,
@@ -211,7 +214,7 @@ export function CommentPanelRow({
               paddingHorizontal: tokens.spacing.sm,
               flexDirection: "row",
               alignItems: "center",
-              gap: 5,
+              gap: tokens.spacing.xxsPlus,
             }}
           >
             <MessageCircle size={13} color={tokens.colors.mutedFg} />
@@ -245,7 +248,7 @@ export function CommentPanelRow({
               paddingHorizontal: tokens.spacing.sm,
               flexDirection: "row",
               alignItems: "center",
-              gap: 5,
+              gap: tokens.spacing.xxsPlus,
             }}
           >
             <Heart

@@ -1,8 +1,20 @@
 {
   "androidBundleJsBytesMax": 8500000,
   "coldStartupP95Ms": 2500,
+  "feedBlankAreaP95PxMax": 8,
+  "feedFpsP50Min": 55,
+  "firstCachedContentP95Ms": 850,
+  "firstFrameP95Ms": 700,
   "frameJankPercentMax": 1,
+  "interactiveP95Ms": 1200,
+  "jsFrameBudgetMs": 16.67,
+  "mediaCacheHitRateMin": 0.65,
+  "navigationResponseP95Ms": 300,
+  "projectionPayloadP95BytesMax": 180000,
+  "projectionRpcP95Ms": 1200,
+  "projectionRpcP99Ms": 2500,
   "splashMaxWaitMs": 900,
   "tapResponseP95Ms": 100,
-  "warmStartupP95Ms": 1000
+  "warmStartupP95Ms": 1000,
+  "warmupUsefulnessRateMin": 0.4
 }

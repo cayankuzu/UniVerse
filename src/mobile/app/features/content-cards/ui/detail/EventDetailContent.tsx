@@ -1,13 +1,14 @@
 import { LinearGradient } from "expo-linear-gradient";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import { Heart, Images, MapPin, MessageCircle } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { OverflowActionMenu, type OverflowActionItem } from "../../../../shared/components";
 import type {
   DetailAccessChip,
   DetailMetaChip,
   DetailSlideItem,
 } from "../../application/eventDetailPresentation";
-import { tokens } from "../../../../shared/theme";
+import { tokens, withAlpha } from "../../../../shared/theme";
 import {
   EventDetailAttendanceBar,
   EventDetailInfoSlides,
@@ -131,7 +132,7 @@ export function EventDetailContent({
           flexDirection: "row",
           alignItems: "center",
           gap: tokens.spacing.xxs,
-          paddingTop: 14,
+          paddingTop: tokens.spacing.smPlus,
           borderTopWidth: 1,
           borderTopColor: tokens.colors.divider,
           marginTop: tokens.spacing.sm,
@@ -154,11 +155,11 @@ export function EventDetailContent({
             style={{
               flexDirection: "row",
               alignItems: "center",
-              gap: 5,
+              gap: tokens.spacing.xxsPlus,
               borderRadius: tokens.radius.pill,
-              paddingHorizontal: 10,
-              minHeight: tokens.minHeight.touchTarget,
-              backgroundColor: liked ? "rgba(254,226,226,0.9)" : "transparent",
+              paddingHorizontal: tokens.spacing.compact,
+              minHeight: tokens.minHeight.buttonMd,
+              backgroundColor: liked ? withAlpha(tokens.colors.dangerSurface, 0.9) : "transparent",
             }}
           >
             <Heart
@@ -185,10 +186,10 @@ export function EventDetailContent({
             style={{
               flexDirection: "row",
               alignItems: "center",
-              gap: 5,
+              gap: tokens.spacing.xxsPlus,
               borderRadius: tokens.radius.pill,
-              paddingHorizontal: 10,
-              minHeight: tokens.minHeight.touchTarget,
+              paddingHorizontal: tokens.spacing.compact,
+              minHeight: tokens.minHeight.buttonMd,
             }}
           >
             <MessageCircle
@@ -225,10 +226,10 @@ export function EventDetailContent({
             style={{
               flexDirection: "row",
               alignItems: "center",
-              gap: 5,
+              gap: tokens.spacing.xxsPlus,
               borderRadius: tokens.radius.pill,
-              paddingHorizontal: 10,
-              minHeight: tokens.minHeight.touchTarget,
+              paddingHorizontal: tokens.spacing.compact,
+              minHeight: tokens.minHeight.buttonMd,
               opacity: albumDisabled ? 0.45 : 1,
             }}
           >
@@ -257,11 +258,11 @@ export function EventDetailContent({
                 onOpenLocation();
               }}
               style={{
-                minHeight: tokens.minHeight.touchTarget,
-                minWidth: tokens.minHeight.touchTarget,
+                minHeight: tokens.minHeight.buttonMd,
+                minWidth: tokens.minHeight.buttonMd,
                 alignItems: "center",
                 justifyContent: "center",
-                paddingHorizontal: 6,
+                paddingHorizontal: tokens.spacing.xsMinus,
                 opacity: locationDisabled ? 0.45 : 1,
               }}
             >
@@ -295,8 +296,8 @@ export function EventDetailContent({
               style={{
                 borderRadius: tokens.radius.md,
                 overflow: "hidden",
-                minWidth: 96,
-                maxWidth: 118,
+                minWidth: 80,
+                maxWidth: 98,
                 flexShrink: 1,
                 opacity: joinDisabled || joinHardDisabled ? 0.72 : 1,
               }}
@@ -305,7 +306,7 @@ export function EventDetailContent({
                 <View
                   style={{
                     minHeight: tokens.minHeight.header,
-                    paddingHorizontal: 14,
+                    paddingHorizontal: tokens.spacing.smPlus,
                     alignItems: "center",
                     justifyContent: "center",
                     backgroundColor: tokens.colors.successSoft,
@@ -321,14 +322,14 @@ export function EventDetailContent({
                       color: tokens.colors.successIcon,
                     }}
                   >
-                    Katildin
+                    Katıldın
                   </Text>
                 </View>
               ) : joinDisabled ? (
                 <View
                   style={{
                     minHeight: tokens.minHeight.header,
-                    paddingHorizontal: 14,
+                    paddingHorizontal: tokens.spacing.smPlus,
                     alignItems: "center",
                     justifyContent: "center",
                     backgroundColor: tokens.colors.border,
@@ -354,7 +355,7 @@ export function EventDetailContent({
                   start={{ x: 0, y: 0.5 }}
                   style={{
                     minHeight: tokens.minHeight.header,
-                    paddingHorizontal: 14,
+                    paddingHorizontal: tokens.spacing.smPlus,
                     alignItems: "center",
                     justifyContent: "center",
                   }}

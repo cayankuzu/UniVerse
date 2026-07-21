@@ -5,6 +5,7 @@ import { AppImage } from "../../../../shared/components";
 import { isVideoMediaUri } from "../../../../shared/media/mediaVideoUtils";
 import { VideoThumbnailPreview } from "../../../../shared/media/VideoThumbnailPreview";
 import type { EventWithMeta } from "../../data";
+import { tokens, withAlpha } from "../../../../shared/theme";
 
 interface EventDetailImageProps {
   event: EventWithMeta;
@@ -38,7 +39,7 @@ export function EventDetailImage({
       onLongPress={onLongPress}
       delayLongPress={220}
       activeOpacity={0.9}
-      style={{ height: 208, backgroundColor: "#e2e8f0", overflow: "hidden" }}
+      style={{ height: 176, backgroundColor: tokens.colors.border, overflow: "hidden" }}
     >
       {canShowImage ? (
         isVideoMediaUri(event.image || "") ? (
@@ -62,10 +63,10 @@ export function EventDetailImage({
                 left: 0,
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: "rgba(15,23,42,0.18)",
+                backgroundColor: withAlpha(tokens.colors.foreground, 0.18),
               }}
             >
-              <Play size={34} color="#ffffff" strokeWidth={1.8} />
+              <Play size={tokens.iconSize["3xl"]} color={tokens.colors.onMedia} strokeWidth={1.8} />
             </View>
           </View>
         ) : (
@@ -80,7 +81,11 @@ export function EventDetailImage({
         )
       ) : (
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-          <ImageIcon size={28} color="#94a3b8" strokeWidth={1.5} />
+          <ImageIcon
+            size={tokens.iconSize["2xl"]}
+            color={tokens.colors.textSubtle}
+            strokeWidth={1.5}
+          />
         </View>
       )}
     </TouchableOpacity>

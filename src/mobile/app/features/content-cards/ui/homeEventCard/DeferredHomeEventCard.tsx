@@ -193,17 +193,17 @@ export const DeferredHomeEventCard = React.memo(function DeferredHomeEventCard({
       />
       <DangerConfirmSheet
         busy={state.deleteBusy}
-        confirmLabel="Etkinligi Sil"
+        confirmLabel="Etkinliği Sil"
         description="Etkinlik sayfasını kapatacaksın. Bu karar hemen akış kartına yansır."
         note="Silme işlemi geri alınamaz."
         onClose={state.closeDeleteConfirmModal}
         onConfirm={() => void state.handleDeleteEvent()}
-        title="Etkinligi kaldir"
+        title="Etkinliği kaldır"
         visible={interactive && state.showDeleteConfirmModal}
         warningItems={[
           "Etkinlik kartı ana sayfa akışından kaldırılır.",
           "Profillerdeki albüm kartları korunur.",
-          "Katılımcılar etkinligi artik gormez.",
+          "Katılımcılar etkinliği artık görmez.",
         ]}
       />
     </EventCardSurface>

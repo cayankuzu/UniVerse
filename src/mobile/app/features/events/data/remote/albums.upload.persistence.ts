@@ -57,13 +57,13 @@ function resolveAlbumUploadCapabilityReason(capabilities: EventUploadCapabilitie
   ).toUpperCase();
   switch (reasonCode) {
     case "EVENT_ENDED":
-      return "Bu etkinlik sona erdigi icin album yukleme izni su anda kapali.";
+      return "Bu etkinlik sona erdiği için albüm yükleme izni şu anda kapalı.";
     case "FOLLOW_REQUIRED":
-      return "Bu albume medya yuklemek icin once ilgili kulubu takip etmelisin.";
+      return "Bu albüme medya yüklemek için önce ilgili kulübü takip etmelisin.";
     case "UNAUTHORIZED":
-      return "Album yuklemek icin once giris yapmalisin.";
+      return "Albüm yüklemek için önce giriş yapmalısın.";
     case "CLUB_ACCOUNT_NOT_ALLOWED":
-      return "Kulup hesaplari bu etkinlige katilimci olarak album yukleyemez.";
+      return "Kulüp hesapları bu etkinliğe katılımcı olarak albüm yükleyemez.";
     default:
       return "";
   }
@@ -138,7 +138,7 @@ async function getAlbumUploadAvailabilityWithClient(
     throw new Error("Etkinlik bulunamadi.");
   }
   if (!normalizedUserId) {
-    throw new Error("Oturum dogrulanamadi.");
+    throw new Error("Oturum doğrulanamadı.");
   }
 
   const [{ data: eventRow, error: eventError }, capabilities, ownAlbumsRes] = await Promise.all([
@@ -161,7 +161,7 @@ async function getAlbumUploadAvailabilityWithClient(
     throw new Error("Etkinlik bulunamadi.");
   }
   if (ownAlbumsRes.error) {
-    throw new Error("Album yukleme hakki hesaplanamadi.");
+    throw new Error("Albüm yükleme hakkı hesaplanamadı.");
   }
 
   const isOwnerClub = String(eventRow.club_id || "").trim() === normalizedUserId;
@@ -176,7 +176,7 @@ async function getAlbumUploadAvailabilityWithClient(
       .eq("user_id", normalizedUserId)
       .maybeSingle();
     if (attendeeError) {
-      throw new Error("Album yukleme yetkisi dogrulanamadi.");
+      throw new Error("Albüm yükleme yetkisi doğrulanamadı.");
     }
     isParticipant = Boolean(attendeeRow);
   }
@@ -193,7 +193,7 @@ async function getAlbumUploadAvailabilityWithClient(
       remainingAlbumSlots,
       reason:
         resolveAlbumUploadCapabilityReason(capabilities) ||
-        "Bu albume sadece etkinlik sahibi kulup ve katilimcilar medya yukleyebilir.",
+        "Bu albüme sadece etkinlik sahibi kulüp ve katılımcılar medya yükleyebilir.",
     };
   }
 
@@ -204,7 +204,7 @@ async function getAlbumUploadAvailabilityWithClient(
       isParticipant,
       ownAlbumCount,
       remainingAlbumSlots,
-      reason: "Bu albume sadece etkinlik sahibi kulup ve katilimcilar medya yukleyebilir.",
+      reason: "Bu albüme sadece etkinlik sahibi kulüp ve katılımcılar medya yükleyebilir.",
     };
   }
 
@@ -215,7 +215,7 @@ async function getAlbumUploadAvailabilityWithClient(
       isParticipant,
       ownAlbumCount,
       remainingAlbumSlots,
-      reason: "Her kullanici bu etkinlige en fazla 3 album karti ekleyebilir.",
+      reason: "Her kullanıcı bu etkinliğe en fazla 3 albüm kartı ekleyebilir.",
     };
   }
 
@@ -244,7 +244,7 @@ export async function getAlbumUploadAvailability(
     userIdHint: userId,
   });
   if (!authContext) {
-    throw new Error("Oturum dogrulanamadi.");
+    throw new Error("Oturum doğrulanamadı.");
   }
   return getAlbumUploadAvailabilityWithClient(eventId, authContext.userId, authContext.client);
 }
@@ -255,7 +255,7 @@ export async function ensureAlbumUploadAllowedForAuthContext(
 ) {
   const availability = await getAlbumUploadAvailabilityForAuthContext(eventId, authContext);
   if (!availability.canUpload) {
-    throw new Error(availability.reason || "Bu etkinlik albumune fotograf yukleme yetkiniz yok.");
+    throw new Error(availability.reason || "Bu etkinlik albümüne fotoğraf yükleme yetkiniz yok.");
   }
   return availability;
 }
@@ -263,7 +263,7 @@ export async function ensureAlbumUploadAllowedForAuthContext(
 export async function ensureAlbumUploadAllowed(eventId: string, userId: string) {
   const availability = await getAlbumUploadAvailability(eventId, userId);
   if (!availability.canUpload) {
-    throw new Error(availability.reason || "Bu etkinlik albumune fotograf yukleme yetkiniz yok.");
+    throw new Error(availability.reason || "Bu etkinlik albümüne fotoğraf yükleme yetkiniz yok.");
   }
   return availability;
 }
@@ -282,7 +282,7 @@ export async function writeAlbumPhotoToTable(params: {
 }) {
   const nextImages = normalizeImages(params.payload);
   if (nextImages.length > MAX_EVENT_ALBUM_PHOTOS) {
-    throw new Error("Tek bir album kartinda en fazla 9 medya olabilir.");
+    throw new Error("Tek bir albüm kartında en fazla 6 medya olabilir.");
   }
 
   const visibility = normalizeProfileSurfaceVisibility(params.payload);

@@ -1,5 +1,6 @@
 import React from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { AppText as Text } from "../components/AppText";
+import { ActivityIndicator, Pressable, View } from "react-native";
 import { Check, ImagePlus, X } from "lucide-react-native";
 import { t } from "../i18n";
 import { tokens } from "../theme";
@@ -10,7 +11,7 @@ export function MediaLibraryPickerLoadingState() {
   return (
     <View
       style={{
-        paddingVertical: 50,
+        paddingVertical: tokens.spacing["3xl"],
         alignItems: "center",
         justifyContent: "center",
         gap: tokens.spacing.sm - 2,
@@ -28,7 +29,7 @@ export function MediaLibraryPickerPermissionState(props: { onClose: () => void }
   return (
     <View
       style={{
-        paddingVertical: tokens.minHeight.touchTarget,
+        paddingVertical: tokens.spacing["3xl"],
         alignItems: "center",
         gap: tokens.spacing.xs,
       }}
@@ -36,7 +37,7 @@ export function MediaLibraryPickerPermissionState(props: { onClose: () => void }
       <Text
         style={{
           color: tokens.colors.foreground,
-          fontSize: 15,
+          fontSize: tokens.typography.control,
           fontWeight: tokens.fontWeight.extrabold,
         }}
       >
@@ -54,11 +55,11 @@ export function MediaLibraryPickerPermissionState(props: { onClose: () => void }
       <Pressable
         onPress={props.onClose}
         style={{
-          marginTop: 6,
+          marginTop: tokens.spacing.xsMinus,
           minHeight: tokens.minHeight.inputSm,
           borderRadius: tokens.radius.md,
           backgroundColor: tokens.colors.primary,
-          paddingHorizontal: 14,
+          paddingHorizontal: tokens.spacing.smPlus,
           alignItems: "center",
           justifyContent: "center",
         }}
@@ -66,7 +67,7 @@ export function MediaLibraryPickerPermissionState(props: { onClose: () => void }
         <Text
           style={{
             color: tokens.colors.surface,
-            fontSize: 13,
+            fontSize: tokens.typography.label,
             fontWeight: tokens.fontWeight.extrabold,
           }}
         >
@@ -81,7 +82,7 @@ export function MediaLibraryPickerEmptyState(props: { tab: TabKey }) {
   return (
     <View
       style={{
-        paddingVertical: tokens.minHeight.touchTarget,
+        paddingVertical: tokens.spacing["3xl"],
         alignItems: "center",
         gap: tokens.spacing.xs,
       }}
@@ -89,7 +90,7 @@ export function MediaLibraryPickerEmptyState(props: { tab: TabKey }) {
       <Text
         style={{
           color: tokens.colors.foreground,
-          fontSize: 15,
+          fontSize: tokens.typography.control,
           fontWeight: tokens.fontWeight.extrabold,
         }}
       >
@@ -116,7 +117,7 @@ export function MediaLibraryPickerSelectionSummary(props: { selectedCount: numbe
   return (
     <View
       style={{
-        borderRadius: 18,
+        borderRadius: tokens.radius.card,
         borderWidth: 1,
         borderColor: tokens.colors.borderLight,
         backgroundColor: tokens.colors.background,
@@ -162,7 +163,7 @@ export function MediaLibraryPickerConfirmButton(props: { disabled: boolean; onPr
       onPress={props.onPress}
       style={{
         minHeight: tokens.minHeight.buttonLg,
-        borderRadius: 14,
+        borderRadius: tokens.radius.control,
         backgroundColor: props.disabled ? tokens.colors.mutedFg : tokens.colors.primary,
         alignItems: "center",
         justifyContent: "center",
@@ -195,7 +196,7 @@ export function MediaLibraryPickerSheetHeader(props: {
     <View
       style={{
         paddingHorizontal: tokens.spacing.md,
-        paddingTop: 14,
+        paddingTop: tokens.spacing.smPlus,
         paddingBottom: tokens.spacing.sm,
         backgroundColor: tokens.colors.surfaceTint,
         borderBottomWidth: 1,
@@ -206,8 +207,8 @@ export function MediaLibraryPickerSheetHeader(props: {
       <View style={{ flexDirection: "row", alignItems: "flex-start", gap: tokens.spacing.sm }}>
         <View
           style={{
-            width: tokens.minHeight.touchTarget,
-            height: tokens.minHeight.touchTarget,
+            width: tokens.minHeight.inputSm,
+            height: tokens.minHeight.inputSm,
             borderRadius: tokens.radius.lg,
             backgroundColor: tokens.colors.primarySoft,
             alignItems: "center",
@@ -260,14 +261,16 @@ export function MediaLibraryPickerSheetHeader(props: {
           style={{
             color: tokens.colors.muted,
             fontSize: tokens.typography.caption,
-            lineHeight: 17,
+            lineHeight: tokens.lineHeight.caption,
           }}
         >
           {props.description}
         </Text>
       ) : null}
 
-      <View style={{ flexDirection: "row", gap: tokens.spacing.xs, paddingTop: 2 }}>
+      <View
+        style={{ flexDirection: "row", gap: tokens.spacing.xs, paddingTop: tokens.spacing.micro }}
+      >
         {(["all", "photos", "videos"] as const).map((item) => {
           const active = props.tab === item;
           const label =

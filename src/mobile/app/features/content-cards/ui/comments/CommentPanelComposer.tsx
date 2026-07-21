@@ -1,6 +1,7 @@
 import { CornerDownRight, Send, X } from "lucide-react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import type { RefObject } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { Pressable, TextInput, View } from "react-native";
 import { AppScrollView as ScrollView, Avatar } from "../../../../shared/components";
 import { tokens } from "../../../../shared/theme";
 import { TEXT_LIMITS } from "../../../../shared/validation/textLimits";
@@ -75,9 +76,9 @@ export function CommentPanelComposer({
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{
-          gap: 7,
-          paddingHorizontal: 1,
-          paddingVertical: 2,
+          gap: tokens.spacing.xsCompact,
+          paddingHorizontal: tokens.spacing.hairline,
+          paddingVertical: tokens.spacing.micro,
         }}
       >
         {QUICK_REACTIONS.map((reaction) => (
@@ -97,7 +98,7 @@ export function CommentPanelComposer({
               borderColor: tokens.colors.border,
             }}
           >
-            <Text style={{ fontSize: 20 }}>{reaction}</Text>
+            <Text style={{ fontSize: tokens.typography.sectionTitle }}>{reaction}</Text>
           </Pressable>
         ))}
       </ScrollView>
@@ -110,8 +111,8 @@ export function CommentPanelComposer({
             borderWidth: 1,
             borderColor: tokens.colors.primaryBorder,
             paddingLeft: tokens.spacing.sm,
-            paddingRight: 6,
-            paddingVertical: 7,
+            paddingRight: tokens.spacing.xsMinus,
+            paddingVertical: tokens.spacing.xsCompact,
             flexDirection: "row",
             alignItems: "center",
             gap: tokens.spacing.xs,
@@ -156,16 +157,16 @@ export function CommentPanelComposer({
           backgroundColor: inputFocused ? tokens.colors.surfaceTint : tokens.colors.surface,
           flexDirection: "row",
           alignItems: "center",
-          paddingLeft: 8,
-          paddingRight: 6,
-          minHeight: 52,
+          paddingLeft: tokens.spacing.xs,
+          paddingRight: tokens.spacing.xsMinus,
+          minHeight: 44,
           gap: tokens.spacing.xs,
         }}
       >
         <Avatar
           uri={currentUser.image || ""}
           name={currentUser.name || currentUser.username}
-          size={34}
+          size={28}
         />
 
         <TextInput
@@ -181,12 +182,13 @@ export function CommentPanelComposer({
           maxLength={TEXT_LIMITS.comment.body}
           style={{
             flex: 1,
-            maxHeight: 108,
+            maxHeight: 88,
             color: tokens.colors.foreground,
+            fontFamily: tokens.fontFamily.regular,
             fontSize: tokens.typography.body,
-            lineHeight: 20,
-            paddingTop: 12,
-            paddingBottom: 12,
+            lineHeight: tokens.lineHeight.body,
+            paddingTop: tokens.spacing.sm,
+            paddingBottom: tokens.spacing.sm,
           }}
         />
 

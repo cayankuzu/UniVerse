@@ -1,4 +1,5 @@
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import { tokens } from "../../../../shared/theme";
 import type { AlbumOwnerFilter } from "../../domain/profileConstants";
 

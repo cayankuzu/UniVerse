@@ -5,6 +5,7 @@ import { GradientButton, TextField } from "../../../../shared/components";
 import { RegistrationAvailabilityHint, RegistrationStepHeading, SelectField } from "../components";
 import { TEXT_LIMITS } from "../../../../shared/validation/textLimits";
 import type { StudentRegistrationStepProps } from "../studentRegistrationSections.shared";
+import { tokens } from "../../../../shared/theme";
 
 export function StudentRegistrationUniversityStep({
   emailAvailabilityError,
@@ -29,7 +30,7 @@ export function StudentRegistrationUniversityStep({
       />
       <RegistrationAvailabilityHint active={emailChecking} text="E-posta kontrol ediliyor..." />
 
-      <View style={{ marginTop: 12 }}>
+      <View style={{ marginTop: tokens.spacing.sm }}>
         <SelectField
           errorText={errors.university?.message}
           fieldName="university"
@@ -41,7 +42,7 @@ export function StudentRegistrationUniversityStep({
           searchPlaceholder="Üniversite ara"
         />
       </View>
-      <View style={{ marginTop: 12 }}>
+      <View style={{ marginTop: tokens.spacing.sm }}>
         <SelectField
           errorText={errors.department?.message}
           fieldName="department"
@@ -53,7 +54,7 @@ export function StudentRegistrationUniversityStep({
           searchPlaceholder="Bölüm ara"
         />
       </View>
-      <View style={{ marginTop: 12 }}>
+      <View style={{ marginTop: tokens.spacing.sm }}>
         <SelectField
           errorText={errors.gradeYear?.message}
           fieldName="gradeYear"
@@ -66,7 +67,7 @@ export function StudentRegistrationUniversityStep({
         />
       </View>
 
-      <View style={{ marginTop: 20 }}>
+      <View style={{ marginTop: tokens.spacing.lg }}>
         <GradientButton
           label="Devam Et"
           onPress={() => void goNext()}

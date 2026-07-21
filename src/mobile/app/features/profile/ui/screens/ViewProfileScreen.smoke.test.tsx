@@ -269,7 +269,7 @@ describe("ViewProfileScreen smoke", () => {
     );
 
     expect(screen.getByText("Engeli Kaldır")).toBeTruthy();
-    expect(screen.getByText("Şikayet Et")).toBeTruthy();
+    expect(screen.getByText("Şikâyet Et")).toBeTruthy();
   });
 
   it("keeps the full profile header visible for private profiles while hiding content", () => {

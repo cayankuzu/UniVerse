@@ -49,7 +49,7 @@ describe("local media integrity", () => {
     mockFileBytes = new Uint8Array();
 
     await expect(calculateLocalFileIntegrity("file:///empty.jpg")).rejects.toThrow(
-      "Medya dosyasi okunamadi veya bos.",
+      "Medya dosyası okunamadı veya boş.",
     );
   });
 
@@ -67,7 +67,7 @@ describe("local media integrity", () => {
     mockReturnEmptyChunk = true;
 
     await expect(calculateLocalFileIntegrity("file:///stalled.jpg")).rejects.toThrow(
-      "tamamen okunamadi",
+      "tamamen okunamadı",
     );
     expect(mockClose).toHaveBeenCalledTimes(1);
   });
@@ -78,7 +78,7 @@ describe("local media integrity", () => {
     mockReturnExtraByte = true;
 
     await expect(calculateLocalFileIntegrity("file:///overread.jpg")).rejects.toThrow(
-      "boyutu dogrulanamadi",
+      "boyutu doğrulanamadı",
     );
     expect(mockClose).toHaveBeenCalledTimes(1);
   });

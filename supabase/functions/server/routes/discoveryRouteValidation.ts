@@ -54,7 +54,7 @@ const uploadSessionItemSchema = z.object({
     .int()
     .positive()
     .max(220 * 1024 * 1024),
-  mediaIndex: z.number().int().min(0).max(8),
+  mediaIndex: z.number().int().min(0).max(5),
   sourceName: z.string().trim().min(1, "sourceName gerekli").max(240, "sourceName gecersiz"),
 });
 
@@ -63,7 +63,7 @@ const uploadSessionCreateBodySchema = z.object({
   items: z
     .array(uploadSessionItemSchema)
     .min(1, "En az bir medya gerekli")
-    .max(9, "En fazla 9 medya olabilir"),
+    .max(6, "En fazla 6 medya olabilir"),
   mutationId: z.string().trim().min(1, "mutationId gerekli").max(120, "mutationId gecersiz"),
 });
 

@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
-import { Image as ImageIcon } from "lucide-react-native";
+import React, { useState } from "react";
+import { AppText as Text } from "../../../../shared/components/AppText";
+import { Pressable, View } from "react-native";
 import { AppImage } from "../../../../shared/components/AppImage";
 import { Avatar } from "../../../../shared/components/Avatar";
+import { ProfileCoverPlaceholder } from "../../../../shared/components/ProfileIdentity";
 import {
   OverflowActionMenu,
   type OverflowActionItem,
 } from "../../../../shared/components/OverflowActionMenu";
 import { DISCOVERY_GRID_CARD_COLORS } from "./discoveryCardTokens";
-import { tokens } from "../../../../shared/theme";
+import { tokens, withAlpha } from "../../../../shared/theme";
+import { formatTurkishDisplayText } from "../../../../shared/i18n/turkishDisplay";
 
 type ImageVariants = {
   full?: string | null;
@@ -69,7 +71,7 @@ export const DiscoveryUserGridCard = React.memo(function DiscoveryUserGridCard({
   cardHeight: _cardHeight,
   mediaHeight: _mediaHeight,
   menuActions = [],
-  menuTitle = "Profil Islemleri",
+  menuTitle = "Profil İşlemleri",
   onPrefetchProfile,
 }: DiscoveryUserGridCardProps) {
   const looseItem = item;
@@ -93,21 +95,27 @@ export const DiscoveryUserGridCard = React.memo(function DiscoveryUserGridCard({
       "",
   ).trim();
   const resolvedUniversity = String(item.university || "").trim();
-  const detailParts = [
-    String(item.department || looseItem.department || "").trim(),
-    String(
-      item.year || looseItem.gradeYear || looseItem.gradeyear || looseItem.grade_year || "",
-    ).trim(),
-    String(
-      item.category ||
-        (Array.isArray(item.categories) ? item.categories[0] : "") ||
-        looseItem.category ||
-        (Array.isArray(looseItem.categories) ? looseItem.categories[0] : "") ||
-        "",
-    ).trim(),
-  ].filter(Boolean);
-  const metaLine = [resolvedUniversity || "Üniversite bilgisi yok", ...detailParts].join(" | ");
-  const [coverFailed, setCoverFailed] = useState(false);
+  const accountType = item.accountType === "club" ? "club" : "student";
+  const department = String(item.department || looseItem.department || "").trim();
+  const year = String(
+    item.year || looseItem.gradeYear || looseItem.gradeyear || looseItem.grade_year || "",
+  ).trim();
+  const primaryCategory = String(
+    item.category ||
+      (Array.isArray(item.categories) ? item.categories[0] : "") ||
+      looseItem.category ||
+      (Array.isArray(looseItem.categories) ? looseItem.categories[0] : "") ||
+      "",
+  ).trim();
+  const metaLine = (
+    accountType === "club"
+      ? [resolvedUniversity, formatTurkishDisplayText(primaryCategory)]
+      : [resolvedUniversity, department, year]
+  )
+    .filter(Boolean)
+    .join(" • ");
+  const [failedCoverSource, setFailedCoverSource] = useState<string | null>(null);
+  const coverFailed = failedCoverSource === coverSource;
   const canShowCover = !!coverSource && !coverFailed;
   const bioText = String(
     looseItem.bio || looseItem.description || looseItem.about || looseItem.biography || "",
@@ -116,10 +124,6 @@ export const DiscoveryUserGridCard = React.memo(function DiscoveryUserGridCard({
   const coverHeight = Math.max(64, Math.min(84, Math.floor(avatarSize * 1.2)));
   const contentTopPadding = Math.floor(avatarSize / 2) + 2;
 
-  useEffect(() => {
-    setCoverFailed(false);
-  }, [item.id, coverSource]);
-
   return (
     <View style={{ width: cardWidth, position: "relative" }}>
       <Pressable
@@ -127,10 +131,10 @@ export const DiscoveryUserGridCard = React.memo(function DiscoveryUserGridCard({
           width: "100%",
           borderRadius: tokens.radius.md,
           borderWidth: 1,
-          borderColor: "rgba(15,23,42,0.08)",
+          borderColor: withAlpha(tokens.colors.foreground, 0.08),
           backgroundColor: DISCOVERY_GRID_CARD_COLORS.surface,
           overflow: "hidden",
-          paddingBottom: 6,
+          paddingBottom: tokens.spacing.xsMinus,
         }}
         onPressIn={() => {
           if (!resolvedUsername) return;
@@ -152,12 +156,10 @@ export const DiscoveryUserGridCard = React.memo(function DiscoveryUserGridCard({
               variants={item.coverImageVariants}
               variant="medium"
               style={{ width: "100%", height: "100%" }}
-              onError={() => setCoverFailed(true)}
+              onError={() => setFailedCoverSource(coverSource)}
             />
           ) : (
-            <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-              <ImageIcon size={tokens.iconSize.xl} color={tokens.colors.mutedFg} />
-            </View>
+            <ProfileCoverPlaceholder accountType={accountType} />
           )}
         </View>
 
@@ -179,39 +181,48 @@ export const DiscoveryUserGridCard = React.memo(function DiscoveryUserGridCard({
         </View>
 
         <View style={{ paddingTop: contentTopPadding, paddingHorizontal: tokens.spacing.xs }}>
-          <Text
-            style={{
-              color: DISCOVERY_GRID_CARD_COLORS.text,
-              fontSize: tokens.typography.caption,
-              fontWeight: tokens.fontWeight.bold,
-              lineHeight: 15,
-            }}
-            numberOfLines={1}
-          >
-            {resolvedName}
-          </Text>
-          <Text
-            style={{
-              marginTop: 2,
-              color: DISCOVERY_GRID_CARD_COLORS.muted,
-              fontSize: tokens.typography.micro,
-              lineHeight: 13,
-            }}
-            numberOfLines={1}
-          >
-            {metaLine}
-          </Text>
-          <Text
-            style={{
-              marginTop: 2,
-              color: DISCOVERY_GRID_CARD_COLORS.muted,
-              fontSize: tokens.typography.micro,
-              lineHeight: tokens.typography.caption,
-            }}
-            numberOfLines={2}
-          >
-            {bioText || "Biyografi yok"}
-          </Text>
+          <View style={{ alignItems: "center", flexDirection: "row" }}>
+            <Text
+              style={{
+                color: DISCOVERY_GRID_CARD_COLORS.text,
+                flexShrink: 1,
+                fontSize: tokens.typography.body,
+                fontWeight: tokens.fontWeight.bold,
+                lineHeight: tokens.lineHeight.body,
+              }}
+              numberOfLines={1}
+            >
+              {resolvedName}
+            </Text>
+          </View>
+          {metaLine ? (
+            <Text
+              style={{
+                marginTop: tokens.spacing.micro,
+                color: DISCOVERY_GRID_CARD_COLORS.muted,
+                fontSize: tokens.typography.caption,
+                lineHeight: tokens.lineHeight.compact,
+              }}
+              numberOfLines={2}
+            >
+              {metaLine}
+            </Text>
+          ) : null}
+          {bioText ? (
+            <Text
+              style={{
+                marginTop: tokens.spacing.micro,
+                color: DISCOVERY_GRID_CARD_COLORS.muted,
+                fontSize: tokens.typography.caption,
+                lineHeight: tokens.lineHeight.compact,
+              }}
+              numberOfLines={2}
+            >
+              {bioText}
+            </Text>
+          ) : (
+            <View style={{ minHeight: tokens.lineHeight.compact }} />
+          )}
         </View>
       </Pressable>
 

@@ -33,7 +33,7 @@ export const trExtraMessages = {
   "auth.legal.separator": ", ",
   "auth.legal.checkboxLabel": "Yasal metinleri kabul et",
   "auth.legal.accepted": "Metinleri okudum ve kabul ediyorum.",
-  "auth.legal.acceptedHint": "Bu kutucuk işaretlenmeden kayıt ve giriş butonları aktif olmaz.",
+  "auth.legal.acceptedHint": "Bu kutucuk işaretlenmeden kayıt butonu aktif olmaz.",
   "auth.legal.understood": "Anladım",
   "auth.legal.closeA11y": "Yasal metin penceresini kapat",
   "auth.imagePicker.selectPhoto": "Fotoğraf seç",
@@ -45,5 +45,5 @@ export const trExtraMessages = {
   "auth.preview.following": "Takip",
   "auth.preview.account": "Hesap",
   "auth.password.forgot.emailHint": "Hesabında kullandığın e-posta adresini gir",
-  "common.list.end": "Tum icerikler yuklendi",
+  "common.list.end": "Tüm içerikler yüklendi",
 } as const;

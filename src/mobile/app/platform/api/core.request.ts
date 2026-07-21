@@ -116,8 +116,8 @@ async function executeRequest<T>(
       });
       throw new HttpRequestError(
         abortBridge.didTimeout()
-          ? "Istek zaman asimina ugradi. Lutfen tekrar deneyin."
-          : "Istek iptal edildi.",
+          ? "İstek zaman aşımına uğradı. Lütfen tekrar deneyin."
+          : "İstek iptal edildi.",
         0,
         abortBridge.didTimeout(),
       );

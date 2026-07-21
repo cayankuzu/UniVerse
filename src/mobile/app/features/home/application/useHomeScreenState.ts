@@ -7,6 +7,7 @@ import { t } from "../../../shared/i18n";
 import { useViewerRelations } from "../../../data/social";
 import { mapAppDataErrorMessage } from "../../../data/errors/appDataError";
 import { debugLog } from "../../../platform/logging/logger";
+import { logProjectionMetric } from "../../../platform/observability";
 import { useHomeFeedCollections } from "./useHomeFeedCollections";
 import { useHomeScreenUiState } from "./useHomeScreenUiState";
 import { getViewerKey } from "../../../data/contracts/viewerKey";
@@ -50,18 +51,18 @@ export function useHomeScreenState(params: UseHomeScreenStateParams) {
     [params.accountType, params.userData.id, params.userData.username],
   );
 
-  useScrollToTopOnReselect({
-    listRef: uiState.listRef,
-    onReselect: () => uiState.setViewerIndex(null),
-    reselectCounter: params.homeReselectCounter,
-  });
-
   const projectionState = useHomeProjectionState({
     blockedUsers: params.blockedUsers,
     uiState,
     userData: params.userData,
     viewer,
     viewerKey,
+  });
+  useScrollToTopOnReselect({
+    listRef: uiState.listRef,
+    onReselect: () => uiState.setViewerIndex(null),
+    onSecondReselect: projectionState.onRefresh,
+    reselectCounter: params.homeReselectCounter,
   });
   const relationReadsEnabled =
     projectionState.speedGate.allowSecondaryReads &&
@@ -121,6 +122,14 @@ export function useHomeScreenState(params: UseHomeScreenStateParams) {
   const loadingMore = projectionState.homeProjection.loadingMore;
   const hasMore = projectionState.homeProjection.hasMore;
   const onUserInteraction = uiState.markUserInteracted;
+  const onFeedFirstDraw = useCallback((durationMs: number) => {
+    logProjectionMetric({
+      durationMs,
+      name: "feed_first_draw",
+      screenKey: "home",
+      status: "ok",
+    });
+  }, []);
   const refreshHomeProjection = projectionState.onRefresh;
   const loadMoreHomeProjection = projectionState.homeProjection.loadMore;
   const refetchViewerRelations = viewerRelations.refetch;
@@ -182,6 +191,7 @@ export function useHomeScreenState(params: UseHomeScreenStateParams) {
     loadingMore,
     onRefresh,
     onNotificationsPressIn: prefetchState.onNotificationsPressIn,
+    onFeedFirstDraw,
     onUserInteraction,
     onViewableItemsChanged: prefetchState.onViewableItemsChanged,
     refreshing: projectionState.refreshing,
