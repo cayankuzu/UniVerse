@@ -60,4 +60,33 @@ describe("InstantPressable", () => {
       selected: undefined,
     });
   });
+
+  it("recovers after an async action resolves", async () => {
+    let resolveAction: (() => void) | undefined;
+    const onPress = jest.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveAction = resolve;
+        }),
+    );
+    render(
+      <InstantPressable accessibilityLabel="Load" onPress={onPress} preventRepeatMs={0}>
+        <Text>Load</Text>
+      </InstantPressable>,
+    );
+
+    fireEvent.press(screen.getByLabelText("Load"));
+    await act(async () => {
+      resolveAction?.();
+      await Promise.resolve();
+    });
+
+    expect(screen.getByLabelText("Load")).toHaveProp("accessibilityState", {
+      busy: undefined,
+      disabled: false,
+      checked: undefined,
+      expanded: undefined,
+      selected: undefined,
+    });
+  });
 });

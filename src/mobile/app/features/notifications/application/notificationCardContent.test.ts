@@ -106,4 +106,51 @@ describe("buildNotificationCardContent", () => {
       }),
     );
   });
+
+  it.each([
+    ["comment", "event", "", {}],
+    ["comment", "profile", "", {}],
+    ["like", "event", "", {}],
+    ["like", "profile", "", {}],
+    ["event", "album", "", {}],
+    ["event", "event", "etkinlige katildi", {}],
+    ["event", "profile", "", {}],
+    ["join", "event", "", {}],
+    ["join_request", "event", "", {}],
+    ["join_accepted", "event", "", {}],
+    ["join_rejected", "event", "", {}],
+    ["follow", "profile", "", {}],
+    ["unknown", "profile", "", {}],
+  ] as const)(
+    "provides deterministic fallback copy for %s notifications targeting %s",
+    (type, targetType, message, extra) => {
+      const result = buildNotificationCardContent(
+        createNotification({
+          ...extra,
+          message,
+          targetType,
+          type: type as NotificationItem["type"],
+        }),
+      );
+
+      expect(result.actionText).toEqual(expect.any(String));
+      expect(result.actionText.length).toBeGreaterThan(0);
+    },
+  );
+
+  it("uses the album-specific reply copy and event fallback context", () => {
+    const result = buildNotificationCardContent(
+      createNotification({
+        contentTitle: "",
+        detail: "yorum",
+        eventTitle: "Etkinlik",
+        message: "yanit verdi",
+        targetType: "album",
+        type: "comment",
+      }),
+    );
+
+    expect(result.actionText).toContain("yorumunuza");
+    expect(result.contextTitle).toBe("Etkinlik");
+  });
 });

@@ -47,4 +47,30 @@ describe("projection RPC cancellation", () => {
     await expect(request).rejects.toMatchObject({ name: "AbortError" });
     expect(abortSignal).toHaveBeenCalledWith(expect.any(Object));
   });
+
+  it("rejects immediately when the caller signal is already cancelled", async () => {
+    const controller = new AbortController();
+    controller.abort();
+
+    await expect(
+      tryProjectionRpc("search_results_projection_v2", {}, controller.signal),
+    ).rejects.toMatchObject({ name: "AbortError" });
+    expect(supabase.rpc).not.toHaveBeenCalled();
+  });
+
+  it("rejects when cancellation happens while a non-abortable RPC is resolving", async () => {
+    let resolveRpc: ((value: { data: { items: [] }; error: null }) => void) | undefined;
+    (supabase.rpc as jest.Mock).mockReturnValue(
+      new Promise((resolve) => {
+        resolveRpc = resolve;
+      }),
+    );
+    const controller = new AbortController();
+    const request = tryProjectionRpc("search_results_projection_v2", {}, controller.signal);
+
+    controller.abort();
+    resolveRpc?.({ data: { items: [] }, error: null });
+
+    await expect(request).rejects.toMatchObject({ name: "AbortError" });
+  });
 });

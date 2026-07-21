@@ -1,7 +1,12 @@
 import React from "react";
 import { Text } from "react-native";
-import { render, screen } from "@testing-library/react-native";
+import { fireEvent, render, screen } from "@testing-library/react-native";
 import { AppIconButton } from "./AppIconButton";
+import { triggerHapticFeedback } from "../feedback/haptics";
+
+jest.mock("../feedback/haptics", () => ({
+  triggerHapticFeedback: jest.fn(),
+}));
 
 describe("AppIconButton", () => {
   it("formats large badges without breaking the control", () => {
@@ -31,5 +36,22 @@ describe("AppIconButton", () => {
       disabled: true,
       selected: true,
     });
+  });
+
+  it("runs haptic feedback before the icon action", () => {
+    const onPress = jest.fn();
+    render(
+      <AppIconButton
+        accessibilityLabel="Create"
+        haptic="light"
+        icon={({ size }) => <Text>{size}</Text>}
+        onPress={onPress}
+      />,
+    );
+
+    fireEvent.press(screen.getByLabelText("Create"));
+
+    expect(triggerHapticFeedback).toHaveBeenCalledWith("light");
+    expect(onPress).toHaveBeenCalledTimes(1);
   });
 });
