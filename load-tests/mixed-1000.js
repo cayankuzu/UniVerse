@@ -57,6 +57,7 @@ export const options = {
     },
   },
   thresholds: {
+    checks: ["rate>0.99"],
     http_req_failed: ["rate<0.01"],
     "http_req_duration{request_kind:projection}": ["p(95)<1000", "p(99)<1500"],
   },

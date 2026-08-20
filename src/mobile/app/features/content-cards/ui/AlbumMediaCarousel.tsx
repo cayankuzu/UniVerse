@@ -112,6 +112,8 @@ export function AlbumMediaCarousel({
             return (
               <Pressable
                 onPress={() => onPressImage(index)}
+                accessibilityRole="button"
+                accessibilityLabel={`Albüm medyası ${index + 1} / ${images.length}`}
                 style={{ width: mediaWidth, height: mediaFrameHeight }}
               >
                 {isNearViewport ? (

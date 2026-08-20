@@ -41,7 +41,7 @@ function renderHomeTourAnchor(props: {
 }
 
 export function HomeScreen({ navigation }: Props) {
-  const { accountType, blockedUsers, userData } = useAuth();
+  const { accountType, authBootState, blockedUsers, userData } = useAuth();
   const homeReselectCounter = useTabReselectCounter("home");
   const {
     activeFilterCount,
@@ -80,6 +80,7 @@ export function HomeScreen({ navigation }: Props) {
     accountType,
     blockedUsers,
     homeReselectCounter,
+    networkReady: authBootState === "signed_in_hydrated",
     userData,
   });
   const {

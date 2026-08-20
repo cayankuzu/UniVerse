@@ -66,7 +66,7 @@ export function useCreateEventScreenState(params: {
       return;
     }
     showConfirmAlert({
-      cancelLabel: "Vazgec",
+      cancelLabel: "Vazgeç",
       confirmLabel: "Cik",
       destructive: true,
       message: "Kaydedilmeyen etkinlik taslağı silinecek.",
@@ -109,7 +109,7 @@ export function useCreateEventScreenState(params: {
 
     setSubmitting(true);
     formState.setSubmitError("");
-    formState.setUploadProgress("Etkinlik sira aliniyor...");
+    formState.setUploadProgress("Etkinlik sıraya alınıyor...");
     try {
       await startQueuedEventCreate({
         coverImageUri: formState.coverImageUri,
@@ -122,7 +122,7 @@ export function useCreateEventScreenState(params: {
       });
       if (!isMountedRef.current) return;
 
-      formState.setUploadProgress("Etkinlik arka planda paylasiliyor...");
+      formState.setUploadProgress("Etkinlik arka planda paylaşılıyor...");
       allowExitRef.current = true;
       params.resetToHome();
     } catch (error: unknown) {
@@ -133,9 +133,9 @@ export function useCreateEventScreenState(params: {
         {
           forbidden: "Bu etkinliği yayımlama iznin yok.",
           invalid_state: "Etkinlik taslağı geçerli değil.",
-          network: "Baglanti sorunu nedeniyle etkinlik olusturulamadi.",
+          network: "Bağlantı sorunu nedeniyle etkinlik oluşturulamadı.",
         },
-        "Etkinlik olusturulamadi.",
+        "Etkinlik oluşturulamadı.",
       );
       formState.setSubmitError(message);
     } finally {

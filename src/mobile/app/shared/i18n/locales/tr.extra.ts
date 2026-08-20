@@ -36,6 +36,10 @@ export const trExtraMessages = {
   "auth.legal.acceptedHint": "Bu kutucuk işaretlenmeden kayıt butonu aktif olmaz.",
   "auth.legal.understood": "Anladım",
   "auth.legal.closeA11y": "Yasal metin penceresini kapat",
+  "auth.legal.openLinkA11y": "{title} belgesini aç",
+  "auth.legal.openLinkHint": "Belgenin ayrıntılarını açar.",
+  "auth.footer.copyright": "Telif hakkı © {year}",
+  "auth.footer.by": "tarafından",
   "auth.imagePicker.selectPhoto": "Fotoğraf seç",
   "auth.imagePicker.change": "Değiştir",
   "auth.imagePicker.upload": "Yükle",
@@ -46,4 +50,6 @@ export const trExtraMessages = {
   "auth.preview.account": "Hesap",
   "auth.password.forgot.emailHint": "Hesabında kullandığın e-posta adresini gir",
   "common.list.end": "Tüm içerikler yüklendi",
+  "content.type.event": "ETKİNLİK",
+  "content.type.album": "ALBÜM",
 } as const;

@@ -281,13 +281,13 @@ describe("useProjectionScreen", () => {
     );
 
     expect(result.current.shouldShowInitialSkeleton).toBe(true);
-
     await waitFor(() => {
       expect(fetchProjection).toHaveBeenCalledWith({
         cursor: null,
         deltaToken: null,
         limit: 33,
         mode: "replace",
+        signal: expect.anything(),
         since: null,
       });
     });

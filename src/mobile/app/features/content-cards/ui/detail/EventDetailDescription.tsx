@@ -8,7 +8,7 @@ interface EventDetailDescriptionProps {
 export function EventDetailDescription({ description }: EventDetailDescriptionProps) {
   return (
     <ExpandableCardText
-      containerStyle={{ marginTop: tokens.spacing.xxsPlus }}
+      containerStyle={{ marginTop: tokens.spacing.xsMinus }}
       text={description}
       textStyle={{
         color: tokens.colors.muted,

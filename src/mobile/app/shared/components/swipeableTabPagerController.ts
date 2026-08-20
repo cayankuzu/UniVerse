@@ -3,7 +3,7 @@ import { AccessibilityInfo } from "react-native";
 
 const PAGE_SELECTION_SYNC_THRESHOLD = 0.08;
 const PROGRAMMATIC_SCROLL_GUARD_MS = 700;
-const LAZY_RENDER_RADIUS = 2;
+const LAZY_RENDER_RADIUS = 1;
 
 function clampPageIndex(index: number, total: number) {
   if (total <= 0) return 0;
@@ -69,6 +69,7 @@ export function useProgrammaticScrollGuard() {
 type PagerControllerParams<TTab extends string> = {
   activeIndex: number;
   activeTab: TTab;
+  getTabAccessibilityLabel?: (tab: TTab) => string;
   onChange: (nextTab: TTab) => void;
   onPageProgressChange?: (pageOffset: number) => void;
   onPreviewTabChange?: (nextTab: TTab) => void;
@@ -78,6 +79,7 @@ type PagerControllerParams<TTab extends string> = {
 export function usePagerController<TTab extends string>({
   activeIndex,
   activeTab,
+  getTabAccessibilityLabel,
   onChange,
   onPageProgressChange,
   onPreviewTabChange,
@@ -90,10 +92,10 @@ export function usePagerController<TTab extends string>({
   const announceTabChange = useCallback(
     (tab: TTab, index: number) => {
       AccessibilityInfo.announceForAccessibility(
-        `${String(tab)} sekmesi, ${index + 1}/${tabs.length}`,
+        `${getTabAccessibilityLabel?.(tab) || String(tab)} sekmesi, ${index + 1}/${tabs.length}`,
       );
     },
-    [tabs.length],
+    [getTabAccessibilityLabel, tabs.length],
   );
   const emitPreviewIndex = useCallback(
     (nextIndex: number) => {

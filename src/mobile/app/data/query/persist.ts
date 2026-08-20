@@ -12,6 +12,7 @@ export const QUERY_CACHE_PERSIST_KEY = "ogrencisosyalagi:query-cache:v2";
 export const QUERY_CACHE_BUSTER = "startup-2026-07-18-v4";
 export const QUERY_CACHE_MAX_AGE = 24 * 60 * 60 * 1000;
 export const QUERY_CACHE_MAX_BYTES = 512 * 1024;
+export const QUERY_CACHE_RESTORE_TIMEOUT_MS = 350;
 const QUERY_CACHE_PERSIST_THROTTLE_MS = 350;
 const SENSITIVE_PERSISTED_FIELD_PATTERN =
   /(^|_)(access.?token|refresh.?token|authorization|birth.?date|email|password|phone|secret)($|_)/i;
@@ -34,6 +35,18 @@ let persistClientTimer: ReturnType<typeof setTimeout> | null = null;
 let persistClientFlushPromise: Promise<void> | null = null;
 let resolvePersistClientFlush: (() => void) | null = null;
 let rejectPersistClientFlush: ((error: unknown) => void) | null = null;
+
+async function readStorageWithTimeout<T>(promise: Promise<T>, fallback: T) {
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
+  return Promise.race([
+    promise.catch(() => fallback),
+    new Promise<T>((resolve) => {
+      timeoutId = setTimeout(() => resolve(fallback), QUERY_CACHE_RESTORE_TIMEOUT_MS);
+    }),
+  ]).finally(() => {
+    if (timeoutId) clearTimeout(timeoutId);
+  });
+}
 
 function stringifyPersistedClient(client: PersistedClient) {
   return JSON.stringify(client, (key, value) =>
@@ -65,10 +78,10 @@ async function removePersistedQueryCacheStorage(key: string) {
 }
 
 async function readPersistedQueryCacheRaw(key: string) {
-  const asyncStoredValue = await AsyncStorage.getItem(key).catch(() => null);
+  const asyncStoredValue = await readStorageWithTimeout(AsyncStorage.getItem(key), null);
   if (asyncStoredValue) return asyncStoredValue;
 
-  const legacySecureValue = await secureTextStorage.getItem(key).catch(() => null);
+  const legacySecureValue = await readStorageWithTimeout(secureTextStorage.getItem(key), null);
   if (!legacySecureValue) return null;
   let sanitizedLegacyValue: string | null = null;
   try {

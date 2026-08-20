@@ -14,6 +14,7 @@ import type {
   EventWithMeta,
   RelationSnapshot,
 } from "../../../features/content-cards/public/types";
+import { requestNotificationPermissionFromUserInteraction } from "../application/notificationPermissionAction";
 
 export type HomeFeedOverlayState =
   | {
@@ -65,6 +66,7 @@ export function useHomeScreenActions(params: {
   );
 
   const handleOpenNotifications = useCallback(() => {
+    void requestNotificationPermissionFromUserInteraction();
     navigateToRegisteredRoute(params.navigation, "Notifications");
   }, [params.navigation]);
 

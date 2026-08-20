@@ -3,10 +3,29 @@ import { AccessibilityInfo, Text } from "react-native";
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
 import { AppModalHost } from "./AppModalHost";
 
+let mockReducedMotion = false;
+
+jest.mock("../hooks/useReducedMotion", () => ({
+  useReducedMotion: () => mockReducedMotion,
+}));
+
 describe("AppModalHost", () => {
   beforeEach(() => {
+    mockReducedMotion = false;
     jest.useFakeTimers();
     jest.spyOn(AccessibilityInfo, "announceForAccessibility").mockImplementation(jest.fn());
+  });
+
+  it("disables native modal motion when the system requests reduced motion", () => {
+    mockReducedMotion = true;
+
+    render(
+      <AppModalHost animationType="fade" onRequestClose={jest.fn()} testID="motion-modal" visible>
+        <Text>İçerik</Text>
+      </AppModalHost>,
+    );
+
+    expect(screen.getByTestId("motion-modal").props.animationType).toBe("none");
   });
 
   afterEach(() => {

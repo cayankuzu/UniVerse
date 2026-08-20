@@ -36,6 +36,7 @@ export function EventCardReportModal({
       onRequestClose={onClose}
     >
       <Pressable
+        accessible={false}
         onPress={onClose}
         style={{
           flex: 1,
@@ -47,6 +48,7 @@ export function EventCardReportModal({
         }}
       >
         <Pressable
+          accessible={false}
           onPress={(eventPress) => eventPress.stopPropagation()}
           style={{
             borderRadius: tokens.radius.lg,
@@ -84,7 +86,7 @@ export function EventCardReportModal({
                     marginBottom: tokens.spacing.xs,
                   }}
                 >
-                  Inceleme icin ekibe iletildi.
+                  İnceleme için ekibe iletildi.
                 </Text>
               </>
             ) : (
@@ -104,6 +106,8 @@ export function EventCardReportModal({
                   <Pressable
                     key={reason}
                     onPress={() => void onReport(reason)}
+                    accessibilityRole="button"
+                    accessibilityLabel={reason}
                     style={{
                       minHeight: 44,
                       paddingHorizontal: tokens.spacing.sm,
@@ -126,6 +130,8 @@ export function EventCardReportModal({
                 ))}
                 <Pressable
                   onPress={onClose}
+                  accessibilityRole="button"
+                  accessibilityLabel="Vazgeç"
                   style={{
                     minHeight: 44,
                     borderTopWidth: 1,
@@ -141,7 +147,7 @@ export function EventCardReportModal({
                       fontWeight: "700",
                     }}
                   >
-                    Vazgec
+                    Vazgeç
                   </Text>
                 </Pressable>
               </>

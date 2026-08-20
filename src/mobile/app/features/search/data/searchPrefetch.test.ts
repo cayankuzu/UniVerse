@@ -52,7 +52,7 @@ describe("prefetchSearchLandingExperience", () => {
         queryText: "konser",
         scope: "events:konser:::newest:",
         sortMode: "newest",
-        updatedAt: new Date().toISOString(),
+        updatedAt: new Date("2026-08-19T12:00:00.000Z").toISOString(),
       },
       queryClient: new QueryClient(),
       viewer: {

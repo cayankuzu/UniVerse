@@ -15,7 +15,9 @@ const APP_FONTS = {
 } as const;
 
 export function AppFontGate({ children }: PropsWithChildren) {
-  const [fontsLoaded, fontError] = useFonts(APP_FONTS);
-  if (!fontsLoaded && !fontError) return null;
+  // Font loading must never become an application-start gate. React Native
+  // renders with the platform fallback for the first frame and replaces it as
+  // soon as Inter is ready, avoiding a blank screen on slow storage devices.
+  useFonts(APP_FONTS);
   return children;
 }

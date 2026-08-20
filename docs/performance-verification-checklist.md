@@ -1,46 +1,63 @@
 # Performance Verification Checklist
 
-Bu checklist performans refactor rollout'u sirasinda cihaz baglamadan tamamlanacak isleri ve cihaz uzerinde yapilacak son dogrulamalari ayirir.
+Use release or profile builds for performance measurements. Debug builds are suitable only for functional smoke testing.
 
-## Debug APK'dan Once
+## Automated Gates
 
-- `npm run check`
-- pagination/cursor migration'larini staging'e uygula
-- `supabase/validation/01_hot_path_explain.sql` calistir
-- `supabase/validation/06_projection_cursor_paths.sql` calistir
-- `npm run loadtest:smoke`
-- mumkunse `npm run loadtest:sustained`
-- load-test sonucunda:
-  - `http_req_failed < 1%`
-  - projection hot-path `p95 < 400-500ms`
-  - genel `http_req_duration p95 < 1000ms`
-  - auth ve projection latency ayni metricte karistirilmamali; projection gate ayri raporlanmali
+- Run `npm run check`, `npm run lint`, `npm run format:check:all`, and the complete test suite.
+- Run `npm run security:verify:internal` for security or release-hardening changes.
+- Run `npm run android:benchmark:startup` on a supported Android device to capture cold, warm, hot, and critical-journey metrics.
+- Generate and verify the Android baseline profile with `npm run android:baseline-profile` before release.
+- Keep all thresholds in `config/performance-budgets.json`; do not relax them to make a regression pass.
 
-## Staging / SQL Kabul Kriteri
+## Startup and Interaction Acceptance
 
-- `home_feed_projection` ilk sayfa ve cursor'lu ikinci sayfa planlari kabul edilebilir kalmali
-- `home_feed_projection` `sort_mode = 'newest'` ve `sort_mode = 'oldest'` icin plan bozulmamali
-- `profile_content_projection` `events` ve `album` tab'leri ikinci sayfa append yolunda tam taramaya dusmemeli
-- `search_results_projection` `events`, `albums`, `clubs` cursor yolunda kabul edilebilir planda kalmali
-- default ilk sayfa boyutlari `20-30` araliginda kalmali; tum liste replace davranisina geri donulmemeli
+- Cold startup p95: at most 2,500 ms.
+- Warm startup p95: at most 1,000 ms.
+- First frame p95: at most 700 ms.
+- Cached content p95: at most 850 ms.
+- Interactive p95: at most 1,200 ms.
+- Tap feedback p95: at most 100 ms.
+- Navigation response p95: at most 300 ms.
+- Splash wait: at most 900 ms; cache restore and warmup must remain bounded and non-blocking.
 
-## Cihaz Uzerinde
+## Feed and Media Acceptance
 
-- gercek performans olcumu icin `debug` yerine mumkunse `release` veya en az `profile` build kullan
-- `Home`, `Profile`, `Notifications`, `Search` icin ilk anlamli render suresini olc
-- `pull-to-refresh` baslangici ile yeni datanin uygulanmasi arasindaki sureyi olc
-- geri donuslerde ekran cache'ten doluyor mu kontrol et
-- load-more ikinci sayfa append ederken liste flash / scroll jump yapiyor mu kontrol et
-- uzun listelerde scroll jank veya frame drop gozle gorulur olmamali
+- Feed median: at least 55 FPS, with no more than 1% jank.
+- Blank area p95: at most 8 px.
+- Media cache hit rate: at least 65%.
+- Only visible or near-visible media may resolve eagerly; inactive video must remain deferred and paused.
+- Offline, poor-network, memory-pressure, and low-power states must suppress speculative image and next-page prefetch.
+- Verify that reduced-motion mode removes nonessential tab and modal transitions.
 
-## Telemetry / Log Kontrolu
+## Projection and SQL Acceptance
 
-- `*:first-visible` screen event'leri dusmeli
-- `*:refresh` event'leri ilgili ekran anahtariyla dusmeli
-- `*:load-more` projection event'leri ikinci sayfa append yolunda dusmeli
-- cache-hit / cache-path event'leri projection-first davranisi dogrulamali
+- Apply pagination and cursor migrations to staging before measuring.
+- Run `supabase/validation/01_hot_path_explain.sql` and `supabase/validation/06_projection_cursor_paths.sql`.
+- Projection RPC p95: at most 1,200 ms; p99: at most 2,500 ms.
+- Projection response p95: at most 180,000 bytes.
+- Keep initial first-fold pages at their intentionally small limits: Home 5, Notifications 15, Profile/Search/Album 12, Relationships/Blocked 20.
+- Keep subsequent pages cursor-based at 33 items; never replace the whole list during append.
+- Keep Home, Profile, Search, Notifications, follow, block, and status reads projection-first. Compatibility GET reads remain rollback-only.
 
-## Notlar
+## Upload Acceptance
 
-- Debug APK yalnizca fonksiyonel smoke icin uygundur; performans sayilari icin baz alinmamali
-- SQL validation ve k6 sonuclari temiz degilse mobil cihaz smoke'una gecilmemeli
+- Confirm image preparation concurrency is 2, video preparation concurrency is 1, and media upload concurrency is 2.
+- Confirm large uploads resume after interruption and finalized sessions verify checksum, size, and scan state before publication.
+- Verify progress remains monotonic, cancellation releases native work, and a failed queue entry exposes retry and cancel actions.
+
+## Device Scenarios
+
+- Measure Home, Profile, Notifications, and Search first meaningful render on a representative low-tier and current device.
+- Verify cached return navigation renders immediately while stale data refreshes in the background.
+- Verify pull-to-refresh, cursor append, empty, error/retry, offline, expired-session, and long-idle return states.
+- Verify no scroll jump, full-screen loading replacement, eager off-screen video, duplicate request, or repeated-tap mutation occurs.
+- Verify VoiceOver/TalkBack focus, labels, 48 dp touch targets, dynamic text behavior, and modal focus restoration.
+
+## Load and Telemetry Acceptance
+
+- Run `npm run loadtest:smoke` and, when credentials are available, `npm run loadtest:sustained`.
+- Require `http_req_failed < 1%`, projection hot-path p95 below 500 ms, and general HTTP p95 below 1,000 ms.
+- Keep auth and projection latency in separate metrics.
+- Confirm `*:first-visible`, `*:refresh`, `*:load-more`, cache-path, cache-hit, startup, and warmup-usefulness events are emitted.
+- Require warmup usefulness of at least 40%; remove speculative work that does not meet the threshold.

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "exceptions": [
+    {
+      "advisory": "GHSA-w3rx-r6r6-pgpr",
+      "package": "image-size",
+      "classification": "build-only-transitive",
+      "runtimeReachable": false,
+      "reason": "Metro uses image-size while processing repository assets during development and CI builds. The package is not bundled into the mobile runtime, and no patched image-size release exists yet.",
+      "owner": "Mobile Platform",
+      "expires": "2026-09-30"
+    },
+    {
+      "advisory": "GHSA-5p2g-fcmc-qvqq",
+      "package": "image-size",
+      "classification": "build-only-transitive",
+      "runtimeReachable": false,
+      "reason": "Metro uses image-size while processing repository assets during development and CI builds. The package is not bundled into the mobile runtime, and no patched image-size release exists yet.",
+      "owner": "Mobile Platform",
+      "expires": "2026-09-30"
+    }
+  ]
+}

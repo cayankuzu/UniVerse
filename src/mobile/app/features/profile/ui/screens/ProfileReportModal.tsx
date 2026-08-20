@@ -38,6 +38,7 @@ export function ProfileReportModal({
       onRequestClose={onClose}
     >
       <Pressable
+        accessible={false}
         onPress={onClose}
         style={{
           flex: 1,
@@ -49,6 +50,7 @@ export function ProfileReportModal({
         }}
       >
         <Pressable
+          accessible={false}
           onPress={(eventPress) => eventPress.stopPropagation()}
           style={{
             borderRadius: tokens.radius.lg,
@@ -106,6 +108,8 @@ export function ProfileReportModal({
                   <Pressable
                     key={reasonKey}
                     onPress={() => void onReport(t(reasonKey))}
+                    accessibilityRole="button"
+                    accessibilityLabel={t(reasonKey)}
                     style={{
                       minHeight: tokens.minHeight.row,
                       paddingHorizontal: tokens.spacing.sm,
@@ -128,6 +132,8 @@ export function ProfileReportModal({
                 ))}
                 <Pressable
                   onPress={onClose}
+                  accessibilityRole="button"
+                  accessibilityLabel={t("common.cancel")}
                   style={{
                     minHeight: tokens.minHeight.buttonLg,
                     borderTopWidth: 1,

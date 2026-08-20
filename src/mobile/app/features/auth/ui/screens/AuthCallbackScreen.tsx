@@ -218,6 +218,8 @@ export function AuthCallbackScreen({ navigation }: Props) {
             <GradientButton label={t("auth.callback.goToLogin")} onPress={goToLogin} />
             <Pressable
               onPress={goToWelcome}
+              accessibilityRole="button"
+              accessibilityLabel={t("auth.callback.goToHome")}
               style={{
                 minHeight: 48,
                 borderRadius: tokens.radius.lg,

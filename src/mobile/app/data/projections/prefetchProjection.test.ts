@@ -30,7 +30,7 @@ describe("prefetchProjectionScreen", () => {
     queryClient.setQueryData(queryKey, {
       ids: ["1"],
       nextCursor: null,
-      touchedAt: Date.now(),
+      touchedAt: Date.parse("2026-08-19T12:00:00.000Z"),
     });
 
     await prefetchProjectionScreen<Item>({

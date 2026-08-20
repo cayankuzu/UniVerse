@@ -17,6 +17,7 @@ const profile = rehearsalProfile();
 const defaultSmokeVus = profile === "full" ? 5 : 1;
 const defaultSmokeIterations = profile === "full" ? 10 : 8;
 const thresholds = {
+  checks: ["rate>0.99"],
   http_req_failed: ["rate<0.01"],
 };
 if (profile === "full") {

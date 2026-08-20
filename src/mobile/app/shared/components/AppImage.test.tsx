@@ -1,23 +1,16 @@
 import React from "react";
-import { act, render, waitFor } from "@testing-library/react-native";
+import { act, render } from "@testing-library/react-native";
 import { AppImage } from "./AppImage";
 import { useResolvedMediaUri } from "../media/useResolvedMediaUri";
 
 const mockExpoImageProps: Array<Record<string, unknown>> = [];
 
 jest.mock("expo-image", () => ({
-  Image: Object.assign(
-    (props: Record<string, unknown>) => {
-      mockExpoImageProps.push(props);
-      return null;
-    },
-    { getCachePathAsync: jest.fn(() => new Promise<string | null>(() => undefined)) },
-  ),
+  Image: (props: Record<string, unknown>) => {
+    mockExpoImageProps.push(props);
+    return null;
+  },
 }));
-
-const mockGetCachePathAsync = (
-  jest.requireMock("expo-image") as { Image: { getCachePathAsync: jest.Mock } }
-).Image.getCachePathAsync;
 
 jest.mock("../media/useResolvedMediaUri", () => ({
   useResolvedMediaUri: jest.fn((uri: string | null | undefined) => String(uri || "")),
@@ -27,16 +20,15 @@ describe("AppImage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockExpoImageProps.length = 0;
-    mockGetCachePathAsync.mockImplementation(() => new Promise<string | null>(() => undefined));
   });
 
-  it("starts private thumbnail resolution immediately and keeps retry enabled", () => {
+  it("defers normal thumbnail resolution and keeps retry enabled", () => {
     render(
       <AppImage uri="albums/photo-1.jpg" variant="thumbnail" style={{ width: 120, height: 120 }} />,
     );
 
     expect(useResolvedMediaUri).toHaveBeenNthCalledWith(1, "albums/photo-1.jpg", {
-      priority: "eager",
+      priority: "deferred",
       retry: true,
     });
   });
@@ -72,34 +64,30 @@ describe("AppImage", () => {
     );
 
     expect(useResolvedMediaUri).toHaveBeenNthCalledWith(1, "albums/photo-medium.jpg", {
-      priority: "eager",
+      priority: "deferred",
       retry: true,
     });
     expect(useResolvedMediaUri).toHaveBeenNthCalledWith(2, "albums/photo-thumbnail.jpg", {
-      priority: "eager",
+      priority: "deferred",
       retry: true,
     });
   });
 
-  it("uses an instant transition for local media without consulting the disk cache", () => {
+  it("uses an instant transition for local media", () => {
     render(<AppImage uri="file:///photo.jpg" style={{ width: 20, height: 20 }} />);
 
-    expect(mockGetCachePathAsync).not.toHaveBeenCalled();
     expect(mockExpoImageProps[mockExpoImageProps.length - 1]?.transition).toBe(0);
   });
 
-  it("resolves disk cache hits and misses for remote media", async () => {
-    mockGetCachePathAsync.mockResolvedValueOnce("file:///cached.jpg");
-    const { unmount } = render(
-      <AppImage uri="https://cdn.example.com/photo.jpg" style={{ width: 20, height: 20 }} />,
-    );
+  it("delegates remote caching to Expo Image with a stable cache key", () => {
+    render(<AppImage uri="https://cdn.example.com/photo.jpg" style={{ width: 20, height: 20 }} />);
 
-    await waitFor(() => expect(mockGetCachePathAsync).toHaveBeenCalled());
-    unmount();
-
-    mockGetCachePathAsync.mockRejectedValueOnce(new Error("cache unavailable"));
-    render(<AppImage uri="https://cdn.example.com/second.jpg" style={{ width: 20, height: 20 }} />);
-    await waitFor(() => expect(mockGetCachePathAsync).toHaveBeenCalledTimes(2));
+    const props = mockExpoImageProps[mockExpoImageProps.length - 1];
+    expect(props?.cachePolicy).toBe("memory-disk");
+    expect(props?.source).toEqual({
+      cacheKey: "https://cdn.example.com/photo.jpg",
+      uri: "https://cdn.example.com/photo.jpg",
+    });
   });
 
   it("forwards native image lifecycle events", () => {

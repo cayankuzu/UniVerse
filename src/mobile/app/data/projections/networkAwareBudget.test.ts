@@ -1,5 +1,9 @@
 import { AppState } from "react-native";
 import { resolveNetworkBudget, getNetworkQuality } from "./networkAwareBudget";
+import {
+  resetResourceConstraintsForTests,
+  setLowPowerModeEnabled,
+} from "../../shared/performance/resourceConstraints";
 
 jest.mock("react-native", () => ({
   AppState: { currentState: "active" },
@@ -8,6 +12,7 @@ jest.mock("react-native", () => ({
 describe("networkAwareBudget", () => {
   beforeEach(() => {
     (AppState as any).currentState = "active";
+    resetResourceConstraintsForTests();
   });
 
   it("starts conservatively until the first native network state arrives", () => {
@@ -41,7 +46,20 @@ describe("networkAwareBudget", () => {
     expect(budget).toHaveProperty("allowImagePrefetch");
     expect(budget).toHaveProperty("allowIntentPrefetch");
     expect(budget).toHaveProperty("allowNextPagePrefetch");
+    expect(budget).toHaveProperty("powerConstrained");
     expect(budget).toHaveProperty("quality");
+  });
+
+  it("keeps intent data available but suppresses speculative work in low power mode", () => {
+    setLowPowerModeEnabled(true);
+
+    expect(resolveNetworkBudget("active")).toMatchObject({
+      allowIdlePrefetch: false,
+      allowImagePrefetch: false,
+      allowIntentPrefetch: true,
+      allowNextPagePrefetch: false,
+      powerConstrained: true,
+    });
   });
 
   it("getNetworkQuality returns a valid quality", () => {

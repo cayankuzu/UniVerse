@@ -325,6 +325,7 @@ export function CategorySelector({
           }}
         >
           <Pressable
+            accessibilityLabel={t("common.clear")}
             accessibilityRole="button"
             onPress={() => onChange([])}
             style={{
@@ -349,6 +350,7 @@ export function CategorySelector({
             </Text>
           </Pressable>
           <Pressable
+            accessibilityLabel={t("common.done")}
             accessibilityRole="button"
             onPress={() => setVisible(false)}
             style={{

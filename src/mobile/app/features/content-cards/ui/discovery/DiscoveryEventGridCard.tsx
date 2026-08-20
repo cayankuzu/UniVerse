@@ -66,6 +66,9 @@ export const DiscoveryEventGridCard = React.memo(function DiscoveryEventGridCard
 
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${String(item.title || "Etkinlik")} etkinliğini aç`}
+      accessibilityState={{ disabled: disablePress }}
       style={{
         width: cardWidth,
         borderRadius: tokens.radius.md,

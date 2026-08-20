@@ -132,7 +132,7 @@ export function ViewProfileHeroSection({
               marginTop: tokens.spacing.xsMinus,
               flexDirection: "row",
               alignItems: "center",
-              gap: tokens.spacing.xxsPlus,
+              gap: tokens.spacing.xsMinus,
             }}
           >
             <Mail size={tokens.iconSize.xs} color={tokens.colors.textSubtle} />
@@ -151,7 +151,7 @@ export function ViewProfileHeroSection({
               marginTop: tokens.spacing.xs,
               flexDirection: "row",
               alignItems: "center",
-              gap: tokens.spacing.xxsPlus,
+              gap: tokens.spacing.xsMinus,
             }}
           >
             <MapPin size={tokens.iconSize.xs} color={tokens.colors.mutedFg} />
@@ -166,7 +166,7 @@ export function ViewProfileHeroSection({
               marginTop: tokens.spacing.xsMinus,
               flexDirection: "row",
               alignItems: "center",
-              gap: tokens.spacing.xxsPlus,
+              gap: tokens.spacing.xsMinus,
             }}
           >
             <BookOpen size={tokens.iconSize.xs} color={tokens.colors.mutedFg} />
@@ -181,7 +181,7 @@ export function ViewProfileHeroSection({
               marginTop: tokens.spacing.xsMinus,
               flexDirection: "row",
               alignItems: "center",
-              gap: tokens.spacing.xxsPlus,
+              gap: tokens.spacing.xsMinus,
             }}
           >
             <GraduationCap size={tokens.iconSize.xs} color={tokens.colors.mutedFg} />

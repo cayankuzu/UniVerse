@@ -155,7 +155,7 @@ export function EventDetailContent({
             style={{
               flexDirection: "row",
               alignItems: "center",
-              gap: tokens.spacing.xxsPlus,
+              gap: tokens.spacing.xsMinus,
               borderRadius: tokens.radius.pill,
               paddingHorizontal: tokens.spacing.compact,
               minHeight: tokens.minHeight.buttonMd,
@@ -186,7 +186,7 @@ export function EventDetailContent({
             style={{
               flexDirection: "row",
               alignItems: "center",
-              gap: tokens.spacing.xxsPlus,
+              gap: tokens.spacing.xsMinus,
               borderRadius: tokens.radius.pill,
               paddingHorizontal: tokens.spacing.compact,
               minHeight: tokens.minHeight.buttonMd,
@@ -209,7 +209,7 @@ export function EventDetailContent({
           </Pressable>
 
           <Pressable
-            accessibilityLabel="Etkinlik albumunu ac"
+            accessibilityLabel="Etkinlik albümünü aç"
             accessibilityRole="button"
             accessibilityState={{ disabled: albumDisabled }}
             onPress={() => {
@@ -226,7 +226,7 @@ export function EventDetailContent({
             style={{
               flexDirection: "row",
               alignItems: "center",
-              gap: tokens.spacing.xxsPlus,
+              gap: tokens.spacing.xsMinus,
               borderRadius: tokens.radius.pill,
               paddingHorizontal: tokens.spacing.compact,
               minHeight: tokens.minHeight.buttonMd,

@@ -44,7 +44,12 @@ export function CreateEventSchedulePicker({
             paddingTop: tokens.spacing.compact,
           }}
         >
-          <Pressable onPress={onClose} hitSlop={tokens.hitSlop.sm}>
+          <Pressable
+            onPress={onClose}
+            accessibilityRole="button"
+            accessibilityLabel={t("events.schedule.cancel")}
+            hitSlop={tokens.hitSlop.sm}
+          >
             <Text
               style={{
                 color: tokens.colors.muted,
@@ -55,7 +60,12 @@ export function CreateEventSchedulePicker({
               {t("events.schedule.cancel")}
             </Text>
           </Pressable>
-          <Pressable onPress={onClose} hitSlop={tokens.hitSlop.sm}>
+          <Pressable
+            onPress={onClose}
+            accessibilityRole="button"
+            accessibilityLabel={t("events.schedule.confirm")}
+            hitSlop={tokens.hitSlop.sm}
+          >
             <Text
               style={{
                 color: tokens.colors.primary,

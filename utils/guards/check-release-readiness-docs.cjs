@@ -301,7 +301,7 @@ assertContains(
 );
 assertContains(
   maestroAuth,
-  /Giris Yap/i,
+  /Giri(?:ş|s) Yap/i,
   "[release-readiness-docs] auth-shell Maestro flow must validate the signed-out shell.",
 );
 

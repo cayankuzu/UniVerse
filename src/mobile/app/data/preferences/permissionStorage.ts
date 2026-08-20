@@ -6,7 +6,6 @@ const PERMISSION_PROMPT_PREFIX = "UNiETAS_permission_prompt_";
 
 const DEFAULT_PERMISSION_SNAPSHOT: PermissionSnapshot = {
   camera: "undetermined",
-  location: "undetermined",
   microphone: "undetermined",
   notifications: "undetermined",
   photos: "undetermined",
@@ -25,7 +24,6 @@ function getPermissionPromptKey(userId: string) {
 export function hasAnyPermissionGranted(snapshot: PermissionSnapshot): boolean {
   return (
     snapshot.camera === "granted" ||
-    snapshot.location === "granted" ||
     snapshot.microphone === "granted" ||
     snapshot.notifications === "granted" ||
     snapshot.photos === "granted"
@@ -37,7 +35,6 @@ export function parsePermissionSnapshot(raw: string | null): PermissionSnapshot 
   if (raw === "granted") {
     return {
       camera: "granted",
-      location: "granted",
       microphone: "granted",
       notifications: "granted",
       photos: "granted",
@@ -50,17 +47,12 @@ export function parsePermissionSnapshot(raw: string | null): PermissionSnapshot 
     if (!parsed || typeof parsed !== "object") {
       return null;
     }
-    if (
-      !isPermissionStatus(parsed.location) ||
-      !isPermissionStatus(parsed.notifications) ||
-      !isPermissionStatus(parsed.photos)
-    ) {
+    if (!isPermissionStatus(parsed.notifications) || !isPermissionStatus(parsed.photos)) {
       return null;
     }
 
     return {
       camera: isPermissionStatus(parsed.camera) ? parsed.camera : "undetermined",
-      location: parsed.location,
       microphone: isPermissionStatus(parsed.microphone) ? parsed.microphone : "undetermined",
       notifications: parsed.notifications,
       photos: parsed.photos,

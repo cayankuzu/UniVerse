@@ -7,6 +7,7 @@ import { debugLog, debugWarn } from "../../platform/logging/logger";
 import { isHttpRequestError } from "../../platform/api/core";
 import { supabase } from "../../platform/supabase";
 import { NotificationPushAPI } from "../../features/notifications/public/push";
+import { subscribeNotificationPermissionGranted } from "../../platform/notifications/notificationPermission";
 import { getStableQueueJitterMs } from "../queues/queueResumeScheduler";
 import {
   ACTIVE_PUSH_SYNC_DELAY_MS,
@@ -30,7 +31,6 @@ export function usePushRegistrationSync() {
   const lastSuccessfulSyncAtRef = useRef(0);
   const lastSyncAttemptAtRef = useRef(0);
   const lastAuthRejectAtRef = useRef(0);
-  const permissionPromptAttemptedRef = useRef(false);
   const userId = String(userData.id || "").trim();
 
   useEffect(() => {
@@ -39,14 +39,12 @@ export function usePushRegistrationSync() {
       lastSuccessfulSyncAtRef.current = 0;
       lastSyncAttemptAtRef.current = 0;
       lastAuthRejectAtRef.current = 0;
-      permissionPromptAttemptedRef.current = false;
     }
   }, [isLoggedIn, userId]);
 
   useEffect(() => {
     if (!isLoggedIn || !userId) return;
     if (shouldSkipPushRegistration(APP_ENV)) {
-      permissionPromptAttemptedRef.current = false;
       void NotificationPushAPI.getStoredRegistration().then((stored) => {
         if (!stored?.expoPushToken) return;
         void NotificationPushAPI.unregisterToken(stored.expoPushToken).catch(() => undefined);
@@ -72,28 +70,25 @@ export function usePushRegistrationSync() {
       Date.now() - lastSuccessfulSyncAtRef.current < PUSH_SYNC_FRESH_MS;
 
     const syncPushRegistration = async () => {
+      await ensureAndroidNotificationChannel();
       const stored = await NotificationPushAPI.getStoredRegistration();
-      let permissions = await Notifications.getPermissionsAsync();
-      const rawPermissionStatus = String((permissions as { status?: unknown }).status || "")
-        .trim()
-        .toLowerCase();
-      if (
-        !hasNotificationPermission(permissions) &&
-        rawPermissionStatus === "undetermined" &&
-        !permissionPromptAttemptedRef.current
-      ) {
-        permissionPromptAttemptedRef.current = true;
-        permissions = await Notifications.requestPermissionsAsync();
-      }
+      const permissions = await Notifications.getPermissionsAsync();
       if (!hasNotificationPermission(permissions)) {
         if (stored?.userId === userId) {
-          await NotificationPushAPI.unregisterToken(stored.expoPushToken).catch(() => undefined);
-          await NotificationPushAPI.clearStoredRegistration();
-          lastSyncedRegistrationKeyRef.current = "";
+          try {
+            await NotificationPushAPI.unregisterToken(stored.expoPushToken);
+            await NotificationPushAPI.clearStoredRegistration();
+            lastSyncedRegistrationKeyRef.current = "";
+          } catch (error) {
+            debugWarn("PUSH", "push-unregister-retry-required", {
+              message: String((error as { message?: string })?.message || error || ""),
+              userId,
+            });
+            return false;
+          }
         }
-        return false;
+        return "permission-missing" as const;
       }
-      permissionPromptAttemptedRef.current = true;
 
       const projectId = resolveExpoProjectId();
       if (!projectId) {
@@ -103,7 +98,6 @@ export function usePushRegistrationSync() {
         return false;
       }
 
-      await ensureAndroidNotificationChannel();
       const expoPushToken = String(
         (await Notifications.getExpoPushTokenAsync({ projectId })).data || "",
       ).trim();
@@ -112,7 +106,7 @@ export function usePushRegistrationSync() {
         return false;
       }
 
-      const registrationKey = `${userId}:${APP_ENV}:${platform}:${expoPushToken}`;
+      const registrationKey = `${userId}:${APP_ENV}:${platform}:${projectId}:${expoPushToken}`;
       if (lastSyncedRegistrationKeyRef.current === registrationKey) {
         return true;
       }
@@ -150,11 +144,13 @@ export function usePushRegistrationSync() {
 
       await NotificationPushAPI.registerToken({
         appEnv: APP_ENV,
+        expoProjectId: projectId,
         expoPushToken,
         platform,
       });
       await NotificationPushAPI.rememberRegistration({
         appEnv: APP_ENV,
+        expoProjectId: projectId,
         expoPushToken,
         platform,
         userId,
@@ -169,9 +165,9 @@ export function usePushRegistrationSync() {
       return true;
     };
 
-    type SyncResult = boolean | "auth-error";
+    type SyncResult = boolean | "auth-error" | "permission-missing";
 
-    const runSync = async (): Promise<SyncResult> => {
+    const runSync = async (options?: { bypassThrottle?: boolean }): Promise<SyncResult> => {
       const now = Date.now();
       if (hasFreshRegistration()) {
         return true;
@@ -179,8 +175,11 @@ export function usePushRegistrationSync() {
       if (now - lastAuthRejectAtRef.current < PUSH_AUTH_REJECT_COOLDOWN_MS) {
         return "auth-error";
       }
-      if (now - lastSyncAttemptAtRef.current < MIN_PUSH_SYNC_INTERVAL_MS) {
-        return true;
+      if (
+        !options?.bypassThrottle &&
+        now - lastSyncAttemptAtRef.current < MIN_PUSH_SYNC_INTERVAL_MS
+      ) {
+        return false;
       }
       lastSyncAttemptAtRef.current = now;
       try {
@@ -217,8 +216,8 @@ export function usePushRegistrationSync() {
       scheduledSyncAt = Date.now() + backoffMs;
       pendingTimeout = setTimeout(() => {
         scheduledSyncAt = null;
-        void runSync().then((result) => {
-          if (result === true || result === "auth-error") return;
+        void runSync({ bypassThrottle: true }).then((result) => {
+          if (result === true || result === "auth-error" || result === "permission-missing") return;
           scheduleRetry();
         });
       }, backoffMs);
@@ -244,7 +243,8 @@ export function usePushRegistrationSync() {
           pendingTimeout = null;
           scheduledSyncAt = null;
           void runSync().then((result) => {
-            if (result === true || result === "auth-error") return;
+            if (result === true || result === "auth-error" || result === "permission-missing")
+              return;
             scheduleRetry();
           });
         },
@@ -253,6 +253,20 @@ export function usePushRegistrationSync() {
     };
 
     scheduleSync(INITIAL_PUSH_SYNC_DELAY_MS);
+
+    const unsubscribePermission = subscribeNotificationPermissionGranted(() => {
+      lastSyncAttemptAtRef.current = 0;
+      retryCount = 0;
+      scheduleSync(0);
+    });
+
+    const pushTokenSubscription = Notifications.addPushTokenListener(() => {
+      lastSyncedRegistrationKeyRef.current = "";
+      lastSuccessfulSyncAtRef.current = 0;
+      lastSyncAttemptAtRef.current = 0;
+      retryCount = 0;
+      scheduleSync(0);
+    });
 
     const appStateSubscription = AppState.addEventListener("change", (state) => {
       if (state === "active" && !disposed) {
@@ -267,6 +281,8 @@ export function usePushRegistrationSync() {
     return () => {
       disposed = true;
       if (pendingTimeout) clearTimeout(pendingTimeout);
+      unsubscribePermission();
+      pushTokenSubscription.remove();
       appStateSubscription.remove();
     };
   }, [isLoggedIn, userId]);

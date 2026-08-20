@@ -135,7 +135,7 @@ async function getAlbumUploadAvailabilityWithClient(
   const normalizedEventId = String(eventId || "").trim();
   const normalizedUserId = String(userId || "").trim();
   if (!normalizedEventId) {
-    throw new Error("Etkinlik bulunamadi.");
+    throw new Error("Etkinlik bulunamadı.");
   }
   if (!normalizedUserId) {
     throw new Error("Oturum doğrulanamadı.");
@@ -158,7 +158,7 @@ async function getAlbumUploadAvailabilityWithClient(
   ]);
 
   if (eventError || !eventRow) {
-    throw new Error("Etkinlik bulunamadi.");
+    throw new Error("Etkinlik bulunamadı.");
   }
   if (ownAlbumsRes.error) {
     throw new Error("Albüm yükleme hakkı hesaplanamadı.");

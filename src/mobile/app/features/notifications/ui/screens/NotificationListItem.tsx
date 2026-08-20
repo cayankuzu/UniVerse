@@ -65,7 +65,9 @@ export const NotificationListItem = React.memo(function NotificationListItem({
 
   return (
     <Pressable
+      accessibilityLabel={`${cardContent.actorName} ${cardContent.actionText}`}
       accessibilityRole="button"
+      accessibilityState={{ selected: !item.read }}
       onPress={onPress}
       style={{
         borderRadius: tokens.radius.control,
@@ -183,7 +185,7 @@ export const NotificationListItem = React.memo(function NotificationListItem({
         </Text>
 
         {showFollowActions ? (
-          <View style={{ marginTop: tokens.spacing.xsCompact, gap: tokens.spacing.xsMinus }}>
+          <View style={{ marginTop: tokens.spacing.xs, gap: tokens.spacing.xsMinus }}>
             <FollowRequestActionButtons
               acceptSelected={followAcceptSelected}
               disabled={!canShowFollowActions || followActionsLocked}

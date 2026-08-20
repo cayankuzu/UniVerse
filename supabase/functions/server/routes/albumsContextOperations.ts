@@ -23,7 +23,13 @@ import type {
 } from "./albumsRouteContext.ts";
 
 type EventMapEntry = { clubProfile: KvProfileRecord | null; event: KvEventRecord };
+const SQL_SYNC_BATCH_SIZE = 50;
 type BlockedStateReader = {
+  filterRowsByTargetId: <T>(
+    viewerId: string,
+    rows: T[],
+    getTargetId: (row: T) => string,
+  ) => Promise<T[]>;
   isBlockedPair: (viewerId: string, targetId: string) => Promise<boolean>;
 };
 
@@ -94,15 +100,9 @@ export function createAlbumContextOperations(params: {
   };
 
   const filterBlockedEvents = async (viewerId: string, events: KvEventRecord[]) => {
-    if (!viewerId || events.length === 0) return events;
-    const next: KvEventRecord[] = [];
-    for (const event of events) {
-      const clubUserId = String(event.clubUserId || "").trim();
-      if (!clubUserId) continue;
-      if (await blockedState.isBlockedPair(viewerId, clubUserId)) continue;
-      next.push(event);
-    }
-    return next;
+    return blockedState.filterRowsByTargetId(viewerId, events, (event) =>
+      String(event.clubUserId || "").trim(),
+    );
   };
 
   const getDiscoverableEventMap = async (viewerId: string) => {
@@ -215,41 +215,56 @@ export function createAlbumContextOperations(params: {
       new Set(rawEventIds.map((item) => String(item || "").trim()).filter(Boolean)),
     );
     if (!eventIds.length) return 0;
+    const eventIdSet = new Set(eventIds);
     const allKvPhotos = await listAllPhotosFromKv();
     const candidatePhotos = allKvPhotos.filter((photo) =>
-      eventIds.includes(normalizeKvPhotoEventId(photo)),
+      eventIdSet.has(normalizeKvPhotoEventId(photo)),
     );
     if (!candidatePhotos.length) return 0;
-    let synced = 0;
-    for (const photo of candidatePhotos) {
+    const rows = candidatePhotos.flatMap((photo) => {
       const photoId = String(photo.id || "").trim() || generateId();
       const eventId = normalizeKvPhotoEventId(photo);
       const userId = String(photo.userId || "").trim();
       const images = normalizeKvPhotoImages(photo);
-      if (!eventId || !userId || !images.length) continue;
+      if (!eventId || !userId || !images.length) return [];
       const visibility = normalizeAlbumSurfaceVisibility(photo);
-      const row = {
-        id: photoId,
-        event_id: eventId,
-        user_id: userId,
-        storage_path: images[0],
-        media_paths: images,
-        caption: String(photo.caption || "").trim(),
-        title: String(photo.title || "").trim() || null,
-        show_on_club_profile: visibility.showOnClubProfile,
-        show_on_profile: visibility.showOnOwnProfile || visibility.showOnClubProfile,
-        show_on_user_profile: visibility.showOnOwnProfile,
-        created_at: String(photo.createdAt || "").trim() || new Date().toISOString(),
-      };
+      return [
+        {
+          id: photoId,
+          event_id: eventId,
+          user_id: userId,
+          storage_path: images[0],
+          media_paths: images,
+          caption: String(photo.caption || "").trim(),
+          title: String(photo.title || "").trim() || null,
+          show_on_club_profile: visibility.showOnClubProfile,
+          show_on_profile: visibility.showOnOwnProfile || visibility.showOnClubProfile,
+          show_on_user_profile: visibility.showOnOwnProfile,
+          created_at: String(photo.createdAt || "").trim() || new Date().toISOString(),
+        },
+      ];
+    });
 
-      const { error } = await adminSupabase
+    let synced = 0;
+    for (let index = 0; index < rows.length; index += SQL_SYNC_BATCH_SIZE) {
+      const batch = rows.slice(index, index + SQL_SYNC_BATCH_SIZE);
+      const { data, error } = await adminSupabase
         .from("album_photos")
-        .upsert(row, { onConflict: "id" })
-        .select("id")
-        .single();
+        .upsert(batch, { onConflict: "id" })
+        .select("id");
+      if (!error && Array.isArray(data)) {
+        synced += data.length;
+        continue;
+      }
 
-      if (!error) {
-        synced += 1;
+      // Keep the rollback sync resilient: isolate a bad legacy row only when a batch fails.
+      for (const row of batch) {
+        const fallback = await adminSupabase
+          .from("album_photos")
+          .upsert(row, { onConflict: "id" })
+          .select("id")
+          .single();
+        if (!fallback.error) synced += 1;
       }
     }
 

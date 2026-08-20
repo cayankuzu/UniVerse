@@ -8,6 +8,29 @@ const APP_JSON = path.join(ROOT, "app.json");
 const RUNTIME_CONFIG = path.join(ROOT, "src", "mobile", "app", "platform", "config", "runtime.ts");
 const BUILD_GRADLE = path.join(ROOT, "android", "app", "build.gradle");
 const PACKAGE_JSON = path.join(ROOT, "package.json");
+const APP_RELEASE_JSON = path.join(ROOT, "config", "app-release.json");
+const IOS_PREBUILD_JSON = path.join(ROOT, "config", "ios-prebuild.json");
+const ANDROID_MANIFEST = path.join(ROOT, "android", "app", "src", "main", "AndroidManifest.xml");
+const ANDROID_STRINGS = path.join(
+  ROOT,
+  "android",
+  "app",
+  "src",
+  "main",
+  "res",
+  "values",
+  "strings.xml",
+);
+const ANDROID_STYLES = path.join(
+  ROOT,
+  "android",
+  "app",
+  "src",
+  "main",
+  "res",
+  "values",
+  "styles.xml",
+);
 const MATERIALIZE_NATIVE_CONFIG = path.join(ROOT, "scripts", "materialize-native-config.cjs");
 const GITIGNORE = path.join(ROOT, ".gitignore");
 
@@ -32,11 +55,110 @@ const appJson = JSON.parse(readFile(APP_JSON));
 const runtimeConfig = readFile(RUNTIME_CONFIG);
 const buildGradle = readFile(BUILD_GRADLE);
 const packageJson = readFile(PACKAGE_JSON);
+const packageManifest = JSON.parse(packageJson);
+const appRelease = JSON.parse(readFile(APP_RELEASE_JSON));
+const iosPrebuild = JSON.parse(readFile(IOS_PREBUILD_JSON));
+const androidManifest = readFile(ANDROID_MANIFEST);
+const androidStrings = readFile(ANDROID_STRINGS);
+const androidStyles = readFile(ANDROID_STYLES);
 const materializeNativeConfig = readFile(MATERIALIZE_NATIVE_CONFIG);
 const gitignore = readFile(GITIGNORE);
 
 const previewProfile = eas?.build?.preview;
 const productionProfile = eas?.build?.production;
+
+function expectEqual(actual, expected, message) {
+  if (String(actual ?? "") !== String(expected ?? "")) {
+    fail(`${message} Expected ${expected}, received ${actual}.`);
+  }
+}
+
+expectEqual(packageManifest.version, appRelease.version, "package.json version drifted.");
+expectEqual(appJson?.expo?.version, appRelease.version, "app.json version drifted.");
+expectEqual(
+  appJson?.expo?.runtimeVersion,
+  appRelease.runtimeVersion,
+  "app.json runtimeVersion drifted.",
+);
+
+const nativeOwnedExpoFields = ["android", "icon", "ios", "plugins", "scheme", "splash"];
+for (const field of nativeOwnedExpoFields) {
+  if (Object.prototype.hasOwnProperty.call(appJson?.expo || {}, field)) {
+    fail(
+      `app.json must remain neutral; native-owned field \"${field}\" belongs in native Android or config/ios-prebuild.json.`,
+    );
+  }
+}
+
+expectEqual(iosPrebuild.scheme, "ogrencisosyalagi", "iOS URL scheme drifted.");
+expectEqual(iosPrebuild.orientation, "portrait", "iOS orientation policy drifted.");
+expectEqual(
+  iosPrebuild?.ios?.infoPlist?.UIUserInterfaceStyle,
+  "Light",
+  "iOS light-only policy drifted.",
+);
+expectMatch(
+  androidManifest,
+  new RegExp(`package=["']${appRelease.android.package.replace(/\./g, "\\.")}["']`),
+  "Android manifest package drifted from the release source of truth.",
+);
+expectMatch(
+  androidManifest,
+  new RegExp(`android:scheme=["']${iosPrebuild.scheme}["']`),
+  "Android URL scheme drifted from the iOS prebuild source of truth.",
+);
+
+if (appRelease.version !== appRelease.runtimeVersion) {
+  fail("config/app-release.json version and runtimeVersion must match for OTA compatibility.");
+}
+
+expectMatch(
+  appConfig,
+  /require\("\.\/config\/app-release\.json"\)/,
+  "app.config.js must read the release source of truth.",
+);
+expectMatch(
+  appConfig,
+  /require\("\.\/config\/ios-prebuild\.json"\)/,
+  "app.config.js must read the dedicated iOS prebuild config.",
+);
+expectMatch(
+  appConfig,
+  /const GENERATE_IOS_NATIVE_CONFIG = EAS_BUILD_PLATFORM === "ios";/,
+  "app.config.js must expose iOS native fields only during an iOS EAS build.",
+);
+expectMatch(
+  buildGradle,
+  /config\/app-release\.json/,
+  "Gradle must read the release source of truth.",
+);
+expectMatch(
+  buildGradle,
+  /resValue\s+"string",\s*"expo_runtime_version"/,
+  "Gradle must materialize the native Expo runtime string from the release source of truth.",
+);
+expectMatch(
+  androidManifest,
+  /expo\.modules\.updates\.EXPO_RUNTIME_VERSION"\s+android:value="@string\/expo_runtime_version"/,
+  "AndroidManifest must use the generated Expo runtime string.",
+);
+if (/name="expo_runtime_version"/.test(androidStrings)) {
+  fail("android strings.xml must not hard-code expo_runtime_version.");
+}
+expectMatch(
+  androidStyles,
+  /Theme[.]AppCompat[.]Light[.]NoActionBar/,
+  "Android must use an explicit light-only application theme.",
+);
+expectMatch(
+  androidManifest,
+  /android:screenOrientation="portrait"/,
+  "Android portrait-only policy drifted.",
+);
+
+if (/play[.]integrity|PLAY_INTEGRITY/i.test(buildGradle)) {
+  fail("Unused partial Play Integrity configuration must not remain in the Android build.");
+}
 
 if (!previewProfile || !productionProfile) {
   fail("Missing preview or production build profile in eas.json.");
@@ -78,6 +200,22 @@ for (const [name, expected] of Object.entries(requiredProductionEnv)) {
   }
 }
 
+for (const [profileName, releaseProfile] of Object.entries(appRelease.profiles || {})) {
+  const easProfile = eas?.build?.[profileName];
+  if (!easProfile) fail(`Missing EAS profile declared by app-release.json: ${profileName}.`);
+  expectEqual(easProfile.channel, releaseProfile.channel, `${profileName} channel drifted.`);
+  expectEqual(
+    easProfile.env?.EXPO_PUBLIC_APP_ENV,
+    releaseProfile.appEnv,
+    `${profileName} app env drifted.`,
+  );
+  expectEqual(
+    easProfile.env?.EXPO_PUBLIC_RELEASE_CHANNEL,
+    releaseProfile.channel,
+    `${profileName} release channel drifted.`,
+  );
+}
+
 expectMatch(
   appConfig,
   /const APP_ENV = process\.env\.EXPO_PUBLIC_APP_ENV \|\| "development";/,
@@ -90,13 +228,13 @@ expectMatch(
 );
 expectMatch(
   appConfig,
-  /EXPO_IOS_GOOGLE_SERVICES_FILE/,
-  "app.config.js must resolve iOS Google services config from an injected file-secret path.",
+  /EXPO_PUBLIC_APP_SCHEME must match config\/ios-prebuild\.json/,
+  "app.config.js must reject runtime/native URL scheme drift.",
 );
 expectMatch(
   appConfig,
-  /EXPO_ANDROID_GOOGLE_SERVICES_FILE/,
-  "app.config.js must resolve Android Google services config from an injected file-secret path.",
+  /EXPO_IOS_GOOGLE_SERVICES_FILE/,
+  "app.config.js must resolve iOS Google services config from an injected file-secret path.",
 );
 expectMatch(
   appConfig,
@@ -138,6 +276,21 @@ expectMatch(
   /project\.file\("src\/release\/google-services\.json"\)/,
   "Gradle must check the materialized release Google services file.",
 );
+expectMatch(
+  buildGradle,
+  /class VerifyReleaseGoogleServicesTask[\s\S]*notCompatibleWithConfigurationCache[\s\S]*it\.name\.toLowerCase\(\)\.contains\("release"\)/,
+  "Release Google services verification must run at task execution and must not reuse configuration cache.",
+);
+expectMatch(
+  buildGradle,
+  /gradle\.taskGraph\.whenReady[\s\S]*it\.path\.toLowerCase\(\)\.startsWith\(":app:"\)[\s\S]*releaseGoogleServicesFile/,
+  "Release Google services verification must fail before release task execution begins.",
+);
+expectMatch(
+  buildGradle,
+  /hasReleaseGoogleServicesConfig = releaseGoogleServicesFile\.exists\(\)/,
+  "Only the materialized release source-set Google services config may satisfy the release gate.",
+);
 if (
   /System\.getenv\("EXPO_ANDROID_GOOGLE_SERVICES_FILE"\)|System\.getenv\("ANDROID_GOOGLE_SERVICES_FILE"\)/.test(
     buildGradle,
@@ -147,12 +300,6 @@ if (
 }
 if (!gitignore.includes("android/app/src/release/google-services.json")) {
   fail("Materialized Android Google services output must be gitignored.");
-}
-
-if (appJson?.expo?.ios?.googleServicesFile || appJson?.expo?.android?.googleServicesFile) {
-  fail(
-    "app.json must not hard-code Google services file paths; app.config.js owns injected file-secret paths.",
-  );
 }
 
 if (

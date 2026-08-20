@@ -48,6 +48,7 @@ export function EventAlbumUploadModalFrame({
       >
         <View style={{ flex: 1, justifyContent: "flex-end" }}>
           <Pressable
+            accessible={false}
             onPress={onClose}
             style={{
               ...StyleSheet.absoluteFillObject,
@@ -100,6 +101,7 @@ export function EventAlbumUploadModalFrame({
                 >
                   <Pressable
                     accessibilityLabel="Geri"
+                    accessibilityRole="button"
                     hitSlop={tokens.hitSlop.sm}
                     onPress={onClose}
                     style={{
@@ -144,7 +146,7 @@ export function EventAlbumUploadModalFrame({
                         fontWeight: tokens.fontWeight.semibold,
                       }}
                     >
-                      Bir album kartina foto ve video ekle.
+                      Bir albüm kartına fotoğraf ve video ekle.
                     </Text>
                   </View>
                   <View
@@ -187,7 +189,7 @@ export function EventAlbumUploadModalFrame({
                         fontWeight: tokens.fontWeight.bold,
                       }}
                     >
-                      Album hakki: {remainingAlbumSlots}/3
+                      Albüm hakkı: {remainingAlbumSlots}/3
                     </Text>
                   </View>
                   <View
@@ -205,7 +207,7 @@ export function EventAlbumUploadModalFrame({
                         fontWeight: tokens.fontWeight.bold,
                       }}
                     >
-                      Video basi: {Math.floor(MAX_VIDEO_DURATION_SECONDS / 60)} dk, 1080p tavan:{" "}
+                      Video başı: {Math.floor(MAX_VIDEO_DURATION_SECONDS / 60)} dk, 1080p tavan:{" "}
                       {MAX_VIDEO_UPLOAD_LIMIT_MB} MB ({MAX_VIDEO_UPLOAD_GRACE_SECONDS} sn boyut
                       payi)
                     </Text>

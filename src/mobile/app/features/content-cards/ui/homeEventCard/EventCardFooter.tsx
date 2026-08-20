@@ -108,7 +108,7 @@ export function EventCardFooter({
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
-                  gap: tokens.spacing.xxsPlus,
+                  gap: tokens.spacing.xsMinus,
                   borderRadius: tokens.radius.pill,
                   paddingHorizontal: tokens.spacing.compact,
                   minHeight: tokens.minHeight.buttonMd,
@@ -148,7 +148,7 @@ export function EventCardFooter({
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
-                  gap: tokens.spacing.xxsPlus,
+                  gap: tokens.spacing.xsMinus,
                   borderRadius: tokens.radius.pill,
                   paddingHorizontal: tokens.spacing.compact,
                   minHeight: tokens.minHeight.buttonMd,
@@ -181,7 +181,7 @@ export function EventCardFooter({
             style={{
               flexDirection: "row",
               alignItems: "center",
-              gap: tokens.spacing.xxsPlus,
+              gap: tokens.spacing.xsMinus,
               borderRadius: tokens.radius.pill,
               paddingHorizontal: tokens.spacing.compact,
               minHeight: tokens.minHeight.buttonMd,

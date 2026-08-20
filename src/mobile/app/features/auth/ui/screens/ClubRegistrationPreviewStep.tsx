@@ -22,7 +22,7 @@ export function ClubRegistrationPreviewStep({
 }: ClubRegistrationStepProps) {
   return (
     <>
-      <RegistrationStepHeading title="On Izleme" subtitle="Kayıt oncesi bilgilerini kontrol et" />
+      <RegistrationStepHeading title="Ön İzleme" subtitle="Kayıt öncesi bilgilerini kontrol et" />
 
       <AccountPreviewCard
         accountLabel="Kulüp Hesabı"

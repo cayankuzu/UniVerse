@@ -12,19 +12,19 @@ export const createEventSchema = z
       .max(4000, "Etkinlik açıklaması en fazla 4000 karakter olabilir."),
     endDate: z.string().optional(),
     endTime: z.string().optional(),
-    fee: z.string().min(1, "Ucret bilgisi zorunlu."),
+    fee: z.string().min(1, "Ücret bilgisi zorunlu."),
     feeAmount: z.string().optional(),
-    level: z.string().min(1, "Seviye secimi zorunlu."),
+    level: z.string().min(1, "Seviye seçimi zorunlu."),
     location: z.string().min(1, "Konum zorunlu."),
     materials: z.string().optional(),
-    startDate: z.string().min(1, "Baslangic tarihi zorunlu."),
+    startDate: z.string().min(1, "Başlangıç tarihi zorunlu."),
     startTime: z.string().optional(),
     targetAudience: z.string().optional(),
     title: z
       .string()
       .trim()
-      .min(3, "Etkinlik basligi en az 3 karakter olmali.")
-      .max(120, "Etkinlik basligi en fazla 120 karakter olabilir."),
+      .min(3, "Etkinlik başlığı en az 3 karakter olmalı.")
+      .max(120, "Etkinlik başlığı en fazla 120 karakter olabilir."),
     type: z.string().min(1, "Etkinlik tipi zorunlu."),
   })
   .superRefine((value, context) => {
@@ -32,7 +32,7 @@ export const createEventSchema = z
     if (!Number.isFinite(capacity) || capacity <= 0) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Kontenjan 0'dan buyuk olmali.",
+        message: "Kontenjan 0'dan büyük olmalı.",
         path: ["capacity"],
       });
     }
@@ -43,14 +43,14 @@ export const createEventSchema = z
     if (!startAt) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Baslangic tarihi veya saati gecersiz.",
+        message: "Başlangıç tarihi veya saati geçersiz.",
         path: ["startDate"],
       });
     }
     if (!endAt) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Bitis tarihi veya saati gecersiz.",
+        message: "Bitiş tarihi veya saati geçersiz.",
         path: ["endDate"],
       });
     }
@@ -58,25 +58,25 @@ export const createEventSchema = z
       if (startAt.getTime() < Date.now()) {
         context.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Gecmis tarih veya saatte etkinlik olusturulamaz.",
+          message: "Geçmiş tarih veya saatte etkinlik oluşturulamaz.",
           path: ["startDate"],
         });
       }
       if (endAt.getTime() < startAt.getTime()) {
         context.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Bitis tarihi ve saati baslangictan once olamaz.",
+          message: "Bitiş tarihi ve saati başlangıçtan önce olamaz.",
           path: ["endDate"],
         });
       }
     }
 
-    if (String(value.fee || "") === "Ucretli") {
+    if (String(value.fee || "") === "Ücretli") {
       const amount = parseInt(String(value.feeAmount || "").trim(), 10);
       if (!Number.isFinite(amount) || amount <= 0) {
         context.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Ucretli etkinlik icin gecerli bir tutar girin.",
+          message: "Ücretli etkinlik için geçerli bir tutar girin.",
           path: ["feeAmount"],
         });
       }

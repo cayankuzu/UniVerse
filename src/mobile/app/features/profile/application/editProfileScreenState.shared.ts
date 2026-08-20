@@ -91,7 +91,7 @@ export function getEditProfileStepDescription(step: EditProfileStep) {
     case 4:
       return "Kategori seçimini tamamla";
     default:
-      return "Kaydetmeden once onizlemeyi kontrol et";
+      return "Kaydetmeden önce önizlemeyi kontrol et";
   }
 }
 

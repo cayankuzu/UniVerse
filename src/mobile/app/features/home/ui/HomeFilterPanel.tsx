@@ -59,6 +59,9 @@ export function HomeFilterPanel({
           const active = sourceFilter === item.key;
           return (
             <Pressable
+              accessibilityLabel={item.label}
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}
               key={item.key}
               onPress={() => setSourceFilter(item.key as SourceFilter)}
               style={{
@@ -110,6 +113,9 @@ export function HomeFilterPanel({
           const active = typeFilter === item.key;
           return (
             <Pressable
+              accessibilityLabel={item.label}
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}
               key={item.key}
               onPress={() => setTypeFilter(item.key as TypeFilter)}
               style={{
@@ -161,6 +167,9 @@ export function HomeFilterPanel({
           const active = entityFilter === item.key;
           return (
             <Pressable
+              accessibilityLabel={item.label}
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}
               key={item.key}
               onPress={() => setEntityFilter(item.key as EntityFilter)}
               style={{
@@ -189,6 +198,8 @@ export function HomeFilterPanel({
       </View>
 
       <Pressable
+        accessibilityLabel={t("home.filter.clear")}
+        accessibilityRole="button"
         onPress={onReset}
         style={{
           minHeight: tokens.minHeight.chipLg,

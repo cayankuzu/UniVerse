@@ -9,6 +9,7 @@ const PACKAGE_JSON = path.join(ROOT, "package.json");
 const RELEASE_WORKFLOW = path.join(ROOT, ".github", "workflows", "release-verify.yml");
 const SECURITY_WORKFLOW = path.join(ROOT, ".github", "workflows", "security-verify.yml");
 const APP_CONFIG = path.join(ROOT, "app.config.js");
+const MATERIALIZE_NATIVE_CONFIG = path.join(ROOT, "scripts", "materialize-native-config.cjs");
 const ANDROID_SENTRY_PROPERTIES = path.join(ROOT, "android", "sentry.properties");
 const SERVER_INDEX = path.join(ROOT, "supabase", "functions", "server", "index.ts");
 const ROUTE_REGISTRY = path.join(ROOT, "supabase", "functions", "server", "routeRegistry.ts");
@@ -50,6 +51,7 @@ const packageJson = fs.readFileSync(PACKAGE_JSON, "utf8");
 const releaseWorkflow = fs.readFileSync(RELEASE_WORKFLOW, "utf8");
 const securityWorkflow = fs.readFileSync(SECURITY_WORKFLOW, "utf8");
 const appConfig = fs.readFileSync(APP_CONFIG, "utf8");
+const materializeNativeConfig = fs.readFileSync(MATERIALIZE_NATIVE_CONFIG, "utf8");
 const androidSentryProperties = fs.readFileSync(ANDROID_SENTRY_PROPERTIES, "utf8");
 const serverIndex = fs.readFileSync(SERVER_INDEX, "utf8");
 const routeRegistry = fs.readFileSync(ROUTE_REGISTRY, "utf8");
@@ -138,10 +140,15 @@ assertContains(
   /EXPO_IOS_GOOGLE_SERVICES_FILE/,
   "[release-hardening] app.config.js must resolve iOS Google services from file-secret env.",
 );
-assertContains(
+assertNotContains(
   appConfig,
   /EXPO_ANDROID_GOOGLE_SERVICES_FILE/,
-  "[release-hardening] app.config.js must resolve Android Google services from file-secret env.",
+  "[release-hardening] app.config.js must not own committed-native Android file-secret materialization.",
+);
+assertContains(
+  materializeNativeConfig,
+  /EXPO_ANDROID_GOOGLE_SERVICES_FILE/,
+  "[release-hardening] Android native config materializer must resolve Google services from file-secret env.",
 );
 assertContains(
   appConfig,

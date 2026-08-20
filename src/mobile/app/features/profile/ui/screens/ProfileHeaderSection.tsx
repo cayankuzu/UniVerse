@@ -141,7 +141,7 @@ export function ProfileHeaderSection({
                 marginTop: tokens.spacing.xsMinus,
                 flexDirection: "row",
                 alignItems: "center",
-                gap: tokens.spacing.xxsPlus,
+                gap: tokens.spacing.xsMinus,
               }}
             >
               <Mail size={tokens.iconSize.xs} color={tokens.colors.textSubtle} />
@@ -170,7 +170,7 @@ export function ProfileHeaderSection({
                   borderWidth: 1,
                   borderColor: tokens.colors.border,
                   paddingHorizontal: tokens.spacing.compact,
-                  paddingVertical: tokens.spacing.xxsPlus,
+                  paddingVertical: tokens.spacing.xsMinus,
                   flexDirection: "row",
                   alignItems: "center",
                   gap: tokens.spacing.xxs,
@@ -196,7 +196,7 @@ export function ProfileHeaderSection({
                   borderWidth: 1,
                   borderColor: tokens.colors.border,
                   paddingHorizontal: tokens.spacing.compact,
-                  paddingVertical: tokens.spacing.xxsPlus,
+                  paddingVertical: tokens.spacing.xsMinus,
                   flexDirection: "row",
                   alignItems: "center",
                   gap: tokens.spacing.xxs,
@@ -222,7 +222,7 @@ export function ProfileHeaderSection({
                   borderWidth: 1,
                   borderColor: tokens.colors.border,
                   paddingHorizontal: tokens.spacing.compact,
-                  paddingVertical: tokens.spacing.xxsPlus,
+                  paddingVertical: tokens.spacing.xsMinus,
                   flexDirection: "row",
                   alignItems: "center",
                   gap: tokens.spacing.xxs,

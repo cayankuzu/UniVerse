@@ -1,17 +1,16 @@
 import {
   AlbumAPI,
   setupHomeProjectionApiTestMocks,
-  supabase,
   tryProjectionRpc,
 } from "./homeProjectionApi.test.helpers";
 import { getHomeFeed } from "./homeProjectionApi";
 
-describe("getHomeFeed blocked visibility", () => {
+describe("getHomeFeed projection authority", () => {
   beforeEach(() => {
     setupHomeProjectionApiTestMocks();
   });
 
-  it("keeps viewer-owned blocked club albums on home when the viewer has block relations", async () => {
+  it("does not append rollback-only album reads to a successful projection", async () => {
     (tryProjectionRpc as jest.Mock).mockResolvedValue({
       deletedIds: [],
       deltaToken: "delta-own-1",
@@ -35,24 +34,6 @@ describe("getHomeFeed blocked visibility", () => {
       serverTime: "2026-03-18T00:00:00.000Z",
       updatedItems: [],
     });
-    (supabase.rpc as jest.Mock).mockResolvedValue({
-      data: [{ direction: "outgoing", user_id: "club-blocked", username: "blocked-club" }],
-      error: null,
-    });
-    (AlbumAPI.getPhotos as jest.Mock).mockResolvedValue([
-      {
-        clubUserId: "club-blocked",
-        clubUsername: "blocked-club",
-        createdAt: "2026-03-18T11:00:00.000Z",
-        eventId: "event-blocked",
-        id: "album-owned",
-        showOnOwnProfile: true,
-        showOnProfile: true,
-        userId: "viewer-blocked",
-        username: "viewer",
-      },
-    ]);
-
     const result = await getHomeFeed({
       blockedUsernames: [],
       entityFilter: "all",
@@ -64,10 +45,7 @@ describe("getHomeFeed blocked visibility", () => {
       viewerUsername: "viewer",
     });
 
-    expect(result.items.map((item) => item.id)).toEqual([
-      "album:album-owned",
-      "event:event-visible",
-    ]);
-    expect(AlbumAPI.getPhotos).toHaveBeenCalledWith("viewer");
+    expect(result.items.map((item) => item.id)).toEqual(["event:event-visible"]);
+    expect(AlbumAPI.getPhotos).not.toHaveBeenCalled();
   });
 });

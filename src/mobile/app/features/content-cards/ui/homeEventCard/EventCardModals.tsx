@@ -1,5 +1,4 @@
 import React from "react";
-import { Alert } from "react-native";
 import { CommentPanel } from "../comments/CommentPanel";
 import type { CommentItem, EventWithMeta, SearchUserResult } from "../../data";
 import { DangerConfirmSheet, type OverflowActionItem } from "../../../../shared/components";
@@ -10,6 +9,7 @@ import { EventCardLocationModal } from "./EventCardLocationModal";
 import { EventCardReportModal } from "./EventCardReportModal";
 import { EventCardUserListModal } from "./EventCardUserListModal";
 import { reportEvent } from "../../data";
+import { showErrorAlert } from "../../../../shared/utils/alerts";
 
 type Props = {
   event: EventWithMeta;
@@ -141,9 +141,9 @@ export function EventCardModals({
                   reason: "Uygunsuz medya",
                 });
               } catch (error) {
-                Alert.alert(
-                  isOwnEventMedia ? "İndirme başarısız" : "Şikâyet gönderilemedi",
+                showErrorAlert(
                   String((error as { message?: string } | null)?.message || "İşlem tamamlanamadı."),
+                  isOwnEventMedia ? "İndirme başarısız" : "Şikâyet gönderilemedi",
                 );
               }
             })();

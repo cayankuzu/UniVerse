@@ -28,9 +28,9 @@ Before running `eas build`, make sure the Expo account you are signed into has a
 
 After cloning the repo, run `npm ci` first so local toolchain commands like `tsc` are available again.
 
-This private repo commits the project's continuity-critical secret and signing material on `main` so a fresh clone can continue release work with the same app identity.
+The repository contains source and non-secret build configuration only. Credentials, signing material, service-account files, and environment secrets must never be committed, even when the repository is private.
 
-Keep the Desktop backup folder `UniVerse_secrests` in sync and copy it to encrypted offline storage as a second recovery path.
+Keep release credentials in their provider-managed secret stores. If an offline recovery copy is required, use access-controlled encrypted storage outside the repository and rotate it through the relevant provider when ownership changes.
 
 There is no committed `ios/` native project in this repo. iOS builds require Expo prebuild/EAS to generate native files from the committed Expo config before building.
 
@@ -38,7 +38,7 @@ There is no committed `ios/` native project in this repo. iOS builds require Exp
 
 1. Install Node.js 20+, Java 17, Android Studio/SDK, and Git.
 2. Clone the private repo.
-3. If any continuity files are missing locally, restore them from `UniVerse_secrests` with `powershell -ExecutionPolicy Bypass -File .\\utils\\ops\\restore-private-secrets.ps1 -BackupRoot "<path-to-UniVerse_secrests\\repo-root>" -ProjectRoot "<cloned-repo-path>"`.
+3. Provision environment and file secrets from GitHub Actions, EAS, Supabase, Sentry, Apple, Google Play, or an approved encrypted offline recovery store. Never copy them into source control.
 4. Run `npm ci`.
 5. Ensure Android SDK is available via `ANDROID_HOME` or `ANDROID_SDK_ROOT`.
 6. Run `npm run check`.
@@ -56,7 +56,7 @@ There is no committed `ios/` native project in this repo. iOS builds require Exp
 - Local release builds may need `SENTRY_DISABLE_AUTO_UPLOAD=true` if the Sentry auth token is no longer valid.
 - iOS native sources are not committed. Generate them with `npx expo prebuild --platform ios` before any Xcode/iOS build work.
 - Apple distribution certificates/profiles and Google Play App Signing's server-held key are still external to the repo.
-- Critical continuity files are committed on private GitHub `main` and mirrored into the Desktop backup folder `UniVerse_secrests`.
+- Signing keys, provider credentials, and service-account files remain outside Git and are supplied through provider-managed secrets or an approved encrypted local recovery store.
 
 ## Project Shape
 

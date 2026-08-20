@@ -14,13 +14,11 @@ jest.mock("../../auth", () => ({
 jest.mock("../data/onboardingStorage", () => ({
   hasAnyPermissionGranted: (snapshot: {
     camera: string;
-    location: string;
     microphone: string;
     notifications: string;
     photos: string;
   }) =>
     snapshot.camera === "granted" ||
-    snapshot.location === "granted" ||
     snapshot.microphone === "granted" ||
     snapshot.notifications === "granted" ||
     snapshot.photos === "granted",
@@ -46,7 +44,6 @@ describe("useOnboardingProviderState", () => {
     mockPersistPermissionPromptPreference.mockResolvedValue(undefined);
     mockPersistPermissionSnapshot.mockResolvedValue({
       camera: "undetermined",
-      location: "undetermined",
       microphone: "undetermined",
       notifications: "undetermined",
       photos: "undetermined",
@@ -57,7 +54,6 @@ describe("useOnboardingProviderState", () => {
   it("does not auto-open the permissions modal after at least one permission was granted", async () => {
     mockReadPermissionSnapshot.mockResolvedValue({
       camera: "undetermined",
-      location: "denied",
       microphone: "undetermined",
       notifications: "granted",
       photos: "granted",
@@ -76,7 +72,6 @@ describe("useOnboardingProviderState", () => {
   it("keeps the startup permission wall closed when no permission has been granted yet", async () => {
     mockReadPermissionSnapshot.mockResolvedValue({
       camera: "undetermined",
-      location: "denied",
       microphone: "undetermined",
       notifications: "denied",
       photos: "undetermined",

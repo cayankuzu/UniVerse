@@ -60,7 +60,7 @@ export function AlbumViewScreen({ route, navigation }: Props) {
       return;
     }
     showConfirmAlert({
-      cancelLabel: "Vazgec",
+      cancelLabel: "Vazgeç",
       confirmLabel: "Cik",
       destructive: true,
       message: "Seçili medya ve yazdığın alanlar silinecek.",

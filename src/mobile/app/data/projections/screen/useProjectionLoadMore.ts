@@ -12,7 +12,10 @@ export interface UseProjectionLoadMoreParams {
   queryClient: QueryClient;
   queryScope: string;
   stableQueryKey: QueryKey;
-  syncProjection: (mode: ProjectionMergeMode) => Promise<ProjectionScreenState | null | undefined>;
+  syncProjection: (
+    mode: ProjectionMergeMode,
+    signal?: AbortSignal,
+  ) => Promise<ProjectionScreenState | null | undefined>;
 }
 
 export function useProjectionLoadMore({

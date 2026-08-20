@@ -42,6 +42,7 @@ export function EventCardUserListModal({
       onRequestClose={onClose}
     >
       <Pressable
+        accessible={false}
         onPress={onClose}
         style={{
           flex: 1,
@@ -53,6 +54,7 @@ export function EventCardUserListModal({
         }}
       >
         <Pressable
+          accessible={false}
           onPress={(eventPress) => eventPress.stopPropagation()}
           style={{
             borderRadius: tokens.radius.lg,
@@ -120,6 +122,8 @@ export function EventCardUserListModal({
               renderItem={({ item }) => (
                 <Pressable
                   onPress={() => onOpenUser(item.username)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${item.name || item.username} profilini aç`}
                   style={{
                     minHeight: 44,
                     flexDirection: "row",

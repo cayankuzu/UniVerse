@@ -5,6 +5,11 @@ const mockCreateVideoPlayer = jest.fn(() => ({
   release: mockRelease,
 }));
 const mockRunLowPriorityTask = jest.fn(async (task: () => Promise<unknown> | unknown) => task());
+const mockGetThumbnail = jest.fn();
+
+jest.mock("expo-modules-core", () => ({
+  requireOptionalNativeModule: jest.fn(() => ({ getThumbnail: mockGetThumbnail })),
+}));
 
 jest.mock("expo-video", () => ({
   createVideoPlayer: mockCreateVideoPlayer,
@@ -20,6 +25,7 @@ describe("videoThumbnailCache", () => {
     mockCreateVideoPlayer.mockClear();
     mockGenerateThumbnailsAsync.mockReset();
     mockRelease.mockReset();
+    mockGetThumbnail.mockReset();
     mockRunLowPriorityTask.mockClear();
   });
 
@@ -65,6 +71,21 @@ describe("videoThumbnailCache", () => {
     expect(mockCreateVideoPlayer).toHaveBeenCalledTimes(1);
   });
 
+  it("retries after a transient thumbnail generation failure", async () => {
+    const { resolveVideoThumbnail } =
+      require("./videoThumbnailCache") as typeof import("./videoThumbnailCache");
+    const thumbnail = { uri: "file:///thumb-retry.jpg" } as never;
+    mockGenerateThumbnailsAsync.mockResolvedValueOnce([]).mockResolvedValueOnce([thumbnail]);
+
+    const first = await resolveVideoThumbnail("https://cdn.example.com/retry.mp4");
+    const second = await resolveVideoThumbnail("https://cdn.example.com/retry.mp4");
+
+    expect(first).toBeNull();
+    expect(second).toBe(thumbnail);
+    expect(mockCreateVideoPlayer).toHaveBeenCalledTimes(2);
+    expect(mockRelease).toHaveBeenCalledTimes(2);
+  });
+
   it("clears generated thumbnails on memory pressure", async () => {
     const { clearVideoThumbnailMemoryCache, getCachedVideoThumbnail, resolveVideoThumbnail } =
       require("./videoThumbnailCache") as typeof import("./videoThumbnailCache");
@@ -74,5 +95,23 @@ describe("videoThumbnailCache", () => {
     clearVideoThumbnailMemoryCache();
 
     expect(getCachedVideoThumbnail("file:///clear.mp4")).toBeNull();
+  });
+
+  it("generates a native thumbnail URI only for supported local schemes", async () => {
+    const { generateVideoThumbnailUri } =
+      require("./videoThumbnailCache") as typeof import("./videoThumbnailCache");
+    mockGetThumbnail.mockResolvedValue({ uri: "file:///native-thumb.jpg" });
+
+    await expect(generateVideoThumbnailUri("https://cdn.example.com/video.mp4")).resolves.toBe(
+      undefined,
+    );
+    await expect(generateVideoThumbnailUri("content://video/1", -50)).resolves.toBe(
+      "file:///native-thumb.jpg",
+    );
+
+    expect(mockGetThumbnail).toHaveBeenCalledWith("content://video/1", {
+      quality: 0.72,
+      time: 0,
+    });
   });
 });

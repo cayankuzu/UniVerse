@@ -20,6 +20,7 @@ import { useHomePerceivedSpeedGate } from "./useHomePerceivedSpeedGate";
 
 type UseHomeProjectionStateParams = {
   blockedUsers?: string[];
+  networkReady?: boolean;
   uiState: ReturnType<typeof useHomeScreenUiState>;
   userData: AuthUserData;
   viewer: HomeViewerData;
@@ -28,6 +29,7 @@ type UseHomeProjectionStateParams = {
 
 export function useHomeProjectionState(params: UseHomeProjectionStateParams) {
   const queryClient = useQueryClient();
+  const networkReady = params.networkReady ?? true;
   const persistedHomeScopeRef = useRef("");
   const homeFeedDef = getHomeFeedQueryDef({
     blockedUsernames: params.blockedUsers,
@@ -40,7 +42,7 @@ export function useHomeProjectionState(params: UseHomeProjectionStateParams) {
   const homeProjection = useProjectionScreen<HomeFeedItem>({
     ...homeFeedDef,
     autoRefreshOnFocus: false,
-    enabled: Boolean(params.userData.id),
+    enabled: networkReady && Boolean(params.userData.id),
   });
   const filterScope = homeFeedDef.filterScope;
   const badgeDef = getNotificationBadgeQueryDef(params.viewer);
@@ -62,13 +64,13 @@ export function useHomeProjectionState(params: UseHomeProjectionStateParams) {
   });
   const badgeQuery = useQuery({
     ...createStableQueryOptions(badgeDef.staleTime),
-    enabled: Boolean(params.userData.id) && speedGate.allowSecondaryReads,
+    enabled: networkReady && Boolean(params.userData.id) && speedGate.allowSecondaryReads,
     placeholderData: (previousData) => previousData,
     queryFn: badgeDef.queryFn,
     queryKey: badgeDef.queryKey,
   });
   const onRefresh = useScreenRefresh({
-    enabled: true,
+    enabled: networkReady,
     screenKey: `home:${homeFeedDef.viewerKey}:${homeFeedDef.filterScope}`,
     surface: "home",
     tasks: [
@@ -98,7 +100,7 @@ export function useHomeProjectionState(params: UseHomeProjectionStateParams) {
 
   useHomeDeferredProfileSupplement({
     blockedUsers: params.blockedUsers,
-    allowSecondaryReads: speedGate.allowSecondaryReads,
+    allowSecondaryReads: networkReady && speedGate.allowSecondaryReads,
     entityFilter: params.uiState.deferredEntityFilter,
     filterScope,
     homeProjection,

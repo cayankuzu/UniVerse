@@ -121,6 +121,7 @@ export function MediaSourceSheet({
       onRequestClose={onClose}
     >
       <Pressable
+        accessible={false}
         onPress={onClose}
         style={{
           flex: 1,

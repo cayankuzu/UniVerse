@@ -42,6 +42,7 @@ export function useHomeScreenState(params: UseHomeScreenStateParams) {
   const bottomPadding = useBottomNavPadding();
   const viewerKey = getViewerKey(params.userData);
   const uiState = useHomeScreenUiState({ viewerKey });
+  const networkReady = params.networkReady ?? true;
   const viewer = useMemo<HomeViewerData>(
     () => ({
       accountType: params.accountType,
@@ -53,6 +54,7 @@ export function useHomeScreenState(params: UseHomeScreenStateParams) {
 
   const projectionState = useHomeProjectionState({
     blockedUsers: params.blockedUsers,
+    networkReady,
     uiState,
     userData: params.userData,
     viewer,

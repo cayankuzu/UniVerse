@@ -115,14 +115,14 @@ export function useProjectionScreen<T extends { id?: string }>({
     enabled,
     placeholderData: (previousData) => previousData,
     refetchOnMount: shouldRefetchProjectionOnMount ? "always" : false,
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const cachedState = getProjectionState(queryClient, stableQueryKey);
       const useDelta =
         hasCachedSnapshot &&
         effectiveRefreshMode === "delta" &&
         (cachedState?.ids?.length || 0) > 0;
       return (
-        (await syncProjection(useDelta ? "delta" : "replace")) ||
+        (await syncProjection(useDelta ? "delta" : "replace", signal)) ||
         createProjectionScreenState({
           ids: [],
           nextCursor: null,

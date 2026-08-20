@@ -131,6 +131,9 @@ export function ForgotPasswordScreen({ navigation }: Props) {
             <Pressable
               disabled={isSubmitting}
               onPress={() => void resendResetMail()}
+              accessibilityRole="button"
+              accessibilityLabel={t("auth.password.forgot.resend")}
+              accessibilityState={{ disabled: isSubmitting }}
               style={{
                 minHeight: 48,
                 borderRadius: tokens.radius.lg,

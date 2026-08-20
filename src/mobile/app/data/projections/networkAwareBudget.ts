@@ -7,6 +7,7 @@
 import { AppState, NativeModules, type AppStateStatus } from "react-native";
 import type { NetInfoState } from "@react-native-community/netinfo";
 import { debugWarn } from "../../platform/logging/logger";
+import { isLowPowerModeEnabled } from "../../shared/performance/resourceConstraints";
 
 export type NetworkQuality = "good" | "degraded" | "offline" | "unknown";
 
@@ -15,6 +16,7 @@ export interface NetworkBudget {
   allowImagePrefetch: boolean;
   allowIntentPrefetch: boolean;
   allowNextPagePrefetch: boolean;
+  powerConstrained: boolean;
   quality: NetworkQuality;
 }
 
@@ -92,6 +94,7 @@ export function subscribeNetworkQuality(listener: (quality: NetworkQuality) => v
 
 export function resolveNetworkBudget(appState?: AppStateStatus): NetworkBudget {
   const effectiveAppState = appState ?? AppState.currentState;
+  const powerConstrained = isLowPowerModeEnabled();
 
   if (effectiveAppState !== "active") {
     return {
@@ -99,6 +102,7 @@ export function resolveNetworkBudget(appState?: AppStateStatus): NetworkBudget {
       allowImagePrefetch: false,
       allowIntentPrefetch: false,
       allowNextPagePrefetch: false,
+      powerConstrained,
       quality: currentQuality,
     };
   }
@@ -109,7 +113,19 @@ export function resolveNetworkBudget(appState?: AppStateStatus): NetworkBudget {
       allowImagePrefetch: false,
       allowIntentPrefetch: false,
       allowNextPagePrefetch: false,
+      powerConstrained,
       quality: "offline",
+    };
+  }
+
+  if (powerConstrained) {
+    return {
+      allowIdlePrefetch: false,
+      allowImagePrefetch: false,
+      allowIntentPrefetch: true,
+      allowNextPagePrefetch: false,
+      powerConstrained: true,
+      quality: currentQuality,
     };
   }
 
@@ -119,6 +135,7 @@ export function resolveNetworkBudget(appState?: AppStateStatus): NetworkBudget {
       allowImagePrefetch: false,
       allowIntentPrefetch: true,
       allowNextPagePrefetch: true,
+      powerConstrained,
       quality: "degraded",
     };
   }
@@ -129,6 +146,7 @@ export function resolveNetworkBudget(appState?: AppStateStatus): NetworkBudget {
       allowImagePrefetch: false,
       allowIntentPrefetch: true,
       allowNextPagePrefetch: false,
+      powerConstrained,
       quality: "unknown",
     };
   }
@@ -138,6 +156,7 @@ export function resolveNetworkBudget(appState?: AppStateStatus): NetworkBudget {
     allowImagePrefetch: true,
     allowIntentPrefetch: true,
     allowNextPagePrefetch: true,
+    powerConstrained,
     quality: currentQuality || "unknown",
   };
 }

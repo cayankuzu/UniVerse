@@ -1,10 +1,10 @@
 import { startTransition, useCallback, useEffect, useRef, useState } from "react";
-import { Alert } from "react-native";
 import type { AuthUserData } from "../../../data/contracts/entities";
 import { getViewerKey } from "../../../data/contracts/viewerKey";
 import { scheduleAfterInteractions } from "../../../shared/utils/scheduleAfterInteractions";
 import { updateViewerPrivacySetting, updateViewerProfileSetting } from "../data";
 import { usePrivacySettingsCacheActions } from "./usePrivacySettingsCacheActions";
+import { showErrorAlert } from "../../../shared/utils/alerts";
 
 interface UsePrivacySettingsStateParams {
   accountType: "club" | "student" | null | undefined;
@@ -95,8 +95,7 @@ export function usePrivacySettingsState(params: UsePrivacySettingsStateParams) {
           applyPrivacyCacheUpdate(rollbackValue);
         });
         scheduleDeferredPrivacyRefresh();
-        Alert.alert(
-          "Hata",
+        showErrorAlert(
           String((error as { message?: string })?.message || "Gizlilik ayarı güncellenemedi."),
         );
       } finally {
@@ -132,7 +131,7 @@ export function usePrivacySettingsState(params: UsePrivacySettingsStateParams) {
       setHideEmail(previous);
       updateUserData({ hideEmail: previous });
       applyHideEmailCacheUpdate(previous);
-      Alert.alert("Uyarı", "Ayar kaydedilemedi.");
+      showErrorAlert("Ayar kaydedilemedi.", "Uyarı");
     } finally {
       setSavingHideEmail(false);
     }

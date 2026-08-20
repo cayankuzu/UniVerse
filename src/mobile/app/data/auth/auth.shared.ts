@@ -214,7 +214,7 @@ export async function fallbackRegisterToTable(payload: RegisterPayload): Promise
     if (msg.includes("profiles_email_key")) {
       throw new Error("Bu e-posta adresi zaten kullanılıyor");
     }
-    throw new Error(msg || "Kayıt sirasinda bir hata olustu");
+    throw new Error(msg || "Kayıt sırasında bir hata oluştu");
   }
 
   return { success: true, userId: payload.userId };

@@ -76,8 +76,8 @@ export function useProjectionSync<T extends { id?: string }>({
   }, []);
 
   const syncProjection = useCallback(
-    (requestedMode?: ProjectionMergeMode) =>
-      runProjectionSyncRequest(runtimeRef.current, requestedMode),
+    (requestedMode?: ProjectionMergeMode, signal?: AbortSignal) =>
+      runProjectionSyncRequest(runtimeRef.current, requestedMode, signal),
     [],
   );
 

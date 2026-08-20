@@ -112,7 +112,7 @@ export const NotificationsHeader = React.memo(function NotificationsHeader({
               borderColor: tokens.colors.primaryBorder,
               flexDirection: "row",
               alignItems: "center",
-              gap: tokens.spacing.xxsPlus,
+              gap: tokens.spacing.xsMinus,
               paddingHorizontal: tokens.spacing.compact,
               opacity: markAllPending ? 0.65 : 1,
             }}
@@ -161,7 +161,7 @@ export const NotificationsHeader = React.memo(function NotificationsHeader({
                 alignItems: "center",
                 justifyContent: "center",
                 flexDirection: "row",
-                gap: tokens.spacing.xxsPlus,
+                gap: tokens.spacing.xsMinus,
               }}
             >
               <Icon

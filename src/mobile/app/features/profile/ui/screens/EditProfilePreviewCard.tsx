@@ -86,7 +86,7 @@ export function EditProfilePreviewCard({
           style={{
             borderRadius: tokens.radius.sm,
             backgroundColor: tokens.colors.primarySofter,
-            paddingHorizontal: tokens.spacing.xsCompact,
+            paddingHorizontal: tokens.spacing.xs,
             paddingVertical: tokens.spacing.microPlus,
           }}
         >
@@ -178,10 +178,10 @@ export function EditProfilePreviewCard({
         {!hideEmail && email ? (
           <View
             style={{
-              marginTop: tokens.spacing.xsCompact,
+              marginTop: tokens.spacing.xs,
               flexDirection: "row",
               alignItems: "center",
-              gap: tokens.spacing.xxsPlus,
+              gap: tokens.spacing.xsMinus,
             }}
           >
             <Mail size={tokens.iconSize.xs} color={tokens.colors.mutedFg} strokeWidth={2.1} />
@@ -396,7 +396,7 @@ export function EditProfilePreviewCard({
             </View>
             <View
               style={{
-                marginTop: tokens.spacing.xsCompact,
+                marginTop: tokens.spacing.xs,
                 flexDirection: "row",
                 alignItems: "center",
                 gap: tokens.spacing.xxs,

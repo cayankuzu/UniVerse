@@ -14,17 +14,23 @@ class StartupBenchmark {
   @get:Rule val benchmarkRule = MacrobenchmarkRule()
 
   @Test
-  fun coldStartup() = measureStartup(CompilationMode.Partial())
+  fun coldStartup() = measureStartup(CompilationMode.Partial(), StartupMode.COLD)
 
   @Test
-  fun coldStartupWithoutProfile() = measureStartup(CompilationMode.None())
+  fun coldStartupWithoutProfile() = measureStartup(CompilationMode.None(), StartupMode.COLD)
 
-  private fun measureStartup(compilationMode: CompilationMode) {
+  @Test
+  fun warmStartup() = measureStartup(CompilationMode.Partial(), StartupMode.WARM)
+
+  @Test
+  fun hotStartup() = measureStartup(CompilationMode.Partial(), StartupMode.HOT)
+
+  private fun measureStartup(compilationMode: CompilationMode, startupMode: StartupMode) {
     benchmarkRule.measureRepeated(
       packageName = targetPackageName(),
       metrics = listOf(StartupTimingMetric()),
       compilationMode = compilationMode,
-      startupMode = StartupMode.COLD,
+      startupMode = startupMode,
       iterations = 10,
       setupBlock = { pressHome() },
       measureBlock = { startActivityAndWait() },

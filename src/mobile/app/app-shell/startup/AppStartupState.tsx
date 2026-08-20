@@ -42,6 +42,7 @@ function resolveFallbackFirstFoldSource(queryClient: QueryClient): FirstFoldSour
 export function AppStartupStateProvider({ children }: AppStartupStateProviderProps) {
   const queryClient = useQueryClient();
   const queryRestoreReady = !useIsRestoring();
+  const [queryRestoreTimedOut, setQueryRestoreTimedOut] = useState(false);
   const [mediaCacheReady, setMediaCacheReady] = useState(false);
   const [snapshotPrimeReady, setSnapshotPrimeReady] = useState(false);
   const [splashTimedOut, setSplashTimedOut] = useState(false);
@@ -72,7 +73,16 @@ export function AppStartupStateProvider({ children }: AppStartupStateProviderPro
     }),
   );
 
-  const firstFoldReady = queryRestoreReady && (snapshotPrimeReady || splashTimedOut);
+  const queryRestoreGateReady = queryRestoreReady || queryRestoreTimedOut;
+  const firstFoldReady = queryRestoreGateReady && (snapshotPrimeReady || splashTimedOut);
+
+  useEffect(() => {
+    if (queryRestoreReady) return;
+    const timer = setTimeout(() => {
+      setQueryRestoreTimedOut(true);
+    }, STARTUP_PERFORMANCE_BUDGET.queryRestoreMaxWaitMs);
+    return () => clearTimeout(timer);
+  }, [queryRestoreReady]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -99,12 +109,15 @@ export function AppStartupStateProvider({ children }: AppStartupStateProviderPro
   }, [mediaCacheReady]);
 
   useEffect(() => {
-    if (!queryRestoreReady) return;
-    stopStartupPhaseTimer(queryRestoreTimerRef, "ok");
-  }, [queryRestoreReady]);
+    if (!queryRestoreGateReady) return;
+    stopStartupPhaseTimer(queryRestoreTimerRef, queryRestoreTimedOut ? "rollback" : "ok", {
+      restoreCompleted: queryRestoreReady,
+      timedOut: queryRestoreTimedOut,
+    });
+  }, [queryRestoreGateReady, queryRestoreReady, queryRestoreTimedOut]);
 
   useEffect(() => {
-    if (!queryRestoreReady) {
+    if (!queryRestoreGateReady) {
       setSnapshotPrimeReady(false);
       firstFoldSourceRef.current = "empty-cache";
       return;
@@ -131,7 +144,7 @@ export function AppStartupStateProvider({ children }: AppStartupStateProviderPro
     return () => {
       cancelled = true;
     };
-  }, [queryClient, queryRestoreReady]);
+  }, [queryClient, queryRestoreGateReady]);
 
   useEffect(() => {
     if (!firstFoldReady || gateOpenLoggedRef.current) return;

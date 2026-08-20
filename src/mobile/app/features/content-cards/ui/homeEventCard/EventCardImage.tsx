@@ -38,6 +38,8 @@ export function EventCardImage({
   return (
     <TouchableOpacity
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`${event.title || "Etkinlik"} medyasını aç`}
       onLongPress={onLongPress}
       delayLongPress={220}
       activeOpacity={0.9}

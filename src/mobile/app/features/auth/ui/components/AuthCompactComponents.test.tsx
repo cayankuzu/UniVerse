@@ -4,9 +4,18 @@ import { AuthBrandFooter } from "./AuthBrandFooter";
 import { RegistrationAvailabilityHint, RegistrationFieldError } from "./RegistrationWizardSections";
 
 describe("compact authentication components", () => {
-  it.each(["light", "dark"] as const)("renders the English brand footer in %s mode", (tone) => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date("2027-01-01T00:00:00.000Z"));
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it.each(["light", "dark"] as const)("renders the Turkish brand footer in %s mode", (tone) => {
     render(<AuthBrandFooter tone={tone} />);
-    expect(screen.getByText("Copyright 2026")).toBeOnTheScreen();
+    expect(screen.getByText("Telif hakkı © 2027")).toBeOnTheScreen();
     expect(screen.getByText("MeMoDe")).toBeOnTheScreen();
   });
 

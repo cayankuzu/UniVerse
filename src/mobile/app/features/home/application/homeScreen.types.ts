@@ -10,5 +10,6 @@ export interface UseHomeScreenStateParams {
   accountType: "club" | "student";
   blockedUsers?: string[];
   homeReselectCounter: number;
+  networkReady?: boolean;
   userData: AuthUserData;
 }

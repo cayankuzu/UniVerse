@@ -1,6 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
-import { useIsFocused } from "@react-navigation/native";
-import { AppState } from "react-native";
+import { useMemo } from "react";
 import type { NotificationItem } from "../../../data/contracts/api";
 import { getViewerKey } from "../../../data/contracts/viewerKey";
 import { getNotificationsQueryDef } from "../../../data/notifications/notificationsProjectionRepository";
@@ -18,19 +16,6 @@ type ViewerIdentity = {
   username: string;
 };
 
-const NOTIFICATION_POLL_INTERVAL_MS = 12_000;
-
-export function shouldPollNotifications(params: {
-  appState: string;
-  hasCachedSnapshot: boolean;
-  inFlight: boolean;
-  isFocused: boolean;
-}) {
-  return (
-    params.isFocused && params.hasCachedSnapshot && !params.inFlight && params.appState === "active"
-  );
-}
-
 interface UseNotificationsInboxDataParams {
   activeFilter: FilterCategory;
   blockedUsers: Array<string | null | undefined>;
@@ -40,8 +25,6 @@ interface UseNotificationsInboxDataParams {
 export function useNotificationsInboxData(params: UseNotificationsInboxDataParams) {
   const { activeFilter, blockedUsers, viewer } = params;
   const viewerKey = getViewerKey(viewer);
-  const isFocused = useIsFocused();
-  const pollInFlightRef = useRef(false);
   const notificationsQueryDef = useMemo(
     () =>
       getNotificationsQueryDef({
@@ -81,31 +64,6 @@ export function useNotificationsInboxData(params: UseNotificationsInboxDataParam
       },
     ],
   });
-  const hasCachedSnapshot = notificationsProjection.hasCachedSnapshot;
-  const refreshNotificationsInBackground = notificationsProjection.onBackgroundRefresh;
-  useEffect(() => {
-    if (!isFocused || !hasCachedSnapshot) return undefined;
-    const timer = setInterval(() => {
-      if (
-        !shouldPollNotifications({
-          appState: AppState.currentState,
-          hasCachedSnapshot,
-          inFlight: pollInFlightRef.current,
-          isFocused,
-        })
-      ) {
-        return;
-      }
-      pollInFlightRef.current = true;
-      void refreshNotificationsInBackground()
-        .catch(() => undefined)
-        .finally(() => {
-          pollInFlightRef.current = false;
-        });
-    }, NOTIFICATION_POLL_INTERVAL_MS);
-    return () => clearInterval(timer);
-  }, [isFocused, hasCachedSnapshot, refreshNotificationsInBackground]);
-
   return {
     badgeKey,
     filterCounts: collections.filterCounts,

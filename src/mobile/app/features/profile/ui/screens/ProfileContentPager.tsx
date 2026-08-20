@@ -1,9 +1,15 @@
 import { memo } from "react";
 import { View } from "react-native";
 import { SwipeableTabPager } from "../../../../shared/components/SwipeableTabPager";
+import { t } from "../../../../shared/i18n";
 import { PROFILE_TAB_ORDER, type ProfileTab } from "../../domain/profileConstants";
 import type { ProfileTileItem } from "../../application/profileUiModels";
 import { ProfileStaticGrid } from "./ProfileStaticGrid";
+
+const PROFILE_TAB_LABELS: Record<ProfileTab, string> = {
+  album: t("profile.preview.tabs.albums"),
+  events: t("profile.preview.tabs.events"),
+};
 
 type Props = {
   activeTab: ProfileTab;
@@ -77,6 +83,7 @@ export const ProfileContentPager = memo(function ProfileContentPager({
       <SwipeableTabPager
         activeTab={activeTab}
         enabled={enabled && PROFILE_TAB_ORDER.length > 1}
+        getTabAccessibilityLabel={(tab) => PROFILE_TAB_LABELS[tab]}
         keepAlive={false}
         lazy
         onChange={onTabChange}

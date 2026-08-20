@@ -48,9 +48,9 @@ export const privacyDocument: LegalDocument = {
     {
       heading: "Cihaz İzinleri ve Neden İstendikleri",
       body: [
-        "Konum izni, yakınındaki veya lokasyon temelli etkinlikleri daha anlamlı gösterebilmek için istenebilir. Konum verisinin kullanım seviyesi, izin tercihin ve ilgili özelliğin gerekliliğiyle sınırlıdır.",
         "Bildirim izni, etkinlik hatırlatmaları, sosyal etkileşim uyarıları veya sistem bilgilendirmeleri gönderebilmek için kullanılır. Bu izin tamamen cihaz ve kullanıcı tercihine bağlıdır.",
         "Fotoğraf ve medya erişimi, albüm veya etkinlik bağlantılı görsel yüklemelerinde gereklidir. İzin vermemen durumunda yükleme ve seçim süreci kısıtlanır, ancak uygulamanın tüm çekirdek bölümleri zorunlu olarak devre dışı kalmaz.",
+        "Kamera ve mikrofon izinleri yalnızca uygulama içinden fotoğraf veya sesli video çekmeyi seçtiğinde kullanılır. Bu izinler verilmezse galeriden mevcut medya seçmeye devam edebilirsin.",
       ],
     },
     {

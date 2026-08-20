@@ -219,15 +219,9 @@ export function createEventRouteContext(
     };
 
     const filterBlockedEvents = async (viewerId: string, events: KvEventRecord[]) => {
-      if (!viewerId || events.length === 0) return events;
-      const next: KvEventRecord[] = [];
-      for (const event of events) {
-        const clubUserId = String(event.clubUserId || "").trim();
-        if (!clubUserId) continue;
-        if (await blockedState.isBlockedPair(viewerId, clubUserId)) continue;
-        next.push(event);
-      }
-      return next;
+      return blockedState.filterRowsByTargetId(viewerId, events, (event) =>
+        String(event.clubUserId || "").trim(),
+      );
     };
 
     const getDeleteEventContext = async (eventId: string): Promise<EventDeleteContext | null> => {
@@ -265,13 +259,19 @@ export function createEventRouteContext(
       const clubProfiles = await Promise.all(
         validEvents.map((event) => getProfile(String(event.clubUserId || "").trim())),
       );
+      const clubProfilesById = new Map(
+        validEvents.map((event, index) => [
+          String(event.clubUserId || "").trim(),
+          clubProfiles[index],
+        ]),
+      );
       const visibleEvents = validEvents.filter((event, index) =>
         canDiscoverEventCard(viewerId, event, clubProfiles[index], followingUsernames),
       );
       const unblockedEvents = await filterBlockedEvents(viewerId, visibleEvents);
       const enriched = await Promise.all(
         unblockedEvents.map(async (event) => {
-          const clubProfile = await getProfile(String(event.clubUserId || "").trim());
+          const clubProfile = clubProfilesById.get(String(event.clubUserId || "").trim()) || null;
           const row = await enrichEvent(event, viewerId);
           return decorateEventVisibility(row, clubProfile);
         }),

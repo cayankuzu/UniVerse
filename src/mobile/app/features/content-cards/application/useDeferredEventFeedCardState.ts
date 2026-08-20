@@ -285,7 +285,7 @@ export function useDeferredEventFeedCardState(params: {
       hint: "Etkinlik kartı listelerden ve veritabanından kaldırılıyor.",
       percent: 32,
       stage: "Etkinlik siliniyor",
-      title: "Etkinlik silme islemi basladi",
+      title: "Etkinlik silme işlemi başladı",
       tone: "info",
     });
     try {

@@ -248,7 +248,7 @@ export function createPendingAlbumUpload(params: {
       caption: params.caption || null,
       clientMutationId,
       eventId: params.eventId,
-      eventTitle: params.event?.title || "Etkinlik Albumu",
+      eventTitle: params.event?.title || "Etkinlik Albümü",
       image: normalizedImages[0] || "",
       images: normalizedImages,
       mediaKinds: normalizedMediaKinds,

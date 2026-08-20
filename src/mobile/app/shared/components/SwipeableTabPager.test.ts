@@ -9,6 +9,10 @@ import {
   SwipeableTabPager,
 } from "./SwipeableTabPager";
 
+jest.mock("../hooks/useReducedMotion", () => ({
+  useReducedMotion: () => false,
+}));
+
 jest.mock("./pagerViewAdapter", () => {
   const actual = jest.requireActual("./pagerViewAdapter");
   return { ...actual, loadNativePagerView: jest.fn(() => null) };
@@ -47,7 +51,8 @@ describe("SwipeableTabPager", () => {
     expect(shouldRenderPagedItem(3, 0, true, true)).toBe(true);
     expect(shouldRenderPagedItem(3, 0, false, false)).toBe(true);
     expect(shouldRenderPagedItem(3, 0, false, true)).toBe(false);
-    expect(shouldRenderPagedItem(2, 0, false, true)).toBe(true);
+    expect(shouldRenderPagedItem(1, 0, false, true)).toBe(true);
+    expect(shouldRenderPagedItem(2, 0, false, true)).toBe(false);
   });
 
   it("keeps profile pages mounted when the active tab changes", () => {

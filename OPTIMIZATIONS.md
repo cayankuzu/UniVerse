@@ -35,18 +35,6 @@
 - **Removal Safety** Needs Verification
 - **Reuse Scope** service-wide
 
-- **Social relationship reads/mutations are cleaner but still duplicated around authoritative readback**
-- **Category** Frontend / Reuse Opportunity
-- **Severity** Medium
-- **Impact** Less repeated auth/getUser/readback logic, easier debugging
-- **Evidence** `src/mobile/app/data/api/social.ts` repeats viewer lookup and mutation/readback scaffolding across follow/block flows.
-- **Why it’s inefficient** Repeated orchestration drifts and complicates future retry/telemetry changes.
-- **Recommended fix** Extract one typed social mutation helper that handles viewer lookup, RPC execution, authoritative readback, and telemetry labeling.
-- **Tradeoffs / Risks** Requires parity checks for optimistic updates and shadow persistence.
-- **Expected impact estimate** Medium
-- **Removal Safety** Likely Safe
-- **Reuse Scope** module
-
 - **Release verification still depends on externally installed tools**
 - **Category** Build / Reliability
 - **Severity** Medium

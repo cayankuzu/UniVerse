@@ -38,6 +38,21 @@ requireText(
   "Network prefetch must remain conservative before NetInfo resolves.",
 );
 requireText(
+  "src/mobile/app/data/projections/networkAwareBudget.ts",
+  /if \(powerConstrained\)[\s\S]*allowImagePrefetch:\s*false/,
+  "Low power mode must suppress speculative media prefetch.",
+);
+requireText(
+  "src/mobile/app/app-shell/startup/DeferredAppServices.tsx",
+  /enableWarmup\s*=\s*[\s\S]*queryCacheReady/,
+  "Warmup must start after the bounded cache gate instead of waiting forever for restore.",
+);
+requireText(
+  "src/mobile/app/shared/media/MediaVideo.tsx",
+  /priority:\s*active\s*&&\s*appActive\s*\?\s*"eager"\s*:\s*"deferred"/,
+  "Inactive videos must not resolve remote media eagerly.",
+);
+requireText(
   "src/mobile/app/data/projections/projections.warmup.transport.ts",
   /AbortController/,
   "Warmup RPC timeout must abort its request.",
@@ -64,6 +79,14 @@ requireFile("android/app/src/main/baseline-prof.txt");
 requireFile("utils/ops/generate-android-baseline-profile.ps1");
 requireFile(
   "android/macrobenchmark/src/main/java/com/ogrencisosyalagi/macrobenchmark/StartupBenchmark.kt",
+);
+requireFile(
+  "android/macrobenchmark/src/main/java/com/ogrencisosyalagi/macrobenchmark/CriticalJourneyBenchmark.kt",
+);
+requireText(
+  "android/macrobenchmark/src/main/java/com/ogrencisosyalagi/macrobenchmark/StartupBenchmark.kt",
+  /StartupMode\.WARM[\s\S]*StartupMode\.HOT/,
+  "Android startup benchmarks must cover warm and hot launches.",
 );
 
 const generatedBundle = path.join(

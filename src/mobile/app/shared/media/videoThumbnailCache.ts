@@ -18,7 +18,7 @@ function getVideoThumbnailsModule() {
   return cachedNativeModule;
 }
 
-const thumbnailCache = new Map<string, VideoThumbnail | null>();
+const thumbnailCache = new Map<string, VideoThumbnail>();
 const thumbnailInflightCache = new Map<string, Promise<VideoThumbnail | null>>();
 const MAX_THUMBNAIL_CACHE_ENTRIES = 96;
 const VIDEO_THUMBNAIL_QUALITY = 0.72;
@@ -31,15 +31,14 @@ function normalizeUri(value: string | null | undefined) {
 export function getCachedVideoThumbnail(uri: string | null | undefined) {
   const normalizedUri = normalizeUri(uri);
   if (!normalizedUri) return null;
-  const thumbnail = thumbnailCache.get(normalizedUri) ?? null;
-  if (thumbnailCache.has(normalizedUri)) {
-    thumbnailCache.delete(normalizedUri);
-    thumbnailCache.set(normalizedUri, thumbnail);
-  }
+  const thumbnail = thumbnailCache.get(normalizedUri);
+  if (!thumbnail) return null;
+  thumbnailCache.delete(normalizedUri);
+  thumbnailCache.set(normalizedUri, thumbnail);
   return thumbnail;
 }
 
-function cacheVideoThumbnail(uri: string, thumbnail: VideoThumbnail | null) {
+function cacheVideoThumbnail(uri: string, thumbnail: VideoThumbnail) {
   thumbnailCache.delete(uri);
   thumbnailCache.set(uri, thumbnail);
   while (thumbnailCache.size > MAX_THUMBNAIL_CACHE_ENTRIES) {
@@ -105,7 +104,9 @@ export async function resolveVideoThumbnail(
   const generateThumbnail = async () => {
     const thumbnail =
       (await resolveViaNativeModule(normalizedUri)) || (await resolveViaVideoPlayer(normalizedUri));
-    cacheVideoThumbnail(normalizedUri, thumbnail);
+    if (thumbnail) {
+      cacheVideoThumbnail(normalizedUri, thumbnail);
+    }
     return thumbnail;
   };
   const pending = (
@@ -120,11 +121,13 @@ export async function resolveVideoThumbnail(
 }
 
 export async function generateVideoThumbnailUri(uri: string, timeMs = 0) {
+  const normalizedUri = normalizeUri(uri);
+  if (!/^(?:asset|content|file|ph):/i.test(normalizedUri)) return undefined;
   const mod = getVideoThumbnailsModule();
   if (!mod?.getThumbnail) return undefined;
 
   try {
-    const result = await mod.getThumbnail(uri, {
+    const result = await mod.getThumbnail(normalizedUri, {
       quality: VIDEO_THUMBNAIL_QUALITY,
       time: Math.max(0, timeMs),
     });

@@ -58,7 +58,7 @@ function writeCachedValue<T>(cache: Map<string, CachedEntry<T>>, key: string, va
 }
 
 export class BlockedInteractionError extends Error {
-  constructor(message = "Blocked interaction forbidden.") {
+  constructor(message = "Engellenen etkileşime izin verilmiyor.") {
     super(message);
     this.name = "BlockedInteractionError";
   }
@@ -76,7 +76,7 @@ async function readViewerId(viewerIdHint?: string | null) {
 async function assertViewerCanReachActor(
   viewerId: string,
   actorId: string,
-  message = "Blocked interaction forbidden.",
+  message = "Engellenen etkileşime izin verilmiyor.",
 ) {
   const normalizedViewerId = normalizeId(viewerId);
   const normalizedActorId = normalizeId(actorId);
@@ -195,7 +195,7 @@ export async function assertEventInteractionAllowed(params: {
   await assertViewerCanReachActor(
     viewerId,
     ownership.clubId,
-    "Blocked interaction forbidden. This event is unavailable.",
+    "Engellenen etkileşime izin verilmiyor. Bu etkinlik kullanılamıyor.",
   );
   return viewerId;
 }
@@ -211,12 +211,12 @@ export async function assertAlbumInteractionAllowed(params: {
   await assertViewerCanReachActor(
     viewerId,
     ownership.uploaderId,
-    "Blocked interaction forbidden. This album is unavailable.",
+    "Engellenen etkileşime izin verilmiyor. Bu albüm kullanılamıyor.",
   );
   await assertViewerCanReachActor(
     viewerId,
     ownership.clubId,
-    "Blocked interaction forbidden. This album is unavailable.",
+    "Engellenen etkileşime izin verilmiyor. Bu albüm kullanılamıyor.",
   );
   return viewerId;
 }
@@ -239,7 +239,7 @@ export async function assertEventCommentCreateAllowed(params: {
   await assertViewerCanReachActor(
     viewerId,
     parentComment.authorId,
-    "Blocked interaction forbidden. This comment is unavailable.",
+    "Engellenen etkileşime izin verilmiyor. Bu yorum kullanılamıyor.",
   );
   return viewerId;
 }

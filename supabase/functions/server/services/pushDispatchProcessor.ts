@@ -7,7 +7,8 @@ import {
   isPushEnabled,
   isRecoverableInactiveTokenError,
   isRetryablePushTicketError,
-  sendExpoPushBatches,
+  resolvePushDispatchEnv,
+  sendExpoPushBatchesByProject,
   validateExpoPushToken,
 } from "./pushNotifications.ts";
 import { isSqlBlockedPair } from "./sqlBlockedState.ts";
@@ -30,6 +31,7 @@ type NotificationRow = {
 
 type PushTokenRow = {
   app_env: string;
+  expo_project_id: string | null;
   expo_push_token: string;
   id: string;
   platform: "android" | "ios";
@@ -169,9 +171,10 @@ export async function processNotificationPushDispatch(params: {
       : Promise.resolve({ data: null, error: null }),
     adminSupabase
       .from("push_device_tokens")
-      .select("id,expo_push_token,platform,app_env")
+      .select("id,expo_push_token,platform,app_env,expo_project_id")
       .eq("user_id", notification.user_id)
-      .eq("is_active", true),
+      .eq("is_active", true)
+      .eq("app_env", resolvePushDispatchEnv()),
   ]);
 
   if (preferencesResult.error || actorResult.error || tokenResult.error) {
@@ -253,15 +256,18 @@ export async function processNotificationPushDispatch(params: {
   }
 
   const pushMessages = tokensToSend.map((token) => ({
-    body: buildPushBody(notification),
-    channelId: token.platform === "android" ? "default" : undefined,
-    data: buildPushData(notification, actorProfile),
-    sound: "default" as const,
-    title: buildPushTitle(notification.type, actorProfile, notification),
-    to: token.expo_push_token,
+    message: {
+      body: buildPushBody(notification),
+      channelId: token.platform === "android" ? "default" : undefined,
+      data: buildPushData(notification, actorProfile),
+      sound: "default" as const,
+      title: buildPushTitle(notification.type, actorProfile, notification),
+      to: token.expo_push_token,
+    },
+    projectId: token.expo_project_id,
   }));
 
-  const dispatchResult = await sendExpoPushBatches(pushMessages);
+  const dispatchResult = await sendExpoPushBatchesByProject(pushMessages);
   const attemptedAt = new Date().toISOString();
 
   await Promise.all(
@@ -274,11 +280,11 @@ export async function processNotificationPushDispatch(params: {
         ticket.status === "ok"
           ? {
               attempted_at: attemptedAt,
-              delivered_at: attemptedAt,
+              delivered_at: null,
               error_code: null,
               error_message: null,
-              response: dispatchResult.raw,
-              status: "sent",
+              response: ticket,
+              status: "pending",
               ticket_id: ticket.ticketId || null,
             }
           : {
@@ -286,7 +292,7 @@ export async function processNotificationPushDispatch(params: {
               delivered_at: null,
               error_code: ticket.errorCode || null,
               error_message: ticket.message || dispatchResult.transportError || null,
-              response: dispatchResult.raw,
+              response: ticket,
               status: "error",
               ticket_id: null,
             };

@@ -1,7 +1,7 @@
 import React from "react";
 import { AppText as Text } from "./AppText";
 import { ActivityIndicator, Pressable, View, useWindowDimensions } from "react-native";
-import { AlertTriangle, ChevronRight, Trash2 } from "lucide-react-native";
+import { AlertTriangle, CheckCircle2, ChevronRight, Trash2 } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { tokens, withAlpha } from "../../shared/theme";
 import { t } from "../../shared/i18n";
@@ -12,6 +12,7 @@ type Props = {
   cancelLabel?: string;
   confirmLabel: string;
   description: string;
+  destructive?: boolean;
   note?: string;
   onClose: () => void;
   onConfirm: () => void;
@@ -25,7 +26,8 @@ export function DangerConfirmSheet({
   cancelLabel = t("common.cancel"),
   confirmLabel,
   description,
-  note = t("danger.confirm.irreversible"),
+  destructive = true,
+  note,
   onClose,
   onConfirm,
   title,
@@ -35,6 +37,14 @@ export function DangerConfirmSheet({
   const insets = useSafeAreaInsets();
   const { fontScale, width } = useWindowDimensions();
   const stackActions = fontScale >= 1.4 || width < 340;
+  const ActionIcon = destructive ? Trash2 : CheckCircle2;
+  const accentBackground = destructive ? tokens.colors.dangerSoft : tokens.colors.primarySofter;
+  const accentBorder = destructive ? tokens.colors.warningBorder : tokens.colors.primaryBorder;
+  const accentColor = destructive ? tokens.colors.dangerDark : tokens.colors.primary;
+  const accentText = destructive ? tokens.colors.warningText : tokens.colors.primaryDeep;
+  const resolvedNote =
+    note || (destructive ? t("danger.confirm.irreversible") : t("common.confirmNote"));
+  const busyLabel = destructive ? t("common.deleting") : t("common.processing");
   const handleCloseRequest = () => {
     if (!busy) {
       onClose();
@@ -51,6 +61,7 @@ export function DangerConfirmSheet({
       onRequestClose={handleCloseRequest}
     >
       <Pressable
+        accessible={false}
         onPress={handleCloseRequest}
         style={{
           flex: 1,
@@ -97,10 +108,10 @@ export function DangerConfirmSheet({
                   borderRadius: tokens.radius.card,
                   alignItems: "center",
                   justifyContent: "center",
-                  backgroundColor: tokens.colors.dangerSoft,
+                  backgroundColor: accentBackground,
                 }}
               >
-                <Trash2 size={tokens.iconSize["2xl"]} color={tokens.colors.dangerDark} />
+                <ActionIcon size={tokens.iconSize["2xl"]} color={accentColor} />
               </View>
               <View style={{ flex: 1, gap: tokens.spacing.xxs }}>
                 <Text
@@ -161,8 +172,8 @@ export function DangerConfirmSheet({
               style={{
                 borderRadius: tokens.radius.card,
                 borderWidth: 1,
-                borderColor: tokens.colors.warningBorder,
-                backgroundColor: tokens.colors.warningSoft,
+                borderColor: accentBorder,
+                backgroundColor: accentBackground,
                 paddingHorizontal: tokens.spacing.sm,
                 paddingVertical: tokens.spacing.compact,
                 flexDirection: "row",
@@ -170,17 +181,17 @@ export function DangerConfirmSheet({
                 gap: tokens.spacing.xs,
               }}
             >
-              <AlertTriangle size={16} color={tokens.colors.warningIcon} />
+              <AlertTriangle size={16} color={accentColor} />
               <Text
                 style={{
                   flex: 1,
-                  color: tokens.colors.warningText,
+                  color: accentText,
                   fontSize: tokens.typography.caption,
                   fontWeight: "700",
                   lineHeight: tokens.lineHeight.caption,
                 }}
               >
-                {note}
+                {resolvedNote}
               </Text>
             </View>
 
@@ -220,7 +231,7 @@ export function DangerConfirmSheet({
               </Pressable>
 
               <Pressable
-                accessibilityLabel={busy ? t("common.deleting") : confirmLabel}
+                accessibilityLabel={busy ? busyLabel : confirmLabel}
                 accessibilityRole="button"
                 accessibilityState={{ busy, disabled: busy }}
                 disabled={busy}
@@ -231,7 +242,7 @@ export function DangerConfirmSheet({
                   borderRadius: tokens.radius.lg,
                   alignItems: "center",
                   justifyContent: "center",
-                  backgroundColor: tokens.colors.dangerDark,
+                  backgroundColor: accentColor,
                   flexDirection: "row",
                   gap: tokens.spacing.xs,
                   opacity: busy ? 0.78 : 1,
@@ -240,7 +251,7 @@ export function DangerConfirmSheet({
                 {busy ? (
                   <ActivityIndicator color={tokens.colors.surface} />
                 ) : (
-                  <Trash2 size={16} color={tokens.colors.surface} />
+                  <ActionIcon size={16} color={tokens.colors.surface} />
                 )}
                 <Text
                   style={{
@@ -249,7 +260,7 @@ export function DangerConfirmSheet({
                     fontWeight: "800",
                   }}
                 >
-                  {busy ? t("common.deleting") : confirmLabel}
+                  {busy ? busyLabel : confirmLabel}
                 </Text>
               </Pressable>
             </View>

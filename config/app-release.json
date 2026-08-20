@@ -1,0 +1,22 @@
+{
+  "version": "1.0.133",
+  "runtimeVersion": "1.0.133",
+  "android": {
+    "package": "com.ogrencisosyalagi.app",
+    "versionCode": 133
+  },
+  "ios": {
+    "bundleIdentifier": "com.ogrencisosyalagi.app",
+    "buildNumber": "133"
+  },
+  "profiles": {
+    "preview": {
+      "appEnv": "preview",
+      "channel": "preview"
+    },
+    "production": {
+      "appEnv": "production",
+      "channel": "production"
+    }
+  }
+}

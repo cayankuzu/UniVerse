@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import { Alert } from "react-native";
 import { View } from "react-native";
 import { useProgressiveHydration } from "../../../../shared/utils/useProgressiveHydration";
 import { useAlbumDetailCardState } from "../../application/useAlbumDetailCardState";
@@ -14,6 +13,7 @@ import { downloadMediaToGallery } from "../../../../shared/media/downloadMediaTo
 import { isVideoMediaUri } from "../../../../shared/media/mediaVideoUtils";
 import { reportAlbum } from "../../data";
 import { tokens, withAlpha } from "../../../../shared/theme";
+import { showErrorAlert } from "../../../../shared/utils/alerts";
 
 type AlbumDetailCardContext = "feed" | "search" | "profile" | "event_album";
 
@@ -97,9 +97,9 @@ export function AlbumDetailCard({
               }
               await reportAlbum({ photoId: photo.id, username: photo.username });
             } catch (error) {
-              Alert.alert(
-                isOwnPhoto ? "İndirme başarısız" : "Şikâyet gönderilemedi",
+              showErrorAlert(
                 String((error as { message?: string } | null)?.message || "İşlem tamamlanamadı."),
+                isOwnPhoto ? "İndirme başarısız" : "Şikâyet gönderilemedi",
               );
             }
           })();

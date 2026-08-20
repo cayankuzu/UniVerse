@@ -3,8 +3,34 @@ apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
 import java.util.Properties
+import groovy.json.JsonSlurper
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.TaskAction
+
+abstract class VerifyReleaseGoogleServicesTask extends DefaultTask {
+    @InputFiles
+    @Optional
+    @PathSensitive(PathSensitivity.RELATIVE)
+    abstract ConfigurableFileCollection getCandidateFiles()
+
+    @TaskAction
+    void verifyGoogleServices() {
+        if (!candidateFiles.files.any { it.exists() }) {
+            throw new GradleException("Android Google services config is required for production/release builds. Run npm run materialize:native-config or provide android/app/src/release/google-services.json via a file secret.")
+        }
+    }
+}
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
+def appReleaseConfigFile = new File(projectRoot, "config/app-release.json")
+if (!appReleaseConfigFile.exists()) {
+    throw new GradleException("config/app-release.json is required for Android builds.")
+}
+def appReleaseConfig = new JsonSlurper().parse(appReleaseConfigFile)
 def requestedGradleTasks = gradle.startParameter.taskNames.collect { String.valueOf(it ?: "").toLowerCase() }
 def releaseTasksRequested = requestedGradleTasks.any { taskName ->
     taskName.contains("release") ||
@@ -12,16 +38,16 @@ def releaseTasksRequested = requestedGradleTasks.any { taskName ->
     taskName.contains("assembleproduction")
 }
 def productionEnvRequested = String.valueOf(System.getenv("EXPO_PUBLIC_APP_ENV") ?: "").trim() == "production"
-def googleServicesCandidates = [
-    project.file("google-services.json"),
-    project.file("src/debug/google-services.json"),
-    project.file("src/release/google-services.json"),
-]
+def commonGoogleServicesFile = project.file("google-services.json")
+def debugGoogleServicesFile = project.file("src/debug/google-services.json")
+def releaseGoogleServicesFile = project.file("src/release/google-services.json")
+def googleServicesCandidates = [commonGoogleServicesFile, debugGoogleServicesFile, releaseGoogleServicesFile]
 def hasGoogleServicesConfig = googleServicesCandidates.any { it.exists() }
-if (hasGoogleServicesConfig) {
-    apply plugin: "com.google.gms.google-services"
-} else if (releaseTasksRequested || productionEnvRequested) {
+def hasReleaseGoogleServicesConfig = releaseGoogleServicesFile.exists()
+if ((releaseTasksRequested || productionEnvRequested) && !hasReleaseGoogleServicesConfig) {
     throw new GradleException("Android Google services config is required for production/release builds. Run npm run materialize:native-config or provide android/app/src/release/google-services.json via a file secret.")
+} else if (hasGoogleServicesConfig) {
+    apply plugin: "com.google.gms.google-services"
 } else {
     logger.lifecycle("[android] google-services.json bulunamadi; debug/dev build Firebase/FCM native config olmadan devam edecek.")
 }
@@ -169,34 +195,20 @@ def releaseKeyPassword =
     System.getenv("ANDROID_RELEASE_KEY_PASSWORD")
 def hasManualReleaseSigning = [releaseStoreFile, releaseStorePassword, releaseKeyAlias, releaseKeyPassword]
     .every { value -> String.valueOf(value ?: "").trim() }
-def configuredVersionCode =
-    findProperty("android.versionCode") ?:
-    localProperties.getProperty("android.versionCode") ?:
-    System.getenv("ANDROID_VERSION_CODE") ?:
-    "128"
-def configuredVersionName =
-    findProperty("android.versionName") ?:
-    localProperties.getProperty("android.versionName") ?:
-    System.getenv("ANDROID_VERSION_NAME") ?:
-    "1.0.128"
-def configuredApplicationId =
-    findProperty("android.applicationId") ?:
-    localProperties.getProperty("android.applicationId") ?:
-    resolveBuildEnv("EXPO_PUBLIC_ANDROID_PACKAGE") ?:
-    "com.ogrencisosyalagi.app"
+def configuredVersionCode = appReleaseConfig.android.versionCode
+def configuredVersionName = appReleaseConfig.version
+def configuredRuntimeVersion = appReleaseConfig.runtimeVersion
+def configuredApplicationId = appReleaseConfig.android.package
+
+if (String.valueOf(configuredVersionName) != String.valueOf(configuredRuntimeVersion)) {
+    throw new GradleException("Android versionName and Expo runtimeVersion must match.")
+}
 
 def escapeBuildConfigString = { value ->
     return String.valueOf(value ?: "")
         .replace("\\", "\\\\")
         .replace("\"", "\\\"")
 }
-
-def configuredPlayIntegrityProjectNumber =
-    findProperty("android.playIntegrityProjectNumber") ?:
-    localProperties.getProperty("android.playIntegrityProjectNumber") ?:
-    System.getenv("PLAY_INTEGRITY_GOOGLE_CLOUD_PROJECT_NUMBER") ?:
-    System.getenv("EXPO_PUBLIC_PLAY_INTEGRITY_GOOGLE_CLOUD_PROJECT_NUMBER") ?:
-    ""
 
 /**
  * The preferred build flavor of JavaScriptCore (JSC)
@@ -224,9 +236,9 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode Integer.parseInt(String.valueOf(configuredVersionCode).trim())
         versionName String.valueOf(configuredVersionName).trim()
+        resValue "string", "expo_runtime_version", "\"${escapeBuildConfigString(configuredRuntimeVersion)}\""
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
-        buildConfigField "String", "PLAY_INTEGRITY_PROJECT_NUMBER", "\"${escapeBuildConfigString(configuredPlayIntegrityProjectNumber)}\""
     }
     signingConfigs {
         debug {
@@ -285,6 +297,24 @@ afterEvaluate {
     }
 }
 
+def verifyReleaseGoogleServices = tasks.register("verifyReleaseGoogleServices", VerifyReleaseGoogleServicesTask) {
+    candidateFiles.from(releaseGoogleServicesFile)
+    notCompatibleWithConfigurationCache("Release Google services presence and plugin application must be evaluated for every release build.")
+}
+tasks.matching {
+    it.name != "verifyReleaseGoogleServices" && it.name.toLowerCase().contains("release")
+}.configureEach {
+    dependsOn(verifyReleaseGoogleServices)
+}
+gradle.taskGraph.whenReady { taskGraph ->
+    def releaseGraphRequested = taskGraph.allTasks.any {
+        it.path.toLowerCase().startsWith(":app:") && it.path.toLowerCase().contains("release")
+    }
+    if (releaseGraphRequested && !releaseGoogleServicesFile.exists()) {
+        throw new GradleException("Android Google services config is required for production/release builds. Run npm run materialize:native-config or provide android/app/src/release/google-services.json via a file secret.")
+    }
+}
+
 // Apply static values from `gradle.properties` to the `android.packagingOptions`
 // Accepts values in comma delimited lists, example:
 // android.packagingOptions.pickFirsts=/LICENSE,**/picasa.ini
@@ -337,7 +367,6 @@ dependencies {
     } else {
         implementation jscFlavor
     }
-    implementation("com.google.android.play:integrity:1.4.0")
 }
 
 if (enableSentryGradlePlugin) {

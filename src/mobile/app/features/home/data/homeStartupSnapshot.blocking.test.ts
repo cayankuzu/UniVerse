@@ -79,7 +79,7 @@ describe("homeStartupSnapshot blocking isolation", () => {
           source: "following",
         } as any,
       ],
-      savedAt: Date.now(),
+      savedAt: Date.parse("2026-08-19T12:00:00.000Z"),
       unreadCount: 2,
       viewerKey: "viewer-1",
     });
@@ -112,7 +112,7 @@ describe("homeStartupSnapshot blocking isolation", () => {
           source: "following",
         } as any,
       ],
-      savedAt: Date.now(),
+      savedAt: Date.parse("2026-08-19T12:00:00.000Z"),
       unreadCount: 1,
       viewerKey: "viewer-1",
     });

@@ -298,7 +298,7 @@ export function useRegistrationWizardState<TValues extends FieldValues>(
       const message = String(
         (error as { message?: string } | null)?.message ||
           error ||
-          "Kayıt sirasinda bir hata olustu.",
+          "Kayıt sırasında bir hata oluştu.",
       );
       debugWarn(logScope, "submit-failed", { message });
       setSubmitError(message);

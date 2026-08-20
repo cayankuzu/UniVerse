@@ -81,25 +81,25 @@ export function writeUploadProgress(
 
 export function createAlbumUploadProgress(eventId: string): UploadProgressState {
   return {
-    hint: "Uygulamayi kullanmaya devam edebilirsin; kapanirsa sonraki acilista surer.",
+    hint: "Uygulamayı kullanmaya devam edebilirsin; kapanırsa sonraki açılışta sürer.",
     percent: 5,
     stage: "Sıraya alındı",
     target: {
       eventId,
       kind: "album-view",
     },
-    title: "Album karti paylasiliyor",
+    title: "Albüm kartı paylaşılıyor",
   };
 }
 
 export function createEventCreateProgress(): UploadProgressState {
   return {
-    hint: "Uygulamayi kullanmaya devam edebilirsin; kapanirsa sonraki acilista surer.",
+    hint: "Uygulamayı kullanmaya devam edebilirsin; kapanırsa sonraki açılışta sürer.",
     percent: 5,
     stage: "Sıraya alındı",
     target: {
       kind: "event-feed",
     },
-    title: "Etkinlik paylasiliyor",
+    title: "Etkinlik paylaşılıyor",
   };
 }

@@ -48,6 +48,7 @@ export const ProfileActionMenu = memo(function ProfileActionMenu({
       onRequestClose={onClose}
     >
       <Pressable
+        accessible={false}
         onPress={onClose}
         style={{
           flex: 1,
@@ -59,6 +60,7 @@ export const ProfileActionMenu = memo(function ProfileActionMenu({
         }}
       >
         <Pressable
+          accessible={false}
           onPress={(event) => event.stopPropagation()}
           style={{
             borderRadius: tokens.radius.card,
@@ -71,6 +73,8 @@ export const ProfileActionMenu = memo(function ProfileActionMenu({
           {menuItems.map((item, index) => (
             <Pressable
               key={item.key}
+              accessibilityRole="button"
+              accessibilityLabel={item.label}
               onPress={() => {
                 onClose();
                 item.onPress();

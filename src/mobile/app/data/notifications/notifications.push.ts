@@ -11,6 +11,7 @@ export type PushAppEnv = "development" | "preview" | "production";
 
 export type StoredPushRegistration = {
   appEnv: PushAppEnv;
+  expoProjectId?: string;
   expoPushToken: string;
   platform: PushPlatform;
   userId: string;
@@ -18,6 +19,7 @@ export type StoredPushRegistration = {
 
 type RegisterPushTokenPayload = {
   appEnv: PushAppEnv;
+  expoProjectId: string;
   expoPushToken: string;
   platform: PushPlatform;
 };
@@ -28,6 +30,7 @@ function normalizeStoredPushRegistration(value: unknown): StoredPushRegistration
   if (!value || typeof value !== "object") return null;
   const item = value as Record<string, unknown>;
   const expoPushToken = String(item.expoPushToken || "").trim();
+  const expoProjectId = String(item.expoProjectId || "").trim();
   const userId = String(item.userId || "").trim();
   const platform = item.platform === "android" || item.platform === "ios" ? item.platform : null;
   const appEnv =
@@ -37,6 +40,7 @@ function normalizeStoredPushRegistration(value: unknown): StoredPushRegistration
   if (!expoPushToken || !userId || !platform || !appEnv) return null;
   return {
     appEnv,
+    ...(expoProjectId ? { expoProjectId } : {}),
     expoPushToken,
     platform,
     userId,

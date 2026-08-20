@@ -18,6 +18,7 @@ async function flushScheduledSync() {
 describe("syncOrchestrator", () => {
   beforeEach(() => {
     jest.useFakeTimers();
+    jest.setSystemTime(new Date("2026-08-19T12:00:00.000Z"));
     getRegisteredProjectionSyncEntries().forEach(([screenKey]) => {
       unregisterProjectionSync(screenKey);
     });

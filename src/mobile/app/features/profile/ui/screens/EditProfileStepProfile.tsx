@@ -46,6 +46,8 @@ export function EditProfileStepProfile({
         </Text>
         <Pressable
           onPress={onPickCover}
+          accessibilityRole="button"
+          accessibilityLabel="Kapak fotoğrafı seç"
           style={{
             height: 108,
             borderRadius: tokens.radius.control,
@@ -113,6 +115,8 @@ export function EditProfileStepProfile({
         </Text>
         <Pressable
           onPress={onPickProfile}
+          accessibilityRole="button"
+          accessibilityLabel="Profil fotoğrafı seç"
           style={{
             width: 68,
             height: 68,

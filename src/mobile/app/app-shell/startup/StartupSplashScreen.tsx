@@ -2,7 +2,7 @@ import React from "react";
 import { Image, StyleSheet, View } from "react-native";
 import { tokens } from "../../shared/theme";
 
-const splashImage = require("../../../../../assets/splash/brand-screen.png");
+const splashImage = require("../../../../../android/app/src/main/res/drawable-xxhdpi/splashscreen_logo.png");
 
 export function StartupSplashScreen() {
   return (

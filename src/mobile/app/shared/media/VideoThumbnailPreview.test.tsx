@@ -94,4 +94,21 @@ describe("VideoThumbnailPreview", () => {
       });
     });
   });
+
+  it("generates a thumbnail for a remote signed video when no poster exists", async () => {
+    const thumbnail = { uri: "file:///remote-video-thumb.jpg" } as never;
+    mockResolveVideoThumbnail.mockResolvedValue(thumbnail);
+    const { VideoThumbnailPreview } =
+      require("./VideoThumbnailPreview") as typeof import("./VideoThumbnailPreview");
+    const remoteVideoUri = "https://cdn.example.com/video.mp4?token=signed";
+
+    render(<VideoThumbnailPreview uri={remoteVideoUri} />);
+
+    await waitFor(() => {
+      expect(mockResolveVideoThumbnail).toHaveBeenCalledWith(remoteVideoUri, {
+        priority: "eager",
+      });
+      expect(expoImageProps.at(-1)?.source).toBe(thumbnail);
+    });
+  });
 });

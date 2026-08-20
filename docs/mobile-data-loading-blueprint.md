@@ -114,11 +114,11 @@ Forbidden behavior for normal flows:
 
 Current prefetch and warmup surfaces include:
 
-- `src/mobile/app/data/projections/intentPrefetch.ts`
-- `src/mobile/app/data/projections/prefetchProjection.ts`
-- `src/mobile/app/data/projections/nextStepPrefetch.ts`
+- `src/mobile/app/data/projections/prefetch/intentPrefetch.ts`
+- `src/mobile/app/data/projections/prefetch/prefetchProjection.ts`
+- `src/mobile/app/data/projections/prefetch/nextStepPrefetch.ts`
 - `src/mobile/app/data/projections/warmupPreferences.ts`
-- `src/mobile/app/app-shell/startup/AppRuntimeWarmup.tsx`
+- `src/mobile/app/app-shell/startup/AppDataWarmup.tsx`
 
 Prefetch is used to improve first paint for likely next navigation targets.
 

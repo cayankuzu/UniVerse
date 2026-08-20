@@ -29,6 +29,7 @@ export function initializeCrashReporter() {
   initialized = true;
 
   const replayEnabled =
+    crashReporterConfig.enabled &&
     appReleaseMeta.appEnv !== "development" &&
     (crashReporterConfig.replaysOnErrorSampleRate > 0 ||
       crashReporterConfig.replaysSessionSampleRate > 0);

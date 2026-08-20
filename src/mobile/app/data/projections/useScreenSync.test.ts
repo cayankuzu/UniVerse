@@ -15,6 +15,7 @@ jest.mock("@react-navigation/native", () => ({
 describe("useScreenSync", () => {
   beforeEach(() => {
     jest.useFakeTimers();
+    jest.setSystemTime(new Date("2026-08-19T12:00:00.000Z"));
     mockIsFocused = false;
     appStateChangeHandler = null;
     Object.defineProperty(AppState, "currentState", {

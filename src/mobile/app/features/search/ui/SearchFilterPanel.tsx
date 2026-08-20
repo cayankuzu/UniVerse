@@ -31,6 +31,9 @@ function renderSortChips(
     <View style={{ flexDirection: "row", gap: tokens.spacing.xs, flexWrap: "wrap" }}>
       {options.map((item) => (
         <Pressable
+          accessibilityLabel={item.label}
+          accessibilityRole="button"
+          accessibilityState={{ selected: sortOption === item.key }}
           key={item.key}
           onPress={() => setSortOption(item.key)}
           style={{
@@ -144,6 +147,9 @@ export function SearchFilterPanel({
               { key: "paid", label: t("search.filter.fee.paid") },
             ].map((item) => (
               <Pressable
+                accessibilityLabel={item.label}
+                accessibilityRole="button"
+                accessibilityState={{ selected: selectedFee === item.key }}
                 key={item.key}
                 onPress={() =>
                   setSelectedFee(selectedFee === item.key ? "" : (item.key as "free" | "paid"))
@@ -180,6 +186,8 @@ export function SearchFilterPanel({
       ) : null}
 
       <Pressable
+        accessibilityLabel={t("search.filter.clear")}
+        accessibilityRole="button"
         onPress={onClear}
         style={{
           minHeight: tokens.minHeight.chipLg,

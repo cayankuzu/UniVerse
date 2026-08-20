@@ -62,6 +62,10 @@ describe("authSessionSupport", () => {
     mockSavePersistedAuthSnapshot.mockReset();
   });
 
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it("serializes concurrent persisted session restores into a single setSession call", async () => {
     const session = createSession();
     let resolveSetSession:
@@ -135,5 +139,23 @@ describe("authSessionSupport", () => {
 
     resolveBootstrap!({ data: { session: null } });
     await expect(pendingBootstrap).resolves.toBeNull();
+  });
+
+  it("fails closed when restoring a persisted session times out", async () => {
+    jest.useFakeTimers();
+    mockGetPersistedAuthSession.mockResolvedValue({
+      access_token: "token-abcdefghijklmnopqrstuvwxyz",
+      refresh_token: "refresh-token",
+    });
+    mockSetSession.mockReturnValue(new Promise(() => undefined));
+    const { restorePersistedSession } =
+      require("./authSessionSupport") as typeof import("./authSessionSupport");
+
+    const pending = restorePersistedSession();
+    await Promise.resolve();
+    jest.advanceTimersByTime(2_500);
+
+    await expect(pending).resolves.toBeNull();
+    expect(mockSavePersistedAuthSession).not.toHaveBeenCalled();
   });
 });

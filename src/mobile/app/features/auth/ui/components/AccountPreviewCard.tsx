@@ -72,7 +72,7 @@ export function AccountPreviewCard({
             borderRadius: tokens.radius.pill,
             backgroundColor: tokens.colors.primarySofter,
             paddingHorizontal: tokens.spacing.compact,
-            paddingVertical: tokens.spacing.xxsPlus,
+            paddingVertical: tokens.spacing.xsMinus,
             flexDirection: "row",
             alignItems: "center",
             gap: tokens.spacing.xxs,
@@ -145,7 +145,7 @@ export function AccountPreviewCard({
 
         <View
           style={{
-            marginTop: tokens.spacing.xsCompact,
+            marginTop: tokens.spacing.xs,
             flexDirection: "row",
             alignItems: "center",
             gap: tokens.spacing.xsMinus,
@@ -180,7 +180,7 @@ export function AccountPreviewCard({
         {departmentLine ? (
           <View
             style={{
-              marginTop: tokens.spacing.xsCompact,
+              marginTop: tokens.spacing.xs,
               flexDirection: "row",
               alignItems: "center",
               gap: tokens.spacing.xsMinus,
@@ -202,7 +202,7 @@ export function AccountPreviewCard({
 
         <View
           style={{
-            marginTop: tokens.spacing.xsCompact,
+            marginTop: tokens.spacing.xs,
             flexDirection: "row",
             alignItems: "center",
             gap: tokens.spacing.xsMinus,
@@ -299,7 +299,7 @@ export function AccountPreviewCard({
                 style={{
                   borderRadius: tokens.radius.pill,
                   paddingHorizontal: tokens.spacing.xsPlus,
-                  paddingVertical: tokens.spacing.xxsPlus,
+                  paddingVertical: tokens.spacing.xsMinus,
                   backgroundColor: `${accent}14`,
                 }}
               >

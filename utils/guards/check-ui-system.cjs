@@ -1,10 +1,12 @@
 const fs = require("node:fs");
 const path = require("node:path");
+const parser = require("@typescript-eslint/parser");
 
 const ROOT = process.cwd();
 const MOBILE_ROOT = path.join(ROOT, "src", "mobile", "app");
 const PRODUCTION_TSX = /\.tsx$/;
-const TEST_FILE = /\.(?:smoke\.)?test\.tsx$/;
+const PRODUCTION_TS_OR_TSX = /\.tsx?$/;
+const TEST_FILE = /\.(?:smoke\.)?test\.tsx?$/;
 
 const sourceViolations = [
   {
@@ -40,15 +42,18 @@ const sourceViolations = [
 
 const turkishCopyPatterns = [
   /\b(?:Yukleme|Yukleniyor|Gonderi|Fotograf|Katildin|Okunmamis|Erisim|Aciklama|Sikayet|Islem)\b/i,
-  /\b(?:profilini ac|Lutfen tekrar|Iptal Et|Etkinligi Sil|Paylasiliyor)\b/i,
+  /\b(?:profilini ac|Lutfen tekrar|Etkinligi Sil|Paylasiliyor)\b/i,
+  /\b(?:Vazgec|sirasinda|olustu|oncesi|onizleme)\b/i,
+  /\b(?:On Izleme|sira aliniyor)\b/i,
+  /\bIptal Et\b/,
 ];
 
-function walk(directory, files = []) {
+function walk(directory, matcher, files = []) {
   for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
     const fullPath = path.join(directory, entry.name);
     if (entry.isDirectory()) {
-      walk(fullPath, files);
-    } else if (entry.isFile() && PRODUCTION_TSX.test(entry.name) && !TEST_FILE.test(entry.name)) {
+      walk(fullPath, matcher, files);
+    } else if (entry.isFile() && matcher.test(entry.name) && !TEST_FILE.test(entry.name)) {
       files.push(fullPath);
     }
   }
@@ -59,12 +64,35 @@ function read(relativePath) {
   return fs.readFileSync(path.join(ROOT, relativePath), "utf8");
 }
 
+function walkAst(node, visit) {
+  if (!node || typeof node !== "object") return;
+  visit(node);
+  for (const [key, value] of Object.entries(node)) {
+    if (key === "parent" || key === "tokens" || key === "comments") continue;
+    if (Array.isArray(value)) {
+      value.forEach((child) => walkAst(child, visit));
+    } else if (value && typeof value.type === "string") {
+      walkAst(value, visit);
+    }
+  }
+}
+
+function hasAccessibleFalse(attributes) {
+  return attributes.some(
+    (attribute) =>
+      attribute.type === "JSXAttribute" &&
+      attribute.name.name === "accessible" &&
+      attribute.value?.type === "JSXExpressionContainer" &&
+      attribute.value.expression?.value === false,
+  );
+}
+
 function requireText(relativePath, pattern, message, failures) {
   if (!pattern.test(read(relativePath))) failures.push(message);
 }
 
 const failures = [];
-for (const filePath of walk(MOBILE_ROOT)) {
+for (const filePath of walk(MOBILE_ROOT, PRODUCTION_TSX)) {
   const source = fs.readFileSync(filePath, "utf8");
   for (const rule of sourceViolations) {
     if (filePath.endsWith(`${path.sep}AppText.tsx`) && rule.label.includes("Text import")) continue;
@@ -72,6 +100,50 @@ for (const filePath of walk(MOBILE_ROOT)) {
       failures.push(`${path.relative(ROOT, filePath)} contains a ${rule.label}.`);
     }
   }
+  if (!filePath.endsWith(`${path.sep}InstantPressable.tsx`)) {
+    const ast = parser.parse(source, { jsx: true, loc: true, sourceType: "module" });
+    walkAst(ast, (node) => {
+      if (
+        node.type !== "JSXOpeningElement" ||
+        node.name?.type !== "JSXIdentifier" ||
+        !["Pressable", "TouchableOpacity"].includes(node.name.name)
+      ) {
+        return;
+      }
+      const attributes = node.attributes.filter((attribute) => attribute.type === "JSXAttribute");
+      const names = attributes.map((attribute) => attribute.name.name);
+      const hidden =
+        hasAccessibleFalse(attributes) ||
+        names.includes("accessibilityElementsHidden") ||
+        names.includes("importantForAccessibility");
+      if (
+        !hidden &&
+        !names.includes("accessibilityLabel") &&
+        !names.includes("accessibilityLabelledBy")
+      ) {
+        failures.push(
+          `${path.relative(ROOT, filePath)}:${node.loc.start.line} contains an unlabeled ${node.name.name}.`,
+        );
+      }
+    });
+  }
+}
+
+for (const filePath of walk(MOBILE_ROOT, PRODUCTION_TS_OR_TSX)) {
+  const themeRoot = `${path.sep}shared${path.sep}theme${path.sep}`;
+  if (!filePath.includes(themeRoot)) {
+    const source = fs.readFileSync(filePath, "utf8");
+    if (/["']#[0-9a-f]{3,8}["']/i.test(source) || /["']rgba\s*\(/i.test(source)) {
+      failures.push(`${path.relative(ROOT, filePath)} contains a raw UI color outside the theme.`);
+    }
+  }
+  if (
+    filePath.endsWith(`${path.sep}data${path.sep}queues${path.sep}uploadQueue.ts`) ||
+    filePath.endsWith(`${path.sep}data${path.sep}queues${path.sep}queueErrorPolicy.ts`)
+  ) {
+    continue;
+  }
+  const source = fs.readFileSync(filePath, "utf8");
   for (const [index, line] of source.split(/\r?\n/).entries()) {
     if (line.includes(".includes(")) continue;
     if (turkishCopyPatterns.some((pattern) => pattern.test(line))) {
@@ -85,7 +157,13 @@ for (const filePath of walk(MOBILE_ROOT)) {
 requireText(
   "src/mobile/app/App.tsx",
   /<AppFontGate>/,
-  "The app root must wait for the shared Inter font gate.",
+  "The app root must retain the shared Inter font loader.",
+  failures,
+);
+requireText(
+  "src/mobile/app/shared/components/AppFontGate.tsx",
+  /useFonts\(APP_FONTS\);[\s\S]*return children;/,
+  "Font loading must keep the first frame non-blocking while Inter loads.",
   failures,
 );
 requireText(
@@ -115,8 +193,8 @@ requireText(
 );
 requireText(
   "src/mobile/app/shared/components/AppImage.tsx",
-  /getCachePathAsync/,
-  "Images must verify cache hits before suppressing their transition.",
+  /cachePolicy=\{cachePolicy\}/,
+  "Images must retain the native memory/disk cache policy.",
   failures,
 );
 requireText(
@@ -135,6 +213,18 @@ requireText(
   "src/mobile/app/data/projections/prefetch/useViewportPrefetch.ts",
   /cancelQueries/,
   "Obsolete viewport prefetch queries must remain cancellable.",
+  failures,
+);
+requireText(
+  "src/mobile/app/shared/components/AppModalHost.tsx",
+  /useReducedMotion\(\)[\s\S]*animationType=\{reducedMotion\s*\?\s*"none"/,
+  "Shared modal transitions must honor the operating system reduced-motion preference.",
+  failures,
+);
+requireText(
+  "src/mobile/app/shared/components/AppFlatList.tsx",
+  /onRetry\?:[\s\S]*onRetry:\s*onRetry\s*\?\?\s*\(onRefresh/,
+  "List error states must expose a retry path when refresh is available.",
   failures,
 );
 

@@ -74,4 +74,52 @@ describe("pushNotificationResponse.shared", () => {
       }),
     ).toBe(false);
   });
+
+  it("rejects malformed payload values without manufacturing a navigation target", () => {
+    const response = {
+      actionIdentifier: "default",
+      notification: {
+        request: {
+          content: {
+            data: {
+              eventId: { unexpected: true },
+              fromUsername: ["cayan"],
+              notificationId: 42,
+              photoId: false,
+              targetType: "unsupported",
+            },
+          },
+          identifier: "request-malformed",
+        },
+      },
+    };
+
+    const payload = parsePushNotificationPayload(response);
+    expect(payload).toEqual({
+      eventId: undefined,
+      fromUsername: undefined,
+      notificationId: undefined,
+      photoId: undefined,
+      targetType: undefined,
+    });
+    expect(buildPushNotificationNavigationTarget(payload)).toBeNull();
+    expect(buildPushNotificationResponseHandlingKey(response)).toBe("request-malformed:default");
+  });
+
+  it("builds the same handling key for duplicate delivery responses", () => {
+    const firstResponse = {
+      actionIdentifier: "default",
+      notification: {
+        request: {
+          content: { data: { eventId: "event-1", notificationId: "notification-1" } },
+          identifier: "request-1",
+        },
+      },
+    };
+    const duplicateResponse = JSON.parse(JSON.stringify(firstResponse));
+
+    expect(buildPushNotificationResponseHandlingKey(duplicateResponse)).toBe(
+      buildPushNotificationResponseHandlingKey(firstResponse),
+    );
+  });
 });

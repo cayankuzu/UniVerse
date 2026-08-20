@@ -3,7 +3,7 @@ import { getCachedResolvedMediaUri, normalizeMediaUriInput, resolveMediaUri } fr
 import { runLowPriorityTask } from "../utils/lowPriorityTaskScheduler";
 import { scheduleAfterInteractions } from "../utils/scheduleAfterInteractions";
 
-const RETRY_DELAYS_MS = [120, 320, 900, 1800];
+const RETRY_DELAYS_MS = [150, 450];
 const DEFAULT_DEFERRED_RESOLVE_DELAY_MS = 96;
 
 type ResolvePriority = "deferred" | "eager";

@@ -129,7 +129,7 @@ export function MediaViewerModal({
       onRequestClose={onClose}
     >
       <View
-        accessibilityLabel="Medya onizleme"
+        accessibilityLabel="Medya önizleme"
         accessibilityRole="image"
         accessibilityViewIsModal
         style={{ flex: 1, backgroundColor: tokens.colors.overlayHeavy }}
@@ -287,7 +287,7 @@ export function MediaViewerModal({
                 borderRadius: tokens.radius.pill,
                 backgroundColor: tokens.colors.backdropLight,
                 paddingHorizontal: tokens.spacing.sm,
-                paddingVertical: tokens.spacing.xsCompact,
+                paddingVertical: tokens.spacing.xs,
               }}
             >
               <Text

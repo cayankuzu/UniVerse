@@ -1,14 +1,15 @@
 import React from "react";
 import { Text } from "react-native";
-import { render, waitFor } from "@testing-library/react-native";
+import { act, render, waitFor } from "@testing-library/react-native";
 
 const mockPrimeHomeStartupSnapshotsIntoQueryCache = jest.fn();
+let mockIsRestoring = false;
 const mockQueryClient = {
   getQueriesData: jest.fn(),
 };
 
 jest.mock("@tanstack/react-query", () => ({
-  useIsRestoring: () => false,
+  useIsRestoring: () => mockIsRestoring,
   useQueryClient: () => mockQueryClient,
 }));
 
@@ -36,6 +37,7 @@ function StartupProbe() {
 describe("AppStartupStateProvider perceived startup", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockIsRestoring = false;
   });
 
   it("opens the first-fold gate from restored Home data without awaiting snapshot IO", async () => {
@@ -54,5 +56,28 @@ describe("AppStartupStateProvider perceived startup", () => {
       expect(getByTestId("query-cache-ready").props.children).toBe("true");
     });
     expect(mockPrimeHomeStartupSnapshotsIntoQueryCache).toHaveBeenCalledWith(mockQueryClient);
+  });
+
+  it("opens the first-fold gate when query restore exceeds its startup budget", async () => {
+    jest.useFakeTimers();
+    mockIsRestoring = true;
+    mockQueryClient.getQueriesData.mockReturnValue([]);
+    mockPrimeHomeStartupSnapshotsIntoQueryCache.mockResolvedValue({ source: "empty-cache" });
+
+    const { getByTestId, unmount } = render(
+      <AppStartupStateProvider>
+        <StartupProbe />
+      </AppStartupStateProvider>,
+    );
+
+    await act(async () => {
+      jest.advanceTimersByTime(351);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(getByTestId("query-cache-ready").props.children).toBe("true");
+    unmount();
+    jest.useRealTimers();
   });
 });

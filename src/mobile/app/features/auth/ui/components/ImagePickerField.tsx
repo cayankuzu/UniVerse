@@ -28,6 +28,10 @@ export function ImagePickerField({ label, uri, onPick, variant, accent }: ImageP
         </Text>
         <Pressable
           onPress={onPick}
+          accessibilityRole="button"
+          accessibilityLabel={`${label}: ${
+            uri ? t("auth.imagePicker.change") : t("auth.imagePicker.upload")
+          }`}
           style={{
             height: 104,
             borderRadius: tokens.radius.lg,
@@ -94,6 +98,10 @@ export function ImagePickerField({ label, uri, onPick, variant, accent }: ImageP
       <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.smPlus }}>
         <Pressable
           onPress={onPick}
+          accessibilityRole="button"
+          accessibilityLabel={`${label}: ${
+            uri ? t("auth.imagePicker.change") : t("auth.imagePicker.upload")
+          }`}
           style={{ width: 64, height: 64, borderRadius: tokens.radius.lg, overflow: "visible" }}
         >
           {uri ? (

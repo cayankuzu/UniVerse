@@ -71,7 +71,7 @@ export async function prefetchProfileExperience(params: {
     }
   }
 
-  const overview = await params.queryClient.fetchQuery({
+  await params.queryClient.prefetchQuery({
     queryKey: projectionKeys.profileOverview(targetUsername, params.viewerKey),
     queryFn: ({ signal }) =>
       getProfileOverviewProjection(
@@ -82,6 +82,9 @@ export async function prefetchProfileExperience(params: {
       ),
     staleTime: 15_000,
   });
+  const overview = params.queryClient.getQueryData<{ profile?: unknown }>(
+    projectionKeys.profileOverview(targetUsername, params.viewerKey),
+  );
   void prefetchIntentImages([overview?.profile], 1).catch((error) => {
     debugWarn("PROJECTIONS/PREFETCH", "profile-intent-image-prefetch-failed", {
       message: String(

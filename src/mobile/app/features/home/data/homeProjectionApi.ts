@@ -15,28 +15,22 @@ import {
   tryProjectionRpc,
 } from "../../../data/projections/projections.api.helpers";
 import {
-  createEmptyBlockedVisibilitySnapshot,
   filterBlockedAlbums,
   filterBlockedEvents,
   loadViewerBlockedVisibilityOrEmpty,
 } from "../../../data/social/blockedVisibility";
 import { filterFallbackHomeAlbums } from "./homeProjectionFallback.helpers";
-import { mergeHomeFeedItemsById, mergeProjectionItemsById } from "./homeProjectionFallback";
+import { mergeProjectionItemsById } from "./homeProjectionFallback";
 import { normalizeProjectionValue } from "../../../data/projections/projections.common";
 import {
   clampProjectionLimit,
   resolveProjectionDeltaParams,
   type ProjectionRequestContext,
 } from "../../../data/projections/projections.request";
-import {
-  getAlbumProjectionHydrationId,
-  hydrateHomeProjectionEnvelopeAlbums,
-} from "../../../data/projections/projectionAlbumSurfaceHydration";
 import type {
   HomeProjectionParams,
   ProjectionHomeFeedItem,
 } from "../../../data/projections/projections.types";
-import { buildOwnClubShadowItems } from "./homeProjectionProfileSurface";
 import { prepareHomeFeedItems } from "./homeFeedAdapters";
 
 function shouldUseIncrementalProjectionFallback(context: ProjectionRequestContext) {
@@ -147,75 +141,6 @@ async function reconcileViewerHomeEvents(
   return changed ? nextEvents : events;
 }
 
-async function reconcileViewerHomeEnvelope(
-  envelope: ProjectionEnvelope<ProjectionHomeFeedItem>,
-  viewerId?: string,
-): Promise<ProjectionEnvelope<ProjectionHomeFeedItem>> {
-  const eventRows = [...(envelope.items || []), ...(envelope.updatedItems || [])]
-    .filter((item): item is ProjectionHomeFeedItem & { kind: "event" } => item.kind === "event")
-    .map((item) => item.event);
-  const reconciledEvents = await reconcileViewerHomeEvents(eventRows, viewerId);
-  if (reconciledEvents.length === 0) return envelope;
-
-  const reconciledById = new Map(
-    reconciledEvents.map((item) => [normalizeEntityId(item.id), item]),
-  );
-  const patchItems = (items: ProjectionHomeFeedItem[]) =>
-    items.map((item) => {
-      if (item.kind !== "event") return item;
-      const nextEvent = reconciledById.get(normalizeEntityId(item.event.id));
-      if (!nextEvent) return item;
-      return {
-        ...item,
-        event: nextEvent,
-      };
-    });
-
-  return {
-    ...envelope,
-    items: patchItems(envelope.items || []),
-    updatedItems: patchItems(envelope.updatedItems || []),
-  };
-}
-
-async function buildViewerOwnedAlbumShadowItems(
-  params: HomeProjectionParams,
-  blockedVisibility: ReturnType<typeof createEmptyBlockedVisibilitySnapshot>,
-) {
-  const normalizedViewer = normalizeProjectionValue(params.viewerUsername || "");
-  if (
-    !normalizedViewer ||
-    params.viewerAccountType === "club" ||
-    params.typeFilter === "events" ||
-    !params.viewerId ||
-    (blockedVisibility.blockedIds.size === 0 && blockedVisibility.blockedUsernames.size === 0)
-  ) {
-    return [] as ProjectionHomeFeedItem[];
-  }
-
-  const ownProfileAlbums = await loadViewerOwnedAlbumsShadow(normalizedViewer);
-  const visibleOwnProfileAlbums = filterBlockedAlbums(ownProfileAlbums, blockedVisibility, {
-    preserveViewerOwned: true,
-    viewerId: params.viewerId,
-    viewerUsername: normalizedViewer,
-  });
-  if (visibleOwnProfileAlbums.length === 0) {
-    return [] as ProjectionHomeFeedItem[];
-  }
-
-  return prepareHomeFeedItems(
-    filterLegacyHomeItems(
-      buildHomeProjectionItems({
-        albums: visibleOwnProfileAlbums,
-        events: [],
-        viewerUsername: normalizedViewer,
-      }),
-      params,
-    ),
-    params.sortOption || "newest",
-  );
-}
-
 async function loadViewerOwnedAlbumsShadow(viewerUsername: string) {
   return AlbumAPI.getPhotos(viewerUsername).catch((error) => {
     debugWarn("HOME/PROJECTION", "viewer-owned-album-shadow-load-failed", {
@@ -303,77 +228,22 @@ export async function getHomeFeed(
     );
   };
 
-  const rpcEnvelope = await tryProjectionRpc<unknown>("home_feed_projection", {
-    cursor: context.cursor || null,
-    ...resolveProjectionDeltaParams(context),
-    entity_filter: params.entityFilter || "all",
-    limit_count: clampProjectionLimit(context.limit, 33),
-    sort_mode: params.sortOption || "newest",
-    source_filter: params.sourceFilter || "all",
-    type_filter: params.typeFilter || "all",
-    viewer_id: params.viewerId || null,
-  });
+  const rpcEnvelope = await tryProjectionRpc<unknown>(
+    "home_feed_projection",
+    {
+      cursor: context.cursor || null,
+      ...resolveProjectionDeltaParams(context),
+      entity_filter: params.entityFilter || "all",
+      limit_count: clampProjectionLimit(context.limit, 33),
+      sort_mode: params.sortOption || "newest",
+      source_filter: params.sourceFilter || "all",
+      type_filter: params.typeFilter || "all",
+      viewer_id: params.viewerId || null,
+    },
+    context.signal,
+  );
   if (rpcEnvelope) {
-    const blockedVisibility = await loadHomeBlockedVisibility(params.viewerId);
-    const idsNeedingHydration = new Set<string>();
-    const mappedRpcEnvelope = mapEnvelopeItems(rpcEnvelope, (row) => {
-      const normalizedItem = toHomeProjectionItem(row);
-      if (!normalizedItem || normalizedItem.kind !== "album") {
-        return normalizedItem;
-      }
-      const rowItem = row && typeof row === "object" ? (row as Record<string, unknown>) : null;
-      const hydrationId = getAlbumProjectionHydrationId(rowItem?.album, normalizedItem.album);
-      if (hydrationId) {
-        idsNeedingHydration.add(hydrationId);
-      }
-      return normalizedItem;
-    });
-    let mappedEnvelope = prepareHomeEnvelope(
-      await reconcileViewerHomeEnvelope(
-        await hydrateHomeProjectionEnvelopeAlbums(mappedRpcEnvelope, idsNeedingHydration),
-        params.viewerId,
-      ),
-      params,
-    );
-    const shouldRecoverEmptyInitialEnvelope =
-      !isIncrementalRequest &&
-      mappedEnvelope.items.length === 0 &&
-      (mappedEnvelope.updatedItems?.length || 0) === 0 &&
-      (mappedEnvelope.deletedIds?.length || 0) === 0;
-
-    if (shouldRecoverEmptyInitialEnvelope) {
-      const fallbackEnvelope = await buildPrimaryFallbackEnvelope();
-      if (fallbackEnvelope.items.length > 0) {
-        mappedEnvelope = fallbackEnvelope;
-      }
-    }
-
-    const ownViewerAlbumShadowItems = await buildViewerOwnedAlbumShadowItems(
-      params,
-      blockedVisibility,
-    );
-    if (ownViewerAlbumShadowItems.length > 0) {
-      mappedEnvelope = prepareHomeEnvelope(
-        {
-          ...mappedEnvelope,
-          items: mergeHomeFeedItemsById(ownViewerAlbumShadowItems, mappedEnvelope.items || []),
-        },
-        params,
-      );
-    }
-
-    const ownShadowItems = await buildOwnClubShadowItems(params);
-    if (ownShadowItems.length === 0) {
-      return mappedEnvelope;
-    }
-
-    return prepareHomeEnvelope(
-      {
-        ...mappedEnvelope,
-        items: mergeHomeFeedItemsById(ownShadowItems, mappedEnvelope.items || []),
-      },
-      params,
-    );
+    return prepareHomeEnvelope(mapEnvelopeItems(rpcEnvelope, toHomeProjectionItem), params);
   }
 
   if (isIncrementalRequest) {

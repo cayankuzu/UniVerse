@@ -1,5 +1,4 @@
 import { memo, useMemo } from "react";
-import { Alert } from "react-native";
 import { AlbumMediaCarousel } from "../AlbumMediaCarousel";
 import { AlbumCardFooter } from "./AlbumCardFooter";
 import { AlbumCardModals } from "./AlbumCardModals";
@@ -15,6 +14,7 @@ import { type OverflowActionItem } from "../../../../shared/components";
 import { downloadMediaToGallery } from "../../../../shared/media/downloadMediaToGallery";
 import { isVideoMediaUri } from "../../../../shared/media/mediaVideoUtils";
 import { reportAlbum } from "../../data";
+import { showErrorAlert } from "../../../../shared/utils/alerts";
 
 function normalizeText(value: string) {
   return String(value || "")
@@ -88,9 +88,9 @@ const InteractiveAlbumFeedCard = memo(function InteractiveAlbumFeedCard({
               }
               await reportAlbum({ photoId: photo.id, username: photo.username });
             } catch (error) {
-              Alert.alert(
-                isOwnPhoto ? "İndirme başarısız" : "Şikâyet gönderilemedi",
+              showErrorAlert(
                 String((error as { message?: string } | null)?.message || "İşlem tamamlanamadı."),
+                isOwnPhoto ? "İndirme başarısız" : "Şikâyet gönderilemedi",
               );
             }
           })();

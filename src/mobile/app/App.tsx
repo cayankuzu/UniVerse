@@ -17,6 +17,7 @@ import { AppErrorBoundary } from "./app-shell/providers/AppErrorBoundary";
 import { DeferredAppServices } from "./app-shell/startup/DeferredAppServices";
 import { AppStartupStateProvider } from "./app-shell/startup/AppStartupState";
 import { AppTransientActivityProvider } from "./shared/feedback/AppTransientActivityContext";
+import { AppConfirmationHost } from "./shared/feedback/AppConfirmationHost";
 import {
   QUERY_CACHE_BUSTER,
   QUERY_CACHE_MAX_AGE,
@@ -47,7 +48,7 @@ export default function App() {
     <AppFontGate>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
-          <StatusBar backgroundColor={appTheme.colors.background} style="dark" />
+          <StatusBar style="dark" />
           <PaperProvider theme={appTheme}>
             <PersistQueryClientProvider
               client={queryClient}
@@ -69,6 +70,7 @@ export default function App() {
                           <AppErrorBoundary>
                             <RootNavigator />
                           </AppErrorBoundary>
+                          <AppConfirmationHost />
                         </TabReselectProvider>
                       </OnboardingProvider>
                     </AuthProvider>

@@ -56,8 +56,6 @@ export function useAuthBootstrapInit({
     const init = async () => {
       setIsLoading(true);
       setAuthBootState("booting");
-      let deferLoadingFlip = false;
-
       try {
         const authStorageVersion = await AsyncStorage.getItem(AUTH_STORAGE_VERSION_KEY);
         if (authStorageVersion !== AUTH_STORAGE_VERSION) {
@@ -84,8 +82,6 @@ export function useAuthBootstrapInit({
           persistedSnapshotPromise,
           demoCleanupPromise ?? Promise.resolve(),
         ]);
-        const hasPersistedSnapshot = Boolean(persistedSnapshot);
-
         if (!cancelled && persistedSnapshot) {
           seedAuthStateFromSnapshot(persistedSnapshot);
           setIsLoading(false);
@@ -95,10 +91,7 @@ export function useAuthBootstrapInit({
         if (cancelled) return;
 
         if (raced.timedOut) {
-          deferLoadingFlip = true;
-          if (hasPersistedSnapshot) {
-            setIsLoading(false);
-          }
+          setIsLoading(false);
 
           sessionPromise
             .then((lateSession) => {
@@ -124,9 +117,7 @@ export function useAuthBootstrapInit({
               setIsLoading(false);
             });
 
-          if (hasPersistedSnapshot) {
-            return;
-          }
+          return;
         } else if (raced.value) {
           startSessionHydrationInBackground(raced.value, "INITIAL_SESSION");
         } else {
@@ -143,7 +134,7 @@ export function useAuthBootstrapInit({
         });
         clearAuthState({ keepLoading: true });
       } finally {
-        if (!cancelled && !deferLoadingFlip) {
+        if (!cancelled) {
           setIsLoading(false);
         }
       }

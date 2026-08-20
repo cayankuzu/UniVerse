@@ -12,7 +12,7 @@ jest.mock("@expo-google-fonts/inter/700Bold", () => ({ Inter_700Bold: 700 }));
 jest.mock("@expo-google-fonts/inter/800ExtraBold", () => ({ Inter_800ExtraBold: 800 }));
 
 describe("AppFontGate", () => {
-  it("keeps content hidden while fonts are loading", () => {
+  it("renders content immediately while fonts are loading", () => {
     (useFonts as jest.Mock).mockReturnValue([false, null]);
     render(
       <AppFontGate>
@@ -20,7 +20,7 @@ describe("AppFontGate", () => {
       </AppFontGate>,
     );
 
-    expect(screen.queryByText("ready")).not.toBeOnTheScreen();
+    expect(screen.getByText("ready")).toBeOnTheScreen();
   });
 
   it.each([

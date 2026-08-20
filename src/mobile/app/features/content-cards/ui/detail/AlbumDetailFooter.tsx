@@ -52,7 +52,7 @@ export function AlbumDetailFooter({
         style={{
           flexDirection: "row",
           alignItems: "center",
-          gap: tokens.spacing.xxsPlus,
+          gap: tokens.spacing.xsMinus,
           borderRadius: tokens.radius.pill,
           paddingHorizontal: tokens.spacing.compact,
           minHeight: tokens.minHeight.buttonMd,
@@ -83,7 +83,7 @@ export function AlbumDetailFooter({
         style={{
           flexDirection: "row",
           alignItems: "center",
-          gap: tokens.spacing.xxsPlus,
+          gap: tokens.spacing.xsMinus,
           borderRadius: tokens.radius.pill,
           paddingHorizontal: tokens.spacing.compact,
           minHeight: tokens.minHeight.buttonMd,
@@ -115,7 +115,7 @@ export function AlbumDetailFooter({
           alignItems: "center",
           justifyContent: "center",
           flexDirection: "row",
-          gap: tokens.spacing.xxsPlus,
+          gap: tokens.spacing.xsMinus,
           backgroundColor: eventDisabled ? tokens.colors.background : tokens.colors.accent,
           borderWidth: 1,
           borderColor: eventDisabled ? tokens.colors.border : tokens.colors.primaryBorder,

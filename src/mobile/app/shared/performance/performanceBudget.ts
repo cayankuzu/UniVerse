@@ -20,6 +20,7 @@ export interface StartupPerformanceBudget {
   criticalAboveFoldItems: number;
   firstFoldHomeLimit: number;
   idleImages: number;
+  queryRestoreMaxWaitMs: number;
   splashMaxWaitMs: number;
   splashMinDisplayMs: number;
   warmupRpcTimeoutMs: number;
@@ -56,6 +57,7 @@ export const STARTUP_PERFORMANCE_BUDGET: StartupPerformanceBudget = {
   criticalAboveFoldItems: 10,
   firstFoldHomeLimit: 5,
   idleImages: 3,
+  queryRestoreMaxWaitMs: 350,
   splashMaxWaitMs: 900,
   splashMinDisplayMs: 0,
   // Non-blocking startup work gets enough time to finish on mobile networks.

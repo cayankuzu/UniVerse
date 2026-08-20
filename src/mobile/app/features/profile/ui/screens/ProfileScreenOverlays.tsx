@@ -1,5 +1,4 @@
 import { memo } from "react";
-import { Alert } from "react-native";
 import { FeedToast, type OverflowActionItem } from "../../../../shared/components";
 import {
   AlbumDetailViewerOverlay,
@@ -14,6 +13,7 @@ import type {
 } from "../../../../features/content-cards/public/types";
 import { MediaViewerModal } from "../../../../shared/media/MediaViewerModal";
 import { downloadMediaToGallery } from "../../../../shared/media/downloadMediaToGallery";
+import { showErrorAlert } from "../../../../shared/utils/alerts";
 
 interface Props {
   accountType: AccountType;
@@ -70,9 +70,9 @@ export const ProfileScreenOverlays = memo(function ProfileScreenOverlays({
                   uri: viewerImage,
                 });
               } catch (error) {
-                Alert.alert(
-                  "Indirme başarısız",
+                showErrorAlert(
                   String((error as { message?: string } | null)?.message || "İşlem tamamlanamadı."),
+                  "İndirme başarısız",
                 );
               }
             })();

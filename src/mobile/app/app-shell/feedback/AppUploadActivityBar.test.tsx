@@ -3,7 +3,10 @@ import { Alert } from "react-native";
 import { act, render, screen, waitFor } from "@testing-library/react-native";
 import { AppUploadActivityBar } from "./AppUploadActivityBar";
 import { getUploadQueue, removeUploadEntry } from "../../data/queues/uploadQueue";
-import { removePendingAlbumUpload } from "../../features/events/public/queues";
+import {
+  removePendingAlbumUpload,
+  removeQueuedEventCreate,
+} from "../../features/events/public/queues";
 
 let mockBannerProps: Record<string, any> = {};
 
@@ -39,6 +42,7 @@ jest.mock("./AppActivityBanner", () => ({
 
 const mockGetUploadQueue = getUploadQueue as jest.Mock;
 const mockRemovePendingAlbumUpload = removePendingAlbumUpload as jest.Mock;
+const mockRemoveQueuedEventCreate = removeQueuedEventCreate as jest.Mock;
 
 function queueEntry(kind: string, status = "pending", errorMessage?: string) {
   return {
@@ -93,5 +97,30 @@ describe("AppUploadActivityBar", () => {
     });
     expect(mockRemovePendingAlbumUpload).toHaveBeenCalledWith("album-photo-id");
     expect(removeUploadEntry).not.toHaveBeenCalled();
+    alertSpy.mockRestore();
+  });
+
+  it.each(["event-create", "profile-update"])("cancels a %s queue entry", async (kind) => {
+    const alertSpy = jest.spyOn(Alert, "alert").mockImplementation(() => undefined);
+    await renderEntry(queueEntry(kind));
+
+    const cancelAction = mockBannerProps.actions.find(
+      (action: { key: string }) => action.key === "cancel",
+    );
+    act(() => cancelAction.onPress());
+    const buttons = alertSpy.mock.calls[0]?.[2] || [];
+    await act(async () => {
+      buttons[1]?.onPress?.();
+      await Promise.resolve();
+    });
+
+    if (kind === "event-create") {
+      expect(mockRemoveQueuedEventCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ entryId: "event-create-id" }),
+      );
+    } else {
+      expect(removeUploadEntry).toHaveBeenCalledWith("profile-update-id");
+    }
+    alertSpy.mockRestore();
   });
 });

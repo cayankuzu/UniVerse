@@ -2,6 +2,7 @@ import React from "react";
 import { AppText as Text } from "../../../../shared/components/AppText";
 import { View } from "react-native";
 import { tokens, withAlpha } from "../../../../shared/theme";
+import { t } from "../../../../shared/i18n";
 
 type Props = {
   tone?: "dark" | "light";
@@ -17,9 +18,11 @@ export function AuthBrandFooter({ tone = "light" }: Props) {
     <View
       style={{ alignItems: "center", gap: tokens.spacing.hairline, paddingTop: tokens.spacing.xs }}
     >
-      <Text style={{ color: mutedColor, fontSize: tokens.typography.caption }}>Copyright 2026</Text>
       <Text style={{ color: mutedColor, fontSize: tokens.typography.caption }}>
-        Powered by <Text style={{ color: strongColor, fontWeight: "700" }}>MeMoDe</Text>
+        {t("auth.footer.copyright", { year: new Date().getFullYear() })}
+      </Text>
+      <Text style={{ color: mutedColor, fontSize: tokens.typography.caption }}>
+        <Text style={{ color: strongColor, fontWeight: "700" }}>MeMoDe</Text> {t("auth.footer.by")}
       </Text>
     </View>
   );

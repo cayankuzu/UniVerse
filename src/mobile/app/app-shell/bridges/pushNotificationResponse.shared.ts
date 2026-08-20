@@ -37,7 +37,7 @@ function normalizeData(value: unknown): Record<string, unknown> {
 }
 
 function normalizeText(value: unknown) {
-  return String(value || "").trim();
+  return typeof value === "string" ? value.trim() : "";
 }
 
 function normalizeTargetType(value: unknown): NotificationItem["targetType"] | undefined {

@@ -9,6 +9,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
+import { useReducedMotion } from "../hooks/useReducedMotion";
 
 import {
   loadNativePagerView,
@@ -33,6 +34,7 @@ export {
 type SwipeableTabPagerProps<TTab extends string> = {
   activeTab: TTab;
   enabled?: boolean;
+  getTabAccessibilityLabel?: (tab: TTab) => string;
   keepAlive?: boolean;
   layoutMode?: "content" | "fill";
   lazy?: boolean;
@@ -58,6 +60,7 @@ function SwipeableFillPager<TTab extends string>({
   activeIndex,
   activeTab,
   enabled = true,
+  getTabAccessibilityLabel,
   keepAlive = true,
   lazy = false,
   onChange,
@@ -68,6 +71,7 @@ function SwipeableFillPager<TTab extends string>({
   style,
   tabs,
 }: SharedPagerProps<TTab>) {
+  const reducedMotion = useReducedMotion();
   const pagerRef = useRef<FlatList<TTab> | null>(null);
   const didMountRef = useRef(false);
   const lastPageWidthRef = useRef(pageWidth);
@@ -82,6 +86,7 @@ function SwipeableFillPager<TTab extends string>({
   } = usePagerController({
     activeIndex,
     activeTab,
+    getTabAccessibilityLabel,
     onChange,
     onPageProgressChange,
     onPreviewTabChange,
@@ -100,13 +105,21 @@ function SwipeableFillPager<TTab extends string>({
     begin();
     const handle = requestAnimationFrame(() => {
       pagerRef.current?.scrollToIndex({
-        animated: didMountRef.current && !widthChanged,
+        animated: didMountRef.current && !widthChanged && !reducedMotion,
         index: activeIndex,
       });
       didMountRef.current = true;
     });
     return () => cancelAnimationFrame(handle);
-  }, [activeIndex, begin, currentPageRef, emitPageProgress, pageWidth, syncActiveIndex]);
+  }, [
+    activeIndex,
+    begin,
+    currentPageRef,
+    emitPageProgress,
+    pageWidth,
+    reducedMotion,
+    syncActiveIndex,
+  ]);
 
   const handleScrollPageSettled = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -199,7 +212,8 @@ function SwipeableContentPager<TTab extends string>(props: SharedPagerProps<TTab
   const flatPagerRef = useRef<FlatList<TTab> | null>(null);
   const didMountRef = useRef(false);
   const [height, setHeight] = useState<number | null>(null);
-  const maxHeightRef = useRef(0);
+  const pageHeightsRef = useRef(new Map<number, number>());
+  const reducedMotion = useReducedMotion();
   const { begin, end, programmaticScrollRef } = useProgrammaticScrollGuard();
   const {
     activeIndex,
@@ -220,13 +234,22 @@ function SwipeableContentPager<TTab extends string>(props: SharedPagerProps<TTab
     ...props,
     ...usePagerController(props),
   };
-  const updateHeight = useCallback((nextHeight: number) => {
-    if (nextHeight <= 0) return;
-    maxHeightRef.current = Math.max(maxHeightRef.current, nextHeight);
-    setHeight((current) =>
-      current && Math.abs(current - maxHeightRef.current) < 1 ? current : maxHeightRef.current,
-    );
-  }, []);
+  const updateHeight = useCallback(
+    (index: number, nextHeight: number) => {
+      if (nextHeight <= 0) return;
+      pageHeightsRef.current.set(index, nextHeight);
+      if (index !== activeIndex) return;
+      setHeight((current) =>
+        current && Math.abs(current - nextHeight) < 1 ? current : nextHeight,
+      );
+    },
+    [activeIndex],
+  );
+
+  useEffect(() => {
+    const measuredHeight = pageHeightsRef.current.get(activeIndex);
+    if (measuredHeight) setHeight(measuredHeight);
+  }, [activeIndex]);
 
   useEffect(() => {
     syncActiveIndex();
@@ -234,20 +257,24 @@ function SwipeableContentPager<TTab extends string>(props: SharedPagerProps<TTab
     const handle = requestAnimationFrame(() => {
       if (NativePagerView) {
         if (didMountRef.current) {
-          nativePagerRef.current?.setPage(activeIndex);
+          if (reducedMotion) {
+            nativePagerRef.current?.setPageWithoutAnimation(activeIndex);
+          } else {
+            nativePagerRef.current?.setPage(activeIndex);
+          }
         } else {
           nativePagerRef.current?.setPageWithoutAnimation(activeIndex);
         }
       } else {
         flatPagerRef.current?.scrollToIndex({
-          animated: didMountRef.current,
+          animated: didMountRef.current && !reducedMotion,
           index: activeIndex,
         });
       }
       didMountRef.current = true;
     });
     return () => cancelAnimationFrame(handle);
-  }, [NativePagerView, activeIndex, begin, syncActiveIndex]);
+  }, [NativePagerView, activeIndex, begin, reducedMotion, syncActiveIndex]);
 
   const handleSelected = useCallback(
     (event: NativePagerViewOnPageSelectedEvent) => {
@@ -329,7 +356,7 @@ function SwipeableContentPager<TTab extends string>(props: SharedPagerProps<TTab
             <View collapsable={false} style={[styles.contentPage, { width: pageWidth }]}>
               <View
                 collapsable={false}
-                onLayout={(event) => updateHeight(event.nativeEvent.layout.height)}
+                onLayout={(event) => updateHeight(index, event.nativeEvent.layout.height)}
               >
                 {shouldRender ? renderPage(tab, !active, active) : null}
               </View>
@@ -364,7 +391,7 @@ function SwipeableContentPager<TTab extends string>(props: SharedPagerProps<TTab
           <View collapsable={false} key={tab} style={styles.nativePage}>
             <View
               collapsable={false}
-              onLayout={(event) => updateHeight(event.nativeEvent.layout.height)}
+              onLayout={(event) => updateHeight(index, event.nativeEvent.layout.height)}
             >
               {shouldRender ? renderPage(tab, !active, active) : null}
             </View>

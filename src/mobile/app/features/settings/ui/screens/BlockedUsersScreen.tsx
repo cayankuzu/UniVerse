@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { AccessibilityInfo, Alert, Pressable, View } from "react-native";
+import { AccessibilityInfo, Pressable, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { AppText as Text } from "../../../../shared/components/AppText";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
@@ -18,6 +18,7 @@ import {
 import { useBottomNavPadding } from "../../../../shared/layout/bottomNavSpacing";
 import type { RootStackParamList } from "../../../../app-shell/navigation/types";
 import { useBlockedUsersScreenState } from "../../application/useBlockedUsersScreenState";
+import { showConfirmAlert } from "../../../../shared/utils/alerts";
 
 type Props = NativeStackScreenProps<RootStackParamList, "BlockedUsers">;
 
@@ -54,33 +55,26 @@ export function BlockedUsersScreen({ navigation }: Props) {
   const [busyUsername, setBusyUsername] = useState<string | null>(null);
 
   const confirmUnblock = (username: string) => {
-    Alert.alert(
-      t("settings.blockedUsers.unblock.confirmTitle"),
-      t("settings.blockedUsers.unblock.confirmMessage", { username: `@${username}` }),
-      [
-        {
-          style: "cancel",
-          text: t("common.cancel"),
-        },
-        {
-          style: "destructive",
-          text: t("settings.blockedUsers.unblock.action"),
-          onPress: async () => {
-            setBusyUsername(username);
-            try {
-              const didUnblock = await handleUnblock(username);
-              if (didUnblock) {
-                AccessibilityInfo.announceForAccessibility(
-                  t("settings.blockedUsers.unblock.success", { username: `@${username}` }),
-                );
-              }
-            } finally {
-              setBusyUsername((current) => (current === username ? null : current));
-            }
-          },
-        },
-      ],
-    );
+    showConfirmAlert({
+      cancelLabel: t("common.cancel"),
+      confirmLabel: t("settings.blockedUsers.unblock.action"),
+      destructive: true,
+      message: t("settings.blockedUsers.unblock.confirmMessage", { username: `@${username}` }),
+      onConfirm: async () => {
+        setBusyUsername(username);
+        try {
+          const didUnblock = await handleUnblock(username);
+          if (didUnblock) {
+            AccessibilityInfo.announceForAccessibility(
+              t("settings.blockedUsers.unblock.success", { username: `@${username}` }),
+            );
+          }
+        } finally {
+          setBusyUsername((current) => (current === username ? null : current));
+        }
+      },
+      title: t("settings.blockedUsers.unblock.confirmTitle"),
+    });
   };
 
   return (
@@ -235,7 +229,7 @@ export function BlockedUsersScreen({ navigation }: Props) {
               {user.isPrivate ? (
                 <View
                   style={{
-                    marginTop: tokens.spacing.xxsPlus,
+                    marginTop: tokens.spacing.xsMinus,
                     flexDirection: "row",
                     alignItems: "center",
                     gap: tokens.spacing.xxs,

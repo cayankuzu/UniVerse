@@ -22,6 +22,7 @@ function VisibilityOptionRow(props: {
 }) {
   return (
     <Pressable
+      accessibilityLabel={props.title}
       accessibilityRole="switch"
       accessibilityState={{ checked: props.selected, disabled: props.disabled }}
       disabled={props.disabled}

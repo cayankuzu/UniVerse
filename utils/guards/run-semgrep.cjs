@@ -61,31 +61,69 @@ const SEMGREP_TARGETS = [
 ].filter((target) => fs.existsSync(target));
 
 const SEMGREP_STAGE_PREFIX = "universe-semgrep-";
+const COPY_EXCLUDED_NAMES = new Set([
+  ".git",
+  "android",
+  "artifacts",
+  "assets",
+  "coverage",
+  "node_modules",
+]);
+
+function copyTrackedFile(source, destination) {
+  fs.mkdirSync(path.dirname(destination), { recursive: true });
+  try {
+    fs.copyFileSync(source, destination);
+    return;
+  } catch (error) {
+    if (error?.code !== "EACCES" && error?.code !== "EPERM") throw error;
+  }
+
+  const relativePath = path.normalize(source).replaceAll("\\", "/");
+  if (path.isAbsolute(relativePath) || relativePath === ".." || relativePath.startsWith("../")) {
+    throw new Error(`[security:sast] Refusing to stage path outside the repository: ${source}`);
+  }
+  const gitResult = spawnSync("git", ["show", `:${relativePath}`], {
+    encoding: null,
+    maxBuffer: 64 * 1024 * 1024,
+    shell: false,
+  });
+  if (gitResult.status !== 0 || !Buffer.isBuffer(gitResult.stdout)) {
+    throw new Error(`[security:sast] Cannot stage unreadable file: ${relativePath}`);
+  }
+  fs.writeFileSync(destination, gitResult.stdout);
+  console.warn(`[security:sast] Staged unreadable tracked file from Git index: ${relativePath}`);
+}
+
+function copyTargetTree(source, destination) {
+  const stat = fs.statSync(source);
+  if (!stat.isDirectory()) {
+    copyTrackedFile(source, destination);
+    return;
+  }
+
+  fs.mkdirSync(destination, { recursive: true });
+  for (const entry of fs.readdirSync(source, { withFileTypes: true })) {
+    if (COPY_EXCLUDED_NAMES.has(entry.name)) continue;
+    if (
+      !entry.name ||
+      entry.name === "." ||
+      entry.name === ".." ||
+      entry.name.includes("/") ||
+      entry.name.includes("\\") ||
+      entry.name.includes("\0")
+    ) {
+      throw new Error(`[security:sast] Unsafe staging path segment: ${entry.name}`);
+    }
+    copyTargetTree(`${source}${path.sep}${entry.name}`, `${destination}${path.sep}${entry.name}`);
+  }
+}
 
 function stageSemgrepTargets() {
   const stageRoot = fs.mkdtempSync(path.join(os.tmpdir(), SEMGREP_STAGE_PREFIX));
   for (const target of SEMGREP_TARGETS) {
     const destination = path.join(stageRoot, target);
-    const stat = fs.statSync(target);
-    if (stat.isDirectory()) {
-      fs.cpSync(target, destination, {
-        recursive: true,
-        filter: (source) => {
-          const name = path.basename(source);
-          return (
-            name !== ".git" &&
-            name !== "android" &&
-            name !== "artifacts" &&
-            name !== "assets" &&
-            name !== "coverage" &&
-            name !== "node_modules"
-          );
-        },
-      });
-      continue;
-    }
-    fs.mkdirSync(path.dirname(destination), { recursive: true });
-    fs.copyFileSync(target, destination);
+    copyTargetTree(target, destination);
   }
   const repoSemgrepIgnore = fs.existsSync(".semgrepignore")
     ? fs.readFileSync(".semgrepignore", "utf8")

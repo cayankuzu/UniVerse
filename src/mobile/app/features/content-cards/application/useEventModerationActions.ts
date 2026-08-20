@@ -1,5 +1,4 @@
 import { useCallback, useMemo, useState, type Dispatch, type SetStateAction } from "react";
-import { Alert } from "react-native";
 import type { QueryClient } from "@tanstack/react-query";
 import type { EventWithMeta } from "../data";
 import type { CommentItem } from "../../../data/contracts/api";
@@ -13,6 +12,7 @@ import {
   removeEventMutationCaches,
 } from "../data";
 import { collectCommentCascadeIds } from "../domain/commentTree.helpers";
+import { showConfirmAlert } from "../../../shared/utils/alerts";
 
 type EventInteractionPatch = {
   attendees?: number;
@@ -91,7 +91,7 @@ export function useEventModerationActions(params: UseEventModerationActionsParam
       hint: "Etkinlik kartı listelerden ve veritabanından kaldırılıyor.",
       percent: 32,
       stage: "Etkinlik siliniyor",
-      title: "Etkinlik silme islemi basladi",
+      title: "Etkinlik silme işlemi başladı",
       tone: "info",
     });
     try {
@@ -124,36 +124,33 @@ export function useEventModerationActions(params: UseEventModerationActionsParam
   const handleDeleteComment = useCallback(
     (comment: CommentItem) => {
       if (!interactive || deleteBusy) return;
-      Alert.alert("Yorumu Sil", "Bu yorumu silmek istiyor musunuz?", [
-        { text: "Vazgeç", style: "cancel" },
-        {
-          text: "Sil",
-          style: "destructive",
-          onPress: () => {
-            void (async () => {
-              const removedIds = collectCommentCascadeIds(comments, comment.id);
-              const nextComments = comments.filter((item) => !removedIds.has(item.id));
-              const nextCount = Math.max(0, nextComments.length);
-              setDeleteBusy(true);
-              setComments(nextComments);
-              patchEventCaches({ comments: nextCount });
-              try {
-                await deleteEventComment(event.id, comment.id);
-                invalidateEventCaches();
-                onShowWarning?.("Yorum silindi.");
-              } catch (error) {
-                setComments(comments);
-                patchEventCaches({ comments: comments.length });
-                onShowWarning?.(
-                  String((error as { message?: string })?.message || "Yorum silinemedi."),
-                );
-              } finally {
-                setDeleteBusy(false);
-              }
-            })();
-          },
+      showConfirmAlert({
+        confirmLabel: "Sil",
+        destructive: true,
+        message: "Bu yorumu silmek istiyor musunuz?",
+        onConfirm: async () => {
+          const removedIds = collectCommentCascadeIds(comments, comment.id);
+          const nextComments = comments.filter((item) => !removedIds.has(item.id));
+          const nextCount = Math.max(0, nextComments.length);
+          setDeleteBusy(true);
+          setComments(nextComments);
+          patchEventCaches({ comments: nextCount });
+          try {
+            await deleteEventComment(event.id, comment.id);
+            invalidateEventCaches();
+            onShowWarning?.("Yorum silindi.");
+          } catch (error) {
+            setComments(comments);
+            patchEventCaches({ comments: comments.length });
+            onShowWarning?.(
+              String((error as { message?: string })?.message || "Yorum silinemedi."),
+            );
+          } finally {
+            setDeleteBusy(false);
+          }
         },
-      ]);
+        title: "Yorumu Sil",
+      });
     },
     [
       comments,
@@ -170,34 +167,29 @@ export function useEventModerationActions(params: UseEventModerationActionsParam
   const handleReportComment = useCallback(
     (comment: CommentItem) => {
       if (!interactive || deleteBusy) return;
-      Alert.alert("Yorumu Şikâyet Et", "Bu yorumu şikâyet etmek istiyor musunuz?", [
-        { text: "Vazgeç", style: "cancel" },
-        {
-          text: "Şikâyet Et",
-          style: "destructive",
-          onPress: () => {
-            void (async () => {
-              try {
-                await reportEventComment({
-                  commentId: comment.id,
-                  username: comment.username,
-                });
-                onShowWarning?.("Şikâyetiniz alındı.");
-              } catch (error) {
-                debugWarn("CONTENT-CARDS", "event-comment-report-failed", {
-                  commentId: String(comment.id || ""),
-                  eventId: event.id,
-                  message: String(
-                    (error as { message?: string } | null)?.message ||
-                      "event-comment-report-failed",
-                  ),
-                });
-                onShowWarning?.("Şikâyet gönderilemedi.");
-              }
-            })();
-          },
+      showConfirmAlert({
+        confirmLabel: "Şikâyet Et",
+        message: "Bu yorumu şikâyet etmek istiyor musunuz?",
+        onConfirm: async () => {
+          try {
+            await reportEventComment({
+              commentId: comment.id,
+              username: comment.username,
+            });
+            onShowWarning?.("Şikâyetiniz alındı.");
+          } catch (error) {
+            debugWarn("CONTENT-CARDS", "event-comment-report-failed", {
+              commentId: String(comment.id || ""),
+              eventId: event.id,
+              message: String(
+                (error as { message?: string } | null)?.message || "event-comment-report-failed",
+              ),
+            });
+            onShowWarning?.("Şikâyet gönderilemedi.");
+          }
         },
-      ]);
+        title: "Yorumu Şikâyet Et",
+      });
     },
     [deleteBusy, event.id, interactive, onShowWarning],
   );

@@ -17,7 +17,7 @@ export function EventDetailInfoSlides({ slides }: { slides: DetailSlideItem[] })
       nestedScrollEnabled
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={{
-        gap: tokens.spacing.xsCompact,
+        gap: tokens.spacing.xs,
         marginTop: tokens.spacing.sm,
         paddingRight: tokens.spacing.compact,
       }}
@@ -35,7 +35,7 @@ export function EventDetailInfoSlides({ slides }: { slides: DetailSlideItem[] })
               paddingVertical: tokens.spacing.xs,
               flexDirection: "row",
               alignItems: "center",
-              gap: tokens.spacing.xsCompact,
+              gap: tokens.spacing.xs,
             }}
           >
             <View
@@ -87,7 +87,7 @@ export function EventDetailMetaChips({ chips }: { chips: DetailMetaChip[] }) {
       nestedScrollEnabled
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={{
-        gap: tokens.spacing.xxsPlus,
+        gap: tokens.spacing.xsMinus,
         marginTop: tokens.spacing.compact,
         paddingRight: tokens.spacing.xs,
       }}
@@ -136,7 +136,7 @@ export function EventDetailAttendanceBar(props: {
         accessibilityLabel="Etkinlik katılımcılarını aç"
         disabled={!props.enabled}
         onPress={props.onPress}
-        style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.xsCompact }}
+        style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.xs }}
       >
         <Users size={13} color={tokens.colors.mutedFg} />
         <View
@@ -171,10 +171,10 @@ export function EventDetailAttendanceBar(props: {
 
       <View
         style={{
-          marginTop: tokens.spacing.xsCompact,
+          marginTop: tokens.spacing.xs,
           flexDirection: "row",
           alignItems: "center",
-          gap: tokens.spacing.xxsPlus,
+          gap: tokens.spacing.xsMinus,
           flexWrap: "wrap",
         }}
       >
@@ -182,7 +182,7 @@ export function EventDetailAttendanceBar(props: {
           style={{
             borderRadius: tokens.radius.pill,
             backgroundColor: props.accessChip.backgroundColor,
-            paddingHorizontal: tokens.spacing.xsCompact,
+            paddingHorizontal: tokens.spacing.xs,
             paddingVertical: tokens.spacing.microPlus,
             flexDirection: "row",
             alignItems: "center",

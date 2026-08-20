@@ -53,42 +53,43 @@ export function createBlockedStateReader(deps: BlockedStateReaderDeps) {
     return targetBlockedViewer || viewerBlockedTarget;
   };
 
-  const filterRowsForViewer = async <T extends { id?: string; userId?: string }>(
+  const filterRowsByTargetId = async <T>(
     viewerId: string,
     rows: T[],
+    getTargetId: (row: T) => string,
   ) => {
     const normalizedViewerId = normalizeUserId(viewerId);
-    if (!normalizedViewerId || !Array.isArray(rows) || rows.length === 0) {
-      return Array.isArray(rows) ? rows : [];
-    }
+    if (!normalizedViewerId || rows.length === 0) return rows;
 
     const viewerBlocked = await getBlockedSet(normalizedViewerId);
-    const candidateTargetIds = Array.from(
-      new Set(
-        rows
-          .map((row) => normalizeUserId(row?.userId || row?.id))
-          .filter(Boolean)
-          .filter((targetId) => !viewerBlocked.has(targetId)),
-      ),
+    const targetIds = Array.from(
+      new Set(rows.map((row) => normalizeUserId(getTargetId(row))).filter(Boolean)),
+    ).filter((targetId) => !viewerBlocked.has(targetId));
+    const targetBlockedEntries = await Promise.all(
+      targetIds.map(async (targetId) => [targetId, await getBlockedSet(targetId)] as const),
     );
-
-    const targetBlockedMap = new Map<string, Set<string>>();
-    await Promise.all(
-      candidateTargetIds.map(async (targetId) => {
-        targetBlockedMap.set(targetId, await getBlockedSet(targetId));
-      }),
-    );
+    const targetBlockedMap = new Map(targetBlockedEntries);
 
     return rows.filter((row) => {
-      const targetId = normalizeUserId(row?.userId || row?.id);
-      if (!targetId) return false;
-      if (viewerBlocked.has(targetId)) return false;
+      const targetId = normalizeUserId(getTargetId(row));
+      if (!targetId || viewerBlocked.has(targetId)) return false;
       return !targetBlockedMap.get(targetId)?.has(normalizedViewerId);
     });
   };
 
+  const filterRowsForViewer = async <T extends { id?: string; userId?: string }>(
+    viewerId: string,
+    rows: T[],
+  ) => {
+    if (!Array.isArray(rows) || rows.length === 0) {
+      return Array.isArray(rows) ? rows : [];
+    }
+    return filterRowsByTargetId(viewerId, rows, (row) => row?.userId || row?.id || "");
+  };
+
   return {
     filterRowsForViewer,
+    filterRowsByTargetId,
     getBlockDirection,
     getBlockedSet,
     isBlockedPair,

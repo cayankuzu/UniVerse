@@ -1,17 +1,13 @@
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import { tokens, withAlpha } from "../../../../shared/theme";
 
 interface PermissionToggleProps {
   value: boolean;
-  onToggle: () => void;
 }
 
-export function PermissionToggle({ value, onToggle }: PermissionToggleProps) {
+export function PermissionToggle({ value }: PermissionToggleProps) {
   return (
-    <Pressable
-      accessibilityRole="switch"
-      accessibilityState={{ checked: value }}
-      onPress={onToggle}
+    <View
       style={{
         alignItems: "center",
         justifyContent: "center",
@@ -43,6 +39,6 @@ export function PermissionToggle({ value, onToggle }: PermissionToggleProps) {
           }}
         />
       </View>
-    </Pressable>
+    </View>
   );
 }

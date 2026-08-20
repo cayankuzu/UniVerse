@@ -53,7 +53,7 @@ export const FollowRequestActionButtons = React.memo(function FollowRequestActio
     <View
       style={{
         alignItems: variant === "card" ? "flex-end" : "flex-start",
-        gap: tokens.spacing.xxsPlus,
+        gap: tokens.spacing.xsMinus,
       }}
     >
       <View style={{ flexDirection: "row", gap: tokens.spacing.xsMinus }}>

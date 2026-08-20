@@ -112,7 +112,7 @@ describe("primeHomeStartupSnapshotsIntoQueryCache", () => {
           source: "following",
         } as any,
       ],
-      savedAt: Date.now(),
+      savedAt: Date.parse("2026-08-19T12:00:00.000Z"),
       unreadCount: 7,
       viewerKey: "viewer",
     });

@@ -6,6 +6,7 @@ import {
   getUploadEntry,
   getUploadQueue,
   isRetryableUploadError,
+  patchUploadEntry,
   processUploadQueue,
 } from "./uploadQueue";
 import { subscribeQueueResumeSignal } from "./runtimeSignals";
@@ -108,6 +109,31 @@ describe("uploadQueue", () => {
 
     expect(handler).not.toHaveBeenCalled();
     expect(await getUploadQueue("event-create", "viewer-1")).toHaveLength(1);
+  });
+
+  it("recovers an abandoned upload claim after process death", async () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date("2026-03-18T00:00:00.000Z"));
+    await enqueueUpload({
+      id: "upload-abandoned",
+      kind: "album-photo",
+      ownerId: "viewer-1",
+      payload: { eventId: "event-1" },
+    });
+    await patchUploadEntry("upload-abandoned", { status: "uploading" });
+
+    jest.setSystemTime(new Date("2026-03-18T00:00:09.000Z"));
+    const handler = jest.fn().mockResolvedValue(undefined);
+    await processUploadQueue({
+      handler,
+      kind: "album-photo",
+      ownerId: "viewer-1",
+    });
+
+    expect(handler).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "upload-abandoned", status: "uploading" }),
+    );
+    await expect(getUploadEntry("upload-abandoned")).resolves.toBeNull();
   });
 
   it("emits a refresh signal after a successful queue removal", async () => {

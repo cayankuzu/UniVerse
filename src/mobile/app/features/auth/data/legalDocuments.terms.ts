@@ -40,7 +40,7 @@ export const termsDocument: LegalDocument = {
     {
       heading: "Topluluk Kuralları ve Yasaklı Davranışlar",
       body: [
-        "Taciz, nefret söylemi, tehdit, aşağılama, nefret veya şiddeti teşvik eden içerikler, ayrımcılık, kişiyi hedef gösteren paylaşımlar, spam, dolandırıcılık, sahte kampanya, zararlı bağlantı yayma ve hukuka aykırı faaliyetler yasaktır.",
+        "Taciz, nefret söylemi, tehdit, aşağılama, nefret veya şiddeti teşvik eden içerikler, ayrımcılık, kişiyi hedef gösteren paylaşımlar, istenmeyen içerik, dolandırıcılık, sahte kampanya, zararlı bağlantı yayma ve hukuka aykırı faaliyetler yasaktır.",
         "Başka bir kullanıcının verilerini izinsiz yaymak, özel hayatını ifşa etmek, hesabı taklit etmek, takip veya yorum sistemini manipüle etmek, bot kullanmak, güvenlik açığı aramak ya da sistemleri zorlamak da yasaklı davranış kapsamındadır.",
         "Kulüp hesapları, temsil ettiklerini belirttikleri topluluk adına gerçeği yansıtmayan, aldatıcı veya yetkisiz içerik paylaşmamalı; etkinlik bilgilerini olabildiğince doğru, net ve güncel tutmalıdır.",
       ],

@@ -14,6 +14,7 @@ import type { AlbumPhotoWithMeta, ContentViewer } from "../../data";
 import { renderTourAnchor, type TourAnchorRenderer } from "../tourAnchorRenderer";
 import { ExpandableCardText } from "../shared/ExpandableCardText";
 import { tokens, withAlpha } from "../../../../shared/theme";
+import { t } from "../../../../shared/i18n";
 
 export type AlbumFeedCardPresentation = {
   avatarInitials: string;
@@ -105,7 +106,11 @@ export function AlbumCardHeaderSection(props: {
 
   return (
     <View style={styles.header}>
-      <Pressable onPress={() => props.onOpenProfile(props.photo.username)}>
+      <Pressable
+        onPress={() => props.onOpenProfile(props.photo.username)}
+        accessibilityRole="button"
+        accessibilityLabel={`${props.photo.name || props.photo.username} profilini aç`}
+      >
         <Avatar
           uri={props.photo.userImage}
           name={props.photo.name}
@@ -113,7 +118,12 @@ export function AlbumCardHeaderSection(props: {
           fallbackInitials={props.presentation?.avatarInitials}
         />
       </Pressable>
-      <Pressable onPress={() => props.onOpenProfile(props.photo.username)} style={styles.copy}>
+      <Pressable
+        onPress={() => props.onOpenProfile(props.photo.username)}
+        accessibilityRole="button"
+        accessibilityLabel={`${props.photo.name || props.photo.username} profilini aç`}
+        style={styles.copy}
+      >
         <Text style={styles.name} numberOfLines={1}>
           {props.photo.name}
         </Text>
@@ -140,7 +150,7 @@ export function AlbumCardDetails(props: {
 
   return (
     <View style={styles.details}>
-      <Text style={styles.contentType}>ALBÜM</Text>
+      <Text style={styles.contentType}>{t("content.type.album")}</Text>
       <Text style={styles.detailsTitle} numberOfLines={2}>
         {props.photo.title || props.photo.eventTitle || "Album"}
       </Text>

@@ -1,6 +1,13 @@
 import { Alert } from "react-native";
 
-import { showConfirmAlert, showErrorAlert, showInfoAlert } from "./alerts";
+import {
+  dismissConfirmAlert,
+  getActiveConfirmAlert,
+  showConfirmAlert,
+  showErrorAlert,
+  showInfoAlert,
+  subscribeConfirmAlerts,
+} from "./alerts";
 
 describe("alerts", () => {
   beforeEach(() => {
@@ -8,6 +15,9 @@ describe("alerts", () => {
   });
 
   afterEach(() => {
+    while (getActiveConfirmAlert()) {
+      dismissConfirmAlert(getActiveConfirmAlert()!.id);
+    }
     jest.restoreAllMocks();
   });
 
@@ -64,5 +74,35 @@ describe("alerts", () => {
         onPress: onConfirm,
       },
     ]);
+  });
+
+  it("routes and queues confirmations through the in-app host when mounted", () => {
+    const listener = jest.fn();
+    const unsubscribe = subscribeConfirmAlerts(listener);
+
+    const firstId = showConfirmAlert({
+      confirmLabel: "Devam et",
+      message: "İlk işlem",
+      onConfirm: jest.fn(),
+      title: "Onay",
+    });
+    const secondId = showConfirmAlert({
+      confirmLabel: "Sil",
+      destructive: true,
+      message: "İkinci işlem",
+      onConfirm: jest.fn(),
+      title: "Sil",
+    });
+
+    expect(Alert.alert).not.toHaveBeenCalled();
+    expect(getActiveConfirmAlert()?.id).toBe(firstId);
+
+    dismissConfirmAlert(firstId!);
+    expect(getActiveConfirmAlert()?.id).toBe(secondId);
+
+    dismissConfirmAlert(secondId!);
+    expect(getActiveConfirmAlert()).toBeNull();
+    expect(listener).toHaveBeenCalledTimes(3);
+    unsubscribe();
   });
 });

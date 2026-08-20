@@ -106,6 +106,8 @@ export const DiscoveryAlbumGridCard = React.memo(function DiscoveryAlbumGridCard
 
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${String(item.title || item.caption || "Albüm")} albümünü aç`}
       style={{
         width: cardWidth,
         borderRadius: tokens.radius.md,
@@ -192,7 +194,7 @@ export const DiscoveryAlbumGridCard = React.memo(function DiscoveryAlbumGridCard
             <View
               style={{
                 borderRadius: tokens.radius.pill,
-                paddingHorizontal: tokens.spacing.xsCompact,
+                paddingHorizontal: tokens.spacing.xs,
                 paddingVertical: tokens.spacing.micro,
                 backgroundColor: withAlpha(tokens.colors.foreground, 0.7),
                 flexDirection: "row",

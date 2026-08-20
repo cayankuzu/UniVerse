@@ -34,8 +34,18 @@ jest.mock("expo-linking", () => ({
 }));
 
 jest.mock("expo-notifications", () => ({
+  AndroidImportance: { MAX: 5 },
+  AndroidNotificationVisibility: { PUBLIC: 1 },
+  IosAuthorizationStatus: {
+    AUTHORIZED: 2,
+    DENIED: 1,
+    EPHEMERAL: 4,
+    NOT_DETERMINED: 0,
+    PROVISIONAL: 3,
+  },
   addNotificationReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
   addNotificationResponseReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
+  addPushTokenListener: jest.fn(() => ({ remove: jest.fn() })),
   clearLastNotificationResponseAsync: jest.fn(async () => undefined),
   getLastNotificationResponseAsync: jest.fn(async () => null),
   getPermissionsAsync: jest.fn(async () => ({ status: "undetermined" })),

@@ -1,9 +1,9 @@
 import { Download, Trash2 } from "lucide-react-native";
 import { useMemo } from "react";
-import { Alert } from "react-native";
 import { tokens } from "../../../../shared/theme";
 import { downloadMediaToGallery } from "../../../../shared/media/downloadMediaToGallery";
 import type { MediaViewerItem } from "../../../../shared/media/MediaViewerModal";
+import { showConfirmAlert, showErrorAlert } from "../../../../shared/utils/alerts";
 
 type Params = {
   activeViewerIndex: number;
@@ -24,7 +24,7 @@ export function useAlbumPreviewViewerActions({
         ? [
             {
               key: "download",
-              label: "Indir",
+              label: "İndir",
               icon: <Download size={tokens.iconSize.md} color={tokens.colors.foreground} />,
               onPress: () => {
                 void downloadMediaToGallery({
@@ -33,11 +33,11 @@ export function useAlbumPreviewViewerActions({
                   kind: activeViewerItem.kind === "video" ? "video" : "image",
                   uri: activeViewerItem.uri,
                 }).catch((error) => {
-                  Alert.alert(
-                    "Indirme ba??ar??s??z",
+                  showErrorAlert(
                     String(
                       (error as { message?: string } | null)?.message || "Medya indirilemedi.",
                     ),
+                    "İndirme başarısız",
                   );
                 });
               },
@@ -48,17 +48,16 @@ export function useAlbumPreviewViewerActions({
               destructive: true,
               icon: <Trash2 size={tokens.iconSize.md} color={tokens.colors.dangerDark} />,
               onPress: () => {
-                Alert.alert("Medyayı sil", "Bu seçili medyayı kaldırmak istiyor musun?", [
-                  { text: "Vazge??", style: "cancel" },
-                  {
-                    text: "Sil",
-                    style: "destructive",
-                    onPress: () => {
-                      onCloseViewer();
-                      onRemoveSelectedPhoto(activeViewerIndex);
-                    },
+                showConfirmAlert({
+                  confirmLabel: "Sil",
+                  destructive: true,
+                  message: "Bu seçili medyayı kaldırmak istiyor musun?",
+                  onConfirm: () => {
+                    onCloseViewer();
+                    onRemoveSelectedPhoto(activeViewerIndex);
                   },
-                ]);
+                  title: "Medyayı sil",
+                });
               },
             },
           ]

@@ -67,7 +67,7 @@ describe("createEventScreen.helpers", () => {
       description: "kisa",
       endDate: "",
       endTime: "",
-      fee: "Ucretli",
+      fee: "Ücretli",
       feeAmount: "0",
       level: "",
       location: "",
@@ -80,7 +80,7 @@ describe("createEventScreen.helpers", () => {
     });
 
     const summary = formatCreateEventValidationSummary({ errors, step: 2 });
-    expect(summary).toContain("Baslangic tarihi");
+    expect(summary).toContain("Başlangıç tarihi");
     expect(summary).toContain("Kontenjan");
   });
 });

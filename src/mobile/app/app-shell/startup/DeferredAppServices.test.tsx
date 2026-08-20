@@ -137,7 +137,7 @@ describe("DeferredAppServices", () => {
     expect(scheduledCallbacks).toHaveLength(0);
   });
 
-  it("waits for query restore before mounting warmup", () => {
+  it("starts warmup after the bounded cache gate even when restore stalls", () => {
     useAppStartupStateMock.mockReturnValue({
       queryCacheReady: true,
       queryRestoreReady: false,
@@ -151,8 +151,8 @@ describe("DeferredAppServices", () => {
       userData: { id: "viewer-1" },
     } as unknown as ReturnType<typeof useAuth>);
 
-    const { queryByTestId } = render(<DeferredAppServices />);
+    const { getByTestId } = render(<DeferredAppServices />);
 
-    expect(queryByTestId("app-data-warmup")).toBeNull();
+    expect(getByTestId("app-data-warmup")).toBeTruthy();
   });
 });

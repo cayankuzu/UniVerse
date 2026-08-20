@@ -70,7 +70,7 @@ function createAlbumUploadAuthRecoveryError() {
 }
 
 function createAlbumUploadCancelledError(payload?: Record<string, unknown>) {
-  const error = new Error("Album upload cancelled.") as CancelledAlbumUploadQueueError;
+  const error = new Error("Albüm yüklemesi iptal edildi.") as CancelledAlbumUploadQueueError;
   error.cancelledAlbumUpload = true;
   error.cleanupPayload = payload;
   return error;
@@ -181,10 +181,10 @@ async function patchAlbumUploadProgress(params: {
   stage: string;
 }) {
   const nextPayload = writeUploadProgress(params.payload, {
-    hint: "Uygulamayi kullanmaya devam edebilirsin; kapanirsa sonraki acilista surer.",
+    hint: "Uygulamayı kullanmaya devam edebilirsin; kapanırsa sonraki açılışta sürer.",
     percent: params.percent,
     stage: params.stage,
-    title: "Album karti paylasiliyor",
+    title: "Albüm kartı paylaşılıyor",
   });
   const patchedEntry = await patchUploadEntry(params.entryId, {
     payload: nextPayload,
@@ -241,7 +241,7 @@ async function createAlbumFromUploadEntry(
       >)
     : [];
 
-  if (!eventId) throw new Error("Album etkinlik bilgisi eksik.");
+  if (!eventId) throw new Error("Albüm etkinlik bilgisi eksik.");
   if (!images.length) throw new Error("Albüm medyası bulunamadı.");
 
   const visibility = normalizeSharedEventAlbumVisibility(payload);
@@ -328,7 +328,7 @@ async function createAlbumFromUploadEntry(
     entryId: entry.id,
     payload,
     percent: 90,
-    stage: "Album karti yayinlaniyor",
+    stage: "Albüm kartı yayımlanıyor",
   });
   logAlbumUploadStep(entry.id, "create:start", {
     imageCount: albumImages.length,
@@ -339,7 +339,7 @@ async function createAlbumFromUploadEntry(
         caption: typeof payload.caption === "string" ? payload.caption : undefined,
         clientMutationId: String(payload.clientMutationId || "").trim() || undefined,
         eventId,
-        eventTitle: String(payload.eventTitle || "Etkinlik Albumu"),
+        eventTitle: String(payload.eventTitle || "Etkinlik Albümü"),
         image: albumImages[0],
         images: albumImages,
         showOnClubProfile: visibility.showOnClubProfile,
@@ -353,10 +353,10 @@ async function createAlbumFromUploadEntry(
       },
     ),
     ALBUM_CREATE_TIMEOUT_MS,
-    "Album create",
+    "Albüm oluşturma",
   );
   const uploadSessionId = normalizeAlbumUploadProcessText(payload.uploadSessionId);
-  if (!uploadSessionId) throw new Error("Album upload session bulunamadi.");
+  if (!uploadSessionId) throw new Error("Albüm yükleme oturumu bulunamadı.");
   await StorageAPI.finalizeUploadSession(uploadSessionId, albumAuthHints.accessTokenHint);
   logAlbumUploadStep(entry.id, "create:done", {
     durationMs: nowMs() - createStartedAt,
@@ -409,7 +409,7 @@ export async function processAlbumUploadQueue(params: {
             userData: params.userData,
           }),
           ALBUM_AUTH_TIMEOUT_MS,
-          "Album auth",
+          "Albüm yetkilendirme",
         );
         logAlbumUploadStep(entry.id, "auth:done", {
           durationMs: nowMs() - authStartedAt,

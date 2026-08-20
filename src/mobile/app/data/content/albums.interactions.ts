@@ -65,7 +65,7 @@ export function fetchAlbumPhotoLikers(
 
 export function reportAlbum(params: { photoId: string; username: string }) {
   return ReportAPI.submit({
-    reason: "Uygunsuz album",
+    reason: "Uygunsuz albüm",
     targetId: params.photoId,
     targetType: "album",
     targetUsername: params.username,

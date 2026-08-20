@@ -1,6 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { AppText as Text } from "../../../../shared/components/AppText";
-import { Bell, Camera, Image, MapPin, Mic, Shield } from "lucide-react-native";
+import { Bell, Camera, Image, Mic, Shield } from "lucide-react-native";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppState, Linking, Pressable, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -20,7 +20,6 @@ import { PermissionItem } from "./PermissionItem";
 
 const DEFAULT_STATE: DevicePermissionState = {
   camera: "undetermined",
-  location: "undetermined",
   microphone: "undetermined",
   notifications: "undetermined",
   photos: "undetermined",
@@ -28,9 +27,6 @@ const DEFAULT_STATE: DevicePermissionState = {
 
 const ICONS: Record<DevicePermissionKey, ReactNode> = {
   camera: <Camera size={tokens.iconSize.xl} color={tokens.colors.primaryLight} strokeWidth={1.5} />,
-  location: (
-    <MapPin size={tokens.iconSize.xl} color={tokens.colors.primaryLight} strokeWidth={1.5} />
-  ),
   microphone: (
     <Mic size={tokens.iconSize.xl} color={tokens.colors.primaryLight} strokeWidth={1.5} />
   ),
@@ -233,6 +229,9 @@ export function PermissionsScreen({ visible, onComplete }: Props) {
 
             <Pressable
               onPress={() => setDontShowAgain((current) => !current)}
+              accessibilityRole="checkbox"
+              accessibilityLabel={t("permissions.dontShowAgain")}
+              accessibilityState={{ checked: dontShowAgain }}
               style={{
                 marginTop: tokens.spacing.mdPlus,
                 flexDirection: "row",
@@ -296,6 +295,10 @@ export function PermissionsScreen({ visible, onComplete }: Props) {
 
             <TouchableOpacity
               onPress={handleContinue}
+              accessibilityRole="button"
+              accessibilityLabel={
+                grantedCount > 0 ? t("common.continue") : t("permissions.closeForNow")
+              }
               style={{ marginTop: tokens.spacing.xl }}
               activeOpacity={0.85}
             >

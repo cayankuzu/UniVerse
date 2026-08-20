@@ -1,5 +1,5 @@
 import * as ImagePicker from "expo-image-picker";
-import { Alert, Platform } from "react-native";
+import { Platform } from "react-native";
 import {
   captureCameraImageSelection,
   filterSelectableMediaSelections,
@@ -7,12 +7,16 @@ import {
   type MediaSelection,
 } from "../../../shared/media/mediaPicker";
 import { captureTimedVideoSelection } from "../../../shared/media/nativeTimedVideoCapture";
+import { showInfoAlert } from "../../../shared/utils/alerts";
 
 export function showAlbumUploadAlert(message: string, onWarning?: (message: string) => void) {
   const text = String(message || "").trim();
   if (!text) return;
-  onWarning?.(text);
-  Alert.alert("Albüm Medyası", text);
+  if (onWarning) {
+    onWarning(text);
+    return;
+  }
+  showInfoAlert("Albüm Medyası", text);
 }
 
 export async function pickAlbumMediaFromLibrary(availableSelectionSlots: number) {

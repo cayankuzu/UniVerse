@@ -25,7 +25,7 @@ describe("shouldUseHomeStartupPreview", () => {
       shouldUseHomeStartupPreview({
         hasProjectionContent: true,
         startupPreviewItemsLength: 4,
-        startupSnapshotSavedAt: Date.now(),
+        startupSnapshotSavedAt: 2_001,
       }),
     ).toBe(false);
   });

@@ -1,6 +1,6 @@
 import React from "react";
 import { Text } from "react-native";
-import { act, render, screen } from "@testing-library/react-native";
+import { act, fireEvent, render, screen } from "@testing-library/react-native";
 
 let latestFlashListProps: Record<string, unknown> | null = null;
 
@@ -91,16 +91,20 @@ describe("AppFlatList", () => {
   });
 
   it("renders the shared error state when empty and errored", () => {
+    const onRefresh = jest.fn();
     render(
       <AppFlatList
         data={[]}
         error="Load failed"
         keyExtractor={(item: { id: string }) => item.id}
+        onRefresh={onRefresh}
         renderItem={() => <Text>Row</Text>}
       />,
     );
 
     expect(screen.getByText("Load failed")).toBeOnTheScreen();
+    fireEvent.press(screen.getByText("Tekrar dene"));
+    expect(onRefresh).toHaveBeenCalledTimes(1);
   });
 
   it("gates native load-more signals to once per data length", () => {

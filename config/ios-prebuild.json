@@ -1,0 +1,52 @@
+{
+  "scheme": "ogrencisosyalagi",
+  "orientation": "portrait",
+  "icon": "./assets/app-icons_background_not_removed/appstore.png",
+  "plugins": [
+    [
+      "expo-image-picker",
+      {
+        "photosPermission": "UniVerse, albüm ve profil görselleri seçebilmeniz için fotoğraflarınıza erişim ister.",
+        "cameraPermission": "UniVerse, profil veya etkinlik görselleri çekebilmeniz için kameranıza erişim ister.",
+        "microphonePermission": "UniVerse, video çekerken ses kaydı alabilmek için mikrofonunuza erişim ister."
+      }
+    ],
+    [
+      "expo-media-library",
+      {
+        "photosPermission": "UniVerse, medya seçip yükleyebilmeniz için fotoğraflarınıza erişim ister.",
+        "savePhotosPermission": "UniVerse, indirdiğiniz medya içeriklerini galerinize kaydedebilmek için izin ister."
+      }
+    ],
+    [
+      "expo-notifications",
+      {
+        "icon": "./assets/notifications/android-notification-icon.png",
+        "color": "#0F172A"
+      }
+    ],
+    [
+      "expo-video",
+      {
+        "supportsPictureInPicture": true
+      }
+    ],
+    "expo-secure-store",
+    "expo-sqlite"
+  ],
+  "splash": {
+    "image": "./android/app/src/main/res/drawable-xxhdpi/splashscreen_logo.png",
+    "resizeMode": "cover",
+    "backgroundColor": "#FFFFFF"
+  },
+  "ios": {
+    "supportsTablet": false,
+    "icon": "./assets/app-icons_background_not_removed/appstore.png",
+    "infoPlist": {
+      "ITSAppUsesNonExemptEncryption": false,
+      "NSMicrophoneUsageDescription": "UniVerse, video içeriklerde ses kaydı alabilmek için mikrofonunuza erişim ister.",
+      "NSPhotoLibraryAddUsageDescription": "UniVerse, albüm ve etkinlik içerikleri paylaşabilmeniz için fotoğraflarınızı yüklemenize izin ister.",
+      "UIUserInterfaceStyle": "Light"
+    }
+  }
+}

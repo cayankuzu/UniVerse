@@ -27,7 +27,6 @@ function actionLabel(status: "denied" | "granted" | "undetermined") {
 
 const DEFAULT_PERMISSION_STATE: DevicePermissionState = {
   camera: "undetermined",
-  location: "undetermined",
   microphone: "undetermined",
   notifications: "undetermined",
   photos: "undetermined",

@@ -251,7 +251,7 @@ export function RegistrationPasswordField({
             <View
               accessibilityLabel={`${PASSWORD_RULE_LABELS[rule]}: ${statusText}`}
               key={rule}
-              style={{ alignItems: "center", flexDirection: "row", gap: tokens.spacing.xsCompact }}
+              style={{ alignItems: "center", flexDirection: "row", gap: tokens.spacing.xs }}
             >
               {passed ? (
                 <CheckCircle2

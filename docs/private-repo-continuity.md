@@ -1,6 +1,6 @@
 # Private Repo Continuity
 
-This private repo is prepared so a new machine can continue development and release work with the same project identity and backend codebase from a plain clone. The same continuity set is also mirrored into the Desktop folder `UniVerse_secrests` so it can be copied to USB for offline recovery.
+This private repository lets a new machine restore source code and non-secret build configuration from a plain clone. App identity, signing continuity, and provider access are restored separately from approved secret stores.
 
 ## Repo contents
 
@@ -9,24 +9,21 @@ This private repo is prepared so a new machine can continue development and rele
 - Supabase migrations and Edge Functions
 - assets, tests, scripts, and build configuration
 - `android/sentry.properties`
-- committed secret/signing material required for repeatable builds
+- references to provider-managed release configuration, without credential values
 
-## Continuity secret set
+## Secret and signing material
 
-- `.env`
-- `GoogleService-Info.plist`
-- `.secrets/app_store_push_bildiirm_ke_AuthKey_TRX8Y4P5SU.p8`
-- `.secrets/AuthKey_DC34BUDLPC.p8`
-- `.secrets/universe-da9c4-firebase-adminsdk-fbsvc-382635baf3.json`
-- `android/keystore.properties`
-- `android/keystores/sorita-release.jks`
-- `android/app/debug.keystore`
-- `android/app/google-services.json`
+- local `.env` files
+- Apple/Firebase platform configuration files
+- Apple API and push-auth private keys
+- Firebase/Google Cloud service-account JSON
+- Android signing properties and keystores
+- materialized Android Google Services configuration
+- local Supabase project-link metadata (`supabase/.temp/linked-project.json` and `project-ref`)
 
-These files must exist in two places:
+These paths are intentionally ignored by Git. Do not add them to a commit, pull request, artifact, log, issue, or chat transcript.
 
-- private GitHub `main`
-- the Desktop export folder `UniVerse_secrests`
+Production values must come from the relevant provider secret store: GitHub Actions, EAS, Supabase, Sentry, Apple, Firebase/Google Cloud, or Google Play. An offline recovery copy is allowed only in access-controlled encrypted storage outside the repository.
 
 ## Not included
 
@@ -44,8 +41,8 @@ These files must exist in two places:
 
 1. Install Git, Node.js 20+, Java 17, Android Studio, Android SDK platform tools, and an NDK version compatible with the committed Android config.
 2. Clone the private repo.
-3. If any continuity files are missing, connect the USB copy of `UniVerse_secrests`.
-4. Run `powershell -ExecutionPolicy Bypass -File .\\utils\\ops\\restore-private-secrets.ps1 -BackupRoot "<path-to-UniVerse_secrests\\repo-root>" -ProjectRoot "<cloned-repo-path>"`.
+3. Obtain the required development or release secrets through the approved provider or encrypted recovery process.
+4. Materialize file secrets only into the Git-ignored paths expected by the build scripts.
 5. Run `npm ci`.
 6. Ensure `ANDROID_HOME` or `ANDROID_SDK_ROOT` points to the installed Android SDK.
 7. Run `npm run check`.
@@ -90,7 +87,7 @@ If iOS build work is needed:
 
 ## Release/signing note
 
-- The Android upload keystore used by `android/keystore.properties` is committed to the private repo and also mirrored in `UniVerse_secrests`.
+- The Android upload keystore and `android/keystore.properties` stay outside Git. Google Play App Signing remains the production signing authority; the upload key is recovered from its approved encrypted backup when needed.
 - Apple distribution certificates/profiles and the Google Play App Signing private key remain external platform-managed assets and are not part of the repo.
 - If local Sentry auth is missing or expired, release bundle creation can still continue with:
 
@@ -98,4 +95,4 @@ If iOS build work is needed:
 
 ## Security note
 
-Because the continuity set now lives in both private GitHub and the USB backup, limit access to both and rotate credentials immediately if either location is exposed.
+Private-repository access does not make committed credentials safe. If a secret or signing file is ever committed or copied to an unapproved location, treat it as exposed, revoke or rotate it at the provider, review audit logs, and follow `docs/credential-incident-response.md`.

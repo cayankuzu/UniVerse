@@ -125,7 +125,7 @@ export const AppButton = memo(function AppButton({
         ...(contentStyle as object),
       }}
       disabled={isDisabled}
-      hitSlop={resolvedMode === "text" ? tokens.hitSlop.sm : undefined}
+      hitSlop={tokens.hitSlop.sm}
       icon={icon ? () => icon as React.ReactElement : undefined}
       labelStyle={{
         fontSize: resolvedMode === "text" ? tokens.typography.control : resolvedSize.textSize,

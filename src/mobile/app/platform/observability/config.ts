@@ -70,7 +70,7 @@ const releaseName = readString(
   `ogrencisosyalagi@${appVersion}:${releaseChannel}`,
 );
 const sentryDsn = readString(expoExtra.sentryDsn, process.env.EXPO_PUBLIC_SENTRY_DSN || "");
-const defaultReplaySessionSampleRate = appEnv === "production" ? 0.05 : 1;
+const defaultReplaySessionSampleRate = 0;
 const defaultReplaySessionQuality = appEnv === "production" ? "medium" : "high";
 const replaysSessionSampleRate = clampSampleRate(
   expoExtra.sentryReplaysSessionSampleRate ??
@@ -80,7 +80,7 @@ const replaysSessionSampleRate = clampSampleRate(
 const replaysOnErrorSampleRate = clampSampleRate(
   expoExtra.sentryReplaysOnErrorSampleRate ??
     process.env.EXPO_PUBLIC_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE,
-  1,
+  0,
 );
 const replaysSessionQuality = normalizeReplayQuality(
   expoExtra.sentryReplaysSessionQuality ?? process.env.EXPO_PUBLIC_SENTRY_REPLAYS_SESSION_QUALITY,
@@ -101,10 +101,10 @@ export const crashReporterConfig: CrashReporterConfig = {
   dsn: sentryDsn,
   enabled: Boolean(sentryDsn),
   environment: appEnv,
-  profilesSampleRate: appEnv === "production" ? 0.15 : 1,
+  profilesSampleRate: appEnv === "production" ? 0.02 : 1,
   replaysOnErrorSampleRate,
   replaysSessionQuality,
   replaysSessionSampleRate,
   release: releaseName,
-  tracesSampleRate: appEnv === "production" ? 0.2 : 1,
+  tracesSampleRate: appEnv === "production" ? 0.05 : 1,
 };

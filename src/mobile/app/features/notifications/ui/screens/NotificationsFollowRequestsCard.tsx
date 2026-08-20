@@ -118,7 +118,11 @@ export function NotificationsFollowRequestsCard({
               <Avatar uri={request.image} name={request.name} size={34} />
             </Pressable>
             <View style={{ flex: 1 }}>
-              <Pressable accessibilityRole="button" onPress={() => onOpenProfile(request.username)}>
+              <Pressable
+                accessibilityLabel={`${request.name} profilini aç`}
+                accessibilityRole="button"
+                onPress={() => onOpenProfile(request.username)}
+              >
                 <Text
                   style={{
                     color: tokens.colors.foreground,

@@ -11,6 +11,7 @@ import {
 } from "lucide-react-native";
 import type { EventWithMeta } from "../data";
 import { resolveEventAccessInfo } from "./eventPresentation";
+import { tokens } from "../../../shared/theme";
 
 export interface DetailAccessChip {
   backgroundColor: string;
@@ -55,8 +56,8 @@ export function resolveEventDetailAccessChip(event: EventWithMeta): DetailAccess
 
   if (access.kind === "public") {
     return {
-      backgroundColor: "#ecfdf5",
-      color: "#047857",
+      backgroundColor: tokens.colors.successSoft,
+      color: tokens.colors.successText,
       icon: Globe,
       label: access.label,
     };
@@ -64,16 +65,16 @@ export function resolveEventDetailAccessChip(event: EventWithMeta): DetailAccess
 
   if (access.kind === "members_only") {
     return {
-      backgroundColor: "#fef2f2",
-      color: "#dc2626",
+      backgroundColor: tokens.colors.dangerSoft,
+      color: tokens.colors.dangerIcon,
       icon: Lock,
       label: access.label,
     };
   }
 
   return {
-    backgroundColor: "#eff6ff",
-    color: "#1d4ed8",
+    backgroundColor: tokens.colors.primarySofter,
+    color: tokens.colors.blueText,
     icon: Users,
     label: access.label,
   };
@@ -89,50 +90,50 @@ export function buildEventDetailInfoSlides(
     .includes("Ücretsiz");
   const slides: DetailSlideItem[] = [
     {
-      backgroundColor: isFree ? "#ecfdf5" : "#fffbeb",
+      backgroundColor: isFree ? tokens.colors.successSoft : tokens.colors.warningSoft,
       icon: DollarSign,
-      iconColor: isFree ? "#059669" : "#d97706",
+      iconColor: isFree ? tokens.colors.successIcon : tokens.colors.warningIcon,
       label: event.fee || "Ücretsiz",
       sub: "Ücret",
-      textColor: isFree ? "#047857" : "#b45309",
+      textColor: isFree ? tokens.colors.successText : tokens.colors.warning,
     },
     {
-      backgroundColor: "#eff6ff",
+      backgroundColor: tokens.colors.primarySofter,
       icon: Calendar,
-      iconColor: "#2563eb",
+      iconColor: tokens.colors.primary,
       label: dateLabel,
       sub: event.endDate && event.endDate !== event.startDate ? `-> ${event.endDate}` : "Başlangıç",
-      textColor: "#1d4ed8",
+      textColor: tokens.colors.blueText,
     },
     {
-      backgroundColor: "#eef2ff",
+      backgroundColor: tokens.colors.indigoSoft,
       icon: Clock,
-      iconColor: "#4f46e5",
+      iconColor: tokens.colors.indigo,
       label: timeLabel,
       sub: "Saat",
-      textColor: "#4338ca",
+      textColor: tokens.colors.indigoDark,
     },
   ];
 
   if (event.level) {
     slides.push({
-      backgroundColor: "#ecfeff",
+      backgroundColor: tokens.colors.cyanSoft,
       icon: BarChart3,
-      iconColor: "#0891b2",
+      iconColor: tokens.colors.cyan,
       label: event.level,
       sub: "Seviye",
-      textColor: "#0e7490",
+      textColor: tokens.colors.cyanDark,
     });
   }
 
   if (event.materials) {
     slides.push({
-      backgroundColor: "#fff7ed",
+      backgroundColor: tokens.colors.warningSurface,
       icon: Package,
-      iconColor: "#ea580c",
+      iconColor: tokens.colors.orangeDark,
       label: event.materials,
       sub: "Malzemeler",
-      textColor: "#c2410c",
+      textColor: tokens.colors.orangeStrong,
     });
   }
 

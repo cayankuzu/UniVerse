@@ -48,7 +48,9 @@ export function ExpandableText({
       </Text>
       {canExpand ? (
         <Pressable
+          accessibilityLabel={expanded ? expandedLabel : collapsedLabel}
           accessibilityRole="button"
+          accessibilityState={{ expanded }}
           onPress={toggle}
           style={{ alignSelf: "flex-start", marginTop: tokens.spacing.xxs }}
         >

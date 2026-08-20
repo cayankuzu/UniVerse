@@ -100,6 +100,9 @@ export function CommentThreadBlock({
       {replies.length > 1 ? (
         <Pressable
           onPress={() => onToggleReplies(comment.id)}
+          accessibilityRole="button"
+          accessibilityLabel={isExpanded ? "Yanıtları gizle" : `${hiddenCount} yanıtı göster`}
+          accessibilityState={{ expanded: isExpanded }}
           style={{
             alignSelf: "flex-start",
             marginLeft: 58,

@@ -1,7 +1,7 @@
 import * as Notifications from "expo-notifications";
 import { resolvePushPlatform } from "../../platform/notifications/pushRuntime";
+import { DEFAULT_NOTIFICATION_CHANNEL_ID } from "../../platform/notifications/notificationChannel";
 
-export const DEFAULT_NOTIFICATION_CHANNEL_ID = "default";
 const FOREGROUND_PUSH_MIRROR_FLAG = "__foregroundPushMirror";
 
 type PushPlatform = ReturnType<typeof resolvePushPlatform>;

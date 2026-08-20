@@ -18,6 +18,9 @@ export function EventAlbumActionButton({ disabled, icon, label, loading, onPress
     <Pressable
       onPress={onPress}
       disabled={blocked}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled: blocked, busy: loading }}
       style={{
         flex: 1,
         minHeight: tokens.minHeight.inputLg,

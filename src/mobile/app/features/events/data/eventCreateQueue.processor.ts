@@ -22,10 +22,10 @@ async function patchEventCreateProgress(
   },
 ) {
   const nextPayload = writeUploadProgress(entry.payload, {
-    hint: "Uygulamadan cikmayin. Etkinlik arka planda paylasiliyor.",
+    hint: "Uygulamadan çıkmayın. Etkinlik arka planda paylaşılıyor.",
     percent: patch.percent,
     stage: patch.stage,
-    title: "Etkinlik paylasiliyor",
+    title: "Etkinlik paylaşılıyor",
   });
   const nextEntry = await patchUploadEntry(entry.id, {
     payload: nextPayload,
@@ -68,10 +68,10 @@ export async function handleEventCreateEntry(params: {
     (
       await patchUploadEntry(params.entry.id, {
         payload: writeUploadProgress(progressPayload, {
-          hint: "Uygulamadan cikmayin. Etkinlik arka planda paylasiliyor.",
+          hint: "Uygulamadan çıkmayın. Etkinlik arka planda paylaşılıyor.",
           percent: 72,
-          stage: "Etkinlik yayinlaniyor",
-          title: "Etkinlik paylasiliyor",
+          stage: "Etkinlik yayımlanıyor",
+          title: "Etkinlik paylaşılıyor",
         }),
         status: "uploading",
       })
@@ -93,10 +93,10 @@ export async function handleEventCreateEntry(params: {
     (
       await patchUploadEntry(params.entry.id, {
         payload: writeUploadProgress(progressPayload, {
-          hint: "Uygulamadan cikmayin. Etkinlik arka planda paylasiliyor.",
+          hint: "Uygulamadan çıkmayın. Etkinlik arka planda paylaşılıyor.",
           percent: 96,
           stage: "Etkinlik gönderiye ekleniyor",
-          title: "Etkinlik paylasiliyor",
+          title: "Etkinlik paylaşılıyor",
         }),
         status: "uploading",
       })

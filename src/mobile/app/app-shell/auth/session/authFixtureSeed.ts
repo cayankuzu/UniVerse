@@ -32,7 +32,7 @@ export const DEMO_STUDENT_USER: AuthUserData = {
   university: "Orta Dogu Teknik Üniversitesi",
   department: "Bilgisayar Muhendisligi",
   gradeYear: "3. Sinif",
-  bio: "Kampus etkinliklerini takip etmeyi sever.",
+  bio: "Kampüs etkinliklerini takip etmeyi sever.",
   profileImage: demoAvatars.ahmet,
   coverImage: demoCovers.campus,
   categories: ["Teknoloji", "Yazilim", "Yapay Zeka"],

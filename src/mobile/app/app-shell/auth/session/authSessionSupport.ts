@@ -11,10 +11,12 @@ import {
   type PersistedAuthSnapshot,
 } from "../../../platform/storage/authSession";
 import { getSeededAuthStateFromSession } from "./authSessionSeed";
+import { raceWithTimeout } from "./authContext.shared";
 
 let restorePersistedSessionPromise: Promise<Session | null> | null = null;
 let activeOrPersistedSessionPromise: Promise<Session | null> | null = null;
 let activeSessionHint: Session | null = null;
+const PERSISTED_SESSION_RESTORE_TIMEOUT_MS = 2_500;
 
 export async function restorePersistedSession(): Promise<Session | null> {
   if (restorePersistedSessionPromise) {
@@ -27,7 +29,14 @@ export async function restorePersistedSession(): Promise<Session | null> {
       return null;
     }
 
-    const { data, error } = await supabase.auth.setSession(persistedSession);
+    const restored = await raceWithTimeout(
+      supabase.auth.setSession(persistedSession),
+      PERSISTED_SESSION_RESTORE_TIMEOUT_MS,
+    );
+    if (restored.timedOut) {
+      return null;
+    }
+    const { data, error } = restored.value;
     if (error || !data.session) {
       await clearPersistedAuthSession();
       return null;

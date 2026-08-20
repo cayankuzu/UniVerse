@@ -5,55 +5,12 @@ import {
 } from "./homeProjectionApi.test.helpers";
 import { getHomeFeed } from "./homeProjectionApi";
 
-describe("getHomeFeed visibility hydration", () => {
+describe("getHomeFeed projection visibility", () => {
   beforeEach(() => {
     setupHomeProjectionApiTestMocks();
   });
 
-  it("hydrates missing home album surface flags from canonical album rows", async () => {
-    (supabase.from as jest.Mock).mockImplementation((table: string) => {
-      const builder: {
-        eq: jest.Mock;
-        in: jest.Mock;
-        is: jest.Mock;
-        maybeSingle: jest.Mock;
-        order: jest.Mock;
-        select: jest.Mock;
-        then: (
-          resolve: (value: unknown) => unknown,
-          reject?: (reason: unknown) => unknown,
-        ) => Promise<unknown>;
-      } = {
-        eq: jest.fn(),
-        in: jest.fn(),
-        is: jest.fn(),
-        maybeSingle: jest.fn(),
-        order: jest.fn(),
-        select: jest.fn(),
-        then: (resolve, reject) => Promise.resolve({ data: [], error: null }).then(resolve, reject),
-      };
-      builder.select.mockReturnValue(builder);
-      builder.eq.mockReturnValue(builder);
-      builder.in.mockReturnValue(builder);
-      builder.order.mockReturnValue(builder);
-      builder.maybeSingle.mockResolvedValue({ data: null, error: null });
-      builder.is.mockResolvedValue(
-        table === "album_photos"
-          ? {
-              data: [
-                {
-                  id: "album-1",
-                  show_on_club_profile: true,
-                  show_on_profile: true,
-                  show_on_user_profile: true,
-                },
-              ],
-              error: null,
-            }
-          : { data: [], error: null },
-      );
-      return builder;
-    });
+  it("trusts canonical projection surface flags without supplementary reads", async () => {
     (tryProjectionRpc as jest.Mock).mockResolvedValue({
       deletedIds: [],
       deltaToken: "delta-1",
@@ -64,6 +21,8 @@ describe("getHomeFeed visibility hydration", () => {
             createdAt: "2026-03-18T09:00:00.000Z",
             eventId: "event-1",
             id: "album-1",
+            showOnClubProfile: true,
+            showOnOwnProfile: true,
             showOnProfile: true,
             username: "student-a",
           },
@@ -89,16 +48,16 @@ describe("getHomeFeed visibility hydration", () => {
       viewerUsername: "viewer",
     });
 
+    expect(supabase.from).not.toHaveBeenCalled();
+
     expect(result.items).toEqual([
       expect.objectContaining({
         album: expect.objectContaining({
           showOnClubProfile: true,
           showOnOwnProfile: true,
-          surfaceVisibility: expect.objectContaining({
-            label: { text: "Kendim ve Kulüp", type: "club" },
-            showOnClubProfile: true,
-            showOnOwnProfile: true,
-          }),
+        }),
+        homePresentation: expect.objectContaining({
+          visibility: { text: "Kendim ve Kulüp", type: "club" },
         }),
         id: "album:album-1",
       }),

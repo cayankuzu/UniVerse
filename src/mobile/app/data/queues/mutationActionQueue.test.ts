@@ -5,6 +5,7 @@ import {
   getMutationActionDeadLetterQueue,
   getMutationActionEntry,
   getMutationActionQueue,
+  patchMutationActionEntry,
   processMutationActionQueue,
   subscribeMutationAction,
 } from "./mutationActionQueue";
@@ -120,6 +121,31 @@ describe("mutationActionQueue", () => {
 
     expect(handler).not.toHaveBeenCalled();
     expect(await getMutationActionQueue("follow-toggle", "viewer-1")).toHaveLength(1);
+  });
+
+  it("recovers an abandoned mutation claim after process death", async () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date("2026-03-18T00:00:00.000Z"));
+    await enqueueMutationAction({
+      id: "follow:abandoned",
+      kind: "follow-toggle",
+      ownerId: "viewer-1",
+      payload: { targetUserId: "target-1" },
+    });
+    await patchMutationActionEntry("follow:abandoned", { status: "running" });
+
+    jest.setSystemTime(new Date("2026-03-18T00:00:09.000Z"));
+    const handler = jest.fn().mockResolvedValue({ status: "following" });
+    await processMutationActionQueue({
+      handler,
+      kind: "follow-toggle",
+      ownerId: "viewer-1",
+    });
+
+    expect(handler).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "follow:abandoned", status: "running" }),
+    );
+    await expect(getMutationActionEntry("follow:abandoned")).resolves.toBeNull();
   });
 
   it("deduplicates the same persisted mutation id without changing its idempotency payload", async () => {

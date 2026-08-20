@@ -213,7 +213,7 @@ export const EventAPI = {
           }
         }
 
-        throw toEventMutationError(rpcResult.error, "Etkinlik begenisi güncellenemedi.");
+        throw toEventMutationError(rpcResult.error, "Etkinlik beğenisi güncellenemedi.");
       },
       toSuccessMeta: (result) => ({ liked: result.liked, source }),
     });
@@ -243,7 +243,7 @@ export const EventAPI = {
             .eq("user_id", user.id)
             .maybeSingle();
           if (me?.account_type === "club") {
-            throw new Error("Kulüp hesaplari etkinliklere katilamaz.");
+            throw new Error("Kulüp hesapları etkinliklere katılamaz.");
           }
         }
 
@@ -301,7 +301,7 @@ export const EventAPI = {
           }
         }
 
-        throw toEventMutationError(rpcResult.error, "Etkinlik katilimi güncellenemedi.");
+        throw toEventMutationError(rpcResult.error, "Etkinlik katılımı güncellenemedi.");
       },
       toSuccessMeta: (result) => ({ joined: result.joined, source }),
     });

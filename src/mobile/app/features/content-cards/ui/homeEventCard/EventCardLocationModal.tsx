@@ -32,6 +32,7 @@ export function EventCardLocationModal({
       onRequestClose={onClose}
     >
       <Pressable
+        accessible={false}
         onPress={onClose}
         style={{
           flex: 1,
@@ -43,6 +44,7 @@ export function EventCardLocationModal({
         }}
       >
         <Pressable
+          accessible={false}
           onPress={(eventPress) => eventPress.stopPropagation()}
           style={{
             borderRadius: tokens.radius.lg,
@@ -133,6 +135,9 @@ function CopyIconButton({ copied, disabled, onPress }: CopyIconButtonProps) {
     <Pressable
       onPress={onPress}
       disabled={disabled}
+      accessibilityRole="button"
+      accessibilityLabel={copied ? "Kopyalandı" : "Kopyala"}
+      accessibilityState={{ disabled }}
       style={{
         width: 28,
         height: 28,

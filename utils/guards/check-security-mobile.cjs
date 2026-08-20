@@ -71,6 +71,65 @@ const DEEP_LINK_BRIDGE = path.join(
   "bridges",
   "useSupabaseDeepLinkBridge.ts",
 );
+const AUTH_LIFECYCLE_HELPERS = path.join(
+  ROOT,
+  "src",
+  "mobile",
+  "app",
+  "app-shell",
+  "auth",
+  "session",
+  "useAuthSessionLifecycle.helpers.ts",
+);
+const PUSH_REGISTRATION = path.join(
+  ROOT,
+  "src",
+  "mobile",
+  "app",
+  "app-shell",
+  "bridges",
+  "usePushRegistrationSync.ts",
+);
+const NOTIFICATION_PERMISSION = path.join(
+  ROOT,
+  "src",
+  "mobile",
+  "app",
+  "platform",
+  "notifications",
+  "notificationPermission.ts",
+);
+const HOME_ACTIONS = path.join(
+  ROOT,
+  "src",
+  "mobile",
+  "app",
+  "features",
+  "home",
+  "ui",
+  "useHomeScreenActions.ts",
+);
+const QUEUE_PROCESSOR_CORE = path.join(
+  ROOT,
+  "src",
+  "mobile",
+  "app",
+  "app-shell",
+  "queues",
+  "usePersistentQueueProcessor.ts",
+);
+const DEVICE_PERMISSIONS = path.join(
+  ROOT,
+  "src",
+  "mobile",
+  "app",
+  "platform",
+  "permissions",
+  "devicePermissions.ts",
+);
+const PACKAGE_JSON = path.join(ROOT, "package.json");
+const ANDROID_BUILD = path.join(ROOT, "android", "app", "build.gradle");
+const ANDROID_MANIFEST = path.join(ROOT, "android", "app", "src", "main", "AndroidManifest.xml");
 const ROUTE_FILES = [
   path.join(ROOT, "supabase", "functions", "server", "routes", "follows.ts"),
   path.join(ROOT, "supabase", "functions", "server", "routes", "social.ts"),
@@ -95,6 +154,15 @@ const authLifecycle = read(AUTH_LIFECYCLE);
 const authCallback = read(AUTH_CALLBACK);
 const resetPassword = read(RESET_PASSWORD);
 const deepLinkBridge = read(DEEP_LINK_BRIDGE);
+const authLifecycleHelpers = read(AUTH_LIFECYCLE_HELPERS);
+const pushRegistration = read(PUSH_REGISTRATION);
+const notificationPermission = read(NOTIFICATION_PERMISSION);
+const homeActions = read(HOME_ACTIONS);
+const queueProcessorCore = read(QUEUE_PROCESSOR_CORE);
+const devicePermissions = read(DEVICE_PERMISSIONS);
+const packageJson = read(PACKAGE_JSON);
+const androidBuild = read(ANDROID_BUILD);
+const androidManifest = read(ANDROID_MANIFEST);
 
 assertContains(
   authStorage,
@@ -151,6 +219,46 @@ assertContains(
   /CommonActions\.reset/,
   "[security-mobile] deep-link bridge must scrub navigation state.",
 );
+assertContains(
+  authLifecycleHelpers,
+  /sha256\(encodeAccessToken\(accessToken\)\)/,
+  "[security-mobile] auth hydration keys must use a one-way token fingerprint.",
+);
+if (/access_token[^\n]*slice\s*\(/i.test(authLifecycleHelpers)) {
+  throw new Error("[security-mobile] access-token material must not be sliced into cache keys.");
+}
+if (/requestPermissionsAsync\s*\(/.test(pushRegistration)) {
+  throw new Error("[security-mobile] login/background push sync must not prompt for permission.");
+}
+assertContains(
+  notificationPermission,
+  /requestNotificationPermissionFromUserInteraction/,
+  "[security-mobile] notification permission must be owned by an explicit interaction helper.",
+);
+assertContains(
+  homeActions,
+  /requestNotificationPermissionFromUserInteraction\(\)/,
+  "[security-mobile] the existing notifications interaction must own the push prompt timing.",
+);
+assertContains(
+  queueProcessorCore,
+  /screenKey:\s*"authenticated-owner"/,
+  "[security-mobile] queue telemetry must use a privacy-safe aggregate screen key.",
+);
+if (/screenKey:\s*ownerId/.test(queueProcessorCore)) {
+  throw new Error("[security-mobile] raw owner UUIDs must not be sent as telemetry screen keys.");
+}
+if (/expo-location/.test(packageJson + devicePermissions)) {
+  throw new Error(
+    "[security-mobile] unused location permission code/dependency must stay removed.",
+  );
+}
+if (/ACCESS_(?:COARSE|FINE)_LOCATION|hardware[.]location/.test(androidManifest)) {
+  throw new Error("[security-mobile] Android must not declare unused location capabilities.");
+}
+if (/play[.]integrity|PLAY_INTEGRITY/i.test(androidBuild)) {
+  throw new Error("[security-mobile] partial Play Integrity configuration must stay removed.");
+}
 assertContains(
   deepLinkBridge,
   /handleSupabaseDeepLink/,

@@ -52,7 +52,7 @@ export function AccessChip({ label, kind }: { label: string; kind: EventAccessKi
         borderWidth: 1,
         borderColor: visual.border,
         backgroundColor: visual.bg,
-        paddingHorizontal: tokens.spacing.xsCompact,
+        paddingHorizontal: tokens.spacing.xs,
         paddingVertical: tokens.spacing.xxs,
       }}
     >
@@ -94,7 +94,7 @@ export function VisibilityChip({ label, type }: { label: string; type: "club" | 
         borderWidth: 1,
         borderColor: visual.border,
         backgroundColor: visual.bg,
-        paddingHorizontal: tokens.spacing.xsCompact,
+        paddingHorizontal: tokens.spacing.xs,
         paddingVertical: tokens.spacing.xxs,
       }}
     >

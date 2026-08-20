@@ -52,6 +52,8 @@ export function DetailViewerOverlayLayout<T extends { id: string }>(
           >
             <Pressable
               onPress={props.onClose}
+              accessibilityRole="button"
+              accessibilityLabel="Geri dön"
               style={{
                 width: 36,
                 height: 36,
@@ -78,6 +80,8 @@ export function DetailViewerOverlayLayout<T extends { id: string }>(
 
             <Pressable
               onPress={props.onClose}
+              accessibilityRole="button"
+              accessibilityLabel="Kapat"
               style={{
                 width: 32,
                 height: 32,

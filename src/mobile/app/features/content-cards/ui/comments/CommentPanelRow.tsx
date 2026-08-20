@@ -40,7 +40,7 @@ function CommentText({
   return (
     <Text
       style={{
-        marginTop: tokens.spacing.xsCompact,
+        marginTop: tokens.spacing.xs,
         fontSize: tokens.typography.body,
         lineHeight: tokens.lineHeight.body,
         color: tokens.colors.foreground,
@@ -122,7 +122,12 @@ export function CommentPanelRow({
         gap: tokens.spacing.sm,
       }}
     >
-      <Pressable onPress={() => onPressUser?.(comment.username)} hitSlop={tokens.hitSlop.sm}>
+      <Pressable
+        onPress={() => onPressUser?.(comment.username)}
+        accessibilityRole="button"
+        accessibilityLabel={`${formatName(comment)} profilini aç`}
+        hitSlop={tokens.hitSlop.sm}
+      >
         <Avatar
           uri={comment.image}
           variants={comment.imageVariants}
@@ -142,11 +147,11 @@ export function CommentPanelRow({
             paddingVertical: tokens.spacing.xs,
           }}
         >
-          <View
-            style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.xsCompact }}
-          >
+          <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.xs }}>
             <Pressable
               onPress={() => onPressUser?.(comment.username)}
+              accessibilityRole="button"
+              accessibilityLabel={`${formatName(comment)} profilini aç`}
               style={{ flexShrink: 1, minWidth: 0 }}
             >
               <Text
@@ -165,7 +170,7 @@ export function CommentPanelRow({
                 style={{
                   borderRadius: tokens.radius.pill,
                   backgroundColor: tokens.colors.primarySofter,
-                  paddingHorizontal: tokens.spacing.xsCompact,
+                  paddingHorizontal: tokens.spacing.xs,
                   paddingVertical: tokens.spacing.micro,
                 }}
               >
@@ -199,7 +204,7 @@ export function CommentPanelRow({
 
         <View
           style={{
-            marginTop: tokens.spacing.xsCompact,
+            marginTop: tokens.spacing.xs,
             flexDirection: "row",
             alignItems: "center",
             gap: tokens.spacing.xs,
@@ -207,6 +212,8 @@ export function CommentPanelRow({
         >
           <Pressable
             onPress={() => onReply(comment)}
+            accessibilityRole="button"
+            accessibilityLabel={`${formatName(comment)} kullanıcısına yanıt ver`}
             hitSlop={tokens.hitSlop.sm}
             style={{
               minHeight: 30,
@@ -214,7 +221,7 @@ export function CommentPanelRow({
               paddingHorizontal: tokens.spacing.sm,
               flexDirection: "row",
               alignItems: "center",
-              gap: tokens.spacing.xxsPlus,
+              gap: tokens.spacing.xsMinus,
             }}
           >
             <MessageCircle size={13} color={tokens.colors.mutedFg} />
@@ -231,6 +238,9 @@ export function CommentPanelRow({
 
           <Pressable
             disabled={!onToggleLike}
+            accessibilityRole="button"
+            accessibilityLabel={likedByViewer ? "Beğeniyi kaldır" : "Yorumu beğen"}
+            accessibilityState={{ disabled: !onToggleLike, selected: likedByViewer }}
             onPress={() => {
               void onToggleLike?.(comment);
             }}
@@ -248,7 +258,7 @@ export function CommentPanelRow({
               paddingHorizontal: tokens.spacing.sm,
               flexDirection: "row",
               alignItems: "center",
-              gap: tokens.spacing.xxsPlus,
+              gap: tokens.spacing.xsMinus,
             }}
           >
             <Heart

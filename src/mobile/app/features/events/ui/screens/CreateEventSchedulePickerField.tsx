@@ -52,6 +52,8 @@ export function CreateEventSchedulePickerField({
       </Text>
       <Pressable
         ref={triggerRef}
+        accessibilityRole="button"
+        accessibilityLabel={label}
         accessibilityHint={errorText || undefined}
         onPress={onPress}
         style={{

@@ -243,9 +243,7 @@ export function ChangePasswordScreen({ navigation }: Props) {
         ) : null}
 
         <View style={{ gap: tokens.spacing.xsMinus }}>
-          <View
-            style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.xsCompact }}
-          >
+          <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.xs }}>
             <View
               style={{
                 width: 6,
@@ -265,9 +263,7 @@ export function ChangePasswordScreen({ navigation }: Props) {
               {t("settings.password.tip.verify")}
             </Text>
           </View>
-          <View
-            style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.xsCompact }}
-          >
+          <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.xs }}>
             <View
               style={{
                 width: 6,
@@ -280,9 +276,7 @@ export function ChangePasswordScreen({ navigation }: Props) {
               {t("settings.password.tip.mail")}
             </Text>
           </View>
-          <View
-            style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.xsCompact }}
-          >
+          <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.xs }}>
             <View
               style={{
                 width: 6,

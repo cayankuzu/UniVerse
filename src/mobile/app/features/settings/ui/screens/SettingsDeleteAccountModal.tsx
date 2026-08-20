@@ -42,6 +42,7 @@ export function SettingsDeleteAccountModal({
       onRequestClose={handleCancel}
     >
       <Pressable
+        accessible={false}
         onPress={handleCancel}
         style={{
           flex: 1,

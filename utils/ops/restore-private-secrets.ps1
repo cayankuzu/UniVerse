@@ -21,7 +21,9 @@ $items = @(
     "android\\keystore.properties",
     "android\\app\\debug.keystore",
     "android\\app\\google-services.json",
-    "android\\keystores\\sorita-release.jks"
+    "android\\keystores\\sorita-release.jks",
+    "supabase\\.temp\\linked-project.json",
+    "supabase\\.temp\\project-ref"
 )
 
 foreach ($relativePath in $items) {

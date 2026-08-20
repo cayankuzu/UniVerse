@@ -54,7 +54,7 @@ export function AppErrorBoundary({ children }: AppErrorBoundaryProps) {
               textAlign: "center",
             }}
           >
-            Beklenmeyen bir hata olustu
+            Beklenmeyen bir hata oluştu
           </Text>
           <Text
             style={{

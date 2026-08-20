@@ -1,4 +1,3 @@
-import { Alert } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import { getProfileSurfaceProjectionKeys } from "../../../data/profile/profileProjectionKeys";
 import { projectionKeys } from "../../../data/projections/projectionKeys";
@@ -6,6 +5,7 @@ import { replaceProjectionScope } from "../../../data/projections/projectionRefr
 import { applyBlockedClientIsolation } from "../../../data/social";
 import type { BlockedUserProjectionItem } from "../data";
 import { removeBlockedUserFromSettingsProjection, reportBlockedUser } from "../data";
+import { showErrorAlert } from "../../../shared/utils/alerts";
 
 export function useBlockedUsersActions(params: {
   blockedData: BlockedUserProjectionItem[];
@@ -48,8 +48,7 @@ export function useBlockedUsersActions(params: {
       return true;
     } catch (error) {
       await onRestoreProjection();
-      Alert.alert(
-        "Hata",
+      showErrorAlert(
         String((error as { message?: string } | null)?.message || "Engel kaldırılamadı."),
       );
       return false;

@@ -1,9 +1,10 @@
 import React from "react";
 import { AppText as Text } from "../../../../shared/components/AppText";
-import { ActivityIndicator, Alert, Pressable, View } from "react-native";
+import { ActivityIndicator, Pressable, View } from "react-native";
 import type { PendingAlbumPhoto } from "../../data";
 import { tokens } from "../../../../shared/theme";
 import { t } from "../../../../shared/i18n";
+import { showConfirmAlert } from "../../../../shared/utils/alerts";
 
 type Props = {
   pending: PendingAlbumPhoto;
@@ -39,31 +40,25 @@ function formatAlbumUploadError(message: string | undefined) {
 }
 
 function confirmCancelPendingUpload(onRemove: () => void) {
-  Alert.alert("Yükleme iptal edilsin mi?", "Bu albüm kartının bekleyen yüklemesi iptal edilecek.", [
-    {
-      style: "cancel",
-      text: t("common.cancel"),
-    },
-    {
-      onPress: onRemove,
-      style: "destructive",
-      text: "İptal Et",
-    },
-  ]);
+  showConfirmAlert({
+    cancelLabel: t("common.cancel"),
+    confirmLabel: "İptal Et",
+    destructive: true,
+    message: "Bu albüm kartının bekleyen yüklemesi iptal edilecek.",
+    onConfirm: onRemove,
+    title: "Yükleme iptal edilsin mi?",
+  });
 }
 
 function confirmRemoveFailedUpload(onRemove: () => void) {
-  Alert.alert("Kart silinsin mi?", "Bu başarısız albüm kartı kuyruktan kaldırılacak.", [
-    {
-      style: "cancel",
-      text: t("common.cancel"),
-    },
-    {
-      onPress: onRemove,
-      style: "destructive",
-      text: t("common.delete"),
-    },
-  ]);
+  showConfirmAlert({
+    cancelLabel: t("common.cancel"),
+    confirmLabel: t("common.delete"),
+    destructive: true,
+    message: "Bu başarısız albüm kartı kuyruktan kaldırılacak.",
+    onConfirm: onRemove,
+    title: "Kart silinsin mi?",
+  });
 }
 
 export function EventAlbumPendingActions({ pending, onRemove, onRetry }: Props) {
@@ -114,6 +109,8 @@ export function EventAlbumPendingActions({ pending, onRemove, onRetry }: Props) 
           {isRetryable ? (
             <Pressable
               onPress={onRetry}
+              accessibilityRole="button"
+              accessibilityLabel={t("common.retryAction")}
               style={{
                 borderRadius: tokens.radius.md,
                 backgroundColor: `${tokens.colors.dangerDeep}e6`,
@@ -134,6 +131,8 @@ export function EventAlbumPendingActions({ pending, onRemove, onRetry }: Props) 
           ) : null}
           <Pressable
             onPress={() => confirmRemoveFailedUpload(onRemove)}
+            accessibilityRole="button"
+            accessibilityLabel="Başarısız yüklemeyi kaldır"
             style={{
               borderRadius: tokens.radius.md,
               backgroundColor: tokens.colors.backdrop,
@@ -189,6 +188,8 @@ export function EventAlbumPendingActions({ pending, onRemove, onRetry }: Props) 
           </View>
           <Pressable
             onPress={() => confirmCancelPendingUpload(onRemove)}
+            accessibilityRole="button"
+            accessibilityLabel="Yüklemeyi iptal et"
             style={{
               borderRadius: tokens.radius.md,
               backgroundColor: `${tokens.colors.dangerDeep}e6`,

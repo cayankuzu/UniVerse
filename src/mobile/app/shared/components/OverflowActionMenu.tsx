@@ -60,6 +60,7 @@ export function OverflowActionMenu({
         onRequestClose={() => setOpen(false)}
       >
         <Pressable
+          accessible={false}
           onPress={() => setOpen(false)}
           style={{
             flex: 1,
@@ -70,7 +71,7 @@ export function OverflowActionMenu({
             paddingBottom: Math.max(insets.bottom + tokens.spacing.sm, tokens.spacing.sm),
           }}
         >
-          <Pressable onPress={(event) => event.stopPropagation()}>
+          <Pressable accessible={false} onPress={(event) => event.stopPropagation()}>
             <Surface
               accessibilityLabel={title}
               accessibilityRole="menu"

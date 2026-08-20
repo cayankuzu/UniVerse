@@ -21,7 +21,7 @@ export const kvkkDocument: LegalDocument = {
         "Hesap ve oturum verileri: kullanıcı kimliği, oturum kayıtları, yenilenen token bilgileri, oturumun cihazda sürdürülmesini sağlayan teknik kimlikler, hesap tipi, gizlilik tercihleri ve e-posta gizleme gibi profil ve hesap yapılandırmaları.",
         "İçerik ve etkileşim verileri: oluşturduğun veya katıldığın etkinlikler, albüm fotoğrafları, yorumlar, beğeniler, takip istekleri, takip ilişkileri, engelleme işlemleri, şikâyet kayıtları, etkinlik katılım bilgileri ve bunlara ilişkin zaman damgaları.",
         "Kullanım ve güvenlik verileri: hata kayıtları, performans ve işlem telemetrisi, istek yanıt durumları, istemci taraflı koruma ve kötüye kullanım önleme amaçlı loglar, açılış ve senkronizasyon ölçümleri ile güvenlik denetimine konu teknik kayıtlar.",
-        "Cihaz ve izin verileri: bildirim izni durumu, konum izni durumu, medya veya fotoğraf erişim izni, yükleme sırasında kullanılan dosya ve medya teknik bilgileri ile uygulamanın cihaz tarafında oluşturduğu sınırlı teknik kayıtlar.",
+        "Cihaz ve izin verileri: bildirim izni durumu, medya veya fotoğraf erişim izni, kamera ve mikrofon izin durumu, yükleme sırasında kullanılan dosya ve medya teknik bilgileri ile uygulamanın cihaz tarafında oluşturduğu sınırlı teknik kayıtlar.",
       ],
     },
     {
@@ -46,7 +46,7 @@ export const kvkkDocument: LegalDocument = {
       heading: "Hukuki Sebepler",
       body: [
         "Kişisel veriler; bir sözleşmenin kurulması veya ifasıyla doğrudan ilgili olması, veri sorumlusunun hukuki yükümlülüğünü yerine getirebilmesi, bir hakkın tesisi, kullanılması veya korunması ve veri sorumlusunun meşru menfaatleri için veri işlenmesinin zorunlu olması hukuki sebeplerine dayanılarak işlenebilir.",
-        "Bildirim, konum ve medya veya fotoğraf erişimi gibi cihaz izinleri ise ilgili özelliğin çalışması için kullanıcının cihaz seviyesindeki tercihine bağlıdır. Bu izinler verilmeden de uygulamanın bazı çekirdek alanları kullanılabilir; ancak ilgili özellikler kısıtlı veya devre dışı kalabilir.",
+        "Bildirim, medya veya fotoğraf erişimi, kamera ve mikrofon gibi cihaz izinleri ilgili özelliğin çalışması için kullanıcının cihaz seviyesindeki tercihine bağlıdır. Bu izinler verilmeden de uygulamanın bazı çekirdek alanları kullanılabilir; ancak ilgili özellikler kısıtlı veya devre dışı kalabilir.",
         "Ayrıca açık rıza gerektiren bir veri işleme durumu doğarsa, bu durum ilgili kullanıcı deneyimi içinde ayrıca sunulur ve teknik akış buna göre yapılandırılır.",
       ],
     },

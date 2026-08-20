@@ -65,12 +65,14 @@ function buildProjectionFetchContext(
   current: ProjectionScreenState | undefined,
   mode: ProjectionMergeMode,
   pageSize: number,
+  signal?: AbortSignal,
 ): ProjectionFetchContext {
   return {
     cursor: mode === "append" ? current?.nextCursor || null : null,
     deltaToken: mode === "delta" ? current?.deltaToken || null : null,
     limit: pageSize,
     mode,
+    signal,
     since: mode === "delta" ? current?.serverTime || null : null,
   };
 }
@@ -144,6 +146,7 @@ export function normalizeLegacyProjectionEnvelope<T extends { id?: string }>(
 export async function runProjectionSyncRequest<T extends { id?: string }>(
   runtime: ProjectionSyncRuntime<T>,
   requestedMode?: ProjectionMergeMode,
+  signal?: AbortSignal,
 ) {
   if (!runtime.enabled) {
     return getProjectionState(runtime.queryClient, runtime.stableQueryKey) || undefined;
@@ -178,7 +181,7 @@ export async function runProjectionSyncRequest<T extends { id?: string }>(
         });
       }
       const envelope = await runtime.fetchProjection(
-        buildProjectionFetchContext(current, resolvedMode, runtime.pageSize),
+        buildProjectionFetchContext(current, resolvedMode, runtime.pageSize, signal),
       );
       const { nextState, payloadSize } = finalizeProjectionSync({
         current,

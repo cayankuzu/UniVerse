@@ -67,4 +67,26 @@ describe("prefetchProfileExperience", () => {
       queryClient.getQueryData(projectionKeys.profileOverview("blocked-user", "viewer-1")),
     ).toBeUndefined();
   });
+
+  it("keeps speculative profile failures non-blocking", async () => {
+    mockLoadViewerBlockedVisibility.mockResolvedValue({
+      blockedIds: new Set(),
+      blockedUsernames: new Set(),
+      viewerId: "viewer-1",
+    });
+    mockGetProfileOverviewProjection.mockRejectedValue(new Error("network-down"));
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+
+    await expect(
+      prefetchProfileExperience({
+        queryClient,
+        username: "target-user",
+        viewerId: "viewer-1",
+        viewerKey: "viewer-1",
+        viewerUsername: "viewer",
+      }),
+    ).resolves.toBeUndefined();
+  });
 });

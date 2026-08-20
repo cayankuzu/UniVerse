@@ -18,11 +18,15 @@ import type { SearchProfileSummarySeed } from "../application/useSeedSearchProfi
 import { SearchFeedViewers } from "./SearchFeedViewers";
 import { SearchResultsContent } from "./SearchResultsContent";
 import { SearchTopPanel } from "./SearchTopPanel";
-import { C } from "./searchHelpers";
+import { C, TABS } from "./searchHelpers";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Search">;
 const SEARCH_SWIPE_TABS = ["albums", "events", "clubs", "students"] as const;
 type SearchSwipeTab = (typeof SEARCH_SWIPE_TABS)[number];
+const SEARCH_TAB_LABELS = Object.fromEntries(TABS.map((tab) => [tab.key, tab.label])) as Record<
+  SearchSwipeTab,
+  string
+>;
 
 export function SearchScreen({ navigation }: Props) {
   const { accountType, blockedUsers, userData } = useAuth();
@@ -213,7 +217,9 @@ export function SearchScreen({ navigation }: Props) {
       <SwipeableTabPager
         activeTab={type}
         enabled={!showFilters && !viewerType}
-        keepAlive
+        getTabAccessibilityLabel={(tab) => SEARCH_TAB_LABELS[tab]}
+        keepAlive={false}
+        lazy
         onChange={handleSelectType}
         onPreviewTabChange={restoreTabScrollOffset}
         renderPage={renderResults}

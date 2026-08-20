@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, type ReactNode, type RefObject } from "react";
 import { AccessibilityInfo, findNodeHandle, Modal, View, type ModalProps } from "react-native";
+import { useReducedMotion } from "../hooks/useReducedMotion";
 
 type FocusableRef = RefObject<unknown>;
 
@@ -48,6 +49,7 @@ export function AppModalHost({
   ...modalProps
 }: AppModalHostProps) {
   const wasVisibleRef = useRef(false);
+  const reducedMotion = useReducedMotion();
 
   const announceAndFocus = useCallback(() => {
     if (accessibilityAnnouncement) {
@@ -66,6 +68,7 @@ export function AppModalHost({
   return (
     <Modal
       {...modalProps}
+      animationType={reducedMotion ? "none" : modalProps.animationType}
       testID={testID}
       visible={visible}
       onDismiss={onDismiss}

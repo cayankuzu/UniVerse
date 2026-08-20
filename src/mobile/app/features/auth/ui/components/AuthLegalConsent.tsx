@@ -52,6 +52,11 @@ export function AuthLegalConsent({ accepted, onToggleAccepted }: Props) {
             }}
           >
             <Text
+              accessibilityHint={t("auth.legal.openLinkHint")}
+              accessibilityLabel={t("auth.legal.openLinkA11y", {
+                title: t("auth.legal.terms"),
+              })}
+              accessibilityRole="link"
               onPress={() => setOpenDocumentId("terms")}
               style={{ color: tokens.colors.primary, fontWeight: "700" }}
             >
@@ -59,6 +64,11 @@ export function AuthLegalConsent({ accepted, onToggleAccepted }: Props) {
             </Text>
             <Text>{t("auth.legal.separator")}</Text>
             <Text
+              accessibilityHint={t("auth.legal.openLinkHint")}
+              accessibilityLabel={t("auth.legal.openLinkA11y", {
+                title: t("auth.legal.kvkk"),
+              })}
+              accessibilityRole="link"
               onPress={() => setOpenDocumentId("kvkk")}
               style={{ color: tokens.colors.primary, fontWeight: "700" }}
             >
@@ -66,6 +76,11 @@ export function AuthLegalConsent({ accepted, onToggleAccepted }: Props) {
             </Text>
             <Text>{t("auth.legal.and")}</Text>
             <Text
+              accessibilityHint={t("auth.legal.openLinkHint")}
+              accessibilityLabel={t("auth.legal.openLinkA11y", {
+                title: t("auth.legal.privacy"),
+              })}
+              accessibilityRole="link"
               onPress={() => setOpenDocumentId("privacy")}
               style={{ color: tokens.colors.primary, fontWeight: "700" }}
             >
@@ -147,6 +162,7 @@ export function AuthLegalConsent({ accepted, onToggleAccepted }: Props) {
           }}
         >
           <Pressable
+            accessible={false}
             onPress={() => setOpenDocumentId(null)}
             style={{
               position: "absolute",

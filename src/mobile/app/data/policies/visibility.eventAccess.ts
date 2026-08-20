@@ -34,7 +34,7 @@ export function canViewEvent(
       canView,
       reason: canView
         ? undefined
-        : event.lockedReasonText || "Bu kulübün içeriğini gormek icin kulübü takip etmelisiniz.",
+        : event.lockedReasonText || "Bu kulübün içeriğini görmek için kulübü takip etmelisiniz.",
     };
   }
 
@@ -45,7 +45,7 @@ export function canViewEvent(
   const canView = isOwnClub || followsClub;
   return {
     canView,
-    reason: canView ? undefined : "Bu kulübün içeriğini gormek icin kulübü takip etmelisiniz.",
+    reason: canView ? undefined : "Bu kulübün içeriğini görmek için kulübü takip etmelisiniz.",
   };
 }
 
@@ -110,7 +110,7 @@ export function getEventActionAccess(
   const reason = !canOpenDetail
     ? "Bu etkinliği görmek için kulübü takip etmelisiniz."
     : eventIsMembersOnly && !isOwnClub && !viewerJoined
-      ? "Bu etkinlik sadece takipcilere Özeldir."
+      ? "Bu etkinlik sadece takipçilere özeldir."
       : isEnded
         ? "Etkinlik sona erdi."
         : undefined;

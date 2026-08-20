@@ -5,6 +5,7 @@ import { MediaVideo } from "./MediaVideo";
 let mockResolvedUri = "";
 const mockPlay = jest.fn();
 const mockPause = jest.fn();
+const mockUseResolvedMediaUri = jest.fn((_uri: string, _options: unknown) => mockResolvedUri);
 const mockPlayer = {
   loop: false,
   muted: false,
@@ -26,7 +27,7 @@ jest.mock("expo-video", () => ({
 }));
 
 jest.mock("./useResolvedMediaUri", () => ({
-  useResolvedMediaUri: jest.fn(() => mockResolvedUri),
+  useResolvedMediaUri: (uri: string, options: unknown) => mockUseResolvedMediaUri(uri, options),
 }));
 
 jest.mock("./mediaUri", () => ({
@@ -43,6 +44,7 @@ describe("MediaVideo", () => {
     mockPlay.mockClear();
     mockPause.mockClear();
     mockResolvedUri = "";
+    mockUseResolvedMediaUri.mockClear();
     mockUseVideoPlayer.mockClear();
   });
 
@@ -71,5 +73,21 @@ describe("MediaVideo", () => {
     rerender(<MediaVideo active={false} autoPlay uri="video.mp4" />);
 
     await waitFor(() => expect(mockPause).toHaveBeenCalled());
+    expect(mockUseResolvedMediaUri).toHaveBeenLastCalledWith("video.mp4", {
+      priority: "deferred",
+      retry: false,
+    });
+  });
+
+  it("does not pause a player again while the video hook releases it on unmount", async () => {
+    mockResolvedUri = "https://cdn.example.com/video.mp4";
+    const { unmount } = render(<MediaVideo active autoPlay uri="video.mp4" />);
+
+    await waitFor(() => expect(mockPlay).toHaveBeenCalledTimes(1));
+    const pauseCountBeforeUnmount = mockPause.mock.calls.length;
+
+    unmount();
+
+    expect(mockPause).toHaveBeenCalledTimes(pauseCountBeforeUnmount);
   });
 });

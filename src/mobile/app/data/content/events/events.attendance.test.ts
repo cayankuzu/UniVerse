@@ -13,8 +13,17 @@ const { supabase } = jest.requireMock("../../../platform/supabase") as {
 };
 
 describe("reconcileEventAttendanceDirect", () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date("2026-07-20T12:00:00.000Z"));
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
   });
 
   it("blocks leaving an event after the event window has ended", async () => {
@@ -49,7 +58,7 @@ describe("reconcileEventAttendanceDirect", () => {
     });
 
     await expect(reconcileEventAttendanceDirect("event-1", "viewer-1", false)).rejects.toThrow(
-      "Etkinlik sona erdigi icin katilimini geri alamazsin.",
+      "Etkinlik sona erdiği için katılımını geri alamazsın.",
     );
 
     expect(deleteEq).not.toHaveBeenCalled();

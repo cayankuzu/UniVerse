@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import type { NavigationContainerRefWithCurrent } from "@react-navigation/native";
 import type { OverflowActionItem } from "../../shared/components";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Alert, View } from "react-native";
+import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getViewerKey } from "../../data/contracts/viewerKey";
 import { subscribeQueueResumeSignal } from "../../data/queues/runtimeSignals";
@@ -20,6 +20,7 @@ import {
 } from "../../features/events/public/queues";
 import { AppActivityBanner, type AppActivityBannerTone } from "./AppActivityBanner";
 import type { RootNavigatorParamList } from "../navigation/types";
+import { showConfirmAlert } from "../../shared/utils/alerts";
 
 type NavigationHandle = NavigationContainerRefWithCurrent<RootNavigatorParamList>;
 
@@ -68,7 +69,7 @@ function pickVisibleQueueEntry(entries: UploadQueueEntry[]) {
 function resolveQueueFallbackTitle(entry: UploadQueueEntry) {
   if (entry.kind === "album-photo") return "Albüm kartı paylaşılıyor";
   if (entry.kind === "event-create") return "Etkinlik paylaşılıyor";
-  if (entry.kind === "profile-update") return "Profil guncelleniyor";
+  if (entry.kind === "profile-update") return "Profil güncelleniyor";
   return "Yükleme sürüyor";
 }
 
@@ -158,30 +159,27 @@ export function AppUploadActivityBar({ navigationRef }: Props) {
 
   const handleCancelEntry = useCallback(
     (entry: UploadQueueEntry) => {
-      Alert.alert("Yükleme iptal edilsin mi?", "Bu bekleyen gönderi kuyruktan kaldırılacak.", [
-        { style: "cancel", text: "Vazgec" },
-        {
-          style: "destructive",
-          text: "İptal Et",
-          onPress: () => {
-            void (async () => {
-              if (entry.kind === "album-photo") {
-                await removePendingAlbumUpload(entry.id);
-                return;
-              }
-              if (entry.kind === "event-create") {
-                await removeQueuedEventCreate({
-                  entryId: entry.id,
-                  queryClient,
-                  viewerKey,
-                });
-                return;
-              }
-              await removeUploadEntry(entry.id);
-            })();
-          },
+      showConfirmAlert({
+        confirmLabel: "İptal Et",
+        destructive: true,
+        message: "Bu bekleyen gönderi kuyruktan kaldırılacak.",
+        onConfirm: async () => {
+          if (entry.kind === "album-photo") {
+            await removePendingAlbumUpload(entry.id);
+            return;
+          }
+          if (entry.kind === "event-create") {
+            await removeQueuedEventCreate({
+              entryId: entry.id,
+              queryClient,
+              viewerKey,
+            });
+            return;
+          }
+          await removeUploadEntry(entry.id);
         },
-      ]);
+        title: "Yükleme iptal edilsin mi?",
+      });
     },
     [queryClient, viewerKey],
   );
@@ -250,7 +248,7 @@ export function AppUploadActivityBar({ navigationRef }: Props) {
       actions,
       hint:
         progress?.hint ||
-        "Uygulamayi kullanmaya devam edebilirsin; kapanirsa sonraki acilista surer.",
+        "Uygulamayı kullanmaya devam edebilirsin; kapanırsa sonraki açılışta sürer.",
       percent: progress?.percent ?? (visibleQueueEntry.status === "uploading" ? 18 : 5),
       stage:
         progress?.stage ||

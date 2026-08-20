@@ -26,7 +26,7 @@ describe("prefetchProjectionScreen priority", () => {
       deltaToken: null,
       items: [{ id: "event-1" }],
       nextCursor: null,
-      serverTime: new Date().toISOString(),
+      serverTime: new Date("2026-08-19T12:00:00.000Z").toISOString(),
     }));
 
     await prefetchProjectionScreen({
@@ -49,7 +49,7 @@ describe("prefetchProjectionScreen priority", () => {
         deltaToken: null,
         items: [],
         nextCursor: null,
-        serverTime: new Date().toISOString(),
+        serverTime: new Date("2026-08-19T12:00:00.000Z").toISOString(),
       }),
       queryClient: createQueryClient(),
       queryKey: ["screen", "notifications"],

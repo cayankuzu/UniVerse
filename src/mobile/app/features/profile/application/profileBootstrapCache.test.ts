@@ -51,7 +51,7 @@ describe("seedProfileBootstrapCache", () => {
 
     queryClient.setQueryData(contentKey, {
       ids: ["event-1"],
-      touchedAt: Date.now(),
+      touchedAt: Date.parse("2026-08-19T12:00:00.000Z"),
     });
 
     seedProfileBootstrapCache({

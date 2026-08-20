@@ -53,11 +53,20 @@ export function AlbumDetailHeader({
       }}
     >
       {showAvatar ? (
-        <Pressable onPress={() => onOpenProfile(photo.username)}>
+        <Pressable
+          onPress={() => onOpenProfile(photo.username)}
+          accessibilityRole="button"
+          accessibilityLabel={`${photo.name || photo.username} profilini aç`}
+        >
           <Avatar uri={photo.userImage} name={photo.name} size={32} />
         </Pressable>
       ) : null}
-      <Pressable onPress={() => onOpenProfile(photo.username)} style={{ flex: 1 }}>
+      <Pressable
+        onPress={() => onOpenProfile(photo.username)}
+        accessibilityRole="button"
+        accessibilityLabel={`${photo.name || photo.username} profilini aç`}
+        style={{ flex: 1 }}
+      >
         <Text
           style={{
             color: tokens.colors.foreground,

@@ -47,7 +47,7 @@ function activateDeferredService(
 }
 
 export function DeferredAppServices() {
-  const { queryCacheReady, queryRestoreReady } = useAppStartupState();
+  const { queryCacheReady } = useAppStartupState();
   const { authBootState, isDemoMode, isLoggedIn, userData } = useAuth();
   const [serviceState, setServiceState] = useState<DeferredServiceState>(
     INITIAL_DEFERRED_SERVICE_STATE,
@@ -56,7 +56,7 @@ export function DeferredAppServices() {
   const isHydratedSession = authBootState === "signed_in_hydrated";
   const enableAuthenticatedServices = queryCacheReady && isHydratedSession;
   const enableWarmup =
-    queryRestoreReady && isLoggedIn && isHydratedSession && !isDemoMode && Boolean(viewerId);
+    queryCacheReady && isLoggedIn && isHydratedSession && !isDemoMode && Boolean(viewerId);
   const enablePushBridge = isLoggedIn && isHydratedSession && !isDemoMode && Boolean(viewerId);
 
   useEffect(() => {

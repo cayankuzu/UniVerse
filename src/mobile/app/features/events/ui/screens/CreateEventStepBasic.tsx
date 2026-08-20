@@ -53,6 +53,9 @@ function ActionButton(props: {
     <Pressable
       disabled={props.disabled}
       onPress={props.onPress}
+      accessibilityRole="button"
+      accessibilityLabel={props.label}
+      accessibilityState={{ disabled: props.disabled }}
       style={{
         flex: 1,
         minHeight: tokens.minHeight.inputSm,
@@ -118,6 +121,10 @@ export function CreateEventStepBasic({
       >
         <TourAnchor tourId="create-event-cover">
           <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={
+              hasCover ? "Etkinlik kapak görselini önizle" : "Etkinlik kapak görseli seç"
+            }
             onPress={() => {
               if (hasCover) {
                 setPreviewVisible(true);

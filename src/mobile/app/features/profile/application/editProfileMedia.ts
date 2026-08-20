@@ -1,10 +1,11 @@
-import { Alert, Platform } from "react-native";
+import { Platform } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import {
   captureCameraImageSelection,
   chooseMediaSourceAction,
   requestLibraryPermission,
 } from "../../../shared/media/mediaPicker";
+import { showInfoAlert } from "../../../shared/utils/alerts";
 
 export async function pickEditProfileImage(type: "profile" | "cover") {
   let resolvedUri: string | null = null;
@@ -42,7 +43,7 @@ export async function pickEditProfileImage(type: "profile" | "cover") {
       resolvedUri = result.assets[0].uri;
     }
   } catch {
-    Alert.alert("İzin Gerekli", "Görsel seçmek için izin gerekli.");
+    showInfoAlert("İzin Gerekli", "Görsel seçmek için izin gerekli.");
   }
 
   return resolvedUri;

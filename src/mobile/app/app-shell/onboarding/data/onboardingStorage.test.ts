@@ -33,7 +33,6 @@ describe("onboardingStorage", () => {
     await persistPermissionSnapshot({
       camera: "granted",
       completedAt: "2026-03-30T10:00:00.000Z",
-      location: "granted",
       microphone: "denied",
       notifications: "denied",
       photos: "undetermined",
@@ -44,5 +43,6 @@ describe("onboardingStorage", () => {
         '{"camera":"granted","completedAt":"2026-03-30T10:00:00.000Z","location":"granted","microphone":"denied","notifications":"denied","photos":"undetermined"}',
       ),
     );
+    expect(await readPermissionSnapshot()).not.toHaveProperty("location");
   });
 });

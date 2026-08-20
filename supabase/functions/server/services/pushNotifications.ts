@@ -31,6 +31,11 @@ export type ExpoPushMessage = {
   to: string;
 };
 
+export type ExpoProjectPushMessage = {
+  message: ExpoPushMessage;
+  projectId?: string | null;
+};
+
 export type ExpoPushTicket = {
   errorCode?: string;
   message?: string;
@@ -49,6 +54,8 @@ const DEFAULT_PUSH_TITLE = "UniVerse";
 const EXPO_ACCESS_TOKEN = String(Deno.env.get("EXPO_ACCESS_TOKEN") || "").trim();
 const EXPO_PUSH_API_URL = "https://exp.host/--/api/v2/push/send";
 const EXPO_PUSH_TOKEN_PATTERN = /^(ExponentPushToken|ExpoPushToken)\[[^\]]+\]$/;
+const EXPO_PROJECT_ID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const EXPO_PUSH_BATCH_LIMIT = 100;
 const EXPO_PUSH_BATCH_DELAY_MS = 60;
 
@@ -91,6 +98,24 @@ function normalizeExpoPushTicket(value: unknown): ExpoPushTicket {
     message: String(item.message || "").trim() || undefined,
     status,
     ticketId: status === "ok" ? String(item.id || "").trim() || undefined : undefined,
+  };
+}
+
+function normalizeExpoRequestError(value: unknown, status: number) {
+  const errors = Array.isArray((value as { errors?: unknown })?.errors)
+    ? (value as { errors: unknown[] }).errors || []
+    : [];
+  const firstError = errors[0];
+  if (!firstError || typeof firstError !== "object") {
+    return {
+      errorCode: undefined,
+      message: `http-${status}`,
+    };
+  }
+  const item = firstError as Record<string, unknown>;
+  return {
+    errorCode: String(item.code || "").trim() || undefined,
+    message: String(item.message || `http-${status}`).trim(),
   };
 }
 
@@ -224,6 +249,11 @@ export function normalizePushAppEnv(value: unknown): PushAppEnv | null {
   return value === "development" || value === "preview" || value === "production" ? value : null;
 }
 
+export function normalizeExpoProjectId(value: unknown) {
+  const normalized = String(value || "").trim();
+  return EXPO_PROJECT_ID_PATTERN.test(normalized) ? normalized.toLowerCase() : null;
+}
+
 export function normalizePushPlatform(value: unknown): PushPlatform | null {
   return value === "android" || value === "ios" ? value : null;
 }
@@ -308,10 +338,12 @@ export async function sendExpoPushBatch(messages: ExpoPushMessage[]): Promise<Ex
     const rawTickets = Array.isArray((raw as { data?: unknown })?.data)
       ? (raw as { data: unknown[] }).data
       : [];
+    const requestError = response.ok ? null : normalizeExpoRequestError(raw, response.status);
     const tickets = messages.map((_, index) =>
       normalizeExpoPushTicket(
         rawTickets[index] || {
-          message: response.ok ? "missing-expo-ticket" : `http-${response.status}`,
+          details: requestError?.errorCode ? { error: requestError.errorCode } : undefined,
+          message: response.ok ? "missing-expo-ticket" : requestError?.message,
         },
       ),
     );
@@ -361,6 +393,50 @@ export async function sendExpoPushBatches(
     if (typeof batchResult.transportStatus === "number") {
       transportStatus = batchResult.transportStatus;
     }
+  }
+
+  return {
+    raw,
+    tickets,
+    transportError: transportErrors.length > 0 ? transportErrors.join("; ") : undefined,
+    transportStatus,
+  };
+}
+
+export async function sendExpoPushBatchesByProject(
+  entries: ExpoProjectPushMessage[],
+): Promise<ExpoPushBatchResult> {
+  if (entries.length === 0) {
+    return { raw: null, tickets: [] };
+  }
+
+  const groups = new Map<string, Array<{ index: number; message: ExpoPushMessage }>>();
+  entries.forEach((entry, index) => {
+    const projectId = String(entry.projectId || "").trim();
+    // Legacy rows predate project attribution. Keep each one isolated so a
+    // mixed-experience request cannot make otherwise valid messages fail.
+    const groupKey = projectId ? `project:${projectId}` : `legacy:${index}`;
+    const group = groups.get(groupKey) || [];
+    group.push({ index, message: entry.message });
+    groups.set(groupKey, group);
+  });
+
+  const tickets: ExpoPushTicket[] = entries.map(() => ({
+    message: "missing-expo-ticket",
+    status: "error",
+  }));
+  const raw: unknown[] = [];
+  const transportErrors: string[] = [];
+  let transportStatus: number | undefined;
+
+  for (const [groupKey, group] of groups) {
+    const result = await sendExpoPushBatches(group.map((item) => item.message));
+    raw.push({ groupKey, response: result.raw });
+    group.forEach((item, groupIndex) => {
+      tickets[item.index] = result.tickets[groupIndex] || tickets[item.index];
+    });
+    if (result.transportError) transportErrors.push(result.transportError);
+    if (typeof result.transportStatus === "number") transportStatus = result.transportStatus;
   }
 
   return {

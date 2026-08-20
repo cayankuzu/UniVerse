@@ -284,7 +284,7 @@ export function useAlbumUploadWorkflowActions({
       return;
     }
     if (!hasSelectedProfileVisibility) {
-      showAlbumUploadAlert("En az bir profil gorunurlugu secmelisin.", setWarningMessage);
+      showAlbumUploadAlert("En az bir profil görünürlüğü seçmelisin.", setWarningMessage);
       return;
     }
     if (remainingAlbumSlots <= 0) {

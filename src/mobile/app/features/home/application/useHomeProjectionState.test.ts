@@ -67,6 +67,7 @@ jest.mock("./useHomePerceivedSpeedGate", () => ({
 
 describe("useHomeProjectionState", () => {
   beforeEach(() => {
+    jest.spyOn(Date, "now").mockReturnValue(Date.parse("2026-08-19T12:00:00.000Z"));
     mockUseQuery.mockReset();
     mockUseQueryClient.mockReset();
     mockReadProjectionItems.mockReset();
@@ -115,7 +116,7 @@ describe("useHomeProjectionState", () => {
     });
     mockUseHomeStartupSnapshot.mockReturnValue({
       items: [{ id: "event:event-1", kind: "event" }],
-      savedAt: Date.now(),
+      savedAt: Date.parse("2026-08-19T12:00:00.000Z"),
       unreadCount: 3,
     });
     mockUseHomePerceivedSpeedGate.mockImplementation(
@@ -126,6 +127,10 @@ describe("useHomeProjectionState", () => {
         allowSecondaryReads: false,
       }),
     );
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it("keeps the startup preview active when restore only rehydrates screen ids without entity rows", () => {

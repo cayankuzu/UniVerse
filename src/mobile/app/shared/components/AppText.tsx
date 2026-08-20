@@ -68,7 +68,7 @@ function resolveFontFamily(style: NativeTextProps["style"]) {
 }
 
 export const AppText = forwardRef<React.ComponentRef<typeof NativeText>, AppTextProps>(
-  function AppText({ maxFontSizeMultiplier = 1.6, style, variant, ...props }, ref) {
+  function AppText({ maxFontSizeMultiplier = 2, style, variant, ...props }, ref) {
     const variantStyle = variant ? variantStyles[variant] : undefined;
     const fontFamily = variantStyle?.fontFamily || resolveFontFamily(style);
     return (

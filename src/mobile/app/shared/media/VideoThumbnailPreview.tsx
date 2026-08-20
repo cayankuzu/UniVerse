@@ -15,7 +15,7 @@ import { getCachedVideoThumbnail, resolveVideoThumbnail } from "./videoThumbnail
 import { isImageMediaUri } from "./mediaVideoUtils";
 import { tokens } from "../theme";
 
-const VIDEO_THUMBNAIL_RESOLVE_RETRY_DELAYS_MS = [120, 320, 900, 1800];
+const VIDEO_THUMBNAIL_RESOLVE_RETRY_DELAYS_MS = [150, 450];
 
 type Props = {
   candidateUris?: Array<string | null | undefined>;

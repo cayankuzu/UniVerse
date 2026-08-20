@@ -76,7 +76,7 @@ export function CommentPanelComposer({
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{
-          gap: tokens.spacing.xsCompact,
+          gap: tokens.spacing.xs,
           paddingHorizontal: tokens.spacing.hairline,
           paddingVertical: tokens.spacing.micro,
         }}
@@ -112,7 +112,7 @@ export function CommentPanelComposer({
             borderColor: tokens.colors.primaryBorder,
             paddingLeft: tokens.spacing.sm,
             paddingRight: tokens.spacing.xsMinus,
-            paddingVertical: tokens.spacing.xsCompact,
+            paddingVertical: tokens.spacing.xs,
             flexDirection: "row",
             alignItems: "center",
             gap: tokens.spacing.xs,

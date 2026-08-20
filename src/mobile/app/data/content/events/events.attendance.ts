@@ -23,8 +23,8 @@ async function ensureDirectAttendanceMutationAllowed(eventId: string, desiredJoi
 
   throw new Error(
     desiredJoined
-      ? "Etkinlik sona erdigi icin artik katilamazsin."
-      : "Etkinlik sona erdigi icin katilimini geri alamazsin.",
+      ? "Etkinlik sona erdiği için artık katılamazsın."
+      : "Etkinlik sona erdiği için katılımını geri alamazsın.",
   );
 }
 

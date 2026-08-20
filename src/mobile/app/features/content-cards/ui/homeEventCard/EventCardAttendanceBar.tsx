@@ -44,7 +44,7 @@ export function EventCardAttendanceBar({
           style={{
             flexDirection: "row",
             alignItems: "center",
-            gap: tokens.spacing.xsCompact,
+            gap: tokens.spacing.xs,
             marginTop: tokens.spacing.compact,
           }}
         >
@@ -80,12 +80,12 @@ export function EventCardAttendanceBar({
           <ChevronRight size={tokens.typography.caption} color={tokens.colors.borderLight} />
         </Pressable>
 
-        <View style={{ marginTop: tokens.spacing.xsCompact }}>
+        <View style={{ marginTop: tokens.spacing.xs }}>
           <View
             style={{
               flexDirection: "row",
               alignItems: "center",
-              gap: tokens.spacing.xxsPlus,
+              gap: tokens.spacing.xsMinus,
               flexWrap: "wrap",
             }}
           >
@@ -93,7 +93,7 @@ export function EventCardAttendanceBar({
               style={{
                 borderRadius: tokens.radius.pill,
                 backgroundColor: accessChip.backgroundColor,
-                paddingHorizontal: tokens.spacing.xsCompact,
+                paddingHorizontal: tokens.spacing.xs,
                 paddingVertical: tokens.spacing.microPlus,
                 flexDirection: "row",
                 alignItems: "center",

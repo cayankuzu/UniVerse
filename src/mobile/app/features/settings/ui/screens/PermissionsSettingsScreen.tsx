@@ -2,7 +2,7 @@ import React from "react";
 import { AppText as Text } from "../../../../shared/components/AppText";
 import { ActivityIndicator, Pressable, RefreshControl, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { Bell, Camera, ChevronRight, Image, MapPin, Mic, Shield } from "lucide-react-native";
+import { Bell, Camera, ChevronRight, Image, Mic, Shield } from "lucide-react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppScrollView as ScrollView, BackHeader } from "../../../../shared/components";
 import { useBottomNavPadding } from "../../../../shared/layout/bottomNavSpacing";
@@ -14,7 +14,6 @@ type Props = NativeStackScreenProps<RootStackParamList, "Permissions">;
 
 const ICONS = {
   camera: <Camera size={18} color={tokens.colors.primary} strokeWidth={1.8} />,
-  location: <MapPin size={18} color={tokens.colors.primary} strokeWidth={1.8} />,
   microphone: <Mic size={18} color={tokens.colors.primary} strokeWidth={1.8} />,
   notifications: <Bell size={18} color={tokens.colors.primary} strokeWidth={1.8} />,
   photos: <Image size={18} color={tokens.colors.primary} strokeWidth={1.8} />,
@@ -177,7 +176,7 @@ export function PermissionsSettingsScreen({ navigation }: Props) {
                     borderRadius: tokens.radius.pill,
                     backgroundColor: colors.bg,
                     paddingHorizontal: tokens.spacing.compact,
-                    paddingVertical: tokens.spacing.xxsPlus,
+                    paddingVertical: tokens.spacing.xsMinus,
                   }}
                 >
                   <Text

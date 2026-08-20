@@ -29,6 +29,9 @@ export function ProfileAlbumOwnerFilterBar({ value, onChange }: Props) {
           <Pressable
             key={option.key}
             onPress={() => onChange(option.key)}
+            accessibilityRole="tab"
+            accessibilityLabel={option.label}
+            accessibilityState={{ selected: active }}
             style={{
               flex: 1,
               minHeight: tokens.minHeight.header,

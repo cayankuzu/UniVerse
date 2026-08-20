@@ -111,7 +111,7 @@ describe("getHomeFeed", () => {
     expect(AlbumAPI.getVisibleByEventIds).toHaveBeenCalledWith(["event-1"]);
   });
 
-  it("recovers from an empty initial home RPC envelope with the SQL fallback feed", async () => {
+  it("treats an empty successful home projection as authoritative", async () => {
     (tryProjectionRpc as jest.Mock).mockResolvedValue({
       deletedIds: [],
       deltaToken: "delta-1",
@@ -155,9 +155,9 @@ describe("getHomeFeed", () => {
       viewerUsername: "viewer",
     });
 
-    expect(result.items.map((item) => item.id)).toEqual(["album:album-1", "event:event-1"]);
-    expect(EventAPI.getHomeFeed).toHaveBeenCalledTimes(1);
-    expect(AlbumAPI.getVisibleByEventIds).toHaveBeenCalledWith(["event-1"]);
+    expect(result.items).toEqual([]);
+    expect(EventAPI.getHomeFeed).not.toHaveBeenCalled();
+    expect(AlbumAPI.getVisibleByEventIds).not.toHaveBeenCalled();
   });
 
   it("filters blocked actors out of the home fallback envelope", async () => {
@@ -232,7 +232,7 @@ describe("getHomeFeed", () => {
     expect(result.items.map((item) => item.id)).toEqual(["event:event-visible"]);
   });
 
-  it("uses the direct viewer-id home event RPC before the auth-scoped fallback", async () => {
+  it("does not invoke the rollback event RPC after a successful empty projection", async () => {
     (tryProjectionRpc as jest.Mock).mockResolvedValue({
       deletedIds: [],
       deltaToken: "delta-1",
@@ -265,10 +265,8 @@ describe("getHomeFeed", () => {
       viewerUsername: "viewer",
     });
 
-    expect(result.items.map((item) => item.id)).toEqual(["event:event-1"]);
-    expect(fetchEventsFromRpc).toHaveBeenCalledWith("list_home_feed_events_for_viewer", {
-      target_viewer_id: "viewer-1",
-    });
+    expect(result.items).toEqual([]);
+    expect(fetchEventsFromRpc).not.toHaveBeenCalled();
     expect(EventAPI.getHomeFeed).not.toHaveBeenCalled();
   });
 
@@ -297,7 +295,7 @@ describe("getHomeFeed", () => {
 
     expect(result.items).toEqual([]);
     expect(EventAPI.getProfileEvents).not.toHaveBeenCalled();
-    expect(AlbumAPI.getPhotos).toHaveBeenCalledWith("viewer");
+    expect(AlbumAPI.getPhotos).not.toHaveBeenCalled();
   });
 
   it("does not invoke the legacy fallback for empty incremental home RPC envelopes", async () => {
@@ -352,7 +350,7 @@ describe("getHomeFeed", () => {
     expect(AlbumAPI.getVisibleByEventIds).not.toHaveBeenCalled();
   });
 
-  it("keeps optimistic own-club events visible alongside projection rows", async () => {
+  it("does not merge local event shadows into successful projection rows", async () => {
     (tryProjectionRpc as jest.Mock).mockResolvedValue({
       deletedIds: [],
       deltaToken: "delta-1",
@@ -400,13 +398,11 @@ describe("getHomeFeed", () => {
       viewerUsername: "club-a",
     });
 
-    expect(result.items.map((item) => item.id)).toEqual([
-      "event:temp-event:1",
-      "event:event-server",
-    ]);
+    expect(result.items.map((item) => item.id)).toEqual(["event:event-server"]);
+    expect(getLocalEventShadowByClubUserId).not.toHaveBeenCalled();
   });
 
-  it("keeps optimistic own-club events visible on the following surface", async () => {
+  it("keeps the following surface projection-only", async () => {
     (tryProjectionRpc as jest.Mock).mockResolvedValue({
       deletedIds: [],
       deltaToken: "delta-1",
@@ -454,9 +450,7 @@ describe("getHomeFeed", () => {
       viewerUsername: "club-a",
     });
 
-    expect(result.items.map((item) => item.id)).toEqual([
-      "event:temp-event:1",
-      "event:event-followed",
-    ]);
+    expect(result.items.map((item) => item.id)).toEqual(["event:event-followed"]);
+    expect(getLocalEventShadowByClubUserId).not.toHaveBeenCalled();
   });
 });

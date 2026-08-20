@@ -30,7 +30,7 @@
   "Veterinerlik",
   "Psikoloji",
   "Toplum Sagligi",
-  "Acil Yardim",
+  "Acil Yardım",
   "Afet Yönetimi",
   "Arama Kurtarma",
   "Yazilim",

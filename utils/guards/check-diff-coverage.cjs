@@ -7,6 +7,11 @@ const { spawnSync } = require("node:child_process");
 const ROOT = process.cwd();
 const LCOV_FILE = resolve(ROOT, "coverage", "lcov.info");
 const MIN_COVERAGE = Number(process.env.DIFF_COVERAGE_MIN || 90);
+const requestedMissLimit = Number(process.env.DIFF_COVERAGE_MAX_MISSES || 40);
+const MAX_REPORTED_MISSES =
+  Number.isFinite(requestedMissLimit) && requestedMissLimit >= 0
+    ? Math.floor(requestedMissLimit)
+    : 40;
 const SOURCE_PREFIX = normalize("src/mobile/app") + sep;
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx"]);
 
@@ -238,9 +243,11 @@ function main() {
       `[diff-coverage] FAILED: ${rounded}% changed-line coverage (${covered}/${coverable}), required ${MIN_COVERAGE}%.`,
     );
     if (misses.length) {
-      console.error(`[diff-coverage] Uncovered lines:\n${misses.slice(0, 40).join("\n")}`);
-      if (misses.length > 40) {
-        console.error(`[diff-coverage] ...and ${misses.length - 40} more.`);
+      console.error(
+        `[diff-coverage] Uncovered lines:\n${misses.slice(0, MAX_REPORTED_MISSES).join("\n")}`,
+      );
+      if (misses.length > MAX_REPORTED_MISSES) {
+        console.error(`[diff-coverage] ...and ${misses.length - MAX_REPORTED_MISSES} more.`);
       }
     }
     process.exitCode = 1;

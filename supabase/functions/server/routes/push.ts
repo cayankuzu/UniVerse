@@ -4,6 +4,7 @@ import { IS_DEVELOPMENT_EDGE, IS_PRODUCTION_EDGE } from "../runtime.ts";
 import type { EdgeRouteApp, ServerRouteDeps } from "../types.ts";
 import {
   isPushDispatchWakeupRequest,
+  normalizeExpoProjectId,
   normalizePushAppEnv,
   normalizePushPlatform,
   parseNotificationDispatchId,
@@ -11,6 +12,7 @@ import {
 } from "../services/pushNotifications.ts";
 import { enqueueNotificationPushDispatch } from "../services/pushDispatchQueue.ts";
 import { drainNotificationPushDispatchQueue } from "../services/pushDispatchDrain.ts";
+import { reconcilePendingPushReceipts } from "../services/pushReceiptProcessor.ts";
 
 const PUSH_DISPATCH_WEBHOOK_SECRET = String(
   Deno.env.get("PUSH_DISPATCH_WEBHOOK_SECRET") || "",
@@ -27,6 +29,7 @@ const PUSH_PUBLIC_WAKEUP_MAX_PASSES = 2;
 
 type PushRegistrationBody = {
   appEnv?: unknown;
+  expoProjectId?: unknown;
   expoPushToken?: unknown;
   platform?: unknown;
 };
@@ -35,13 +38,22 @@ function parsePushRegistrationBody(body: unknown) {
   if (!body || typeof body !== "object") return null;
   const item = body as PushRegistrationBody;
   const expoPushToken = String(item.expoPushToken || "").trim();
+  const rawExpoProjectId = String(item.expoProjectId || "").trim();
+  const expoProjectId = rawExpoProjectId ? normalizeExpoProjectId(rawExpoProjectId) : null;
   const platform = normalizePushPlatform(item.platform);
   const appEnv = normalizePushAppEnv(item.appEnv);
-  if (!expoPushToken || !platform || !appEnv || !validateExpoPushToken(expoPushToken)) {
+  if (
+    !expoPushToken ||
+    (rawExpoProjectId && !expoProjectId) ||
+    !platform ||
+    !appEnv ||
+    !validateExpoPushToken(expoPushToken)
+  ) {
     return null;
   }
   return {
     appEnv,
+    expoProjectId,
     expoPushToken,
     platform,
   };
@@ -112,6 +124,7 @@ export function registerPushRoutes(
     const { error } = await adminSupabase.from("push_device_tokens").upsert(
       {
         app_env: payload.appEnv,
+        ...(payload.expoProjectId ? { expo_project_id: payload.expoProjectId } : {}),
         expo_push_token: payload.expoPushToken,
         is_active: true,
         last_registered_at: now,
@@ -230,8 +243,43 @@ export function registerPushRoutes(
     if (drainResult.error) {
       return c.json({ error: "Push dispatch claim failed" }, 500);
     }
+
+    const receiptResult = wakeupRequest
+      ? await reconcilePendingPushReceipts(adminSupabase).catch((error) => ({
+          checkedCount: 0,
+          deactivatedCount: 0,
+          error,
+          errorCount: 0,
+          expiredCount: 0,
+          missingCount: 0,
+          sentCount: 0,
+        }))
+      : null;
+    const receiptSummary = receiptResult
+      ? {
+          checkedCount: receiptResult.checkedCount,
+          deactivatedCount: receiptResult.deactivatedCount,
+          errorCount: receiptResult.errorCount,
+          expiredCount: receiptResult.expiredCount,
+          failed: Boolean(receiptResult.error),
+          missingCount: receiptResult.missingCount,
+          sentCount: receiptResult.sentCount,
+        }
+      : null;
+    if (receiptResult?.error) {
+      logError("push/receipts", "push-receipt-reconcile-failed", receiptResult.error, {
+        expiredCount: receiptResult.expiredCount,
+      });
+      if (drainResult.processedCount === 0) {
+        return c.json({ error: "Push receipt reconciliation failed" }, 502);
+      }
+    }
     if (drainResult.processedCount === 0) {
-      return c.json({ success: true, skipped: "no-pending-notifications" });
+      return c.json({
+        receipts: receiptSummary,
+        success: true,
+        skipped: "no-pending-notifications",
+      });
     }
 
     logInfo("push/dispatch", "push-dispatch-drain-finished", {
@@ -239,12 +287,15 @@ export function registerPushRoutes(
       processedCount: drainResult.processedCount,
       retryCount: drainResult.retryCount,
       sentCount: drainResult.sentCount,
+      receiptCheckedCount: receiptSummary?.checkedCount || 0,
+      receiptErrorCount: receiptSummary?.errorCount || 0,
     });
 
     return c.json({
       failedCount: drainResult.failedCount,
       processedCount: drainResult.processedCount,
       retryCount: drainResult.retryCount,
+      receipts: receiptSummary,
       sentCount: drainResult.sentCount,
       success: true,
     });

@@ -65,7 +65,7 @@ export function ProfileTabsBar({
                 alignItems: "center",
                 justifyContent: "center",
                 flexDirection: "row",
-                gap: tokens.spacing.xxsPlus,
+                gap: tokens.spacing.xsMinus,
                 position: "relative",
               }}
             >

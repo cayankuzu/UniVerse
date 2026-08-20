@@ -79,7 +79,7 @@ describe("fallback visibility access", () => {
       ),
     ).toEqual({
       canView: false,
-      reason: "Bu kulübün içeriğini gormek icin kulübü takip etmelisiniz.",
+      reason: "Bu kulübün içeriğini görmek için kulübü takip etmelisiniz.",
     });
   });
 

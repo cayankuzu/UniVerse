@@ -12,7 +12,7 @@ import { type WarmupFailurePhase, type WarmupReason, WARMUP_STALE_MS } from "./a
 export function AppDataWarmup() {
   const queryClient = useQueryClient();
   const { isLoggedIn, isDemoMode, userData } = useAuth();
-  const { queryRestoreReady } = useAppStartupState();
+  const { queryCacheReady } = useAppStartupState();
   const warmedViewerRef = useRef("");
   const prefetchedImageUrisRef = useRef(new Set<string>());
   const lastWarmupAtRef = useRef(0);
@@ -25,11 +25,7 @@ export function AppDataWarmup() {
     .trim()
     .toLowerCase();
   const canWarmup =
-    queryRestoreReady &&
-    isLoggedIn &&
-    !isDemoMode &&
-    Boolean(userData.id) &&
-    Boolean(viewerUsername);
+    queryCacheReady && isLoggedIn && !isDemoMode && Boolean(userData.id) && Boolean(viewerUsername);
   const viewerWarmupKey = canWarmup ? `${viewerKey}:${viewerUsername}` : "";
 
   const reportWarmupFailure = useCallback(

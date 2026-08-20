@@ -127,6 +127,8 @@ export const DiscoveryUserGridCard = React.memo(function DiscoveryUserGridCard({
   return (
     <View style={{ width: cardWidth, position: "relative" }}>
       <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`${resolvedName || resolvedUsername || "Kullanıcı"} profilini aç`}
         style={{
           width: "100%",
           borderRadius: tokens.radius.md,

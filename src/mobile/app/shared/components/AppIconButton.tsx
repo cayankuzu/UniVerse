@@ -122,7 +122,7 @@ export const AppIconButton = memo(function AppIconButton({
             color: tokens.colors.surface,
             minWidth: 18,
             height: 18,
-            paddingHorizontal: tokens.spacing.xxsPlus,
+            paddingHorizontal: tokens.spacing.xsMinus,
             fontVariant: ["tabular-nums"],
           }}
         >

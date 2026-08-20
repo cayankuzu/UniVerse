@@ -56,6 +56,7 @@ describe("swipeableTabPagerController", () => {
       usePagerController({
         activeIndex,
         activeTab,
+        getTabAccessibilityLabel: (tab) => (tab === "events" ? "Etkinlikler" : "Albümler"),
         onChange,
         onPageProgressChange,
         onPreviewTabChange,
@@ -74,7 +75,7 @@ describe("swipeableTabPagerController", () => {
     act(() => result.current.settleTabIndex(1, true));
     expect(result.current.currentPageRef.current).toBe(1);
     expect(onChange).toHaveBeenLastCalledWith("events");
-    expect(announce).toHaveBeenLastCalledWith("events sekmesi, 2/2");
+    expect(announce).toHaveBeenLastCalledWith("Etkinlikler sekmesi, 2/2");
 
     activeIndex = 1;
     activeTab = "events";

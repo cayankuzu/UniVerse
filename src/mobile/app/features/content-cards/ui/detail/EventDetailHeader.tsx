@@ -41,6 +41,8 @@ export function EventDetailHeader({ event, onPress }: EventDetailHeaderProps) {
     >
       <Pressable
         onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={`${event.club || "Kulüp"} profilini aç`}
         style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: tokens.spacing.compact }}
       >
         <View

@@ -19,6 +19,7 @@ import {
 } from "../../application/feedCardPresentation";
 import type { HomeEventCardPresentation } from "./eventCard.types";
 import { tokens } from "../../../../shared/theme";
+import { t } from "../../../../shared/i18n";
 
 interface Props {
   event: EventWithMeta;
@@ -62,7 +63,7 @@ export function EventCardBody({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.contentType}>ETKİNLİK</Text>
+      <Text style={styles.contentType}>{t("content.type.event")}</Text>
       <Text style={styles.title} numberOfLines={2}>
         {event.title}
       </Text>

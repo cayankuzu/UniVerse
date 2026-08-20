@@ -1,5 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { Session } from "@supabase/supabase-js";
+import { sha256 } from "@noble/hashes/sha2.js";
+import { bytesToHex } from "@noble/hashes/utils.js";
 import { logError } from "../../../platform/observability";
 import { logAuthSessionError } from "../../../platform/security/authSessionErrors";
 import { supabase } from "../../../platform/supabase";
@@ -28,9 +30,16 @@ export const EMPTY_AUTH_USER_DATA: AuthUserData = {
   username: "",
 };
 
+function encodeAccessToken(accessToken: string) {
+  return Uint8Array.from(accessToken, (character) => character.charCodeAt(0));
+}
+
 export function buildSessionHydrationKey(session: Session) {
-  const tokenSuffix = String(session.access_token || "").slice(-24);
-  return `${session.user.id}:${tokenSuffix || "session"}`;
+  const accessToken = String(session.access_token || "");
+  const sessionFingerprint = accessToken
+    ? bytesToHex(sha256(encodeAccessToken(accessToken)))
+    : "session";
+  return `${session.user.id}:${sessionFingerprint}`;
 }
 
 export async function persistDemoAuthState(type: DemoAccountType, data: AuthUserData) {

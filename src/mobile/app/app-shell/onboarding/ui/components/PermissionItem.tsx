@@ -22,6 +22,7 @@ export function PermissionItem({
 }: PermissionItemProps) {
   return (
     <Pressable
+      accessibilityLabel={label}
       accessibilityRole="switch"
       accessibilityState={{ checked: granted }}
       onPress={onToggle}
@@ -93,7 +94,7 @@ export function PermissionItem({
         ) : null}
       </View>
 
-      <PermissionToggle value={granted} onToggle={onToggle} />
+      <PermissionToggle value={granted} />
     </Pressable>
   );
 }

@@ -34,6 +34,11 @@ describe("AuthLegalConsent", () => {
   it("opens the related legal document in a modal", () => {
     render(<AuthLegalConsent accepted={false} onToggleAccepted={() => undefined} />);
 
+    expect(screen.getByLabelText("Kullanım Koşulları belgesini aç")).toHaveProp(
+      "accessibilityRole",
+      "link",
+    );
+
     fireEvent.press(screen.getByText("Kullanım Koşulları"));
 
     expect(screen.getByText("Hizmetin Tanımı ve Kabul")).toBeTruthy();

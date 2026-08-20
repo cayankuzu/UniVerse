@@ -18,7 +18,7 @@ export function EventCardMetaChips({ chips }: EventCardMetaChipsProps) {
       style={{
         flexDirection: "row",
         flexWrap: "wrap",
-        gap: tokens.spacing.xxsPlus,
+        gap: tokens.spacing.xsMinus,
         marginTop: tokens.spacing.xs,
       }}
     >

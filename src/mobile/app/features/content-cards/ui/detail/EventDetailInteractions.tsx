@@ -1,4 +1,3 @@
-import { Alert } from "react-native";
 import { CommentPanel } from "../comments/CommentPanel";
 import { UserListSheet } from "../comments/UserListSheet";
 import { EventDetailImagePreviewModal } from "./EventDetailImagePreviewModal";
@@ -9,6 +8,7 @@ import { DangerConfirmSheet, type OverflowActionItem } from "../../../../shared/
 import { downloadMediaToGallery } from "../../../../shared/media/downloadMediaToGallery";
 import { isVideoMediaUri } from "../../../../shared/media/mediaVideoUtils";
 import { reportEvent } from "../../data";
+import { showErrorAlert } from "../../../../shared/utils/alerts";
 
 type DetailCurrentUser = {
   id?: string;
@@ -138,9 +138,9 @@ export function EventDetailInteractions({
                   reason: "Uygunsuz medya",
                 });
               } catch (error) {
-                Alert.alert(
-                  isOwnEventMedia ? "İndirme başarısız" : "Şikâyet gönderilemedi",
+                showErrorAlert(
                   String((error as { message?: string } | null)?.message || "İşlem tamamlanamadı."),
+                  isOwnEventMedia ? "İndirme başarısız" : "Şikâyet gönderilemedi",
                 );
               }
             })();

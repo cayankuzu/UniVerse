@@ -30,6 +30,7 @@ const getSignedMediaUrls = jest.fn();
 describe("mediaUri helpers", () => {
   beforeEach(async () => {
     jest.clearAllMocks();
+    jest.spyOn(Date, "now").mockReturnValue(Date.parse("2026-08-19T12:00:00.000Z"));
     configureMediaUrlResolver({
       resolveMediaUrl: getSignedMediaUrl,
       resolveMediaUrls: getSignedMediaUrls,
@@ -38,6 +39,7 @@ describe("mediaUri helpers", () => {
   });
 
   afterEach(() => {
+    jest.restoreAllMocks();
     resetMediaUrlResolver();
   });
 
@@ -177,7 +179,7 @@ describe("mediaUri helpers", () => {
       JSON.stringify([
         {
           cacheKey: "avatars/user-7/profile.jpg",
-          expiresAt: Date.now() + 60_000,
+          expiresAt: Date.parse("2026-08-19T12:01:00.000Z"),
           url: signedUrl,
         },
       ]),
@@ -196,7 +198,7 @@ describe("mediaUri helpers", () => {
       JSON.stringify([
         {
           cacheKey: "avatars/user-9/profile.jpg",
-          expiresAt: Date.now() + 60_000,
+          expiresAt: Date.parse("2026-08-19T12:01:00.000Z"),
           url: signedUrl,
         },
       ]),

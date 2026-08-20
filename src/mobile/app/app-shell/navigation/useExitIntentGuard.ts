@@ -3,7 +3,7 @@ import { useCallback, useRef } from "react";
 import { useAutoClearingMessage } from "../../shared/hooks/useAutoClearingMessage";
 
 export const EXIT_INTENT_WINDOW_MS = 2000;
-export const EXIT_INTENT_MESSAGE = "Uygulamadan cikmak icin tekrar geri tusuna basin.";
+export const EXIT_INTENT_MESSAGE = "Uygulamadan çıkmak için tekrar geri tuşuna basın.";
 
 export function useExitIntentGuard(timeoutMs = EXIT_INTENT_WINDOW_MS) {
   const { message, setMessage } = useAutoClearingMessage(timeoutMs);

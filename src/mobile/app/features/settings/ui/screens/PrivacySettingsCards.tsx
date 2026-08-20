@@ -265,7 +265,7 @@ export function PrivacySettingsExplainCard({
             style={{
               flexDirection: "row",
               alignItems: "flex-start",
-              gap: tokens.spacing.xsCompact,
+              gap: tokens.spacing.xs,
             }}
           >
             <Text

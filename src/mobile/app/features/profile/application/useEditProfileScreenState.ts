@@ -60,12 +60,12 @@ export function useEditProfileScreenState(params: UseEditProfileScreenStateParam
       return;
     }
     showConfirmAlert({
-      cancelLabel: "Vazgec",
+      cancelLabel: "Vazgeç",
       confirmLabel: "Cik",
       destructive: true,
       message: "Kaydedilmeyen profil değişiklikleri silinecek.",
       onConfirm: leaveScreen,
-      title: "Profilden cikilsin mi?",
+      title: "Profilden çıkılsın mı?",
     });
   }, [formState.hasUnsavedChanges, leaveScreen, step]);
 

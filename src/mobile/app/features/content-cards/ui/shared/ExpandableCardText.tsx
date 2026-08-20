@@ -44,6 +44,9 @@ export function ExpandableCardText({
       {canExpand ? (
         <Pressable
           onPress={() => setExpanded((current) => !current)}
+          accessibilityRole="button"
+          accessibilityLabel={expanded ? expandedLabel : collapsedLabel}
+          accessibilityState={{ expanded }}
           style={{ alignSelf: "flex-start", marginTop: tokens.spacing.xxs }}
         >
           <Text style={toggleTextStyle}>{expanded ? expandedLabel : collapsedLabel}</Text>

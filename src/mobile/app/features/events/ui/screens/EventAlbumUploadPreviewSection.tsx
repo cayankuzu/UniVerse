@@ -3,7 +3,6 @@ import { AppText as Text } from "../../../../shared/components/AppText";
 import { Camera, Crop, ImagePlus, Trash2 } from "lucide-react-native";
 import {
   ActivityIndicator,
-  Alert,
   Image,
   Pressable,
   View,
@@ -28,6 +27,7 @@ import {
 import { MediaViewerModal, type MediaViewerItem } from "../../../../shared/media/MediaViewerModal";
 import { VideoThumbnailPreview } from "../../../../shared/media/VideoThumbnailPreview";
 import { useAlbumPreviewViewerActions } from "./useAlbumPreviewViewerActions";
+import { showConfirmAlert } from "../../../../shared/utils/alerts";
 type Props = {
   cropPending: boolean;
   handleThumbPress: (index: number) => void;
@@ -44,7 +44,6 @@ type Props = {
   selectedPhotoUris: string[];
   uploadPending: boolean;
 };
-
 export function EventAlbumUploadPreviewSection({
   cropPending,
   handleThumbPress,
@@ -299,6 +298,8 @@ export function EventAlbumUploadPreviewSection({
               {previewMediaItems.map((item, index) => (
                 <Pressable
                   key={`${item.uri}-${index}`}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${index + 1}. medyayı tam ekran aç`}
                   onPress={() => {
                     updateSelectedIndex(index, "preview-open-viewer");
                     setViewerIndex(index);
@@ -334,7 +335,7 @@ export function EventAlbumUploadPreviewSection({
                 borderRadius: tokens.radius.pill,
                 backgroundColor: tokens.colors.backdropLight,
                 paddingHorizontal: tokens.spacing.compact,
-                paddingVertical: tokens.spacing.xxsPlus,
+                paddingVertical: tokens.spacing.xsMinus,
               }}
             >
               <Text
@@ -356,7 +357,7 @@ export function EventAlbumUploadPreviewSection({
                   borderRadius: tokens.radius.pill,
                   backgroundColor: tokens.colors.backdropLight,
                   paddingHorizontal: tokens.spacing.compact,
-                  paddingVertical: tokens.spacing.xxsPlus,
+                  paddingVertical: tokens.spacing.xsMinus,
                 }}
               >
                 <Text
@@ -374,6 +375,8 @@ export function EventAlbumUploadPreviewSection({
         ) : (
           <Pressable
             onPress={onPickPhotos}
+            accessibilityRole="button"
+            accessibilityLabel="Fotoğraf veya video seç"
             style={{ alignItems: "center", justifyContent: "center" }}
           >
             <Camera size={tokens.iconSize["3xl"]} color={tokens.colors.mutedFg} />
@@ -428,18 +431,16 @@ export function EventAlbumUploadPreviewSection({
           }
           label="Sil"
           onPress={() =>
-            Alert.alert("Medyayı sil", "Bu seçili medyayı kaldırmak istiyor musun?", [
-              { text: "Vazgec", style: "cancel" },
-              {
-                text: "Sil",
-                style: "destructive",
-                onPress: () => onRemoveSelectedPhoto(normalizedSelectedPhotoIndex),
-              },
-            ])
+            showConfirmAlert({
+              confirmLabel: "Sil",
+              destructive: true,
+              message: "Bu seçili medyayı kaldırmak istiyor musun?",
+              onConfirm: () => onRemoveSelectedPhoto(normalizedSelectedPhotoIndex),
+              title: "Medyayı sil",
+            })
           }
         />
       </View>
-
       {previewMediaItems.length > 0 ? (
         <View
           style={{
@@ -476,13 +477,11 @@ export function EventAlbumUploadPreviewSection({
           </ScrollView>
         </View>
       ) : null}
-
       <Text style={{ color: tokens.colors.muted, fontSize: tokens.typography.tiny }}>
         {cropPending
           ? "Kırpma hazırlanıyor. İşlem bitene kadar seçimi kilitli tutuyoruz."
           : "Bir medyaya uzun basarak onu seç, sonra başka bir medyaya dokunarak yer değiştir."}
       </Text>
-
       <MediaViewerModal
         actions={viewerActions}
         initialIndex={normalizedSelectedPhotoIndex}

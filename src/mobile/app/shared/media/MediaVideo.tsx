@@ -51,8 +51,8 @@ export function MediaVideo({
     AppState.currentState !== "background" && AppState.currentState !== "inactive",
   );
   const resolvedUri = useResolvedMediaUri(uri, {
-    priority: "eager",
-    retry: true,
+    priority: active && appActive ? "eager" : "deferred",
+    retry: active && appActive,
   });
   const normalizedUri = normalizeMediaUriInput(uri);
   const sourceUri = resolvedUri || (canUseMediaUriDirectly(normalizedUri) ? normalizedUri : "");
@@ -94,13 +94,6 @@ export function MediaVideo({
     }
     player.pause();
   }, [autoPlay, player, shouldAttachPlayer]);
-
-  useEffect(
-    () => () => {
-      player.pause();
-    },
-    [player],
-  );
 
   if (!normalizedUri) {
     return (

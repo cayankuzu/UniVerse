@@ -76,7 +76,12 @@ export const DeferredAlbumFeedCard = memo(function DeferredAlbumFeedCard({
         onOpenProfile={onOpenProfile}
       />
 
-      <Pressable onPress={handleOpenCard} style={styles.heroFrame}>
+      <Pressable
+        onPress={handleOpenCard}
+        accessibilityRole="button"
+        accessibilityLabel={`${photo.caption || "Albüm"} albümünü aç`}
+        style={styles.heroFrame}
+      >
         {heroImageUri ? (
           isVideoMediaUri(heroImageUri) ? (
             <View style={{ width: "100%", height: "100%" }}>

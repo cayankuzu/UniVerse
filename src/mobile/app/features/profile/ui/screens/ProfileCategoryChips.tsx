@@ -50,7 +50,7 @@ export function ProfileCategoryChips({ accountType, categories }: ProfileCategor
             backgroundColor: tokens.colors.primarySofter,
             borderRadius: tokens.radius.sm,
             paddingHorizontal: tokens.spacing.xs,
-            paddingVertical: tokens.spacing.xxsPlus,
+            paddingVertical: tokens.spacing.xsMinus,
           }}
         >
           <Text
@@ -84,7 +84,7 @@ export function ProfileCategoryChips({ accountType, categories }: ProfileCategor
               backgroundColor: tokens.colors.surfaceVariant,
               borderRadius: tokens.radius.sm,
               paddingHorizontal: tokens.spacing.xs,
-              paddingVertical: tokens.spacing.xxsPlus,
+              paddingVertical: tokens.spacing.xsMinus,
             }}
           >
             <Text

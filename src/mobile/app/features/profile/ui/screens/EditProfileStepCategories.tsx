@@ -66,6 +66,9 @@ export function EditProfileStepCategories({
         >
           <Pressable
             onPress={() => onTogglePreview?.(false)}
+            accessibilityRole="tab"
+            accessibilityLabel={accountType === "club" ? "Kategoriler" : "İlgi alanları"}
+            accessibilityState={{ selected: !showPreview }}
             style={{
               flex: 1,
               minHeight: tokens.minHeight.chipMd,
@@ -74,7 +77,7 @@ export function EditProfileStepCategories({
               alignItems: "center",
               justifyContent: "center",
               flexDirection: "row",
-              gap: tokens.spacing.xxsPlus,
+              gap: tokens.spacing.xsMinus,
             }}
           >
             <Sparkles
@@ -95,6 +98,9 @@ export function EditProfileStepCategories({
 
           <Pressable
             onPress={() => onTogglePreview?.(true)}
+            accessibilityRole="tab"
+            accessibilityLabel="Profil önizlemesi"
+            accessibilityState={{ selected: showPreview }}
             style={{
               flex: 1,
               minHeight: tokens.minHeight.chipMd,
@@ -103,7 +109,7 @@ export function EditProfileStepCategories({
               alignItems: "center",
               justifyContent: "center",
               flexDirection: "row",
-              gap: tokens.spacing.xxsPlus,
+              gap: tokens.spacing.xsMinus,
             }}
           >
             <Eye
@@ -162,6 +168,9 @@ export function EditProfileStepCategories({
                 <Pressable
                   key={category}
                   onPress={() => onToggleCategory(category)}
+                  accessibilityRole="checkbox"
+                  accessibilityLabel={category}
+                  accessibilityState={{ checked: selected }}
                   style={{
                     borderRadius: tokens.radius.compact,
                     backgroundColor: selected ? tokens.colors.primary : tokens.colors.border,

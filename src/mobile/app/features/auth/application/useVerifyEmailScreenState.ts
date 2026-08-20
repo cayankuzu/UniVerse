@@ -129,7 +129,7 @@ export function useVerifyEmailScreenState(params: UseVerifyEmailScreenStateParam
       }
       setCheckMessage("E-posta henüz doğrulanmadı. Lütfen gelen kutunu kontrol et.");
     } catch {
-      setCheckMessage("Kontrol sirasinda hata olustu. Tekrar dene.");
+      setCheckMessage("Kontrol sırasında hata oluştu. Tekrar dene.");
     } finally {
       setChecking(false);
     }

@@ -177,7 +177,7 @@ describe("RootNavigator", () => {
     requestAnimationFrameSpy = jest
       .spyOn(global, "requestAnimationFrame")
       .mockImplementation((callback: FrameRequestCallback) => {
-        callback(Date.now());
+        callback(Date.parse("2026-08-19T12:00:00.000Z"));
         return 0;
       });
     cancelAnimationFrameSpy = jest

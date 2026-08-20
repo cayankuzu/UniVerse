@@ -19,7 +19,12 @@ export function EventCardHeader({ event, presentation, onPress }: Props) {
 
   return (
     <View style={styles.container}>
-      <Pressable onPress={onPress} style={styles.pressable}>
+      <Pressable
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={`${event.club || "Kulüp"} profilini aç`}
+        style={styles.pressable}
+      >
         <View style={styles.avatarFrame}>
           {event.clubImage ? (
             <Avatar

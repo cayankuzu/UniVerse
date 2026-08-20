@@ -90,9 +90,10 @@ export function getAccessToken() {
 }
 
 export function callRpc(token, fn, body, options = {}) {
+  const requestKind = options.tags?.request_kind || "projection";
   const tags = {
     endpoint: fn,
-    request_kind: "projection",
+    request_kind: requestKind,
     ...(options.tags || {}),
   };
   const response = http.post(
@@ -100,8 +101,62 @@ export function callRpc(token, fn, body, options = {}) {
     JSON.stringify(body || {}),
     jsonHeaders(token, tags),
   );
+  let parsedPayload;
+  let payloadWasParsed = false;
+  let payloadIsJson = false;
+  const readPayload = () => {
+    if (payloadWasParsed) return parsedPayload;
+    payloadWasParsed = true;
+    try {
+      parsedPayload = response.json();
+      payloadIsJson = true;
+    } catch {
+      parsedPayload = null;
+    }
+    return parsedPayload;
+  };
+  const isProjectionRequest = requestKind === "projection" || requestKind === "warmup";
+
   check(response, {
-    [`${fn} status < 500`]: (r) => r.status < 500,
+    [`${fn} status is 2xx`]: (r) => r.status >= 200 && r.status < 300,
+    [`${fn} projection body is valid JSON`]: () =>
+      !isProjectionRequest || Boolean(readPayload()) || payloadIsJson,
+    [`${fn} response has no RPC error`]: () => {
+      const payload = readPayload();
+      if (!payloadIsJson || !payload || typeof payload !== "object") return !isProjectionRequest;
+      return !(
+        payload.error ||
+        (typeof payload.code === "string" && typeof payload.message === "string")
+      );
+    },
+    [`${fn} projection body is an object`]: () => {
+      if (!isProjectionRequest) return true;
+      const payload = readPayload();
+      return Boolean(payload && typeof payload === "object" && !Array.isArray(payload));
+    },
+    [`${fn} projection envelope is complete`]: () => {
+      if (!options.requireProjectionEnvelope) return true;
+      const payload = readPayload();
+      return Boolean(
+        payload &&
+        typeof payload === "object" &&
+        !Array.isArray(payload) &&
+        typeof (payload.server_time || payload.serverTime) === "string" &&
+        (Object.prototype.hasOwnProperty.call(payload, "delta_token") ||
+          Object.prototype.hasOwnProperty.call(payload, "deltaToken")),
+      );
+    },
+    [`${fn} cursor envelope is complete`]: () => {
+      if (!options.requireCursorEnvelope) return true;
+      const payload = readPayload();
+      return Boolean(
+        payload &&
+        typeof payload === "object" &&
+        !Array.isArray(payload) &&
+        (Object.prototype.hasOwnProperty.call(payload, "next_cursor") ||
+          Object.prototype.hasOwnProperty.call(payload, "nextCursor")),
+      );
+    },
   });
   return response;
 }
@@ -116,7 +171,10 @@ export function readNextCursor(response) {
 }
 
 export function callRpcWithCursor(token, fn, body, options = {}) {
-  const firstResponse = callRpc(token, fn, body, options);
+  const firstResponse = callRpc(token, fn, body, {
+    ...options,
+    requireCursorEnvelope: true,
+  });
   const nextCursor = readNextCursor(firstResponse);
   if (!options.append || !nextCursor) {
     return { firstResponse, nextCursor, secondResponse: null };
@@ -129,6 +187,7 @@ export function callRpcWithCursor(token, fn, body, options = {}) {
       cursor: nextCursor,
     },
     {
+      requireCursorEnvelope: true,
       tags: {
         ...(options.tags || {}),
         page: "append",
@@ -198,6 +257,7 @@ export function callTrackedProjection(token, fn, body, tracker, options = {}) {
       since: context.since,
     },
     {
+      requireProjectionEnvelope: true,
       tags: {
         ...(options.tags || {}),
         request_shape: context.useDelta ? "delta" : "full",
@@ -229,6 +289,7 @@ export function callTrackedProjectionWithCursor(token, fn, body, tracker, option
       since: null,
     },
     {
+      requireCursorEnvelope: true,
       tags: {
         ...(options.tags || {}),
         page: "append",
@@ -406,27 +467,62 @@ export function callOptionalMutationSet(token) {
 
   const targets = getProjectionTargets();
   if (targets.targetProfileId) {
-    callRpc(token, "toggle_follow_with_patch", {
-      target_user_id: targets.targetProfileId,
-    });
+    callRpc(
+      token,
+      "toggle_follow_with_patch",
+      {
+        target_user_id: targets.targetProfileId,
+      },
+      {
+        tags: { request_kind: "mutation" },
+      },
+    );
   }
   if (targets.targetClubId) {
-    callRpc(token, "toggle_club_membership_with_patch", {
-      target_club_id: targets.targetClubId,
-    });
+    callRpc(
+      token,
+      "toggle_club_membership_with_patch",
+      {
+        target_club_id: targets.targetClubId,
+      },
+      {
+        tags: { request_kind: "mutation" },
+      },
+    );
   }
   if (targets.targetNotificationId) {
-    callRpc(token, "mark_notification_read_with_patch", {
-      target_notification_id: targets.targetNotificationId,
-    });
+    callRpc(
+      token,
+      "mark_notification_read_with_patch",
+      {
+        target_notification_id: targets.targetNotificationId,
+      },
+      {
+        tags: { request_kind: "mutation" },
+      },
+    );
   }
   if (targets.targetEventId) {
-    callRpc(token, "toggle_event_like", {
-      target_event_id: targets.targetEventId,
-    });
-    callRpc(token, "toggle_event_attendance", {
-      target_event_id: targets.targetEventId,
-    });
+    callRpc(
+      token,
+      "toggle_event_like",
+      {
+        target_event_id: targets.targetEventId,
+      },
+      {
+        tags: { request_kind: "mutation" },
+      },
+    );
+    callRpc(
+      token,
+      "toggle_event_attendance",
+      {
+        target_event_id: targets.targetEventId,
+      },
+      {
+        tags: { request_kind: "mutation" },
+      },
+    );
   }
 }
 

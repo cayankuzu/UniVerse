@@ -43,6 +43,7 @@ export function UserListSheet({
     >
       <View style={{ flex: 1, justifyContent: "flex-end" }}>
         <Pressable
+          accessible={false}
           onPress={onClose}
           style={{
             position: "absolute",
@@ -115,6 +116,8 @@ export function UserListSheet({
               renderItem={({ item }) => (
                 <Pressable
                   onPress={() => onOpenUser?.(item.username)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${item.name || item.username} profilini aç`}
                   style={{
                     minHeight: 46,
                     flexDirection: "row",

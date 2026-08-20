@@ -271,6 +271,7 @@ export const SelectField = React.memo(function SelectField({
         />
 
         <Pressable
+          accessibilityLabel={t("common.close")}
           accessibilityRole="button"
           style={{
             marginTop: tokens.spacing.xsMinus,

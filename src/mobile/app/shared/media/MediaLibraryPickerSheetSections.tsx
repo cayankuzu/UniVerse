@@ -54,6 +54,8 @@ export function MediaLibraryPickerPermissionState(props: { onClose: () => void }
       </Text>
       <Pressable
         onPress={props.onClose}
+        accessibilityRole="button"
+        accessibilityLabel={t("common.close")}
         style={{
           marginTop: tokens.spacing.xsMinus,
           minHeight: tokens.minHeight.inputSm,
@@ -161,6 +163,9 @@ export function MediaLibraryPickerConfirmButton(props: { disabled: boolean; onPr
     <Pressable
       disabled={props.disabled}
       onPress={props.onPress}
+      accessibilityRole="button"
+      accessibilityLabel={t("media.library.confirm")}
+      accessibilityState={{ disabled: props.disabled }}
       style={{
         minHeight: tokens.minHeight.buttonLg,
         borderRadius: tokens.radius.control,

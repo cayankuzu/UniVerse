@@ -1,5 +1,10 @@
-import { FlashList, type FlashListProps, type FlashListRef } from "@shopify/flash-list";
-import { AppText as Text } from "./AppText";
+import {
+  FlashList,
+  type FlashListProps,
+  type FlashListRef,
+  type ListRenderItem,
+  type ListRenderItemInfo,
+} from "@shopify/flash-list";
 import {
   forwardRef,
   useCallback,
@@ -11,7 +16,6 @@ import {
   type ReactElement,
 } from "react";
 import type {
-  ListRenderItem,
   GestureResponderEvent,
   NativeScrollEvent,
   NativeSyntheticEvent,
@@ -21,7 +25,6 @@ import type {
 } from "react-native";
 import { Platform, RefreshControl, StyleSheet, View } from "react-native";
 import { tokens } from "../../shared/theme";
-import { t } from "../../shared/i18n";
 import {
   resolveListPerformanceBudget,
   type PerformanceTier,
@@ -31,10 +34,9 @@ import {
   resolveRuntimePerformanceTier,
   useRuntimePerformanceTier,
 } from "../performance/runtimePerformanceTier";
-import { AsyncState } from "./AsyncState";
-import { AppListSkeleton } from "./AppListSkeleton";
-import { EmptyState } from "./EmptyState";
-import { LoadingSpinner } from "./LoadingSpinner";
+import { buildDefaultListEmptyState, buildDefaultListFooter } from "./AppFlatListStates";
+
+const EMPTY_LIST: never[] = [];
 
 type BaseFlatListProps<T> = Omit<
   FlashListProps<T>,
@@ -57,88 +59,12 @@ export interface AppFlatListProps<T> extends BaseFlatListProps<T> {
   loadingMore?: boolean;
   loadingComponent?: ReactElement | null;
   onRefresh?: () => Promise<void> | void;
+  onRetry?: () => void;
   performanceTier?: PerformanceTier;
   refreshColor?: string;
   refreshing?: boolean;
   refreshProps?: Partial<RefreshControlProps>;
   renderItem: ListRenderItem<T>;
-}
-
-function buildDefaultEmptyState(params: {
-  emptySubtitle?: string;
-  emptyText?: string;
-  emptyTitle?: string;
-  error?: string | null;
-  estimatedItemSize: number;
-  loading?: boolean;
-  loadingComponent?: ReactElement | null;
-  numColumns: number;
-}) {
-  if (params.loading) {
-    if (params.loadingComponent) {
-      return params.loadingComponent;
-    }
-
-    return (
-      <AppListSkeleton
-        columns={params.numColumns}
-        count={
-          params.numColumns > 1 ? params.numColumns * 3 : params.estimatedItemSize > 220 ? 3 : 6
-        }
-        itemHeight={
-          params.numColumns > 1
-            ? Math.max(128, params.estimatedItemSize - 40)
-            : Math.max(72, params.estimatedItemSize - 24)
-        }
-        variant={params.numColumns > 1 ? "grid" : "list"}
-      />
-    );
-  }
-
-  if (params.error) {
-    return (
-      <AsyncState error={params.error} loading={false}>
-        <View />
-      </AsyncState>
-    );
-  }
-
-  if (!params.emptyText && !params.emptyTitle && !params.emptySubtitle) return null;
-
-  const resolvedTitle = params.emptyTitle ?? params.emptyText ?? t("common.empty.title");
-  const resolvedSubtitle = params.emptyTitle
-    ? params.emptySubtitle
-    : (params.emptySubtitle ?? (params.emptyText ? undefined : t("common.empty.subtitle")));
-
-  return <EmptyState title={resolvedTitle} subtitle={resolvedSubtitle} />;
-}
-
-function buildDefaultFooter(params: {
-  dataLength: number;
-  endReachedText?: string;
-  hasMore?: boolean;
-  loadingMore?: boolean;
-}) {
-  if (params.dataLength === 0) return null;
-
-  if (params.loadingMore) {
-    return (
-      <View style={styles.footer}>
-        <LoadingSpinner size="small" />
-        <Text style={styles.footerText}>{t("common.loading")}</Text>
-      </View>
-    );
-  }
-
-  if (params.hasMore === false) {
-    return (
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>{params.endReachedText || t("common.list.end")}</Text>
-      </View>
-    );
-  }
-
-  return null;
 }
 
 function AppFlatListInner<T>(
@@ -169,6 +95,7 @@ function AppFlatListInner<T>(
     onMomentumScrollBegin,
     onMomentumScrollEnd,
     onRefresh,
+    onRetry,
     onScroll,
     onScrollBeginDrag,
     onScrollEndDrag,
@@ -179,7 +106,7 @@ function AppFlatListInner<T>(
     refreshColor = tokens.colors.primary,
     refreshProps,
     refreshing = false,
-    removeClippedSubviews = true,
+    removeClippedSubviews = false,
     renderItem,
     scrollEventThrottle,
     showsHorizontalScrollIndicator = false,
@@ -197,7 +124,7 @@ function AppFlatListInner<T>(
   const flattenedColumnWrapperStyle = StyleSheet.flatten(columnWrapperStyle);
   const resolvedEstimatedItemSize =
     estimatedItemSize ?? (typeof rest.numColumns === "number" && rest.numColumns > 1 ? 216 : 248);
-  const listData = data || [];
+  const listData = data ?? (EMPTY_LIST as T[]);
   const maxDrawDistance = resolvedEstimatedItemSize * listBudget.drawDistanceMultiplier;
   const resolvedDrawDistance = Math.min(drawDistance ?? maxDrawDistance, maxDrawDistance);
   const resolvedColumnGap = Number(flattenedColumnWrapperStyle?.columnGap || 0);
@@ -231,7 +158,7 @@ function AppFlatListInner<T>(
   const resolvedEmptyComponent = useMemo(
     () =>
       ListEmptyComponent ??
-      buildDefaultEmptyState({
+      buildDefaultListEmptyState({
         emptySubtitle,
         emptyText,
         emptyTitle,
@@ -240,6 +167,7 @@ function AppFlatListInner<T>(
         loading,
         loadingComponent,
         numColumns: resolvedNumColumns,
+        onRetry: onRetry ?? (onRefresh ? () => void onRefresh() : undefined),
       }),
     [
       ListEmptyComponent,
@@ -249,6 +177,8 @@ function AppFlatListInner<T>(
       error,
       loading,
       loadingComponent,
+      onRefresh,
+      onRetry,
       resolvedEstimatedItemSize,
       resolvedNumColumns,
     ],
@@ -256,7 +186,7 @@ function AppFlatListInner<T>(
   const resolvedFooterComponent = useMemo(
     () =>
       ListFooterComponent ??
-      buildDefaultFooter({
+      buildDefaultListFooter({
         dataLength: listData.length,
         endReachedText,
         hasMore,
@@ -362,16 +292,9 @@ function AppFlatListInner<T>(
     onEndReached();
   }, [hasMore, listData.length, loading, loadingMore, onEndReached, refreshing, rest.horizontal]);
   const wrappedRenderItem = useCallback(
-    ({ index, item }: { index: number; item: T }) => {
-      const content = renderItem({
-        index,
-        item,
-        separators: {
-          highlight: () => undefined,
-          unhighlight: () => undefined,
-          updateProps: () => undefined,
-        },
-      });
+    (info: ListRenderItemInfo<T>) => {
+      const { index } = info;
+      const content = renderItem(info);
       if (!content) return null;
       if (resolvedNumColumns <= 1) return content;
       const isRowEnd = (index + 1) % resolvedNumColumns === 0;
@@ -425,17 +348,3 @@ function AppFlatListInner<T>(
 export const AppFlatList = forwardRef(AppFlatListInner) as <T>(
   props: AppFlatListProps<T> & { ref?: ForwardedRef<FlashListRef<T>> },
 ) => ReactElement;
-
-const styles = StyleSheet.create({
-  footer: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingBottom: tokens.spacing.md,
-    paddingTop: tokens.spacing.sm,
-  },
-  footerText: {
-    color: tokens.colors.muted,
-    fontSize: tokens.typography.caption,
-    textAlign: "center",
-  },
-});

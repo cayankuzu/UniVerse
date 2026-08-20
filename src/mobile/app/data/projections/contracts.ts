@@ -16,6 +16,7 @@ export interface ProjectionFetchContext {
   deltaToken: string | null;
   limit: number | null;
   mode: ProjectionMergeMode;
+  signal?: AbortSignal;
   since: string | null;
 }
 

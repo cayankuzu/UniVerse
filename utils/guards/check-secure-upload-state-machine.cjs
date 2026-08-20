@@ -13,6 +13,7 @@ const albumMediaProcessor = read(
   "src/mobile/app/features/events/data/albumUploadQueueProcessor.media.ts",
 );
 const semgrepIgnore = read(".semgrepignore");
+const resumableUpload = read("src/mobile/app/data/storage/storage.resumableUpload.ts");
 
 function requirePattern(content, pattern, message) {
   if (!pattern.test(content)) throw new Error(`[secure-upload] ${message}`);
@@ -56,6 +57,16 @@ requirePattern(
   albumMediaProcessor,
   /checksum: fileInfo\.checksumSha256/u,
   "mobile session must bind the expected SHA-256 checksum.",
+);
+requirePattern(
+  albumMediaProcessor,
+  /IMAGE_PREPARE_CONCURRENCY\s*=\s*2[\s\S]*VIDEO_PREPARE_CONCURRENCY\s*=\s*1[\s\S]*MEDIA_UPLOAD_CONCURRENCY\s*=\s*2/u,
+  "media preparation and upload concurrency must remain explicitly bounded.",
+);
+requirePattern(
+  resumableUpload,
+  /findPreviousUploads\(\)[\s\S]*resumeFromPreviousUpload/u,
+  "large uploads must remain resumable after interruption.",
 );
 requirePattern(
   albumProcessor,

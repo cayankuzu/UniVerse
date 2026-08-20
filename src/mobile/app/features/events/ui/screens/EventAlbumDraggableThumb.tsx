@@ -36,6 +36,10 @@ export function EventAlbumDraggableThumb({
     <Pressable
       disabled={disabled}
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`${index + 1}. medya${selected ? ", seçili" : ""}`}
+      accessibilityHint="Sıralamak için basılı tut"
+      accessibilityState={{ disabled, selected }}
       onLongPress={onLongPress}
       delayLongPress={500}
       hitSlop={4}
@@ -92,7 +96,7 @@ export function EventAlbumDraggableThumb({
           top: 4,
           borderRadius: tokens.radius.pill,
           backgroundColor: tokens.colors.backdrop,
-          paddingHorizontal: tokens.spacing.xxsPlus,
+          paddingHorizontal: tokens.spacing.xsMinus,
           paddingVertical: tokens.spacing.micro,
           flexDirection: "row",
           alignItems: "center",

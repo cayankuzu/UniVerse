@@ -26,7 +26,7 @@ export function EventCardInfoSlides({
         directionalLockEnabled
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{
-          gap: tokens.spacing.xsCompact,
+          gap: tokens.spacing.xs,
           marginTop: tokens.spacing.compact,
           paddingRight: tokens.spacing.compact,
         }}
@@ -44,7 +44,7 @@ export function EventCardInfoSlides({
                 paddingVertical: tokens.spacing.xs,
                 flexDirection: "row",
                 alignItems: "center",
-                gap: tokens.spacing.xsCompact,
+                gap: tokens.spacing.xs,
               }}
             >
               <View
