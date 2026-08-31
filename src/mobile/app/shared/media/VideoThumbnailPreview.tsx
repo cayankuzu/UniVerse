@@ -91,6 +91,24 @@ async function resolveThumbnailSourceUri(candidate: string, isCancelled: () => b
   return "";
 }
 
+export async function resolveVideoThumbnailFromCandidates(
+  thumbnailCandidates: string[],
+  priority: "deferred" | "eager",
+  isCancelled: () => boolean,
+): Promise<ThumbnailSource | null> {
+  for (const candidate of thumbnailCandidates) {
+    const resolvedSourceUri = await resolveThumbnailSourceUri(candidate, isCancelled);
+    if (!resolvedSourceUri) continue;
+    const nextThumbnail = isImageMediaUri(candidate)
+      ? buildPosterSource(candidate, resolvedSourceUri)
+      : getCachedVideoThumbnail(resolvedSourceUri) ||
+        (await resolveVideoThumbnail(resolvedSourceUri, { priority }));
+    if (isCancelled()) return null;
+    if (nextThumbnail) return nextThumbnail;
+  }
+  return null;
+}
+
 export function VideoThumbnailPreview({
   candidateUris,
   contentFit = "cover",
@@ -115,21 +133,12 @@ export function VideoThumbnailPreview({
     if (thumbnailCandidates.length === 0) return undefined;
     let cancelled = false;
     const runThumbnailLoad = async () => {
-      for (const candidate of thumbnailCandidates) {
-        const resolvedSourceUri = await resolveThumbnailSourceUri(candidate, () => cancelled);
-        if (!resolvedSourceUri) continue;
-        const nextThumbnail = isImageMediaUri(candidate)
-          ? buildPosterSource(candidate, resolvedSourceUri)
-          : getCachedVideoThumbnail(resolvedSourceUri) ||
-            (await resolveVideoThumbnail(resolvedSourceUri, { priority }));
-        if (cancelled) return;
-        if (!nextThumbnail) continue;
-        setThumbnail(nextThumbnail);
-        return;
-      }
-      if (!cancelled) {
-        setThumbnail(null);
-      }
+      const nextThumbnail = await resolveVideoThumbnailFromCandidates(
+        thumbnailCandidates,
+        priority,
+        () => cancelled,
+      );
+      if (!cancelled) setThumbnail(nextThumbnail);
     };
 
     const scheduleLoad = () => {

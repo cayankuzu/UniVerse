@@ -14,6 +14,8 @@ import {
   subscribeHomeStartupSnapshot,
 } from "./homeStartupSnapshot";
 
+const FIXED_NOW = Date.parse("2026-08-19T12:00:00.000Z");
+
 function createQueryClient() {
   return new QueryClient({
     defaultOptions: {
@@ -26,9 +28,14 @@ function createQueryClient() {
 
 describe("primeHomeStartupSnapshotsIntoQueryCache", () => {
   beforeEach(async () => {
+    jest.spyOn(Date, "now").mockReturnValue(FIXED_NOW);
     clearProjectionPrefetchRegistry();
     resetHomeStartupSnapshotState();
     await AsyncStorage.clear();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it("refreshes savedAt without notifying listeners when snapshot content is unchanged", () => {
@@ -112,7 +119,7 @@ describe("primeHomeStartupSnapshotsIntoQueryCache", () => {
           source: "following",
         } as any,
       ],
-      savedAt: Date.parse("2026-08-19T12:00:00.000Z"),
+      savedAt: FIXED_NOW,
       unreadCount: 7,
       viewerKey: "viewer",
     });

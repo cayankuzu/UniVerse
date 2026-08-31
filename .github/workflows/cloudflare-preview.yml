@@ -1,0 +1,93 @@
+name: cloudflare-preview
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/cloudflare-preview.yml"
+      - ".github/workflows/cloudflare-production.yml"
+      - "infra/cloudflare/universe-edge/**"
+      - "src/mobile/app/platform/api/core.routing.ts"
+      - "supabase/functions/server/**"
+      - "supabase/migrations/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-preview-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            infra/cloudflare/universe-edge/package-lock.json
+      - run: npm ci
+      - run: node --test utils/ops/cloudflare-rollout-policy.test.cjs
+      - run: npm run check
+      - run: npm ci --prefix infra/cloudflare/universe-edge
+      - run: npm run check --prefix infra/cloudflare/universe-edge
+
+  deploy-preview:
+    if: github.event_name == 'workflow_dispatch'
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: preview
+    env:
+      ORIGIN_VERIFICATION_MODE: ${{ vars.CLOUDFLARE_ORIGIN_VERIFICATION_MODE }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: infra/cloudflare/universe-edge/package-lock.json
+      - run: npm ci --prefix infra/cloudflare/universe-edge
+      - name: Reject placeholder preview upstream
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require("node:fs");
+          const config = JSON.parse(fs.readFileSync("infra/cloudflare/universe-edge/wrangler.jsonc", "utf8"));
+          const values = Object.values(config.env?.preview?.vars || {});
+          if (values.some((value) => String(value).includes(".invalid"))) {
+            throw new Error("Preview Supabase values are still fail-closed placeholders.");
+          }
+          NODE
+          node utils/ops/cloudflare-rollout-policy.cjs assert-origin-mode \
+            --value "$ORIGIN_VERIFICATION_MODE"
+          # "off" is valid only after selective gateway traffic has been removed.
+      - name: Deploy preview Worker
+        working-directory: infra/cloudflare/universe-edge
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PREVIEW_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler deploy --env preview --strict --tag "sha-${GITHUB_SHA}" \
+            --message "preview sha:${GITHUB_SHA}" --outdir .wrangler-preview \
+            2>&1 | tee cloudflare-preview-deploy.log
+          find .wrangler-preview -type f -print0 | sort -z | xargs -0 sha256sum \
+            > cloudflare-preview-sha256.txt
+      - name: Retain preview evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: cloudflare-preview-${{ github.sha }}
+          if-no-files-found: error
+          path: |
+            infra/cloudflare/universe-edge/cloudflare-preview-deploy.log
+            infra/cloudflare/universe-edge/cloudflare-preview-sha256.txt
+          retention-days: 30

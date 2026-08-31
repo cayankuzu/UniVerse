@@ -7,7 +7,7 @@ import type {
   StorageUploadSessionResponse,
   UploadResponse,
 } from "../../platform/api/contracts";
-import { BASE_URL } from "../../platform/api/core";
+import { BASE_URL, resolveApiUrl } from "../../platform/api/core";
 import { SUPABASE_PUBLIC_ANON_KEY } from "../../platform/config/publicEnv";
 import {
   SUPABASE_CLIENT_INFO,
@@ -289,7 +289,7 @@ export const StorageAPI = {
   }): Promise<StorageUploadSessionResponse> => {
     const response = await retryWithRefreshedSession(
       (token) =>
-        fetch(`${BASE_URL}/storage/upload-session/create`, {
+        fetch(resolveApiUrl("POST", "/storage/upload-session/create"), {
           method: "POST",
           headers: {
             apikey: SUPABASE_PUBLIC_ANON_KEY,
@@ -338,7 +338,7 @@ export const StorageAPI = {
   finalizeUploadSession: async (sessionId: string, accessToken?: string) => {
     const response = await retryWithRefreshedSession(
       (token) =>
-        fetch(`${BASE_URL}/storage/upload-session/finalize`, {
+        fetch(resolveApiUrl("POST", "/storage/upload-session/finalize"), {
           method: "POST",
           headers: {
             apikey: SUPABASE_PUBLIC_ANON_KEY,
@@ -359,7 +359,7 @@ export const StorageAPI = {
   cancelUploadSession: async (sessionId: string, accessToken?: string) => {
     const response = await retryWithRefreshedSession(
       (token) =>
-        fetch(`${BASE_URL}/storage/upload-session/cancel`, {
+        fetch(resolveApiUrl("POST", "/storage/upload-session/cancel"), {
           method: "POST",
           headers: {
             apikey: SUPABASE_PUBLIC_ANON_KEY,

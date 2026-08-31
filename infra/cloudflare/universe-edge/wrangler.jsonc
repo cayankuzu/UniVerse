@@ -1,0 +1,125 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "universe-edge-development",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-30",
+  "workers_dev": true,
+  "preview_urls": true,
+  "version_metadata": { "binding": "CF_VERSION_METADATA" },
+  "secrets": {
+    "required": ["ORIGIN_HMAC_SECRET", "RATE_LIMIT_SALT", "SUPABASE_PUBLISHABLE_KEY"],
+  },
+  "vars": {
+    "ALLOWED_ORIGINS": "http://localhost:8081,http://localhost:19006",
+    "ENVIRONMENT": "development",
+    "JWT_AUDIENCE": "authenticated",
+    "JWT_ISSUER": "https://kfvdbfoufybltybsxlhh.supabase.co/auth/v1",
+    "ORIGIN_BASE_URL": "https://kfvdbfoufybltybsxlhh.supabase.co/functions/v1/server/make-server-e3557d40",
+    "SUPABASE_URL": "https://kfvdbfoufybltybsxlhh.supabase.co",
+    "UPSTREAM_TIMEOUT_MS": "8000",
+  },
+  "ratelimits": [
+    {
+      "name": "AUTH_RATE_LIMITER",
+      "namespace_id": "110101",
+      "simple": { "limit": 20, "period": 60 },
+    },
+    {
+      "name": "REPORT_RATE_LIMITER",
+      "namespace_id": "110102",
+      "simple": { "limit": 12, "period": 60 },
+    },
+    {
+      "name": "UPLOAD_RATE_LIMITER",
+      "namespace_id": "110103",
+      "simple": { "limit": 60, "period": 60 },
+    },
+  ],
+  "observability": {
+    "enabled": true,
+    "logs": { "head_sampling_rate": 1 },
+    "traces": { "enabled": true, "head_sampling_rate": 0.1 },
+  },
+  "env": {
+    "preview": {
+      "name": "universe-edge-preview",
+      "workers_dev": true,
+      "preview_urls": true,
+      "version_metadata": { "binding": "CF_VERSION_METADATA" },
+      "secrets": {
+        "required": ["ORIGIN_HMAC_SECRET", "RATE_LIMIT_SALT", "SUPABASE_PUBLISHABLE_KEY"],
+      },
+      "vars": {
+        "ALLOWED_ORIGINS": "",
+        "ENVIRONMENT": "preview",
+        "JWT_AUDIENCE": "authenticated",
+        "JWT_ISSUER": "https://preview-project-ref.invalid/auth/v1",
+        "ORIGIN_BASE_URL": "https://preview-project-ref.invalid/functions/v1/server/make-server-e3557d40",
+        "SUPABASE_URL": "https://preview-project-ref.invalid",
+        "UPSTREAM_TIMEOUT_MS": "8000",
+      },
+      "ratelimits": [
+        {
+          "name": "AUTH_RATE_LIMITER",
+          "namespace_id": "120101",
+          "simple": { "limit": 20, "period": 60 },
+        },
+        {
+          "name": "REPORT_RATE_LIMITER",
+          "namespace_id": "120102",
+          "simple": { "limit": 12, "period": 60 },
+        },
+        {
+          "name": "UPLOAD_RATE_LIMITER",
+          "namespace_id": "120103",
+          "simple": { "limit": 60, "period": 60 },
+        },
+      ],
+      "observability": {
+        "enabled": true,
+        "logs": { "head_sampling_rate": 1 },
+        "traces": { "enabled": true, "head_sampling_rate": 0.1 },
+      },
+    },
+    "production": {
+      "name": "universe-edge-production",
+      "workers_dev": false,
+      "preview_urls": false,
+      "version_metadata": { "binding": "CF_VERSION_METADATA" },
+      "secrets": {
+        "required": ["ORIGIN_HMAC_SECRET", "RATE_LIMIT_SALT", "SUPABASE_PUBLISHABLE_KEY"],
+      },
+      "vars": {
+        "ALLOWED_ORIGINS": "",
+        "ENVIRONMENT": "production",
+        "JWT_AUDIENCE": "authenticated",
+        "JWT_ISSUER": "https://kfvdbfoufybltybsxlhh.supabase.co/auth/v1",
+        "ORIGIN_BASE_URL": "https://kfvdbfoufybltybsxlhh.supabase.co/functions/v1/server/make-server-e3557d40",
+        "SUPABASE_URL": "https://kfvdbfoufybltybsxlhh.supabase.co",
+        "UPSTREAM_TIMEOUT_MS": "8000",
+      },
+      "ratelimits": [
+        {
+          "name": "AUTH_RATE_LIMITER",
+          "namespace_id": "130101",
+          "simple": { "limit": 20, "period": 60 },
+        },
+        {
+          "name": "REPORT_RATE_LIMITER",
+          "namespace_id": "130102",
+          "simple": { "limit": 12, "period": 60 },
+        },
+        {
+          "name": "UPLOAD_RATE_LIMITER",
+          "namespace_id": "130103",
+          "simple": { "limit": 60, "period": 60 },
+        },
+      ],
+      "observability": {
+        "enabled": true,
+        "logs": { "head_sampling_rate": 0.1 },
+        "traces": { "enabled": true, "head_sampling_rate": 0.01 },
+      },
+    },
+  },
+}

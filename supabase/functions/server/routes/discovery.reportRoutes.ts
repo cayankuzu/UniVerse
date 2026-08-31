@@ -9,6 +9,7 @@ import {
   recordSecurityAuditEvent,
   trackSecurityDetectionSignal,
 } from "../services/securityAudit.ts";
+import { fingerprintReportMutation } from "../services/reportIdempotency.ts";
 import { createViewerSupabaseClient } from "../services/viewerSupabase.ts";
 import {
   DiscoveryRouteValidationError,
@@ -198,30 +199,50 @@ export function registerDiscoveryReportRoutes(
         reporterId: user.id,
         targetUsernameHint: body.targetUsername,
       });
-      const { data: insertedReport, error } = await viewerSupabase
-        .from("reports")
-        .insert({
-          detail: body.detail || null,
-          mail_delivery_status: "pending",
-          reason: body.reason,
-          reporter_id: user.id,
-          reporter_snapshot: reportSnapshots.reporterSnapshot,
-          target_snapshot: reportSnapshots.targetSnapshot,
-          ...reportTarget,
-        })
-        .select("id")
-        .maybeSingle();
+      const clientMutationFingerprint = body.clientMutationId
+        ? await fingerprintReportMutation(body)
+        : null;
+      const reportInsert = {
+        client_mutation_fingerprint: clientMutationFingerprint,
+        client_mutation_id: body.clientMutationId || null,
+        detail: body.detail || null,
+        mail_delivery_status: "pending",
+        reason: body.reason,
+        reporter_id: user.id,
+        reporter_snapshot: reportSnapshots.reporterSnapshot,
+        target_snapshot: reportSnapshots.targetSnapshot,
+        ...reportTarget,
+      };
+      const insertQuery = body.clientMutationId
+        ? viewerSupabase.from("reports").upsert(reportInsert, {
+            ignoreDuplicates: true,
+            onConflict: "reporter_id,client_mutation_id",
+          })
+        : viewerSupabase.from("reports").insert(reportInsert);
+      const { data: insertedReport, error } = await insertQuery.select("id").maybeSingle();
       if (error) {
         throw new Error(error.message);
       }
       const reportId = String(insertedReport?.id || "").trim();
+      if (!reportId && body.clientMutationId) {
+        const { data: existingReport, error: existingError } = await viewerSupabase
+          .from("reports")
+          .select("client_mutation_fingerprint")
+          .eq("reporter_id", user.id)
+          .eq("client_mutation_id", body.clientMutationId)
+          .maybeSingle();
+        if (existingError || !existingReport) {
+          throw new Error(existingError?.message || "report-idempotency-lookup-failed");
+        }
+        if (existingReport.client_mutation_fingerprint !== clientMutationFingerprint) {
+          return c.json({ error: "idempotency_key_reused" }, 409);
+        }
+        return c.json({ success: true });
+      }
       if (reportId) {
         const mailDelivery = await sendModerationReportEmail({
-          detail: body.detail || null,
           reason: body.reason,
           reportId,
-          reporterSnapshot: reportSnapshots.reporterSnapshot,
-          targetSnapshot: reportSnapshots.targetSnapshot,
           targetType: reportTarget.target_type,
         });
         const deliveryPatch = {

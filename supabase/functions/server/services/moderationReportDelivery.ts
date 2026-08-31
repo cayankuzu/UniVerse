@@ -39,7 +39,6 @@ export type ModerationMailDeliveryResult = {
 type DeliveryParams = {
   htmlContent: string;
   reportId: string;
-  reporterEmail: string;
   subject: string;
   targetType: string;
   textContent: string;
@@ -60,7 +59,6 @@ async function sendViaBrevoApi(params: DeliveryParams): Promise<ModerationMailDe
       body: JSON.stringify({
         sender: { email: REPORT_FROM_EMAIL, name: REPORT_FROM_NAME },
         to: [{ email: REPORT_TO_EMAIL }],
-        ...(params.reporterEmail ? { replyTo: { email: params.reporterEmail } } : {}),
         htmlContent: params.htmlContent,
         subject: params.subject,
         textContent: params.textContent,
@@ -111,7 +109,6 @@ async function sendViaSmtp(params: DeliveryParams): Promise<ModerationMailDelive
     await transporter.sendMail({
       from: `"${REPORT_FROM_NAME}" <${REPORT_FROM_EMAIL}>`,
       html: params.htmlContent,
-      replyTo: params.reporterEmail || undefined,
       subject: params.subject,
       text: params.textContent,
       to: REPORT_TO_EMAIL,

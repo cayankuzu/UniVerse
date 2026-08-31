@@ -1,0 +1,608 @@
+name: cloudflare-production
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Upload at 0%, advance the ordered rollout, or restore the previous version."
+        required: true
+        type: choice
+        options:
+          - upload
+          - rollout-5
+          - rollout-25
+          - rollout-50
+          - rollout-100
+          - rollback
+      candidate_sha:
+        description: "Full immutable main commit SHA (required except for rollback)."
+        required: false
+        type: string
+      candidate_version_id:
+        description: "Candidate version UUID from the upload manifest (rollout only)."
+        required: false
+        type: string
+      previous_version_id:
+        description: "Previously healthy version UUID (required for every action)."
+        required: true
+        type: string
+      candidate_upload_run_id:
+        description: "Successful upload workflow run containing the candidate manifest (rollout only)."
+        required: false
+        type: string
+      candidate_manifest_sha256:
+        description: "SHA-256 printed by the upload workflow (rollout only)."
+        required: false
+        type: string
+      health_evidence_ref:
+        description: "Same-SHA preview/health-window evidence reference (required except for rollback)."
+        required: false
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: cloudflare-production
+  cancel-in-progress: false
+
+jobs:
+  dispatch_guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require production dispatch from main
+        shell: bash
+        run: test "$GITHUB_REF" = "refs/heads/main"
+
+  verify_candidate:
+    if: inputs.action != 'rollback'
+    needs: dispatch_guard
+    runs-on: ubuntu-latest
+    env:
+      CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+    outputs:
+      sha: ${{ steps.candidate.outputs.sha }}
+      tree_sha: ${{ steps.candidate.outputs.tree_sha }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.candidate_sha }}
+      - id: candidate
+        name: Verify immutable main candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$CANDIDATE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          resolved="$(git rev-parse HEAD)"
+          test "$resolved" = "$CANDIDATE_SHA"
+          git fetch origin main --no-tags
+          git merge-base --is-ancestor "$resolved" origin/main
+          test -z "$(git status --porcelain)"
+          tree_sha="$(git rev-parse "${resolved}^{tree}")"
+          [[ "$tree_sha" =~ ^[0-9a-f]{40}$ ]]
+          echo "sha=$resolved" >> "$GITHUB_OUTPUT"
+          echo "tree_sha=$tree_sha" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            infra/cloudflare/universe-edge/package-lock.json
+      - run: npm ci
+      - run: node --test utils/ops/cloudflare-rollout-policy.test.cjs
+      - run: npm run security:verify:internal
+      - run: npm ci --prefix infra/cloudflare/universe-edge
+      - run: npm run check --prefix infra/cloudflare/universe-edge
+
+  production:
+    if: ${{ inputs.action != 'rollback' && needs.verify_candidate.result == 'success' }}
+    needs:
+      - dispatch_guard
+      - verify_candidate
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      ACTION: ${{ inputs.action }}
+      CANDIDATE_MANIFEST_SHA256: ${{ inputs.candidate_manifest_sha256 }}
+      CANDIDATE_UPLOAD_RUN_ID: ${{ inputs.candidate_upload_run_id }}
+      CANDIDATE_VERSION_ID: ${{ inputs.candidate_version_id }}
+      HEALTHCHECK_URL: ${{ vars.CLOUDFLARE_PRODUCTION_HEALTHCHECK_URL }}
+      HEALTH_EVIDENCE_REF: ${{ inputs.health_evidence_ref }}
+      ORIGIN_VERIFICATION_MODE: ${{ vars.CLOUDFLARE_ORIGIN_VERIFICATION_MODE }}
+      PREVIOUS_VERSION_ID: ${{ inputs.previous_version_id }}
+      RELEASE_SHA: ${{ needs.verify_candidate.outputs.sha }}
+      RELEASE_TREE_SHA: ${{ needs.verify_candidate.outputs.tree_sha }}
+      WORKER_NAME: universe-edge-production
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          ref: ${{ needs.verify_candidate.outputs.sha }}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: infra/cloudflare/universe-edge/package-lock.json
+      - run: npm ci --prefix infra/cloudflare/universe-edge
+      - name: Validate protected production inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=(
+            validate-inputs
+            --action "$ACTION"
+            --candidate-sha "$RELEASE_SHA"
+            --candidate-tree-sha "$RELEASE_TREE_SHA"
+            --health-evidence-ref "$HEALTH_EVIDENCE_REF"
+            --healthcheck-url "$HEALTHCHECK_URL"
+            --origin-verification-mode "$ORIGIN_VERIFICATION_MODE"
+            --previous-version-id "$PREVIOUS_VERSION_ID"
+          )
+          if [[ "$ACTION" == rollout-* ]]; then
+            args+=(
+              --candidate-version-id "$CANDIDATE_VERSION_ID"
+              --candidate-upload-run-id "$CANDIDATE_UPLOAD_RUN_ID"
+              --candidate-manifest-sha256 "$CANDIDATE_MANIFEST_SHA256"
+            )
+          fi
+          node utils/ops/cloudflare-rollout-policy.cjs "${args[@]}"
+          # "off" is valid only after selective gateway traffic has been removed.
+      - name: Read candidate upload workflow provenance
+        if: startsWith(inputs.action, 'rollout-')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api "/repos/${GITHUB_REPOSITORY}/actions/runs/${CANDIDATE_UPLOAD_RUN_ID}" \
+            > infra/cloudflare/universe-edge/candidate-upload-run.json
+      - name: Verify successful same-SHA upload workflow provenance
+        if: startsWith(inputs.action, 'rollout-')
+        shell: bash
+        run: |
+          set -euo pipefail
+          node utils/ops/cloudflare-rollout-policy.cjs assert-upload-run \
+            --run-json infra/cloudflare/universe-edge/candidate-upload-run.json \
+            --run-id "$CANDIDATE_UPLOAD_RUN_ID" \
+            --repository "$GITHUB_REPOSITORY" \
+            --output infra/cloudflare/universe-edge/candidate-upload-run.evidence.json
+      - name: Download immutable candidate upload evidence
+        if: startsWith(inputs.action, 'rollout-')
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: cloudflare-production-upload-${{ needs.verify_candidate.outputs.sha }}
+          path: candidate-upload-evidence
+          run-id: ${{ inputs.candidate_upload_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify candidate upload manifest and bundled bytes
+        if: startsWith(inputs.action, 'rollout-')
+        shell: bash
+        run: |
+          set -euo pipefail
+          node utils/ops/cloudflare-rollout-policy.cjs validate-upload-manifest \
+            --artifact-root candidate-upload-evidence \
+            --manifest candidate-upload-evidence/candidate-upload-manifest.json \
+            --checksum candidate-upload-evidence/candidate-upload-manifest.json.sha256 \
+            --expected-digest "$CANDIDATE_MANIFEST_SHA256" \
+            --candidate-sha "$RELEASE_SHA" \
+            --candidate-tree-sha "$RELEASE_TREE_SHA" \
+            --candidate-version-id "$CANDIDATE_VERSION_ID" \
+            --repository "$GITHUB_REPOSITORY" \
+            --run-id "$CANDIDATE_UPLOAD_RUN_ID"
+      - name: Read previous version as structured JSON
+        working-directory: infra/cloudflare/universe-edge
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PRODUCTION_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler versions view "$PREVIOUS_VERSION_ID" --env production --json \
+            > previous-version.json
+      - name: Verify previous version identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          node utils/ops/cloudflare-rollout-policy.cjs assert-version \
+            --version-json infra/cloudflare/universe-edge/previous-version.json \
+            --expected-id "$PREVIOUS_VERSION_ID" \
+            --output infra/cloudflare/universe-edge/previous-version.evidence.json
+      - name: Read candidate version as structured JSON
+        if: startsWith(inputs.action, 'rollout-')
+        working-directory: infra/cloudflare/universe-edge
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PRODUCTION_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler versions view "$CANDIDATE_VERSION_ID" --env production --json \
+            > candidate-version.json
+      - name: Verify candidate version identity
+        if: startsWith(inputs.action, 'rollout-')
+        shell: bash
+        run: |
+          set -euo pipefail
+          node utils/ops/cloudflare-rollout-policy.cjs assert-version \
+            --version-json infra/cloudflare/universe-edge/candidate-version.json \
+            --expected-id "$CANDIDATE_VERSION_ID" \
+            --expected-tag "sha-${RELEASE_SHA}" \
+            --expected-message "production-candidate sha:${RELEASE_SHA}" \
+            --output infra/cloudflare/universe-edge/candidate-version.evidence.json
+      - name: Read current production deployment
+        working-directory: infra/cloudflare/universe-edge
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PRODUCTION_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler deployments status --env production --json > deployment-before.json
+      - name: Enforce the exact preceding rollout stage
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=(
+            assert-deployment
+            --action "$ACTION"
+            --phase before
+            --status-json infra/cloudflare/universe-edge/deployment-before.json
+            --previous-version-id "$PREVIOUS_VERSION_ID"
+            --output infra/cloudflare/universe-edge/deployment-before.evidence.json
+          )
+          if [[ "$ACTION" == rollout-* ]]; then
+            args+=(--candidate-version-id "$CANDIDATE_VERSION_ID")
+          fi
+          node utils/ops/cloudflare-rollout-policy.cjs "${args[@]}"
+      - name: Probe the currently healthy version before upload
+        if: inputs.action == 'upload'
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error \
+            --connect-timeout 5 --max-time 15 \
+            -D infra/cloudflare/universe-edge/health-before.headers \
+            -o infra/cloudflare/universe-edge/health-before.json \
+            "$HEALTHCHECK_URL"
+          node utils/ops/cloudflare-rollout-policy.cjs assert-health \
+            --headers infra/cloudflare/universe-edge/health-before.headers \
+            --body infra/cloudflare/universe-edge/health-before.json \
+            --output infra/cloudflare/universe-edge/health-before.evidence.json
+      - name: Deterministically probe candidate before promotion
+        if: startsWith(inputs.action, 'rollout-')
+        shell: bash
+        run: |
+          set -euo pipefail
+          override="${WORKER_NAME}=\"${CANDIDATE_VERSION_ID}\""
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error \
+            --connect-timeout 5 --max-time 15 \
+            -H "Cloudflare-Workers-Version-Overrides: ${override}" \
+            -D infra/cloudflare/universe-edge/health-candidate-before.headers \
+            -o infra/cloudflare/universe-edge/health-candidate-before.json \
+            "$HEALTHCHECK_URL"
+          node utils/ops/cloudflare-rollout-policy.cjs assert-health \
+            --headers infra/cloudflare/universe-edge/health-candidate-before.headers \
+            --body infra/cloudflare/universe-edge/health-candidate-before.json \
+            --expected-version-id "$CANDIDATE_VERSION_ID" \
+            --expected-tag "sha-${RELEASE_SHA}" \
+            --output infra/cloudflare/universe-edge/health-candidate-before.evidence.json
+      - name: Upload immutable candidate version
+        id: upload
+        if: inputs.action == 'upload'
+        working-directory: infra/cloudflare/universe-edge
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PRODUCTION_API_TOKEN }}
+          WRANGLER_OUTPUT_FILE_PATH: ${{ github.workspace }}/infra/cloudflare/universe-edge/wrangler-upload.ndjson
+        run: |
+          set -euo pipefail
+          npx wrangler versions upload --env production --strict \
+            --tag "sha-${RELEASE_SHA}" \
+            --message "production-candidate sha:${RELEASE_SHA}" \
+            --outdir .wrangler-production 2>&1 | tee cloudflare-production.log
+          find .wrangler-production -type f -print0 | LC_ALL=C sort -z | \
+            xargs -0 -r sha256sum > cloudflare-production-bundle-sha256.txt
+          test -s cloudflare-production-bundle-sha256.txt
+      - name: Parse uploaded version ID
+        id: upload_identity
+        if: inputs.action == 'upload'
+        shell: bash
+        run: |
+          set -euo pipefail
+          node utils/ops/cloudflare-rollout-policy.cjs parse-upload \
+            --wrangler-output infra/cloudflare/universe-edge/wrangler-upload.ndjson \
+            --worker-name "$WORKER_NAME" \
+            --github-output "$GITHUB_OUTPUT"
+      - name: Read uploaded candidate as structured JSON
+        if: inputs.action == 'upload'
+        working-directory: infra/cloudflare/universe-edge
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PRODUCTION_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler versions view "${{ steps.upload_identity.outputs.candidate_version_id }}" \
+            --env production --json > candidate-version.json
+      - name: Write candidate upload manifest
+        id: upload_manifest
+        if: inputs.action == 'upload'
+        shell: bash
+        run: |
+          set -euo pipefail
+          node utils/ops/cloudflare-rollout-policy.cjs write-upload-manifest \
+            --wrangler-output infra/cloudflare/universe-edge/wrangler-upload.ndjson \
+            --version-json infra/cloudflare/universe-edge/candidate-version.json \
+            --bundle-hashes infra/cloudflare/universe-edge/cloudflare-production-bundle-sha256.txt \
+            --candidate-sha "$RELEASE_SHA" \
+            --candidate-tree-sha "$RELEASE_TREE_SHA" \
+            --repository "$GITHUB_REPOSITORY" \
+            --run-id "$GITHUB_RUN_ID" \
+            --run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --workflow-ref "$GITHUB_WORKFLOW_REF" \
+            --worker-name "$WORKER_NAME" \
+            --output infra/cloudflare/universe-edge/candidate-upload-manifest.json \
+            --checksum-output infra/cloudflare/universe-edge/candidate-upload-manifest.json.sha256 \
+            --github-output "$GITHUB_OUTPUT"
+      - name: Summarize immutable candidate identity
+        if: inputs.action == 'upload'
+        shell: bash
+        run: |
+          {
+            echo "### Cloudflare candidate upload"
+            echo "- Version ID: ${{ steps.upload_identity.outputs.candidate_version_id }}"
+            echo "- Manifest SHA-256: ${{ steps.upload_manifest.outputs.candidate_manifest_sha256 }}"
+            echo "- Source SHA: ${RELEASE_SHA}"
+            echo "- Source tree: ${RELEASE_TREE_SHA}"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Apply the next exact deployment stage
+        id: apply
+        working-directory: infra/cloudflare/universe-edge
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PRODUCTION_API_TOKEN }}
+          WRANGLER_OUTPUT_FILE_PATH: ${{ github.workspace }}/infra/cloudflare/universe-edge/wrangler-deploy.ndjson
+        run: |
+          set -euo pipefail
+          candidate="$CANDIDATE_VERSION_ID"
+          if [[ "$ACTION" == "upload" ]]; then
+            candidate="${{ steps.upload_identity.outputs.candidate_version_id }}"
+          fi
+          case "$ACTION" in
+            upload) specs=("${PREVIOUS_VERSION_ID}@100" "${candidate}@0") ;;
+            rollout-5) specs=("${PREVIOUS_VERSION_ID}@95" "${candidate}@5") ;;
+            rollout-25) specs=("${PREVIOUS_VERSION_ID}@75" "${candidate}@25") ;;
+            rollout-50) specs=("${PREVIOUS_VERSION_ID}@50" "${candidate}@50") ;;
+            rollout-100) specs=("${PREVIOUS_VERSION_ID}@0" "${candidate}@100") ;;
+            *) exit 2 ;;
+          esac
+          npx wrangler versions deploy "${specs[@]}" --env production --yes \
+            --message "${ACTION} sha:${RELEASE_SHA} evidence:${HEALTH_EVIDENCE_REF}" \
+            2>&1 | tee -a cloudflare-production.log
+      - name: Read resulting production deployment
+        id: read_after
+        working-directory: infra/cloudflare/universe-edge
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PRODUCTION_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler deployments status --env production --json > deployment-after.json
+      - name: Verify resulting deployment weights
+        id: assert_after
+        shell: bash
+        run: |
+          set -euo pipefail
+          candidate="$CANDIDATE_VERSION_ID"
+          if [[ "$ACTION" == "upload" ]]; then
+            candidate="${{ steps.upload_identity.outputs.candidate_version_id }}"
+          fi
+          node utils/ops/cloudflare-rollout-policy.cjs assert-deployment \
+            --action "$ACTION" \
+            --phase after \
+            --status-json infra/cloudflare/universe-edge/deployment-after.json \
+            --previous-version-id "$PREVIOUS_VERSION_ID" \
+            --candidate-version-id "$candidate" \
+            --output infra/cloudflare/universe-edge/deployment-after.evidence.json
+      - name: Deterministically probe both deployed versions
+        id: health_after
+        shell: bash
+        run: |
+          set -euo pipefail
+          candidate="$CANDIDATE_VERSION_ID"
+          if [[ "$ACTION" == "upload" ]]; then
+            candidate="${{ steps.upload_identity.outputs.candidate_version_id }}"
+          fi
+          candidate_override="${WORKER_NAME}=\"${candidate}\""
+          previous_override="${WORKER_NAME}=\"${PREVIOUS_VERSION_ID}\""
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error \
+            --connect-timeout 5 --max-time 15 \
+            -H "Cloudflare-Workers-Version-Overrides: ${candidate_override}" \
+            -D infra/cloudflare/universe-edge/health-candidate-after.headers \
+            -o infra/cloudflare/universe-edge/health-candidate-after.json \
+            "$HEALTHCHECK_URL"
+          node utils/ops/cloudflare-rollout-policy.cjs assert-health \
+            --headers infra/cloudflare/universe-edge/health-candidate-after.headers \
+            --body infra/cloudflare/universe-edge/health-candidate-after.json \
+            --expected-version-id "$candidate" \
+            --expected-tag "sha-${RELEASE_SHA}" \
+            --output infra/cloudflare/universe-edge/health-candidate-after.evidence.json
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error \
+            --connect-timeout 5 --max-time 15 \
+            -H "Cloudflare-Workers-Version-Overrides: ${previous_override}" \
+            -D infra/cloudflare/universe-edge/health-previous-after.headers \
+            -o infra/cloudflare/universe-edge/health-previous-after.json \
+            "$HEALTHCHECK_URL"
+          node utils/ops/cloudflare-rollout-policy.cjs assert-health \
+            --headers infra/cloudflare/universe-edge/health-previous-after.headers \
+            --body infra/cloudflare/universe-edge/health-previous-after.json \
+            --output infra/cloudflare/universe-edge/health-previous-after.evidence.json
+      - name: Automatically restore previous version after a failed post-deploy check
+        id: restore
+        if: ${{ always() && steps.apply.outcome == 'success' && (steps.read_after.outcome == 'failure' || steps.assert_after.outcome == 'failure' || steps.health_after.outcome == 'failure') }}
+        working-directory: infra/cloudflare/universe-edge
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PRODUCTION_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler rollback "$PREVIOUS_VERSION_ID" --env production --yes \
+            --message "automatic restore after failed ${ACTION} sha:${RELEASE_SHA}" \
+            2>&1 | tee -a cloudflare-production.log
+      - name: Read automatic restore state
+        if: ${{ always() && steps.restore.outcome == 'success' }}
+        working-directory: infra/cloudflare/universe-edge
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PRODUCTION_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler deployments status --env production --json > deployment-restored.json
+      - name: Verify automatic restore reached previous at 100%
+        if: ${{ always() && steps.restore.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node utils/ops/cloudflare-rollout-policy.cjs assert-deployment \
+            --action rollback \
+            --phase after \
+            --status-json infra/cloudflare/universe-edge/deployment-restored.json \
+            --previous-version-id "$PREVIOUS_VERSION_ID" \
+            --output infra/cloudflare/universe-edge/deployment-restored.evidence.json
+      - name: Verify origin-backed health after automatic restore
+        if: ${{ always() && steps.restore.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error \
+            --connect-timeout 5 --max-time 15 \
+            -D infra/cloudflare/universe-edge/health-restored.headers \
+            -o infra/cloudflare/universe-edge/health-restored.json \
+            "$HEALTHCHECK_URL"
+          node utils/ops/cloudflare-rollout-policy.cjs assert-health \
+            --headers infra/cloudflare/universe-edge/health-restored.headers \
+            --body infra/cloudflare/universe-edge/health-restored.json \
+            --output infra/cloudflare/universe-edge/health-restored.evidence.json
+      - name: Retain production evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: cloudflare-production-${{ inputs.action }}-${{ needs.verify_candidate.outputs.sha }}
+          if-no-files-found: warn
+          include-hidden-files: true
+          path: |
+            infra/cloudflare/universe-edge/.wrangler-production/**
+            infra/cloudflare/universe-edge/candidate-upload-manifest.json
+            infra/cloudflare/universe-edge/candidate-upload-manifest.json.sha256
+            infra/cloudflare/universe-edge/cloudflare-production-bundle-sha256.txt
+            infra/cloudflare/universe-edge/cloudflare-production.log
+            infra/cloudflare/universe-edge/wrangler-upload.ndjson
+            infra/cloudflare/universe-edge/wrangler-deploy.ndjson
+            infra/cloudflare/universe-edge/*.evidence.json
+          retention-days: 90
+
+  rollback:
+    if: inputs.action == 'rollback'
+    needs: dispatch_guard
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      HEALTHCHECK_URL: ${{ vars.CLOUDFLARE_PRODUCTION_HEALTHCHECK_URL }}
+      ORIGIN_VERIFICATION_MODE: ${{ vars.CLOUDFLARE_ORIGIN_VERIFICATION_MODE }}
+      PREVIOUS_VERSION_ID: ${{ inputs.previous_version_id }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: infra/cloudflare/universe-edge/package-lock.json
+      - run: npm ci --prefix infra/cloudflare/universe-edge
+      - name: Validate rollback controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          node utils/ops/cloudflare-rollout-policy.cjs validate-inputs \
+            --action rollback \
+            --healthcheck-url "$HEALTHCHECK_URL" \
+            --origin-verification-mode "$ORIGIN_VERIFICATION_MODE" \
+            --previous-version-id "$PREVIOUS_VERSION_ID"
+          # No candidate tests or pre-change health probe may block this emergency path.
+      - name: Read rollback target as structured JSON
+        working-directory: infra/cloudflare/universe-edge
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PRODUCTION_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler versions view "$PREVIOUS_VERSION_ID" --env production --json \
+            > rollback-version.json
+      - name: Verify rollback target identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          node utils/ops/cloudflare-rollout-policy.cjs assert-version \
+            --version-json infra/cloudflare/universe-edge/rollback-version.json \
+            --expected-id "$PREVIOUS_VERSION_ID" \
+            --output infra/cloudflare/universe-edge/rollback-version.evidence.json
+      - name: Restore previous version at 100%
+        working-directory: infra/cloudflare/universe-edge
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PRODUCTION_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler rollback "$PREVIOUS_VERSION_ID" --env production --yes \
+            --message "manual emergency rollback run:${GITHUB_RUN_ID}" \
+            2>&1 | tee cloudflare-production-rollback.log
+      - name: Read rollback deployment
+        working-directory: infra/cloudflare/universe-edge
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PRODUCTION_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler deployments status --env production --json > deployment-rollback.json
+      - name: Verify rollback reached previous at 100%
+        shell: bash
+        run: |
+          set -euo pipefail
+          node utils/ops/cloudflare-rollout-policy.cjs assert-deployment \
+            --action rollback \
+            --phase after \
+            --status-json infra/cloudflare/universe-edge/deployment-rollback.json \
+            --previous-version-id "$PREVIOUS_VERSION_ID" \
+            --output infra/cloudflare/universe-edge/deployment-rollback.evidence.json
+      - name: Verify origin-backed health after rollback
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error \
+            --connect-timeout 5 --max-time 15 \
+            -D infra/cloudflare/universe-edge/health-rollback.headers \
+            -o infra/cloudflare/universe-edge/health-rollback.json \
+            "$HEALTHCHECK_URL"
+          node utils/ops/cloudflare-rollout-policy.cjs assert-health \
+            --headers infra/cloudflare/universe-edge/health-rollback.headers \
+            --body infra/cloudflare/universe-edge/health-rollback.json \
+            --output infra/cloudflare/universe-edge/health-rollback.evidence.json
+      - name: Retain rollback evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: cloudflare-production-rollback-${{ github.sha }}
+          if-no-files-found: warn
+          path: |
+            infra/cloudflare/universe-edge/cloudflare-production-rollback.log
+            infra/cloudflare/universe-edge/*.evidence.json
+          retention-days: 90

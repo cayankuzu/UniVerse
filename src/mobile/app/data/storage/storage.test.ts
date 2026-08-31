@@ -17,7 +17,13 @@ jest.mock("./storage.image", () => ({
   normalizeStorageUploadFile: jest.fn(async (file: unknown) => file),
 }));
 
+jest.mock("../../platform/api/core", () => ({
+  BASE_URL: "https://origin.example.test",
+  resolveApiUrl: jest.fn((_method: string, path: string) => `https://gateway.example.test${path}`),
+}));
+
 import { StorageAPI } from "./storage";
+import { resolveApiUrl } from "../../platform/api/core";
 import {
   directUploadWithRest,
   readStorageResponse,
@@ -27,6 +33,7 @@ import {
 const mockDirectUploadWithRest = directUploadWithRest as jest.Mock;
 const mockReadStorageResponse = readStorageResponse as jest.Mock;
 const mockRetryWithRefreshedSession = retryWithRefreshedSession as jest.Mock;
+const mockResolveApiUrl = resolveApiUrl as jest.Mock;
 
 describe("StorageAPI.uploadFile", () => {
   beforeEach(() => {
@@ -194,5 +201,47 @@ describe("StorageAPI.createUploadSession", () => {
 
     mockReadStorageResponse.mockResolvedValue({ sessionId: "session-1", tickets: [] });
     await expect(StorageAPI.createUploadSession(params)).rejects.toThrow("Yükleme oturumu yan");
+  });
+
+  it("routes every upload-session mutation through the central API selector", async () => {
+    const originalFetchDescriptor = Object.getOwnPropertyDescriptor(globalThis, "fetch");
+    Object.defineProperty(globalThis, "fetch", {
+      configurable: true,
+      value: jest.fn().mockResolvedValue({ ok: true, status: 200 } as Response),
+      writable: true,
+    });
+    mockRetryWithRefreshedSession.mockImplementation(
+      async (request: (token: string) => Promise<Response>) => request("access-token"),
+    );
+    mockReadStorageResponse.mockResolvedValue({
+      sessionId: "session-1",
+      tickets: [
+        {
+          expectedSizeBytes: 123,
+          mediaIndex: 0,
+          path: "albums/user/photo.jpg",
+          uploadToken: "upload-token",
+          uploadUrl: "https://upload.example/photo",
+        },
+      ],
+    });
+
+    try {
+      await StorageAPI.createUploadSession(params);
+      await StorageAPI.finalizeUploadSession("session-1", "access-token");
+      await StorageAPI.cancelUploadSession("session-1", "access-token");
+    } finally {
+      if (originalFetchDescriptor) {
+        Object.defineProperty(globalThis, "fetch", originalFetchDescriptor);
+      } else {
+        Reflect.deleteProperty(globalThis, "fetch");
+      }
+    }
+
+    expect(mockResolveApiUrl.mock.calls).toEqual([
+      ["POST", "/storage/upload-session/create"],
+      ["POST", "/storage/upload-session/finalize"],
+      ["POST", "/storage/upload-session/cancel"],
+    ]);
   });
 });

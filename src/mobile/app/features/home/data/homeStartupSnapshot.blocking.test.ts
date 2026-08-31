@@ -10,6 +10,7 @@ import {
 } from "./homeStartupSnapshot";
 
 const mockLoadViewerBlockedVisibility = jest.fn();
+const FIXED_NOW = Date.parse("2026-08-19T12:00:00.000Z");
 
 jest.mock("../../../data/social/blockedVisibility", () => {
   const actual = jest.requireActual("../../../data/social/blockedVisibility");
@@ -34,6 +35,7 @@ function createQueryClient() {
 describe("homeStartupSnapshot blocking isolation", () => {
   beforeEach(async () => {
     jest.clearAllMocks();
+    jest.spyOn(Date, "now").mockReturnValue(FIXED_NOW);
     clearProjectionPrefetchRegistry();
     resetHomeStartupSnapshotState();
     await AsyncStorage.clear();
@@ -42,6 +44,10 @@ describe("homeStartupSnapshot blocking isolation", () => {
       blockedUsernames: new Set(["blocked-club"]),
       viewerId: "viewer-1",
     });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it("filters blocked actors before priming startup snapshots into cache", async () => {
@@ -79,7 +85,7 @@ describe("homeStartupSnapshot blocking isolation", () => {
           source: "following",
         } as any,
       ],
-      savedAt: Date.parse("2026-08-19T12:00:00.000Z"),
+      savedAt: FIXED_NOW,
       unreadCount: 2,
       viewerKey: "viewer-1",
     });
@@ -112,7 +118,7 @@ describe("homeStartupSnapshot blocking isolation", () => {
           source: "following",
         } as any,
       ],
-      savedAt: Date.parse("2026-08-19T12:00:00.000Z"),
+      savedAt: FIXED_NOW,
       unreadCount: 1,
       viewerKey: "viewer-1",
     });

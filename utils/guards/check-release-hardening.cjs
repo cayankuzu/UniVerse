@@ -302,8 +302,28 @@ assertContains(
 );
 assertContains(
   releaseWorkflow,
-  /npm run release:verify/,
-  "[release-hardening] release workflow must run npm run release:verify.",
+  /npm run release:verify:repository/,
+  "[release-hardening] release workflow must run secret-free repository verification.",
+);
+assertContains(
+  releaseWorkflow,
+  /environment:\s*production/,
+  "[release-hardening] provider verification must use the protected production environment.",
+);
+assertContains(
+  releaseWorkflow,
+  /RELEASE_EDGE_HEALTHCHECK_URL:\s*\$\{\{\s*vars\.RELEASE_EDGE_HEALTHCHECK_URL/,
+  "[release-hardening] release health must use the fixed repository/environment variable.",
+);
+assertNotContains(
+  releaseWorkflow,
+  /edge_healthcheck_url:/,
+  "[release-hardening] release health URL must not be supplied as a workflow dispatch input.",
+);
+assertNotContains(
+  releaseWorkflow,
+  /^ {6}[A-Z0-9_]+:\s*\$\{\{\s*secrets\./m,
+  "[release-hardening] provider secrets must not be exposed at job scope.",
 );
 assertContains(
   securityWorkflow,

@@ -20,6 +20,8 @@ Bu klasor production hardening oncesi calistirilacak SQL dogrulama paketlerini i
   `client_mutation_id` replay kontrolu ve receipt kaydi dogrulamasi
 - `08_database_architecture_audit.sql`
   Domain table/view varligi, projection signature standardizasyonu, projection source kolonlari, `updated_by` trigger coverage ve zorunlu index seti audit'i
+- `09_cloudflare_origin_replay_security.sql`
+  Cloudflare origin nonce tablosu/RPC RLS-grant sozlesmesi ve tek-kullanim replay reddi dogrulamasi
 
 ## Calistirma
 
@@ -35,6 +37,7 @@ Onerilen sira:
 6. `06_projection_cursor_paths.sql`
 7. `07_client_mutation_idempotency.sql`
 8. `08_database_architecture_audit.sql`
+9. `09_cloudflare_origin_replay_security.sql`
 
 ## Beklenen Cikti
 
@@ -46,6 +49,7 @@ Onerilen sira:
 - cursor / append EXPLAIN planlari secondary projection ikinci sayfa ve `sort_mode` yollarinda da index kullanimini korumali
 - duplicate `client_mutation_id` replay sorgulari ayni mutation icin ikinci yan etkiyi uretmemeli
 - database architecture audit script'i projection signature, trigger ve index coverage eksigi bulmamali
+- Cloudflare origin replay testi ilk nonce claim'ini kabul edip ayni nonce'i ikinci kez reddetmeli; public/anon/auth erisimi kapali kalmali
 
 ## Notlar
 

@@ -37,6 +37,9 @@ jest.mock("./mediaVideoUtils", () => ({
   isImageMediaUri: jest.fn((uri: string) => /\.(?:jpe?g|png|webp)(?:$|[?#])/i.test(uri)),
 }));
 
+const { VideoThumbnailPreview, resolveVideoThumbnailFromCandidates } =
+  require("./VideoThumbnailPreview") as typeof import("./VideoThumbnailPreview");
+
 describe("VideoThumbnailPreview", () => {
   beforeEach(() => {
     mockResolveVideoThumbnail.mockReset();
@@ -55,30 +58,23 @@ describe("VideoThumbnailPreview", () => {
       return null;
     });
 
-    const { VideoThumbnailPreview } =
-      require("./VideoThumbnailPreview") as typeof import("./VideoThumbnailPreview");
+    await expect(
+      resolveVideoThumbnailFromCandidates(
+        ["content://video-primary", "file:///video-secondary.mp4"],
+        "eager",
+        () => false,
+      ),
+    ).resolves.toBe(thumbnail);
 
-    render(
-      <VideoThumbnailPreview
-        candidateUris={["content://video-primary", "file:///video-secondary.mp4"]}
-        uri="content://video-primary"
-      />,
-    );
-
-    await waitFor(() => {
-      expect(mockResolveVideoThumbnail).toHaveBeenNthCalledWith(1, "content://video-primary", {
-        priority: "eager",
-      });
-      expect(mockResolveVideoThumbnail).toHaveBeenNthCalledWith(2, "file:///video-secondary.mp4", {
-        priority: "eager",
-      });
+    expect(mockResolveVideoThumbnail).toHaveBeenCalledWith("content://video-primary", {
+      priority: "eager",
+    });
+    expect(mockResolveVideoThumbnail).toHaveBeenCalledWith("file:///video-secondary.mp4", {
+      priority: "eager",
     });
   });
 
   it("uses an image variant directly as the video poster", async () => {
-    const { VideoThumbnailPreview } =
-      require("./VideoThumbnailPreview") as typeof import("./VideoThumbnailPreview");
-
     render(
       <VideoThumbnailPreview
         candidateUris={["https://cdn.example.com/video-poster.webp"]}
@@ -98,8 +94,6 @@ describe("VideoThumbnailPreview", () => {
   it("generates a thumbnail for a remote signed video when no poster exists", async () => {
     const thumbnail = { uri: "file:///remote-video-thumb.jpg" } as never;
     mockResolveVideoThumbnail.mockResolvedValue(thumbnail);
-    const { VideoThumbnailPreview } =
-      require("./VideoThumbnailPreview") as typeof import("./VideoThumbnailPreview");
     const remoteVideoUri = "https://cdn.example.com/video.mp4?token=signed";
 
     render(<VideoThumbnailPreview uri={remoteVideoUri} />);

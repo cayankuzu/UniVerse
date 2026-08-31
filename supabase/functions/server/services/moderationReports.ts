@@ -176,16 +176,8 @@ async function loadAlbumCommentRow(adminSupabase: SupabaseClient, commentId: str
   return (data || null) as Record<string, unknown> | null;
 }
 
-function renderSectionHtml(title: string, value: unknown) {
-  return [
-    `<h2 style="margin:24px 0 8px;font-size:16px;color:#0f172a;">${escapeHtml(title)}</h2>`,
-    `<pre style="margin:0;padding:14px;border-radius:12px;background:#f8fafc;border:1px solid #e2e8f0;white-space:pre-wrap;word-break:break-word;font-size:12px;line-height:1.6;color:#0f172a;">${escapeHtml(JSON.stringify(value, null, 2))}</pre>`,
-  ].join("");
-}
-
 function buildModerationMailSubject(params: {
   reportId: string;
-  targetSnapshot: Record<string, unknown>;
   targetType: ReportTargetInsertShape["target_type"];
 }) {
   const targetLabel = {
@@ -195,16 +187,7 @@ function buildModerationMailSubject(params: {
     event_comment: "etkinlik yorumu",
     user: "profil",
   }[params.targetType];
-  const username =
-    trimText((params.targetSnapshot.profile as Record<string, unknown> | undefined)?.username) ||
-    trimText((params.targetSnapshot.owner as Record<string, unknown> | undefined)?.username) ||
-    trimText((params.targetSnapshot.uploader as Record<string, unknown> | undefined)?.username) ||
-    trimText((params.targetSnapshot.author as Record<string, unknown> | undefined)?.username);
-  const title =
-    trimText((params.targetSnapshot.event as Record<string, unknown> | undefined)?.title) ||
-    trimText((params.targetSnapshot.album as Record<string, unknown> | undefined)?.title);
-  const suffix = username || title || params.reportId;
-  return `[UniVerse] Yeni ${targetLabel} sikayeti - ${suffix}`;
+  return `[UniVerse] Yeni ${targetLabel} sikayeti - ${params.reportId}`;
 }
 
 export async function buildModerationReportSnapshots(params: {
@@ -313,36 +296,21 @@ export async function buildModerationReportSnapshots(params: {
 }
 
 export async function sendModerationReportEmail(params: {
-  detail?: string | null;
   reason: string;
   reportId: string;
-  reporterSnapshot: Record<string, unknown>;
-  targetSnapshot: Record<string, unknown>;
   targetType: ReportTargetInsertShape["target_type"];
 }): Promise<ModerationMailDeliveryResult> {
   const subject = buildModerationMailSubject({
     reportId: params.reportId,
-    targetSnapshot: params.targetSnapshot,
     targetType: params.targetType,
   });
-  const submittedDetail = truncateText(params.detail, 4000) || "Yok";
-  const reporterEmail = trimText(
-    (params.reporterSnapshot.profile as Record<string, unknown> | undefined)?.email,
-  );
   const textContent = [
     "UniVerse moderation report",
     `Report ID: ${params.reportId}`,
     `Target Type: ${params.targetType}`,
     `Reason: ${params.reason}`,
     "",
-    "User supplied detail:",
-    submittedDetail,
-    "",
-    "Reporter snapshot:",
-    JSON.stringify(params.reporterSnapshot, null, 2),
-    "",
-    "Target snapshot:",
-    JSON.stringify(params.targetSnapshot, null, 2),
+    "Review the protected report record for evidence. Sensitive snapshots are not sent by email.",
   ].join("\n");
   const htmlContent = [
     '<div style="font-family:Arial,sans-serif;background:#f8fafc;padding:24px;color:#0f172a;">',
@@ -354,11 +322,8 @@ export async function sendModerationReportEmail(params: {
     "</div>",
     '<div style="padding:16px;border-radius:14px;background:#fff7ed;border:1px solid #fdba74;">',
     `<div style="font-size:13px;color:#9a3412;font-weight:700;margin-bottom:6px;">Reason</div><div style="font-size:15px;color:#7c2d12;">${escapeHtml(params.reason)}</div>`,
-    '<div style="font-size:13px;color:#9a3412;font-weight:700;margin:14px 0 6px;">User supplied detail</div>',
-    `<div style="font-size:14px;color:#7c2d12;white-space:pre-wrap;">${escapeHtml(submittedDetail)}</div>`,
+    '<div style="font-size:13px;color:#9a3412;margin-top:14px;">Review the protected report record for evidence. Sensitive snapshots are not sent by email.</div>',
     "</div>",
-    renderSectionHtml("Reporter snapshot", params.reporterSnapshot),
-    renderSectionHtml("Target snapshot", params.targetSnapshot),
     "</div>",
     "</div>",
   ].join("");
@@ -366,7 +331,6 @@ export async function sendModerationReportEmail(params: {
   return deliverModerationReportEmail({
     htmlContent,
     reportId: params.reportId,
-    reporterEmail,
     subject,
     targetType: params.targetType,
     textContent,

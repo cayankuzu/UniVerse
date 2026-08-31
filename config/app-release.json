@@ -1,13 +1,13 @@
 {
-  "version": "1.0.133",
-  "runtimeVersion": "1.0.133",
+  "version": "1.0.134",
+  "runtimeVersion": "1.0.134",
   "android": {
     "package": "com.ogrencisosyalagi.app",
-    "versionCode": 133
+    "versionCode": 134
   },
   "ios": {
     "bundleIdentifier": "com.ogrencisosyalagi.app",
-    "buildNumber": "133"
+    "buildNumber": "134"
   },
   "profiles": {
     "preview": {

@@ -1,8 +1,10 @@
 import { createClient } from "jsr:@supabase/supabase-js@2.49.8";
+import { readVerifiedClientNetworkSubject } from "./services/verifiedClientNetwork.ts";
 
 type HeaderReader = {
   req: {
     header(name: string): string | undefined;
+    raw?: Request;
   };
 };
 
@@ -56,6 +58,8 @@ function normalizeSingleIp(value: string | undefined) {
 }
 
 export function getRequestClientAddress(c: HeaderReader) {
+  const verifiedClientNetworkSubject = readVerifiedClientNetworkSubject(c.req.raw);
+  if (verifiedClientNetworkSubject) return verifiedClientNetworkSubject;
   return (
     [
       c.req.header("cf-connecting-ip"),

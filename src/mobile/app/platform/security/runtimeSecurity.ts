@@ -7,6 +7,7 @@ import {
   RUNTIME_FLAGS,
 } from "../config/runtime";
 import {
+  CLOUDFLARE_GATEWAY_URL,
   SUPABASE_FUNCTIONS_BASE_URL_VALIDATED,
   SUPABASE_PUBLIC_URL_VALIDATED,
 } from "../config/publicEnv";
@@ -56,6 +57,13 @@ function collectStaticRuntimeSecurityIssues() {
   }
   if (!/^https:\/\//i.test(SUPABASE_FUNCTIONS_BASE_URL_VALIDATED)) {
     addIssue(issues, "supabase_functions_url_not_https", "high");
+  }
+  if (
+    IS_PRODUCTION_RUNTIME &&
+    CLOUDFLARE_GATEWAY_URL &&
+    !/^https:\/\//i.test(CLOUDFLARE_GATEWAY_URL)
+  ) {
+    addIssue(issues, "cloudflare_gateway_url_not_https", "high");
   }
   if (!APP_SCHEME) {
     addIssue(issues, "app_scheme_missing", "high");

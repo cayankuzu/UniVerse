@@ -41,6 +41,33 @@ for (const target of TARGETS) {
   }
 }
 
+const runtimeConfigPath = path.join(
+  ROOT,
+  "src",
+  "mobile",
+  "app",
+  "platform",
+  "config",
+  "runtime.ts",
+);
+const runtimeConfig = fs.readFileSync(runtimeConfigPath, "utf8");
+if (/const\s+raw\s*=\s*process\.env\s*\[/.test(runtimeConfig)) {
+  failures.push(
+    "src/mobile/app/platform/config/runtime.ts must not use dynamic process.env access; Expo only inlines static EXPO_PUBLIC_* dot references.",
+  );
+}
+for (const requiredStaticEnv of [
+  "EXPO_PUBLIC_CLOUDFLARE_GATEWAY_URL",
+  "EXPO_PUBLIC_DISABLE_LEGACY_EDGE_READS",
+  "EXPO_PUBLIC_SUPABASE_ANON_KEY",
+  "EXPO_PUBLIC_SUPABASE_FUNCTIONS_BASE_URL",
+  "EXPO_PUBLIC_SUPABASE_URL",
+]) {
+  if (!runtimeConfig.includes(`process.env.${requiredStaticEnv}`)) {
+    failures.push(`runtime.ts must statically reference process.env.${requiredStaticEnv}.`);
+  }
+}
+
 if (failures.length > 0) {
   console.error("[runtime-hygiene] FAIL");
   for (const failure of failures) {

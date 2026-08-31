@@ -2,7 +2,7 @@
   "expo": {
     "name": "UniVerse",
     "slug": "universe",
-    "version": "1.0.133",
+    "version": "1.0.134",
     "platforms": ["android", "ios"],
     "extra": {
       "eas": {
@@ -10,7 +10,7 @@
       }
     },
     "owner": "cayanns-team",
-    "runtimeVersion": "1.0.133",
+    "runtimeVersion": "1.0.134",
     "updates": {
       "fallbackToCacheTimeout": 0,
       "url": "https://u.expo.dev/c7565eaa-d013-430f-9576-217c4beefa3f"

@@ -1,0 +1,28 @@
+{
+  "name": "@universe/edge-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "npm run types:check && npm run typecheck && npm test && npm run deploy:dry-run",
+    "deploy:dry-run": "wrangler deploy --dry-run --env=\"\" --outdir .wrangler-dry-run",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "types": "wrangler types ./worker-configuration.d.ts --strict-vars=false",
+    "types:check": "wrangler types ./worker-configuration.d.ts --strict-vars=false --check"
+  },
+  "dependencies": {
+    "jose": "6.2.10",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "1.1.2",
+    "typescript": "~5.9.2",
+    "vitest": "4.1.11",
+    "wrangler": "4.127.1"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true,
+    "workerd@1.20260828.1": true
+  }
+}

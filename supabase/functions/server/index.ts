@@ -2,7 +2,7 @@ import { Hono } from "npm:hono";
 import { cors } from "npm:hono/cors";
 import { createClient } from "npm:@supabase/supabase-js";
 import * as kv from "./kv_store.ts";
-import { logEdgeRequest, logError } from "./logging.ts";
+import { logEdgeRequest, logError, logInfo } from "./logging.ts";
 import {
   AUTH_RECOVERY_ENDPOINTS_ENABLED,
   COMPAT_ROUTES_ENABLED,
@@ -15,6 +15,12 @@ import {
   purgeUserAccountData as purgeDeletionData,
 } from "./services/accountDeletion.ts";
 import { createBlockedStateReader } from "./services/blockedState.ts";
+import {
+  CloudflareOriginVerificationError,
+  readCloudflareOriginVerificationConfig,
+  verifyCloudflareOriginRequest,
+  type OriginNonceClaim,
+} from "./services/cloudflareOriginVerification.ts";
 import { createProfileStore } from "./services/profileStore.ts";
 import { triggerInlinePushDispatchDrain } from "./services/pushDispatchDrain.ts";
 import { isSqlBlockedPair } from "./services/sqlBlockedState.ts";
@@ -30,12 +36,18 @@ import type {
   NotificationInsertPayload,
   ServerRouteDeps,
 } from "./types.ts";
+import { markVerifiedClientNetworkKey } from "./services/verifiedClientNetwork.ts";
 
 const app = new Hono().basePath("/server");
 
 const SUPABASE_URL = readRequiredEdgeEnv("SUPABASE_URL");
 const SERVICE_ROLE_KEY = readRequiredEdgeEnv("SUPABASE_SERVICE_ROLE_KEY", "SERVICE_ROLE_KEY");
 const adminSupabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+const cloudflareOriginVerificationConfig = readCloudflareOriginVerificationConfig({
+  maxClockSkewSeconds: Deno.env.get("CLOUDFLARE_ORIGIN_MAX_CLOCK_SKEW_SECONDS"),
+  mode: Deno.env.get("CLOUDFLARE_ORIGIN_VERIFICATION_MODE"),
+  secret: Deno.env.get("ORIGIN_HMAC_SECRET"),
+});
 const KV_TABLE = "kv_store_e3557d40";
 const MEDIA_BUCKET = "make-e3557d40-media";
 const SLOW_REQUEST_MS = Number(Deno.env.get("EDGE_SLOW_REQUEST_MS") || "400");
@@ -121,6 +133,65 @@ app.use(
   }),
 );
 
+async function claimCloudflareOriginNonce(claim: OriginNonceClaim) {
+  const { data, error } = await adminSupabase.rpc("claim_cloudflare_origin_request_nonce", {
+    p_expires_at: claim.expiresAt,
+    p_nonce: claim.nonce,
+    p_request_id: claim.requestId,
+    p_request_timestamp: claim.requestTimestamp,
+    p_route_id: claim.routeId,
+  });
+  if (error) {
+    throw new Error(`cloudflare-origin-nonce-claim-failed:${error.code || "unknown"}`);
+  }
+  return data === true;
+}
+
+app.use("*", async (c, next) => {
+  if (c.req.method === "OPTIONS") {
+    await next();
+    return;
+  }
+
+  try {
+    const result = await verifyCloudflareOriginRequest(
+      c.req.raw,
+      cloudflareOriginVerificationConfig,
+      { claimNonce: claimCloudflareOriginNonce },
+    );
+    if (result.outcome === "observed_unsigned") {
+      logInfo("origin-verification", "unsigned-selected-route-observed", {
+        method: c.req.method,
+        path: c.req.path,
+        routeId: result.routeId,
+      });
+    }
+    if (result.outcome === "verified" && result.clientNetworkKey) {
+      markVerifiedClientNetworkKey(c.req.raw, result.clientNetworkKey);
+    }
+    await next();
+  } catch (error) {
+    if (!(error instanceof CloudflareOriginVerificationError)) throw error;
+    const logMeta = {
+      code: error.code,
+      method: c.req.method,
+      path: c.req.path,
+    };
+    if (error.status >= 500) {
+      logError("origin-verification", "selected-route-verification-unavailable", error, logMeta);
+    } else {
+      logInfo("origin-verification", "selected-route-verification-rejected", logMeta);
+    }
+    return new Response(JSON.stringify({ error: "Origin request verification failed." }), {
+      headers: {
+        "cache-control": "no-store",
+        "content-type": "application/json; charset=utf-8",
+      },
+      status: error.status,
+    });
+  }
+});
+
 function generateId() {
   return crypto.randomUUID();
 }
@@ -164,7 +235,6 @@ async function getUser(c: EdgeRouteContext): Promise<EdgeUser | null> {
   } catch (error) {
     logError("auth", "get-user-failed", error instanceof Error ? error : new Error(String(error)), {
       path: c.req.path,
-      tokenPrefix: token.slice(0, 20),
     });
     return null;
   }

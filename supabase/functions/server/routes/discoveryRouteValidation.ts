@@ -14,6 +14,11 @@ const REPORT_TARGET_TYPES = ["album", "album_comment", "event", "event_comment",
 const SEARCH_TYPES = ["events", "clubs", "students"] as const;
 
 const reportBodySchema = z.object({
+  clientMutationId: z
+    .string()
+    .trim()
+    .regex(/^[A-Za-z0-9._:-]{8,120}$/, "clientMutationId gecersiz")
+    .optional(),
   detail: z.string().trim().max(1000, "Detay en fazla 1000 karakter olabilir").optional(),
   reason: z
     .string()

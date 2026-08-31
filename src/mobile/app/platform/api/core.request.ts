@@ -19,7 +19,8 @@ import {
   tryDedupeInflight,
   trackInflightGet,
 } from "./core.requestPool";
-import { BASE_URL, DEBUG_API_TRACE } from "./core.shared";
+import { DEBUG_API_TRACE } from "./core.shared";
+import { resolveApiUrl } from "./core.routing";
 
 function createRequestAbortBridge(params: {
   callerSignal?: AbortSignal | null;
@@ -104,7 +105,7 @@ async function executeRequest<T>(
   let releaseRequestSlot: () => void = () => undefined;
   try {
     releaseRequestSlot = await acquireApiRequestSlot(abortBridge.signal);
-    res = await fetch(`${BASE_URL}${path}`, {
+    res = await fetch(resolveApiUrl(method, path), {
       ...requestInit,
       signal: abortBridge.signal,
       headers: buildRequestHeaders(requestInit.headers, token),

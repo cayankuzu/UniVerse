@@ -1,0 +1,485 @@
+name: eas-update-production
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_sha:
+        description: "Full SHA of the currently approved production update; it must be an ancestor of this workflow SHA."
+        required: true
+        type: string
+      preview_run_id:
+        description: "Successful eas-update-preview publish run ID for this exact candidate SHA."
+        required: true
+        type: string
+      device_evidence_run_id:
+        description: "Successful same-SHA preview attest-devices run containing the sealed device artifact."
+        required: true
+        type: string
+      binary_ota_evidence_path:
+        description: "Committed release-evidence/published-binaries/*.json inspection report for current Android and iOS binaries."
+        required: true
+        type: string
+      release_message:
+        description: "Short operator-visible description of the existing-feature fix."
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: eas-update-production-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  verify-production:
+    name: Credential-free production verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    outputs:
+      classification: ${{ steps.ota_diff.outputs.classification }}
+    env:
+      BASE_SHA: ${{ inputs.base_sha }}
+      CANDIDATE_SHA: ${{ github.sha }}
+      DEVICE_EVIDENCE_RUN_ID: ${{ inputs.device_evidence_run_id }}
+      GH_TOKEN: ${{ github.token }}
+      INPUT_RELEASE_MESSAGE: ${{ inputs.release_message }}
+      PREVIEW_RUN_ID: ${{ inputs.preview_run_id }}
+    steps:
+      - name: Checkout immutable candidate
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.sha }}
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Require current main and validate release inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF}" = "refs/heads/main"
+          test "$(git rev-parse HEAD)" = "${CANDIDATE_SHA}"
+          test "$(gh api "repos/${GITHUB_REPOSITORY}/commits/main" --jq .sha)" = "${CANDIDATE_SHA}"
+          test -z "$(git status --porcelain=v1 --untracked-files=normal)"
+          node <<'NODE'
+          const message = process.env.INPUT_RELEASE_MESSAGE || "";
+          if (!message.trim() || message.length > 160 || /[\u0000-\u001f\u007f]/u.test(message)) {
+            throw new Error("release_message must be 1-160 characters without control characters");
+          }
+          for (const [name, value] of [
+            ["preview_run_id", process.env.PREVIEW_RUN_ID],
+            ["device_evidence_run_id", process.env.DEVICE_EVIDENCE_RUN_ID],
+          ]) {
+            if (!/^[1-9]\d*$/u.test(value || "")) throw new Error(`${name} must be a positive run ID`);
+          }
+          NODE
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Self-test OTA policy and evidence tooling
+        run: >-
+          node --test
+          ./utils/guards/classify-ota-diff.test.cjs
+          ./utils/ops/validate-ota-provider.test.cjs
+          ./utils/ops/validate-ota-device-evidence.test.cjs
+          ./utils/ops/write-ota-update-evidence.test.cjs
+          ./utils/ops/ota-workflow-policy.test.cjs
+
+      - name: Classify immutable production diff
+        id: ota_diff
+        shell: bash
+        run: >-
+          node ./utils/guards/classify-ota-diff.cjs
+          --base "${BASE_SHA}"
+          --head "${CANDIDATE_SHA}"
+          --require-clean
+          --require-ota-safe
+          --require-ota-payload
+          --json-output "${RUNNER_TEMP}/production-classifier.json"
+          --github-output "${GITHUB_OUTPUT}"
+
+      - name: Run repository quality gates without provider credentials
+        run: |
+          npm run security:verify:internal
+          npm run lint -- --max-warnings=0
+          npm run format:check:all
+          npm run test:ci
+
+  publish-production:
+    name: Publish verified production canary from a fresh checkout
+    needs: verify-production
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    env:
+      BASE_SHA: ${{ inputs.base_sha }}
+      BINARY_OTA_EVIDENCE_PATH: ${{ inputs.binary_ota_evidence_path }}
+      CANDIDATE_SHA: ${{ github.sha }}
+      DEVICE_EVIDENCE_RUN_ID: ${{ inputs.device_evidence_run_id }}
+      EAS_CLI_VERSION: "23.0.0"
+      EVIDENCE_DIR: ${{ runner.temp }}/universe-ota/production/${{ github.sha }}
+      GH_TOKEN: ${{ github.token }}
+      INPUT_RELEASE_MESSAGE: ${{ inputs.release_message }}
+      OTA_CHANNEL: production
+      OTA_ENVIRONMENT: production
+      PREVIEW_RUN_ID: ${{ inputs.preview_run_id }}
+    steps:
+      - name: Checkout immutable candidate into fresh publish workspace
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.sha }}
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Validate fresh current-main workspace and release inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF}" = "refs/heads/main"
+          test "$(git rev-parse HEAD)" = "${CANDIDATE_SHA}"
+          test "$(gh api "repos/${GITHUB_REPOSITORY}/commits/main" --jq .sha)" = "${CANDIDATE_SHA}"
+          test -z "$(git status --porcelain=v1 --untracked-files=normal)"
+          mkdir -p "${EVIDENCE_DIR}"
+          node <<'NODE'
+          const fs = require("node:fs");
+          const message = process.env.INPUT_RELEASE_MESSAGE || "";
+          if (!message.trim() || message.length > 160 || /[\u0000-\u001f\u007f]/u.test(message)) {
+            throw new Error("release_message must be 1-160 characters without control characters");
+          }
+          for (const value of [process.env.PREVIEW_RUN_ID, process.env.DEVICE_EVIDENCE_RUN_ID]) {
+            if (!/^[1-9]\d*$/u.test(value || "")) throw new Error("run IDs must be positive integers");
+          }
+          const release = require("./config/app-release.json");
+          fs.appendFileSync(process.env.GITHUB_ENV, `RUNTIME_VERSION=${release.runtimeVersion}\n`);
+          NODE
+
+      - name: Install locked dependencies in fresh publish workspace
+        run: npm ci
+
+      - name: Install pinned EAS CLI without provider credentials
+        run: |
+          npm install --global --ignore-scripts "eas-cli@${EAS_CLI_VERSION}"
+          eas --version | grep -E '^eas-cli/23\.0\.0 '
+
+      - name: Classify fresh immutable production diff
+        shell: bash
+        run: >-
+          node ./utils/guards/classify-ota-diff.cjs
+          --base "${BASE_SHA}"
+          --head "${CANDIDATE_SHA}"
+          --require-clean
+          --require-ota-safe
+          --require-ota-payload
+          --json-output "${EVIDENCE_DIR}/classifier.json"
+
+      - name: Download and validate same-SHA preview publish evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          preview_dir="${EVIDENCE_DIR}/preview-evidence"
+          mkdir -p "${preview_dir}"
+          gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${PREVIEW_RUN_ID}" >"${EVIDENCE_DIR}/preview-run.json"
+          node - "${EVIDENCE_DIR}/preview-run.json" <<'NODE'
+          const fs = require("node:fs");
+          const run = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+          if (String(run.id) !== process.env.PREVIEW_RUN_ID) throw new Error("preview run ID mismatch");
+          if (run.path !== ".github/workflows/eas-update-preview.yml") throw new Error("unexpected preview workflow");
+          if (run.conclusion !== "success" || run.status !== "completed") throw new Error("preview run failed");
+          if (run.head_sha !== process.env.CANDIDATE_SHA) throw new Error("preview run SHA mismatch");
+          NODE
+          gh run download "${PREVIEW_RUN_ID}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --name "eas-update-preview-evidence-${CANDIDATE_SHA}" \
+            --dir "${preview_dir}"
+          test -f "${preview_dir}/manifest.json"
+          test -f "${preview_dir}/manifest.json.sha256"
+
+      - name: Validate committed published-binary OTA inspection evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const crypto = require("node:crypto");
+          const fs = require("node:fs");
+          const path = require("node:path");
+          const requested = String(process.env.BINARY_OTA_EVIDENCE_PATH || "").replace(/\\/gu, "/");
+          if (!/^release-evidence\/published-binaries\/[-_.a-z0-9]+\.json$/iu.test(requested)) {
+            throw new Error("binary OTA evidence path is invalid");
+          }
+          const raw = fs.readFileSync(path.resolve(requested));
+          const evidence = JSON.parse(raw.toString("utf8"));
+          const release = require("./config/app-release.json");
+          const expectedUrl = "https://u.expo.dev/c7565eaa-d013-430f-9576-217c4beefa3f";
+          if (evidence.schemaVersion !== 1 || evidence.kind !== "published-binary-ota-capability") {
+            throw new Error("published-binary evidence schema or kind is invalid");
+          }
+          for (const platform of ["android", "ios"]) {
+            const item = evidence.platforms?.[platform];
+            if (!item || item.updatesEnabled !== true) throw new Error(`${platform} OTA capability is unverified`);
+            if (item.runtimeVersion !== release.runtimeVersion) throw new Error(`${platform} runtime mismatch`);
+            if (item.updateUrl !== expectedUrl || item.channel !== "production") throw new Error(`${platform} target mismatch`);
+            if (!/^[0-9a-f]{64}$/u.test(String(item.artifactSha256 || ""))) throw new Error(`${platform} hash missing`);
+            if (!String(item.artifactReference || "").trim() || !String(item.inspectionTool || "").trim()) {
+              throw new Error(`${platform} artifact reference or inspection tool missing`);
+            }
+          }
+          const output = path.join(process.env.EVIDENCE_DIR, "published-binary-evidence.json");
+          fs.copyFileSync(path.resolve(requested), output);
+          fs.writeFileSync(`${output}.sha256`, `${crypto.createHash("sha256").update(raw).digest("hex")}  published-binary-evidence.json\n`);
+          NODE
+
+      - name: Download immutable same-SHA device evidence artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          device_dir="${EVIDENCE_DIR}/device-evidence"
+          artifact_name="eas-update-preview-device-evidence-${CANDIDATE_SHA}"
+          mkdir -p "${device_dir}"
+          gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${DEVICE_EVIDENCE_RUN_ID}" >"${EVIDENCE_DIR}/device-run.json"
+          gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${DEVICE_EVIDENCE_RUN_ID}/artifacts?name=${artifact_name}" >"${EVIDENCE_DIR}/device-artifact.json"
+          node - "${EVIDENCE_DIR}/device-run.json" "${EVIDENCE_DIR}/device-artifact.json" <<'NODE'
+          const fs = require("node:fs");
+          const run = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+          const result = JSON.parse(fs.readFileSync(process.argv[3], "utf8"));
+          const expectedName = `eas-update-preview-device-evidence-${process.env.CANDIDATE_SHA}`;
+          if (String(run.id) !== process.env.DEVICE_EVIDENCE_RUN_ID) throw new Error("device run ID mismatch");
+          if (run.path !== ".github/workflows/eas-update-preview.yml") throw new Error("unexpected device workflow");
+          if (run.conclusion !== "success" || run.status !== "completed") throw new Error("device run failed");
+          if (run.head_sha !== process.env.CANDIDATE_SHA) throw new Error("device run SHA mismatch");
+          if (result.total_count !== 1 || result.artifacts?.length !== 1) throw new Error("one device artifact is required");
+          const artifact = result.artifacts[0];
+          if (artifact.name !== expectedName || artifact.expired === true) throw new Error("device artifact invalid");
+          if (!/^sha256:[0-9a-f]{64}$/u.test(String(artifact.digest || ""))) throw new Error("device digest missing");
+          NODE
+          gh run download "${DEVICE_EVIDENCE_RUN_ID}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --name "${artifact_name}" \
+            --dir "${device_dir}"
+          test -f "${device_dir}/manifest.json"
+          test -f "${device_dir}/manifest.json.sha256"
+          test -f "${device_dir}/validation.json"
+          test -f "${device_dir}/validation.json.sha256"
+
+      - name: Revalidate Android and iOS preview runtime-device evidence
+        shell: bash
+        run: >-
+          node ./utils/ops/validate-ota-device-evidence.cjs
+          --candidate "${CANDIDATE_SHA}"
+          --runtime-version "${RUNTIME_VERSION}"
+          --manifest "${EVIDENCE_DIR}/device-evidence/manifest.json"
+          --checksum "${EVIDENCE_DIR}/device-evidence/manifest.json.sha256"
+          --preview-manifest "${EVIDENCE_DIR}/preview-evidence/manifest.json"
+          --preview-checksum "${EVIDENCE_DIR}/preview-evidence/manifest.json.sha256"
+          --binary-evidence "${EVIDENCE_DIR}/published-binary-evidence.json"
+          --output "${EVIDENCE_DIR}/device-validation.json"
+
+      - name: Verify Expo identity
+        shell: bash
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: eas whoami --non-interactive
+
+      - name: Read production provider state for idempotency
+        shell: bash
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: >-
+          eas update:list
+          --all
+          --runtime-version "${RUNTIME_VERSION}"
+          --limit 50
+          --json
+          --non-interactive
+          >"${EVIDENCE_DIR}/preflight-update-list.json"
+
+      - name: Reject duplicate production candidate publication
+        shell: bash
+        run: >-
+          node ./utils/ops/validate-ota-provider.cjs preflight
+          --kind production
+          --candidate "${CANDIDATE_SHA}"
+          --runtime-version "${RUNTIME_VERSION}"
+          --branch "${OTA_CHANNEL}"
+          --update-list "${EVIDENCE_DIR}/preflight-update-list.json"
+
+      - name: Revalidate full cleanliness and OTA classification immediately before publish
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${CANDIDATE_SHA}"
+          node ./utils/guards/classify-ota-diff.cjs \
+            --base "${BASE_SHA}" \
+            --head "${CANDIDATE_SHA}" \
+            --require-clean \
+            --require-ota-safe \
+            --require-ota-payload \
+            --json-output "${EVIDENCE_DIR}/classifier.json"
+          test -z "$(git status --porcelain=v1 --untracked-files=normal)"
+          git diff --exit-code
+          git diff --cached --exit-code
+
+      - name: Publish production update at five percent
+        id: publish
+        shell: bash
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: >-
+          eas update
+          --channel "${OTA_CHANNEL}"
+          --environment "${OTA_ENVIRONMENT}"
+          --message "production ${CANDIDATE_SHA}: ${INPUT_RELEASE_MESSAGE}"
+          --platform all
+          --rollout-percentage 5
+          --clear-cache
+          --emit-metadata
+          --json
+          --non-interactive
+          >"${EVIDENCE_DIR}/eas-update.json"
+          2>"${EVIDENCE_DIR}/eas-update.stderr.log"
+
+      - name: Validate exact production provider response
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f dist/eas-update-metadata.json
+          cp dist/eas-update-metadata.json "${EVIDENCE_DIR}/eas-update-metadata.json"
+          node ./utils/ops/validate-ota-provider.cjs publish \
+            --kind production \
+            --candidate "${CANDIDATE_SHA}" \
+            --runtime-version "${RUNTIME_VERSION}" \
+            --branch "${OTA_CHANNEL}" \
+            --message "production ${CANDIDATE_SHA}: ${INPUT_RELEASE_MESSAGE}" \
+            --provider-output "${EVIDENCE_DIR}/eas-update.json" \
+            --update-metadata "${EVIDENCE_DIR}/eas-update-metadata.json" \
+            --output "${EVIDENCE_DIR}/publish-validation.json"
+
+      - name: Observe production update group
+        shell: bash
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: >-
+          eas update:list
+          --branch "${OTA_CHANNEL}"
+          --runtime-version "${RUNTIME_VERSION}"
+          --limit 10
+          --json
+          --non-interactive
+          >"${EVIDENCE_DIR}/observed-update-list.json"
+
+      - name: Observe production channel linkage
+        shell: bash
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: >-
+          eas channel:view "${OTA_CHANNEL}"
+          --limit 10
+          --json
+          --non-interactive
+          >"${EVIDENCE_DIR}/observed-channel.json"
+
+      - name: Validate five-percent provider observation
+        shell: bash
+        run: |
+          set -euo pipefail
+          node ./utils/ops/validate-ota-provider.cjs observe \
+            --kind production \
+            --candidate "${CANDIDATE_SHA}" \
+            --runtime-version "${RUNTIME_VERSION}" \
+            --branch "${OTA_CHANNEL}" \
+            --message "production ${CANDIDATE_SHA}: ${INPUT_RELEASE_MESSAGE}" \
+            --rollout-percentage 5 \
+            --provider-output "${EVIDENCE_DIR}/eas-update.json" \
+            --update-metadata "${EVIDENCE_DIR}/eas-update-metadata.json" \
+            --update-list "${EVIDENCE_DIR}/observed-update-list.json" \
+            --channel-view "${EVIDENCE_DIR}/observed-channel.json" \
+            --output "${EVIDENCE_DIR}/provider-observation.json"
+
+      - name: Write same-SHA production evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          node ./utils/ops/write-ota-update-evidence.cjs \
+            --kind production \
+            --base "${BASE_SHA}" \
+            --head "${CANDIDATE_SHA}" \
+            --channel "${OTA_CHANNEL}" \
+            --environment "${OTA_ENVIRONMENT}" \
+            --rollout-percentage 5 \
+            --eas-cli-version "${EAS_CLI_VERSION}" \
+            --classifier-report "${EVIDENCE_DIR}/classifier.json" \
+            --provider-output "${EVIDENCE_DIR}/eas-update.json" \
+            --provider-observation "${EVIDENCE_DIR}/provider-observation.json" \
+            --provider-stderr "${EVIDENCE_DIR}/eas-update.stderr.log" \
+            --update-metadata "${EVIDENCE_DIR}/eas-update-metadata.json" \
+            --preview-manifest "${EVIDENCE_DIR}/preview-evidence/manifest.json" \
+            --preview-manifest-checksum "${EVIDENCE_DIR}/preview-evidence/manifest.json.sha256" \
+            --device-validation "${EVIDENCE_DIR}/device-validation.json" \
+            --repository "${GITHUB_REPOSITORY}" \
+            --workflow-run-id "${GITHUB_RUN_ID}" \
+            --workflow-run-attempt "${GITHUB_RUN_ATTEMPT}" \
+            --output "${EVIDENCE_DIR}/manifest.json"
+
+      - name: Upload immutable production evidence
+        if: ${{ always() && steps.publish.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: eas-update-production-evidence-${{ github.sha }}
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 0
+
+      - name: Record truthful production status
+        if: ${{ success() }}
+        shell: bash
+        run: |
+          {
+            echo "### EAS Update production canary"
+            echo "- Candidate: \`${CANDIDATE_SHA}\`"
+            echo "- Diff: \`${{ needs.verify-production.outputs.classification }}\`"
+            echo "- Target: \`${OTA_ENVIRONMENT}/${OTA_CHANNEL}\` at observed 5% rollout."
+            echo "- Same-SHA preview, Android+iOS device, installed-binary, and provider observation evidence passed."
+            echo "- Promotion beyond 5% still requires the separate health and rollback runbook gates."
+          } >>"${GITHUB_STEP_SUMMARY}"
+
+      - name: Resolve published group for automatic production revert
+        id: rollback_identity
+        if: ${{ failure() && steps.publish.outcome == 'success' }}
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require("node:fs");
+          const file = `${process.env.EVIDENCE_DIR}/eas-update.json`;
+          if (!fs.existsSync(file)) process.exit(0);
+          const updates = JSON.parse(fs.readFileSync(file, "utf8"));
+          const groups = [...new Set(updates.map((item) => String(item?.group || "").toLowerCase()))];
+          if (groups.length !== 1 || !/^[0-9a-f-]{36}$/u.test(groups[0])) process.exit(0);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `group_id=${groups[0]}\n`);
+          NODE
+
+      - name: Revert production rollout after a post-publish failure
+        if: ${{ failure() && steps.rollback_identity.outputs.group_id != '' }}
+        shell: bash
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: >-
+          eas update:revert-update-rollout
+          --group "${{ steps.rollback_identity.outputs.group_id }}"
+          --message "automatic production rollout revert after evidence failure ${CANDIDATE_SHA}"
+          --json
+          --non-interactive
+          >"${EVIDENCE_DIR}/automatic-revert.json"

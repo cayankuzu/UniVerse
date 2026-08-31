@@ -205,6 +205,11 @@ for (const [profileName, releaseProfile] of Object.entries(appRelease.profiles |
   if (!easProfile) fail(`Missing EAS profile declared by app-release.json: ${profileName}.`);
   expectEqual(easProfile.channel, releaseProfile.channel, `${profileName} channel drifted.`);
   expectEqual(
+    easProfile.environment,
+    releaseProfile.appEnv,
+    `${profileName} EAS environment drifted.`,
+  );
+  expectEqual(
     easProfile.env?.EXPO_PUBLIC_APP_ENV,
     releaseProfile.appEnv,
     `${profileName} app env drifted.`,

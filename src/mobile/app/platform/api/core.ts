@@ -5,6 +5,7 @@ export { HttpRequestError, isHttpRequestError } from "./core.requestHelpers";
 export { getToken } from "./core.auth";
 export { del, get, post, put } from "./core.request";
 export { BASE_URL } from "./core.shared";
+export { isCloudflareGatewayRoute, resolveApiUrl } from "./core.routing";
 
 export function isFunctionUnavailable(error: unknown): boolean {
   if (isHttpRequestError(error)) {
