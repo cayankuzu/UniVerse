@@ -125,7 +125,7 @@ jobs:
       CANDIDATE_SHA: ${{ github.sha }}
       DEVICE_EVIDENCE_RUN_ID: ${{ inputs.device_evidence_run_id }}
       EAS_CLI_VERSION: "23.0.0"
-      EVIDENCE_DIR: ${{ runner.temp }}/universe-ota/production/${{ github.sha }}
+      EVIDENCE_DIR: ${{ github.workspace }}/../universe-ota/production/${{ github.sha }}
       GH_TOKEN: ${{ github.token }}
       INPUT_RELEASE_MESSAGE: ${{ inputs.release_message }}
       OTA_CHANNEL: production

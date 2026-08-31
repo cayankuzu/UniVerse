@@ -122,7 +122,7 @@ jobs:
       BASE_SHA: ${{ inputs.base_sha }}
       CANDIDATE_SHA: ${{ github.sha }}
       EAS_CLI_VERSION: "23.0.0"
-      EVIDENCE_DIR: ${{ runner.temp }}/universe-ota/preview/${{ github.sha }}
+      EVIDENCE_DIR: ${{ github.workspace }}/../universe-ota/preview/${{ github.sha }}
       INPUT_RELEASE_MESSAGE: ${{ inputs.release_message }}
       OTA_CHANNEL: preview
       OTA_ENVIRONMENT: preview
@@ -380,7 +380,7 @@ jobs:
       BINARY_OTA_EVIDENCE_PATH: ${{ inputs.binary_ota_evidence_path }}
       CANDIDATE_SHA: ${{ github.sha }}
       DEVICE_MANIFEST_BASE64: ${{ inputs.device_manifest_base64 }}
-      EVIDENCE_DIR: ${{ runner.temp }}/universe-ota/device-verification/${{ github.sha }}
+      EVIDENCE_DIR: ${{ github.workspace }}/../universe-ota/device-verification/${{ github.sha }}
       GH_TOKEN: ${{ github.token }}
       PREVIEW_RUN_ID: ${{ inputs.preview_run_id }}
     steps:
@@ -462,7 +462,7 @@ jobs:
       BINARY_OTA_EVIDENCE_PATH: ${{ inputs.binary_ota_evidence_path }}
       CANDIDATE_SHA: ${{ github.sha }}
       DEVICE_MANIFEST_BASE64: ${{ inputs.device_manifest_base64 }}
-      EVIDENCE_DIR: ${{ runner.temp }}/universe-ota/device-attestation/${{ github.sha }}
+      EVIDENCE_DIR: ${{ github.workspace }}/../universe-ota/device-attestation/${{ github.sha }}
       GH_TOKEN: ${{ github.token }}
       PREVIEW_RUN_ID: ${{ inputs.preview_run_id }}
     steps:
