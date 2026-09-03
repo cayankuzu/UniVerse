@@ -39,6 +39,50 @@ candidate.
 - No Docker was used. Isolated Supabase migration/RLS validation, credentialed k6, iOS signing/device
   coverage, provider inspection, and rollout/rollback rehearsals remain external evidence gaps below.
 
+## Containerized same-SHA verification (2026-09-03)
+
+Candidate commit: `79805fbb567d58ff99742884a0881181ff86e0ac`
+Tree: `be15793c717114bfeac979afed77a48fb1704a45` (clean worktree)
+
+The Docker validation environment now produces an aggregate evidence manifest bound to that
+commit and tree. `artifacts/docker/evidence-manifest.json` lists 8 artifacts, each with its
+SHA-256, and the writer refuses to aggregate anything produced from a different or dirty tree.
+
+| Profile      | What actually ran                                                                                                                                                                                                    | Bound artifact             |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| `test`       | Supabase CLI 2.116.0 local stack, clean migration replay, DB lint, SQL validation pack, pgTAP RLS contracts, disposable-schema dump/restore probe, origin/report/push contracts, Worker tests/types/Wrangler dry-run | `test-evidence.json`       |
+| `resilience` | Toxiproxy 2.12.0 baseline, 254 ms latency, peer reset, provider outage, and recovery                                                                                                                                 | `resilience-evidence.json` |
+| `load`       | k6 smoke and sustained scenarios against the synthetic RPC envelope, verifying scripts and semantic thresholds only                                                                                                  | `load-evidence.json`       |
+| `security`   | Hadolint, CycloneDX SBOM, and Trivy image scan failing closed on fixable HIGH/CRITICAL                                                                                                                               | `security-evidence.json`   |
+
+This closes the _isolated_ part of E4 for migration replay, DB lint, RLS/IDOR personas, and
+dump/restore. It does **not** close E4 for credentialed staging: the load profile is explicitly a
+script/threshold check against a synthetic upstream, not capacity evidence, and provider PITR and
+Storage restore remain external. The remaining E-codes are unchanged.
+
+### Toolchain parity
+
+The tooling image previously ran Node 26 while every workflow ran Node 22, so the container and CI
+were not the same quality gate. The image is repinned to `node:22.23.2` by digest and
+`npm run guard:toolchain-parity` fails closed on divergence. `npm run guard:docker-test-manifest`
+additionally fails closed when a staged contract test reads a file the image does not copy, which
+was masking two real container-only failures before this candidate.
+
+### Local repository verification for this candidate
+
+- `npm run check` (typecheck, all guards, Worker types/tests) passed.
+- ESLint zero-warning and full-tree Prettier passed.
+- Jest passed 321 suites and 1084 tests; changed-line coverage was 93.22% (330/354) against a 90% gate.
+- Semgrep reported 0 findings; Gitleaks reported no leaks on the current tree and across full history.
+- `npm run guard:dependency-audit` passed with four approved advisories. `browserslist` was upgraded
+  to a genuinely patched release rather than accepted; see
+  [dependency-security-exceptions.md](dependency-security-exceptions.md).
+- `npm run guard:expo-doctor` passes on the CI Node 22 toolchain. On a Node 26 workstation two
+  legacy-package probes abort because `npm explain` now exits non-zero for absent packages; that is
+  an environment deviation, not a project finding, and is the reason the toolchain is pinned.
+- `npm run guard:k6-env` still fails closed because `K6_SUPABASE_URL` and `K6_SUPABASE_ANON_KEY`
+  are unset. That is the intended block: credentialed staging load remains an external gate.
+
 ## Feature-freeze comparison
 
 | Protected surface                                         |   Baseline | Current guarded source | Result           |
