@@ -6,10 +6,12 @@ import { useSyncOrchestratorStore } from "../projections/sync/syncOrchestrator";
 import { useUiViewStateStore } from "../projections/uiViewState";
 import { QUERY_CACHE_PERSIST_KEY } from "../query/persist";
 import { MEDIA_URI_CACHE_PERSIST_KEY } from "../../shared/media/mediaUri";
+import { NotificationPushAPI } from "../notifications/notifications.push";
 import { clearSensitiveClientState } from "./clearSensitiveClientState";
 
 describe("clearSensitiveClientState", () => {
   beforeEach(async () => {
+    jest.spyOn(NotificationPushAPI, "clearStoredRegistration").mockResolvedValue(undefined);
     await AsyncStorage.clear();
     queryClient.clear();
     useSyncOrchestratorStore.getState().reset();
@@ -68,5 +70,19 @@ describe("clearSensitiveClientState", () => {
     expect(useSyncOrchestratorStore.getState().projections).toEqual({});
     expect(useUiViewStateStore.getState().screens).toEqual({});
     expect(useOptimisticOutboxMetaStore.getState().entries).toEqual({});
+    expect(NotificationPushAPI.clearStoredRegistration).not.toHaveBeenCalled();
+  });
+
+  it("clears the stored push registration only after confirmed account deletion", async () => {
+    await clearSensitiveClientState({
+      clearPushRegistration: true,
+      reason: "delete-account",
+    });
+
+    expect(NotificationPushAPI.clearStoredRegistration).toHaveBeenCalledTimes(1);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 });

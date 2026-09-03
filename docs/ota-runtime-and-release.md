@@ -33,6 +33,10 @@ Neither a store-provenance AAB/APK nor an IPA/TestFlight artifact is committed w
 inspection report. A published-binary inspection for both platforms is therefore a production
 precondition. Until it exists, the truthful state is `RELEASE NO-GO`.
 
+Push registration or delivery evidence is a separate requirement. It may exercise an installed
+runtime, but it cannot prove update selection, runtime compatibility, rollout state, or rollback.
+Track it independently through [push-real-device-matrix.md](push-real-device-matrix.md).
+
 No Expo Update code-signing certificate or metadata is configured in the repository. The workflows
 therefore do not request a private signing key and do not claim signed-update verification. Adding,
 rotating, or removing an update certificate changes the native runtime and requires a new runtime

@@ -98,6 +98,7 @@ beforeEach(() => {
   mockGetActiveOrPersistedSession.mockReset();
   mockGetPersistedAuthBootstrapSnapshot.mockReset();
   mockHardSignOut.mockReset();
+  mockHardSignOut.mockResolvedValue(undefined);
   mockLogError.mockReset();
   mockPersistAuthSession.mockReset();
   mockSupabaseOnAuthStateChange.mockReset();
@@ -256,5 +257,59 @@ describe("useAuthSessionSubscription", () => {
     expect(recoverAndHydrateSession).not.toHaveBeenCalled();
     expect(startSessionHydrationInBackground).not.toHaveBeenCalled();
     expect(clearAuthState).not.toHaveBeenCalled();
+  });
+
+  it("suppresses the SIGNED_OUT event emitted by an intentional logout boundary", async () => {
+    const clearAuthState = jest.fn();
+    const confirmPersistedSession = jest.fn().mockResolvedValue(null);
+    const suppressSignedOutRef = { current: true };
+
+    const { useAuthSessionSubscription } = require("./useAuthSessionEffects");
+    renderHook(() =>
+      useAuthSessionSubscription({
+        clearAuthState,
+        confirmPersistedSession,
+        isDemoRef: { current: false },
+        lastSeededSessionAtRef: { current: 0 },
+        recoverAndHydrateSession: jest.fn(),
+        startSessionHydrationInBackground: jest.fn(),
+        suppressSignedOutRef,
+      }),
+    );
+
+    await act(async () => {
+      authStateChangeHandler?.("SIGNED_OUT", null);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    expect(confirmPersistedSession).not.toHaveBeenCalled();
+    expect(mockHardSignOut).not.toHaveBeenCalled();
+    expect(clearAuthState).not.toHaveBeenCalled();
+  });
+
+  it("uses the proof-preserving default boundary for an external SIGNED_OUT event", async () => {
+    const clearAuthState = jest.fn();
+
+    const { useAuthSessionSubscription } = require("./useAuthSessionEffects");
+    renderHook(() =>
+      useAuthSessionSubscription({
+        clearAuthState,
+        confirmPersistedSession: jest.fn().mockResolvedValue(null),
+        isDemoRef: { current: false },
+        lastSeededSessionAtRef: { current: 0 },
+        recoverAndHydrateSession: jest.fn(),
+        startSessionHydrationInBackground: jest.fn(),
+        suppressSignedOutRef: { current: false },
+      }),
+    );
+
+    await act(async () => {
+      authStateChangeHandler?.("SIGNED_OUT", null);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      await Promise.resolve();
+    });
+
+    expect(mockHardSignOut).toHaveBeenCalledWith("sign-out");
+    expect(clearAuthState).toHaveBeenCalledTimes(1);
   });
 });

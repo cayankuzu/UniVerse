@@ -4,7 +4,7 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
-    "lib": ["ES2023", "WebWorker"],
+    "lib": ["ES2023", "WebWorker", "WebWorker.Iterable"],
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "noEmit": true,
@@ -17,7 +17,7 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "ES2023",
-    "types": ["@cloudflare/vitest-plugin/types"]
+    "types": ["@cloudflare/vitest-plugin/types", "node"]
   },
   "include": ["src/**/*.ts", "test/**/*.ts", "vitest.config.ts", "worker-configuration.d.ts"]
 }

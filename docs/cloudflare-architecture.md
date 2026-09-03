@@ -1,6 +1,6 @@
 # Selective Cloudflare architecture
 
-Updated: 2026-08-30
+Updated: 2026-08-31
 
 ## Decision
 
@@ -60,10 +60,19 @@ projection, follow/block/status, Realtime or private-media traffic through Cloud
 ## Environment isolation
 
 Development, preview and production have distinct Worker names, limiter namespace IDs, secrets,
-upstreams and sampling. Production disables `workers.dev` and preview URLs. Preview contains
-fail-closed `.invalid` upstreams until the real isolated project is entered. A stable custom
+upstreams and sampling. Production disables `workers.dev` and preview URLs. Development and
+preview contain fail-closed `.invalid` upstreams until their isolated projects are supplied; the
+tracked development defaults can never reach production. A stable custom
 `api.*` hostname is intentionally a manual DNS/zone decision because the repository contains no
 verified root-domain ownership evidence.
+
+Mobile preview configuration also fails closed: an enabled preview
+`EXPO_PUBLIC_CLOUDFLARE_GATEWAY_URL` must be a canonical HTTPS origin and requires the canonical
+production origin in `EXPO_PUBLIC_CLOUDFLARE_PRODUCTION_GATEWAY_URL` as an explicit deny target.
+The two origins cannot match. Preview Supabase and Functions URLs likewise require an isolated
+project ref and an exact same-origin Functions path. When production cutover is enabled, its mobile
+gateway must exactly match the declared production gateway origin; the production Supabase target
+is pinned to the tracked project ref.
 
 ## Rollout and rollback
 

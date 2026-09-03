@@ -136,7 +136,7 @@ export function useAuthSessionLifecycle({
         clearDemoStorage,
         isDemoRef,
         logout,
-        signOut: () => hardSignOut("delete-account"),
+        signOut: (options) => hardSignOut("delete-account", options),
       }),
     [clearAuthState, clearDemoStorage, isDemoRef, logout],
   );

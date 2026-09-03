@@ -7,12 +7,15 @@ const PUSH_RECEIPT_BATCH_LIMIT = 500;
 const PUSH_RECEIPT_MIN_AGE_MS = 15 * 60_000;
 const PUSH_RECEIPT_MAX_AGE_MS = 24 * 60 * 60_000;
 const PUSH_RECEIPT_UPDATE_CONCURRENCY = 20;
+const EXPO_RECEIPT_REQUEST_TIMEOUT_MS = 8_000;
 
 type PendingPushDelivery = {
   attempted_at: string;
   notification_id: string;
   push_token_id: string;
+  recipient_user_id: string | null;
   ticket_id: string;
+  token_revision: number | null;
 };
 
 type ExpoPushReceipt = ExpoPushTicket & {
@@ -95,7 +98,7 @@ export async function reconcilePendingPushReceipts(adminSupabase: SupabaseClient
 
   const { data, error } = await adminSupabase
     .from("notification_push_deliveries")
-    .select("notification_id,push_token_id,ticket_id,attempted_at")
+    .select("notification_id,push_token_id,ticket_id,attempted_at,recipient_user_id,token_revision")
     .eq("status", "pending")
     .not("ticket_id", "is", null)
     .gt("attempted_at", receiptExpiredAt)
@@ -120,17 +123,23 @@ export async function reconcilePendingPushReceipts(adminSupabase: SupabaseClient
   }
 
   let response: Response;
+  let raw: unknown;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), EXPO_RECEIPT_REQUEST_TIMEOUT_MS);
   try {
     response = await fetch(EXPO_PUSH_RECEIPTS_URL, {
       body: JSON.stringify({ ids: deliveries.map((item) => item.ticket_id) }),
       headers: createReceiptHeaders(),
       method: "POST",
+      signal: controller.signal,
     });
+    raw = await response.json().catch(() => null);
   } catch (fetchError) {
     return failedReceiptResult(fetchError, expiredRows?.length || 0);
+  } finally {
+    clearTimeout(timeout);
   }
 
-  const raw = await response.json().catch(() => null);
   if (!response.ok) {
     return failedReceiptResult(
       new Error(`Expo push receipt request failed with HTTP ${response.status}.`),
@@ -155,7 +164,7 @@ export async function reconcilePendingPushReceipts(adminSupabase: SupabaseClient
     }
     const receipt = normalizeExpoPushReceipt(rawReceipt);
     if (receipt.status === "ok") {
-      const { error: updateError } = await adminSupabase
+      const { data: updatedDelivery, error: updateError } = await adminSupabase
         .from("notification_push_deliveries")
         .update({
           delivered_at: reconciledAt,
@@ -167,13 +176,40 @@ export async function reconcilePendingPushReceipts(adminSupabase: SupabaseClient
         .eq("notification_id", delivery.notification_id)
         .eq("push_token_id", delivery.push_token_id)
         .eq("status", "pending")
-        .eq("ticket_id", delivery.ticket_id);
+        .eq("ticket_id", delivery.ticket_id)
+        .select("notification_id")
+        .maybeSingle();
       if (updateError) throw updateError;
+      if (!updatedDelivery) throw new Error("Push receipt delivery update was not confirmed.");
       sentCount += 1;
       return;
     }
 
-    const { error: updateError } = await adminSupabase
+    if (isRecoverableInactiveTokenError(receipt)) {
+      const tokenRevision = Number(delivery.token_revision);
+      if (
+        !delivery.recipient_user_id ||
+        !Number.isSafeInteger(tokenRevision) ||
+        tokenRevision <= 0
+      ) {
+        return;
+      }
+      const { data: deactivatedToken, error: deactivateError } = await adminSupabase
+        .from("push_device_tokens")
+        .update({
+          is_active: false,
+          last_seen_at: reconciledAt,
+        })
+        .eq("id", delivery.push_token_id)
+        .eq("user_id", delivery.recipient_user_id)
+        .eq("delivery_revision", tokenRevision)
+        .select("id")
+        .maybeSingle();
+      if (deactivateError) throw deactivateError;
+      if (deactivatedToken) deactivatedCount += 1;
+    }
+
+    const { data: updatedDelivery, error: updateError } = await adminSupabase
       .from("notification_push_deliveries")
       .update({
         delivered_at: null,
@@ -185,21 +221,12 @@ export async function reconcilePendingPushReceipts(adminSupabase: SupabaseClient
       .eq("notification_id", delivery.notification_id)
       .eq("push_token_id", delivery.push_token_id)
       .eq("status", "pending")
-      .eq("ticket_id", delivery.ticket_id);
+      .eq("ticket_id", delivery.ticket_id)
+      .select("notification_id")
+      .maybeSingle();
     if (updateError) throw updateError;
+    if (!updatedDelivery) throw new Error("Push receipt failure update was not confirmed.");
     errorCount += 1;
-
-    if (isRecoverableInactiveTokenError(receipt)) {
-      const { error: deactivateError } = await adminSupabase
-        .from("push_device_tokens")
-        .update({
-          is_active: false,
-          last_seen_at: reconciledAt,
-        })
-        .eq("id", delivery.push_token_id);
-      if (deactivateError) throw deactivateError;
-      deactivatedCount += 1;
-    }
   });
 
   return {

@@ -1,0 +1,87 @@
+name: docker-validation
+
+on:
+  # `docker-validate-immutable` is a required branch-protection context, so every PR must create it.
+  # A path-filtered required PR workflow can remain permanently pending on unrelated changes.
+  pull_request:
+  push:
+    branches:
+      - main
+      - "chore/aaa-mvp-hardening-docker-cloudflare-ota-push"
+  workflow_dispatch:
+
+permissions:
+  attestations: write
+  contents: read
+  id-token: write
+
+concurrency:
+  group: docker-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: docker-validate-immutable
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      CI: "true"
+    steps:
+      - name: Check out candidate SHA
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.sha }}
+
+      - name: Set up deterministic host Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+
+      - name: Verify immutable clean checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          test -z "$(git status --porcelain=v1 --untracked-files=normal)"
+
+      - name: Validate Compose graph
+        run: npm run docker:config
+
+      - name: Migration, RLS, disposable restore probe, and Worker contracts
+        run: npm run docker:test
+
+      - name: Fault-injection profile
+        run: npm run docker:resilience
+
+      - name: Synthetic k6 tooling profile
+        run: npm run docker:load
+
+      - name: Dockerfile, SBOM, and vulnerability gates
+        run: npm run docker:security
+
+      - name: Bind evidence to the checked-out commit and tree
+        run: npm run docker:evidence
+
+      - name: Attest the checksum-bound Docker evidence manifest
+        if: ${{ success() && github.event_name != 'pull_request' }}
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
+        with:
+          subject-path: artifacts/docker/evidence-manifest.json
+          show-summary: true
+
+      - name: Upload immutable Docker evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: docker-validation-${{ github.sha }}
+          path: artifacts/docker
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Clean validation resources
+        if: always()
+        env:
+          DOCKER_CLEAN_CONFIRM: "YES"
+        run: npm run docker:clean

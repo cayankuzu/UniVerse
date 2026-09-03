@@ -27,3 +27,5 @@ supabase/migrations_legacy_archive/20260319010000_push_notification_delivery_pip
 supabase/migrations_legacy_archive/20260319030000_push_webhook_secret_header.sql
 supabase/migrations_legacy_archive/20260326183000_push_dispatch_queue_buffering.sql
 utils/guards/check-architecture-boundaries.cjs
+supabase/.temp/
+supabase/.branches/

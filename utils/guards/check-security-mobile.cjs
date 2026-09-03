@@ -81,6 +81,25 @@ const AUTH_LIFECYCLE_HELPERS = path.join(
   "session",
   "useAuthSessionLifecycle.helpers.ts",
 );
+const ROOT_NAVIGATION_LINKING = path.join(
+  ROOT,
+  "src",
+  "mobile",
+  "app",
+  "app-shell",
+  "navigation",
+  "rootNavigation.linking.ts",
+);
+const AUTH_LIFECYCLE_ACTIONS = path.join(
+  ROOT,
+  "src",
+  "mobile",
+  "app",
+  "app-shell",
+  "auth",
+  "session",
+  "useAuthSessionLifecycle.actions.ts",
+);
 const PUSH_REGISTRATION = path.join(
   ROOT,
   "src",
@@ -155,6 +174,8 @@ const authCallback = read(AUTH_CALLBACK);
 const resetPassword = read(RESET_PASSWORD);
 const deepLinkBridge = read(DEEP_LINK_BRIDGE);
 const authLifecycleHelpers = read(AUTH_LIFECYCLE_HELPERS);
+const authLifecycleActions = read(AUTH_LIFECYCLE_ACTIONS);
+const rootNavigationLinking = read(ROOT_NAVIGATION_LINKING);
 const pushRegistration = read(PUSH_REGISTRATION);
 const notificationPermission = read(NOTIFICATION_PERMISSION);
 const homeActions = read(HOME_ACTIONS);
@@ -191,8 +212,8 @@ assertContains(
 );
 assertContains(
   authSessionBoundary,
-  /await clearSensitiveClientState\(\{ reason \}\)/,
-  "[security-mobile] hardSignOut must purge sensitive client state.",
+  /await clearSensitiveClientState\(\{[\s\S]*?\breason,?\s*\}\)/,
+  "[security-mobile] hardSignOut must purge sensitive client state with the sign-out reason.",
 );
 assertContains(
   authLifecycle,
@@ -201,8 +222,18 @@ assertContains(
 );
 assertContains(
   authLifecycle,
-  /hardSignOut\("delete-account"\)/,
+  /hardSignOut\("delete-account"[,)]/,
   "[security-mobile] delete-account flow must hard sign out through the centralized purge path.",
+);
+assertContains(
+  authLifecycleActions,
+  /await params\.signOut\(\{ clearPushRegistration: true \}\)/,
+  "[security-mobile] delete-account must revoke the stored push registration for the device.",
+);
+assertContains(
+  clearSensitiveState,
+  /clearPushRegistration\s*\?\s*\[NotificationPushAPI\.clearStoredRegistration\(\)\]/,
+  "[security-mobile] sensitive state purge must clear the stored push registration when requested.",
 );
 assertContains(
   resetPassword,
@@ -213,6 +244,16 @@ assertContains(
   authCallback,
   /hardSignOut\("auth-recovery-failed"\)/,
   "[security-mobile] auth callback failure must purge sensitive state.",
+);
+assertContains(
+  rootNavigationLinking,
+  /getStateFromPath:\s*getStateFromLinkedPath/,
+  "[security-mobile] deep-link routing must resolve through the hardened path resolver.",
+);
+assertContains(
+  rootNavigationLinking,
+  /getStateFromPath\(\s*path\.replace\(\/\[\?#\]\[\\s\\S\]\*\$\/,\s*""\)/,
+  "[security-mobile] deep-link query and fragment data must be stripped before parsing.",
 );
 assertContains(
   deepLinkBridge,

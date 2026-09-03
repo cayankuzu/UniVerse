@@ -1,14 +1,12 @@
-jest.mock("../../../platform/config/runtime", () => ({
-  IS_DEVELOPMENT_RUNTIME: false,
-  IS_PRODUCTION_RUNTIME: false,
-  IS_TEST_RUNTIME: true,
-  readBooleanEnv: jest.fn((_name: string, fallback: boolean) => fallback),
-  readRequiredEnv: jest.fn((_name: string, fallback = "") => fallback),
-  readStringEnv: jest.fn((_name: string, fallback = "") => fallback),
-  RUNTIME_FLAGS: {
-    useProjectionSearch: true,
-  },
-}));
+// Keep the real runtime config (APP_ENV, env readers) so the public-env contract still
+// resolves; only the projection-search flag is forced on for this suite.
+jest.mock("../../../platform/config/runtime", () => {
+  const actual = jest.requireActual("../../../platform/config/runtime");
+  return {
+    ...actual,
+    RUNTIME_FLAGS: { ...actual.RUNTIME_FLAGS, useProjectionSearch: true },
+  };
+});
 
 jest.mock("../../../data/projections/projections.api.helpers", () => ({
   shouldFallbackToLegacy: jest.fn(() => false),

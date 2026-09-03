@@ -6,6 +6,7 @@ import {
   isPushDispatchWakeupRequest,
   normalizeExpoProjectId,
   normalizePushAppEnv,
+  normalizePushInstallationId,
   normalizePushPlatform,
   parseNotificationDispatchId,
   validateExpoPushToken,
@@ -22,6 +23,8 @@ const PUSH_DISPATCH_SERVICE_ROLE_KEY = String(
 ).trim();
 const PUSH_REGISTER_RATE_LIMIT = 10;
 const PUSH_REGISTER_RATE_WINDOW_MS = 60_000;
+const PUSH_UNREGISTER_RATE_LIMIT = 10;
+const PUSH_UNREGISTER_RATE_WINDOW_MS = 60_000;
 const PUSH_PUBLIC_WAKEUP_RATE_LIMIT = 600;
 const PUSH_PUBLIC_WAKEUP_RATE_WINDOW_MS = 60_000;
 const PUSH_PUBLIC_WAKEUP_BATCH_LIMIT = 8;
@@ -31,8 +34,40 @@ type PushRegistrationBody = {
   appEnv?: unknown;
   expoProjectId?: unknown;
   expoPushToken?: unknown;
+  generation?: unknown;
+  installationId?: unknown;
   platform?: unknown;
 };
+
+type PushRpcResult = {
+  applied: boolean;
+  currentGeneration: number;
+};
+
+function normalizePushGeneration(value: unknown) {
+  if (value === undefined || value === null || value === "") return null;
+  const generation = Number(value);
+  return Number.isSafeInteger(generation) && generation > 0 ? generation : null;
+}
+
+function normalizePushRpcResult(value: unknown): PushRpcResult | null {
+  const item = (Array.isArray(value) ? value[0] : value) as {
+    applied?: unknown;
+    currentGeneration?: unknown;
+  } | null;
+  const currentGeneration = Number(item?.currentGeneration);
+  if (
+    typeof item?.applied !== "boolean" ||
+    !Number.isSafeInteger(currentGeneration) ||
+    currentGeneration < 0
+  ) {
+    return null;
+  }
+  return {
+    applied: item.applied,
+    currentGeneration,
+  };
+}
 
 function parsePushRegistrationBody(body: unknown) {
   if (!body || typeof body !== "object") return null;
@@ -40,11 +75,19 @@ function parsePushRegistrationBody(body: unknown) {
   const expoPushToken = String(item.expoPushToken || "").trim();
   const rawExpoProjectId = String(item.expoProjectId || "").trim();
   const expoProjectId = rawExpoProjectId ? normalizeExpoProjectId(rawExpoProjectId) : null;
+  const rawInstallationId = String(item.installationId || "").trim();
+  const parsedInstallationId = rawInstallationId
+    ? normalizePushInstallationId(rawInstallationId)
+    : null;
+  const hasGeneration = item.generation !== undefined && item.generation !== null;
+  const generation = normalizePushGeneration(item.generation);
   const platform = normalizePushPlatform(item.platform);
   const appEnv = normalizePushAppEnv(item.appEnv);
   if (
     !expoPushToken ||
     (rawExpoProjectId && !expoProjectId) ||
+    (rawInstallationId && !parsedInstallationId) ||
+    (hasGeneration && (!generation || !parsedInstallationId)) ||
     !platform ||
     !appEnv ||
     !validateExpoPushToken(expoPushToken)
@@ -55,6 +98,44 @@ function parsePushRegistrationBody(body: unknown) {
     appEnv,
     expoProjectId,
     expoPushToken,
+    generation,
+    // Installation metadata without a generation came from a pre-generation client. Treat it as
+    // the legacy null path so it cannot create unordered installation state.
+    installationId: generation ? parsedInstallationId : null,
+    platform,
+  };
+}
+
+function parsePushUnregistrationBody(body: unknown) {
+  if (!body || typeof body !== "object") return null;
+  const item = body as PushRegistrationBody;
+  const expoPushToken = String(item.expoPushToken || "").trim() || null;
+  const rawExpoProjectId = String(item.expoProjectId || "").trim();
+  const expoProjectId = rawExpoProjectId ? normalizeExpoProjectId(rawExpoProjectId) : null;
+  const rawInstallationId = String(item.installationId || "").trim();
+  const installationId = rawInstallationId ? normalizePushInstallationId(rawInstallationId) : null;
+  const hasGeneration = item.generation !== undefined && item.generation !== null;
+  const generation = normalizePushGeneration(item.generation);
+  const platform = normalizePushPlatform(item.platform);
+  const appEnv = normalizePushAppEnv(item.appEnv);
+
+  if (expoPushToken && !validateExpoPushToken(expoPushToken)) return null;
+  if (!hasGeneration) return expoPushToken ? { expoPushToken, generation: null } : null;
+  if (
+    !generation ||
+    !installationId ||
+    !platform ||
+    !appEnv ||
+    (rawExpoProjectId && !expoProjectId)
+  ) {
+    return null;
+  }
+  return {
+    appEnv,
+    expoProjectId,
+    expoPushToken,
+    generation,
+    installationId,
     platform,
   };
 }
@@ -120,53 +201,109 @@ export function registerPushRoutes(
       return c.json({ error: "Invalid push token payload" }, 400);
     }
 
-    const now = new Date().toISOString();
-    const { error } = await adminSupabase.from("push_device_tokens").upsert(
-      {
-        app_env: payload.appEnv,
-        ...(payload.expoProjectId ? { expo_project_id: payload.expoProjectId } : {}),
-        expo_push_token: payload.expoPushToken,
-        is_active: true,
-        last_registered_at: now,
-        last_seen_at: now,
-        platform: payload.platform,
-        user_id: user.id,
-      },
-      {
-        onConflict: "expo_push_token",
-      },
-    );
+    const { data, error } = await adminSupabase.rpc("register_push_device_token", {
+      p_app_env: payload.appEnv,
+      p_expo_project_id: payload.expoProjectId,
+      p_expo_push_token: payload.expoPushToken,
+      p_generation: payload.generation,
+      p_installation_id: payload.installationId,
+      p_platform: payload.platform,
+      p_user_id: user.id,
+    });
 
     if (error) {
       logError("push/register", "push-token-register-failed", error, {
         appEnv: payload.appEnv,
+        hasInstallationId: Boolean(payload.installationId),
         platform: payload.platform,
         userId: user.id,
       });
       return c.json({ error: "Push token kaydedilemedi." }, 500);
     }
 
-    return c.json({ success: true });
+    const result = normalizePushRpcResult(data);
+    if (!result) {
+      logError(
+        "push/register",
+        "push-token-register-result-invalid",
+        new Error("Push registration RPC returned an invalid result."),
+        { userId: user.id },
+      );
+      return c.json({ error: "Push token kaydi dogrulanamadi." }, 502);
+    }
+    return c.json({
+      applied: result.applied,
+      currentGeneration: result.currentGeneration,
+      success: true,
+    });
   });
 
   app.post("/make-server-e3557d40/push/unregister", async (c) => {
     const user = await getUser(c);
     if (!user) return c.json({ error: "Unauthorized" }, 401);
 
+    const allowed = await consumeRateLimit({
+      limit: PUSH_UNREGISTER_RATE_LIMIT,
+      scope: "push-unregister",
+      subject: user.id,
+      windowMs: PUSH_UNREGISTER_RATE_WINDOW_MS,
+    });
+    if (!allowed) return c.json({ error: "Rate limit exceeded" }, 429);
+
     const body = await c.req.json().catch(() => null);
-    const expoPushToken = String((body as { expoPushToken?: unknown })?.expoPushToken || "").trim();
-    if (!validateExpoPushToken(expoPushToken)) {
+    const payload = parsePushUnregistrationBody(body);
+    if (!payload) {
       return c.json({ error: "Invalid push token payload" }, 400);
     }
 
-    const { error } = await adminSupabase
+    if (payload.generation) {
+      const { data, error } = await adminSupabase.rpc("tombstone_push_installation", {
+        p_app_env: payload.appEnv,
+        p_expo_project_id: payload.expoProjectId,
+        p_expo_push_token: payload.expoPushToken,
+        p_generation: payload.generation,
+        p_installation_id: payload.installationId,
+        p_platform: payload.platform,
+        p_user_id: user.id,
+      });
+
+      if (error) {
+        logError("push/unregister", "push-installation-tombstone-failed", error, {
+          appEnv: payload.appEnv,
+          generation: payload.generation,
+          platform: payload.platform,
+          userId: user.id,
+        });
+        return c.json({ error: "Push token kaldirilamadi." }, 500);
+      }
+
+      const result = normalizePushRpcResult(data);
+      if (!result) {
+        logError(
+          "push/unregister",
+          "push-installation-tombstone-result-invalid",
+          new Error("Push tombstone RPC returned an invalid result."),
+          { userId: user.id },
+        );
+        return c.json({ error: "Push token kaldirma sonucu dogrulanamadi." }, 502);
+      }
+      return c.json({
+        applied: result.applied,
+        currentGeneration: result.currentGeneration,
+        success: true,
+      });
+    }
+
+    const { data: deactivatedToken, error } = await adminSupabase
       .from("push_device_tokens")
       .update({
         is_active: false,
         last_seen_at: new Date().toISOString(),
       })
       .eq("user_id", user.id)
-      .eq("expo_push_token", expoPushToken);
+      .eq("expo_push_token", payload.expoPushToken)
+      .select("id")
+      .maybeSingle();
 
     if (error) {
       logError("push/unregister", "push-token-unregister-failed", error, {
@@ -175,7 +312,7 @@ export function registerPushRoutes(
       return c.json({ error: "Push token kaldirilamadi." }, 500);
     }
 
-    return c.json({ success: true });
+    return c.json({ applied: Boolean(deactivatedToken), currentGeneration: 0, success: true });
   });
 
   app.post("/make-server-e3557d40/push/dispatch", async (c) => {

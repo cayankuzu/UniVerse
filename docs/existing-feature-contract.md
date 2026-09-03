@@ -1,7 +1,7 @@
 # Existing Feature Contract
 
 This document freezes the end-user product surface found at commit
-`227329989bd937faff48c54291aeefc8b3942515`. Repository source is authoritative. The
+`1caace7fa52dd56e8fd968983b1b1a1ea36da7cd`. Repository source is authoritative. The
 machine-readable companion is `quality/feature-surface.snapshot.json`; this document explains the
 user jobs and the runtime status that cannot be expressed by names alone.
 
@@ -86,6 +86,16 @@ The canonical mobile and PostgreSQL notification types are identical:
 
 The inbox filter categories are `all`, `social`, `like`, `comment`, and `club`. Android uses the
 single channel ID `default`; no Expo notification category/action identifiers are registered.
+
+### Push delivery hardening boundary
+
+Push remains an optional signal for this same inbox, never a new navigation or read model. The
+existing authenticated register/unregister routes and service-role delivery worker are retained.
+`push_device_tokens.installation_id` is nullable internal metadata used only to prevent a new
+account registration on the same physical installation from leaving another account's active token
+behind. It does not expose a mobile table/RPC, add a notification category/type, or change the
+existing destinations. The detailed source contract and evidence boundary are in
+[push-current-contract.md](push-current-contract.md).
 
 ## Native permissions and capabilities
 

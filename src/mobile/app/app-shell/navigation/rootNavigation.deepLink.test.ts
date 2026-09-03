@@ -20,4 +20,32 @@ describe("root navigation deep links", () => {
       routes: [{ name: "ResetPassword" }],
     });
   });
+
+  it("resolves linked routes without handing deep-link query or fragment data to the parser", () => {
+    const getState = rootNavigationLinking.getStateFromPath;
+    expect(getState).toBeDefined();
+
+    const options = rootNavigationLinking.config;
+    const hostileQuery = `?next=${"%".repeat(2048)}`;
+
+    expect(getState?.("auth/callback", options)).toMatchObject({
+      routes: [{ name: "AuthCallback" }],
+    });
+    expect(getState?.(`auth/callback${hostileQuery}`, options)).toEqual(
+      getState?.("auth/callback", options),
+    );
+    expect(getState?.(`reset-password${hostileQuery}#access_token=secret`, options)).toEqual(
+      getState?.("reset-password", options),
+    );
+  });
+
+  it("never exposes deep-link params to the linked screens", () => {
+    const options = rootNavigationLinking.config;
+    const state = rootNavigationLinking.getStateFromPath?.(
+      "reset-password?token=abc&code=def",
+      options,
+    );
+
+    expect(state?.routes.at(-1)?.params).toBeUndefined();
+  });
 });

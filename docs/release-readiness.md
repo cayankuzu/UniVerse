@@ -1,7 +1,7 @@
 # AAA-MVP release readiness
 
 Updated: 2026-08-31
-Baseline commit: `227329989bd937faff48c54291aeefc8b3942515`
+Baseline commit: `1caace7fa52dd56e8fd968983b1b1a1ea36da7cd`
 Target version/runtime: `1.0.134` / `1.0.134`
 
 ## Current decision

@@ -49,6 +49,7 @@ export async function drainNotificationPushDispatchQueue(params: {
       attemptCount: number;
       errorMessage: string;
       notificationId: string;
+      retryAfterSeconds?: number;
     }> = [];
 
     for (const entry of claimedBatch.entries) {
@@ -64,6 +65,7 @@ export async function drainNotificationPushDispatchQueue(params: {
           attemptCount: entry.attemptCount,
           errorMessage: result.errorMessage || "push-dispatch-retry-requested",
           notificationId: entry.notificationId,
+          ...(result.retryAfterSeconds ? { retryAfterSeconds: result.retryAfterSeconds } : {}),
         });
         retryCount += 1;
         continue;

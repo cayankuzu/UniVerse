@@ -62,7 +62,8 @@ function isSensitiveAsyncStorageKey(key: string) {
   );
 }
 
-export async function clearSensitiveClientState(_options?: {
+export async function clearSensitiveClientState(options?: {
+  clearPushRegistration?: boolean;
   keepUiPrefs?: boolean;
   reason?: SensitiveClientStateClearReason;
 }) {
@@ -74,13 +75,13 @@ export async function clearSensitiveClientState(_options?: {
   const keys = await AsyncStorage.getAllKeys().catch(() => [] as string[]);
   const removableKeys = Array.from(new Set(keys.filter(isSensitiveAsyncStorageKey)));
 
-  await clearTrackedSecureKeys();
-  await Promise.all([
+  const cleanupResults = await Promise.allSettled([
+    clearTrackedSecureKeys(),
     clearPersistedQueryCache(),
     clearPersistedMediaUriCache(),
     clearPersistedWarmupPreferences(),
     clearMutationActionQueueStorage(),
-    NotificationPushAPI.clearStoredRegistration(),
+    ...(options?.clearPushRegistration ? [NotificationPushAPI.clearStoredRegistration()] : []),
     clearPendingRegistrationDraft(),
     clearUploadQueueStorage(),
     clearLocalAlbumShadowStorage(),
@@ -88,6 +89,18 @@ export async function clearSensitiveClientState(_options?: {
   ]);
 
   if (removableKeys.length > 0) {
-    await AsyncStorage.multiRemove(removableKeys);
+    cleanupResults.push(
+      await AsyncStorage.multiRemove(removableKeys).then(
+        () => ({ status: "fulfilled", value: undefined }) as PromiseFulfilledResult<void>,
+        (reason) => ({ status: "rejected", reason }) as PromiseRejectedResult,
+      ),
+    );
+  }
+
+  const failedCleanup = cleanupResults.find(
+    (result): result is PromiseRejectedResult => result.status === "rejected",
+  );
+  if (failedCleanup) {
+    throw failedCleanup.reason;
   }
 }

@@ -1,0 +1,194 @@
+name: universe-validation
+
+x-tooling-build: &tooling-build
+  context: .
+  dockerfile: infra/docker/Dockerfile.tooling
+  target: tooling
+  args:
+    GIT_SHA: ${GIT_SHA:-unknown}
+
+x-hardened: &hardened
+  read_only: true
+  cap_drop:
+    - ALL
+  security_opt:
+    - no-new-privileges:true
+  restart: "no"
+  init: true
+  pids_limit: 128
+  mem_limit: 512m
+  cpus: 1.0
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,nodev,size=128m,mode=1777
+  networks:
+    - validation
+
+services:
+  test-runner:
+    <<: *hardened
+    profiles: [test]
+    image: universe-validation-tooling:${UNIVERSE_DOCKER_TAG:-local}
+    build: *tooling-build
+    command: ["node", "infra/docker/scripts/container-test.mjs"]
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=128m,mode=1777
+      - /workspace/infra/cloudflare/universe-edge/.wrangler:rw,noexec,nosuid,nodev,size=64m,mode=0700,uid=1000,gid=1000
+
+  mock-upstream:
+    <<: *hardened
+    profiles: [resilience, load]
+    image: universe-validation-tooling:${UNIVERSE_DOCKER_TAG:-local}
+    build: *tooling-build
+    command: ["node", "infra/docker/mocks/upstream.mjs"]
+    expose:
+      - "8080"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:8080/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 2s
+      timeout: 2s
+      retries: 15
+      start_period: 2s
+    mem_limit: 128m
+    cpus: 0.25
+    pids_limit: 64
+
+  toxiproxy:
+    profiles: [resilience]
+    image: ghcr.io/shopify/toxiproxy:2.12.0@sha256:9378ed52a28bc50edc1350f936f518f31fa95f0d15917d6eb40b8e376d1a214e
+    user: "65532:65532"
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: "no"
+    pids_limit: 64
+    mem_limit: 64m
+    cpus: 0.25
+    expose:
+      - "8474"
+      - "8666"
+    healthcheck:
+      test: ["CMD", "/toxiproxy", "-version"]
+      interval: 2s
+      timeout: 2s
+      retries: 15
+      start_period: 2s
+    networks:
+      - validation
+
+  resilience-runner:
+    <<: *hardened
+    profiles: [resilience]
+    image: universe-validation-tooling:${UNIVERSE_DOCKER_TAG:-local}
+    build: *tooling-build
+    command: ["node", "infra/docker/scripts/resilience-check.mjs"]
+    environment:
+      TOXIPROXY_API_URL: http://toxiproxy:8474
+      TOXIPROXY_PROXY_URL: http://toxiproxy:8666
+      UPSTREAM_ADDRESS: mock-upstream:8080
+    depends_on:
+      mock-upstream:
+        condition: service_healthy
+      toxiproxy:
+        condition: service_healthy
+    mem_limit: 128m
+    cpus: 0.5
+    pids_limit: 64
+
+  load-runner:
+    profiles: [load]
+    image: universe-validation-k6:${UNIVERSE_DOCKER_TAG:-local}
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.tooling
+      target: load
+      args:
+        GIT_SHA: ${GIT_SHA:-unknown}
+    user: "12345:12345"
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: "no"
+    init: true
+    pids_limit: 128
+    mem_limit: 256m
+    cpus: 1.0
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=32m,mode=1777
+    environment:
+      K6_AUTH_MODE: anon
+      K6_REHEARSAL_PROFILE: gate
+      K6_SMOKE_ITERATIONS: "4"
+      K6_SMOKE_VUS: "1"
+      K6_SUSTAINED_DURATION: 8s
+      K6_SUSTAINED_VUS: "2"
+      K6_SUPABASE_ANON_KEY: synthetic-docker-validation-key
+      K6_SUPABASE_URL: http://mock-upstream:8080
+    depends_on:
+      mock-upstream:
+        condition: service_healthy
+    networks:
+      - validation
+
+  dockerfile-lint:
+    profiles: [security]
+    image: hadolint/hadolint:v2.12.0-debian@sha256:27173fe25e062448490a32de410c08491c626a0bef360aa2ce5d5bdd9384b50d
+    user: "65532:65532"
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: "no"
+    network_mode: none
+    volumes:
+      - ./infra/docker/Dockerfile.tooling:/workspace/Dockerfile.tooling:ro
+    command: ["hadolint", "/workspace/Dockerfile.tooling"]
+
+  trivy:
+    profiles: [security]
+    image: aquasec/trivy:0.67.2@sha256:e2b22eac59c02003d8749f5b8d9bd073b62e30fefaef5b7c8371204e0a4b0c08
+    user: "65532:65532"
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: "no"
+    pids_limit: 128
+    mem_limit: 2g
+    cpus: 1.0
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=2g,mode=1777
+    environment:
+      TRIVY_CACHE_DIR: /tmp/trivy-cache
+    volumes:
+      - ./artifacts/docker:/scan:ro
+    command:
+      - image
+      - --input
+      - /scan/tooling-image.tar
+      - --scanners
+      - vuln
+      - --severity
+      - CRITICAL,HIGH
+      - --ignore-unfixed
+      - --exit-code
+      - "1"
+      - --no-progress
+      - --format
+      - json
+    networks:
+      - scanner-egress
+
+networks:
+  validation:
+    internal: true
+  scanner-egress: {}

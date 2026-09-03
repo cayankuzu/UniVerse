@@ -5,5 +5,7 @@ export {
 export type {
   PushAppEnv,
   PushPlatform,
+  PushUnregisterCleanupResult,
+  PushUnregisterCleanupReason,
   StoredPushRegistration,
 } from "../../../data/notifications/notifications.push";

@@ -3,7 +3,7 @@
 ## Decision
 
 The repository feature baseline is frozen at commit
-`227329989bd937faff48c54291aeefc8b3942515`. The current protected source inventory matches that
+`1caace7fa52dd56e8fd968983b1b1a1ea36da7cd`. The current protected source inventory matches that
 baseline: no screen, route, tab, modal mount, settings group/CTA, notification type/category, native
 permission/entitlement, Storage bucket, product table, public product HTTP route, or content/filter
 type was added or removed by the feature-freeze machinery.
@@ -34,7 +34,7 @@ release decision.
 | Edge Function domains                 |        1 |              1 | Same                        |
 | Defined server HTTP route literals    |       51 |             51 | Same                        |
 | Mobile RPC names                      |       19 |             19 | Same                        |
-| Migration-created tables              |       33 |             34 | Same protected; +1 internal |
+| Migration-created tables              |       34 |             35 | Same protected; +1 internal |
 | Product-domain tables                 |       16 |             16 | Same                        |
 | Storage buckets                       |        1 |              1 | Same                        |
 | Visible catalog domains               |        7 |              7 | Same fingerprints           |
@@ -104,7 +104,7 @@ The Node self-test covers four cases:
 3. narrowly named ops/audit/OTA additions are accepted and reported as allowlisted;
 4. removing or remapping an existing screen/API route is rejected.
 
-Focused run on 2026-08-30:
+Focused run on 2026-08-31:
 
 ```text
 node --test ./utils/guards/check-no-new-product-surface.test.cjs
@@ -112,8 +112,8 @@ node --test ./utils/guards/check-no-new-product-surface.test.cjs
 
 node ./utils/guards/check-no-new-product-surface.cjs
 # [feature-freeze] PASS routes=24 screens=24 visibleTabs=4 notificationTypes=11
-# devicePermissions=4 settingsGroups=3 settingsItems=7 httpRoutes=51 databaseTables=34
-# database.allTables: allowed internal addition "public.cloudflare_origin_request_nonces"
+# devicePermissions=4 settingsGroups=3 settingsItems=7 httpRoutes=51 databaseTables=35
+# database.allTables: allowed internal addition "public.internal_push_installation_state"
 ```
 
 ## Audit limitations

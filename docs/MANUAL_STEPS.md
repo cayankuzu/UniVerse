@@ -1,6 +1,6 @@
 # Manual release steps
 
-Updated: 2026-08-30
+Updated: 2026-08-31
 
 None of the checkboxes below is complete merely because repository code exists. Perform the steps
 in order against one immutable candidate commit. Replace `<VERSION>`, `<FULL_SHA>`, IDs, domains,
@@ -11,6 +11,19 @@ file. Store sanitized evidence under `release-evidence/<VERSION>/<FULL_SHA>/` as
 The repository does not establish ownership of a root domain, Cloudflare account/zone, preview
 Supabase project, provider dashboards, published mobile artifacts, or real devices. Those are exact
 external blockers, not values to guess.
+
+## Control-plane work already automated
+
+This run created/verified the three GitHub environments, protected `main`, configured an independent
+production reviewer, bound the four required checks to GitHub Actions, and created the missing EAS
+`development`/`preview` channels and branches without deploying or publishing. The local Supabase
+migration/RLS/restore and Docker validation layers require no provider secret. Exact non-secret
+observations are in [provider-state-audit.md](provider-state-audit.md).
+
+The checkboxes below remain open only where the complete safe result still needs an unavailable
+secret, account/zone/domain choice, isolated paid/provider resource, independent human approval,
+published artifact, store state, or physical device. Repeating the already completed control-plane
+creation is not required; re-verify it against the final immutable SHA before release.
 
 ## 0. Freeze one release candidate and evidence root
 
@@ -42,8 +55,9 @@ external blockers, not values to guess.
 
 ## 1. Protect GitHub environments and credentials
 
-- [ ] **Why:** production Cloudflare and EAS workflows name protected environments, but a YAML name
-      cannot create reviewers, prevent self-review, or prove token scope.
+- [ ] **Why:** reviewers, self-review prevention, branch protection, and required checks are now
+      configured, but no GitHub environment secret exists and repository automation cannot invent or
+      prove the least-privilege scope of provider credentials that were not supplied.
 - **Where:** GitHub Settings -> Environments and branch protection/rulesets.
 - **Values:** environments `development`, `preview`, `production`; separate `EXPO_TOKEN`,
   `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_PREVIEW_API_TOKEN`, and
@@ -56,8 +70,9 @@ external blockers, not values to guess.
   gh api repos/cayankuzu/UniVerse/rulesets
   ```
 
-- **Safe result:** production requires an independent reviewer and prevents self-review; preview and
-  production tokens are different and minimum-scope; secret values are not present in API output.
+- **Safe result:** production continues to require an independent reviewer and prevents self-review;
+  preview and production tokens are different and minimum-scope; secret values are not present in
+  API output. The protection half is complete; the provider-credential half remains open.
 - **Rollback:** remove/revoke the new credential, disable the affected deployment workflow, and
   restore the last reviewed environment rule configuration.
 - **Owner / evidence:** Repository administrator + Security / `01-security/github-environments/`.
@@ -316,6 +331,13 @@ external blockers, not values to guess.
 - **Owner / evidence:** Backend operations + Mobile release + Security / `01-security/providers/` and
   `08-observability/providers/`.
 
+  The source-level push contract, lifecycle, retry/receipt boundary, physical-device matrix, and
+  credential-rotation procedure are [push-current-contract.md](push-current-contract.md),
+  [push-provider-and-token-lifecycle.md](push-provider-and-token-lifecycle.md),
+  [push-outbox-retry-receipt-dlq.md](push-outbox-retry-receipt-dlq.md),
+  [push-real-device-matrix.md](push-real-device-matrix.md), and
+  [push-incident-and-credential-rotation-runbook.md](push-incident-and-credential-rotation-runbook.md).
+
 ## 12. Deploy isolated staging and run DB/load/security matrices
 
 - [ ] **Why:** local code tests do not prove migrations, RLS/IDOR, locks, pool behavior, provider
@@ -463,7 +485,13 @@ external blockers, not values to guess.
 
 ## Current status
 
-All provider/dashboard, staging, artifact, device, store, restore, canary, and approval steps above
-are unverified for the current implementation SHA. Repository implementation alone therefore
-cannot change the release decision from `NO-GO`. See [release-readiness.md](release-readiness.md) for
-the area-by-area mapping.
+GitHub environments/protection and the missing EAS development/preview channels were provisioned
+automatically without publishing or deploying. Local migration/RLS validation and a disposable
+PostgreSQL restore drill were also executed without touching production. The exact non-secret
+observations are recorded in [provider-state-audit.md](provider-state-audit.md).
+
+Cloudflare deployment/secrets/DNS/WAF, an isolated preview Supabase target, same-SHA signed iOS,
+published-binary OTA inspection, provider dashboards, physical-device coverage, stores, production
+backup/PITR/Storage recovery, canary rollback, and independent release approval remain unverified.
+Repository implementation alone therefore cannot change the release decision from `NO-GO`. See
+[release-readiness.md](release-readiness.md) for the area-by-area mapping.
