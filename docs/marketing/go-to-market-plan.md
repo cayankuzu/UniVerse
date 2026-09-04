@@ -12,6 +12,7 @@ Bir sosyal keşif ürününün değeri, aynı bağlamdaki kullanıcı yoğunluğ
 Bu yüzden başlangıç **tek kampüstür**. Katalogda 202 üniversite tanımlı olması pazarlama hedefi değil, ürünün hazır olduğu kapsamdır.
 
 **Kampüs seçim ölçütü** (sıralı):
+
 1. Kurucunun fiziksel erişimi olan kampüs,
 2. Aktif kulüp sayısı yüksek olan kampüs,
 3. Yönetimi tanıdık en az 3 kulüp.
@@ -22,14 +23,14 @@ Bu yüzden başlangıç **tek kampüstür**. Katalogda 202 üniversite tanımlı
 
 Kanallar ürünün gerçek yüzeyinden türetildi. Ürün kulüp ve etkinlik etrafında kurulu olduğu için dağıtım da kulüp ve etkinlik etrafından yürür.
 
-| # | Kanal | Neden bu ürüne uyuyor | İlk adım | Maliyet |
-|---|---|---|---|---|
-| K-1 | Kulüp yönetimleriyle birebir | Kulüp, hem kullanıcı hem içerik üreticisi. Bir kulüp geldiğinde takipçileri de gelir. | 3 kulübe `CreateEventScreen` akışını yüz yüze göster | Emek |
-| K-2 | Etkinlik sonrası albüm | En doğal yayılma: etkinliğe gelen 60 kişi fotoğrafları aramak için gelir | Etkinlik gününde albümü aç, kulübün duyurmasını sağla | Emek |
-| K-3 | Üniversite topluluk sayfaları | Öğrencinin zaten baktığı yer | `ad-creative-briefs.md` Açı 1'in organik biçimi | Emek |
-| K-4 | Kampüs micro-creator | Kampüste tanınan 1–2 öğrenci | Yalnız gerçekten kullanan kişiyle; iş birliği etiketli | Düşük |
-| K-5 | Store araması (ASO) | `kulüp`, `etkinlik`, `kampüs` niyetli arama | `store-listing-tr.md` yayında | Sıfır |
-| K-6 | Küçük ücretli test | Yalnız ölçüm eşiği sağlanıyorsa | Tek kampüsün coğrafi hedeflemesi, tek açı | Kontrollü |
+| #   | Kanal                         | Neden bu ürüne uyuyor                                                                 | İlk adım                                               | Maliyet   |
+| --- | ----------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------ | --------- |
+| K-1 | Kulüp yönetimleriyle birebir  | Kulüp, hem kullanıcı hem içerik üreticisi. Bir kulüp geldiğinde takipçileri de gelir. | 3 kulübe `CreateEventScreen` akışını yüz yüze göster   | Emek      |
+| K-2 | Etkinlik sonrası albüm        | En doğal yayılma: etkinliğe gelen 60 kişi fotoğrafları aramak için gelir              | Etkinlik gününde albümü aç, kulübün duyurmasını sağla  | Emek      |
+| K-3 | Üniversite topluluk sayfaları | Öğrencinin zaten baktığı yer                                                          | `ad-creative-briefs.md` Açı 1'in organik biçimi        | Emek      |
+| K-4 | Kampüs micro-creator          | Kampüste tanınan 1–2 öğrenci                                                          | Yalnız gerçekten kullanan kişiyle; iş birliği etiketli | Düşük     |
+| K-5 | Store araması (ASO)           | `kulüp`, `etkinlik`, `kampüs` niyetli arama                                           | `store-listing-tr.md` yayında                          | Sıfır     |
+| K-6 | Küçük ücretli test            | Yalnız ölçüm eşiği sağlanıyorsa                                                       | Tek kampüsün coğrafi hedeflemesi, tek açı              | Kontrollü |
 
 **Kanal olmayanlar:** Toplu e-posta listesi satın alma, otomatik takip botu, uygulama içi zorunlu davet kapısı, sahte hesapla içerik doldurma. Hiçbiri kullanılmaz.
 
@@ -64,11 +65,11 @@ Her adımın karşılığı `measurement-plan.md` içinde bir olaydır. Ölçül
 uv_<kanal>_<aci>_<segment>_<yyyymm>
 ```
 
-| Parça | İzinli değerler |
-|---|---|
-| kanal | `kulup`, `album`, `topluluk`, `creator`, `aso`, `paid` |
-| aci | `etkinlik`, `kulup`, `gizlilik` (Açı 1/2/3) |
-| segment | `yeni`, `yonetici`, `aktif` |
+| Parça   | İzinli değerler                                        |
+| ------- | ------------------------------------------------------ |
+| kanal   | `kulup`, `album`, `topluluk`, `creator`, `aso`, `paid` |
+| aci     | `etkinlik`, `kulup`, `gizlilik` (Açı 1/2/3)            |
+| segment | `yeni`, `yonetici`, `aktif`                            |
 
 Örnek: `uv_topluluk_gizlilik_yeni_202609`
 
@@ -85,13 +86,13 @@ uv_<kanal>_<aci>_<segment>_<yyyymm>
 
 Tarihler değil, **kapılar**. Bir kapı geçilmeden sonraki başlamaz.
 
-| Faz | Kapı | Çıktı |
-|---|---|---|
-| F0 — Hazırlık | Store listing yayında; `claims-register` `TASLAK` satırı metinde kullanılmıyor | Store sayfası canlı |
-| F1 — Tohumlama | 3 kulüp + 5 yaklaşan etkinlik | Akış boş değil |
-| F2 — Dar duyuru | K-1, K-2 çalışıyor | İlk gerçek etkinlik albümü |
-| F3 — Kampüs duyurusu | D7 dönüş ölçülebilir hâlde | K-3, K-4 açılır |
-| F4 — Ölçülü genişleme | `first_value_*` oranı iki hafta üst üste stabil | İkinci kampüs veya küçük ücretli test |
+| Faz                   | Kapı                                                                           | Çıktı                                 |
+| --------------------- | ------------------------------------------------------------------------------ | ------------------------------------- |
+| F0 — Hazırlık         | Store listing yayında; `claims-register` `TASLAK` satırı metinde kullanılmıyor | Store sayfası canlı                   |
+| F1 — Tohumlama        | 3 kulüp + 5 yaklaşan etkinlik                                                  | Akış boş değil                        |
+| F2 — Dar duyuru       | K-1, K-2 çalışıyor                                                             | İlk gerçek etkinlik albümü            |
+| F3 — Kampüs duyurusu  | D7 dönüş ölçülebilir hâlde                                                     | K-3, K-4 açılır                       |
+| F4 — Ölçülü genişleme | `first_value_*` oranı iki hafta üst üste stabil                                | İkinci kampüs veya küçük ücretli test |
 
 **Geri adım kuralı:** Herhangi bir fazda D7 dönüş oranı bir önceki fazın altına düşerse genişleme durur; sebep bulunana kadar bir sonraki faza geçilmez.
 

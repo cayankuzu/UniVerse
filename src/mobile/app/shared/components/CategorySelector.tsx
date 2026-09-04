@@ -170,7 +170,9 @@ export function CategorySelector({
                 backgroundColor: `${accent}1A`,
               }}
             >
-              <Text style={{ fontSize: tokens.typography.caption, fontWeight: "700", color: accent }}>
+              <Text
+                style={{ fontSize: tokens.typography.caption, fontWeight: "700", color: accent }}
+              >
                 {formatTurkishDisplayText(item)}
               </Text>
             </View>

@@ -7,15 +7,15 @@
 
 ## 0. Bütün creative'lerin uyduğu çerçeve
 
-| İlke | Uygulaması |
-|---|---|
-| Hook merak uyandırır, sonucu saklamaz | "Kampüste bu hafta ne var?" ✓ · "Bunu görene kadar bekle" ✗ |
-| Ekran gerçek | Her karede candidate build'in ekran kaydı |
-| Tek mesaj | Bir creative, bir claim. İkinci mesaj ikinci creative'dir. |
-| İlk 3 saniye ürünü gösterir | Logo/animasyon açılışı yok; kullanıcı ilk saniyede ekranı görür |
-| Sessiz izlenebilir | Anlam ses olmadan da tam; altyazı gömülü |
-| Dikey öncelikli | 9:16 ana format; 1:1 ve 4:5 türetilir |
-| CTA sakin | "İndir ve gör." · "Kampüsünü aç." — baskı, aciliyet, sayaç yok |
+| İlke                                  | Uygulaması                                                      |
+| ------------------------------------- | --------------------------------------------------------------- |
+| Hook merak uyandırır, sonucu saklamaz | "Kampüste bu hafta ne var?" ✓ · "Bunu görene kadar bekle" ✗     |
+| Ekran gerçek                          | Her karede candidate build'in ekran kaydı                       |
+| Tek mesaj                             | Bir creative, bir claim. İkinci mesaj ikinci creative'dir.      |
+| İlk 3 saniye ürünü gösterir           | Logo/animasyon açılışı yok; kullanıcı ilk saniyede ekranı görür |
+| Sessiz izlenebilir                    | Anlam ses olmadan da tam; altyazı gömülü                        |
+| Dikey öncelikli                       | 9:16 ana format; 1:1 ve 4:5 türetilir                           |
+| CTA sakin                             | "İndir ve gör." · "Kampüsünü aç." — baskı, aciliyet, sayaç yok  |
 
 ---
 
@@ -27,29 +27,29 @@
 
 ### 6 saniyelik hook (Reels / Shorts / TikTok)
 
-| Saniye | Görüntü | Metin (gömülü altyazı) |
-|---|---|---|
-| 0–2 | Telefon eli, `HomeScreen` etkinlik akışı yukarı kayıyor | `Kampüste bu hafta ne var?` |
-| 2–4 | Bir etkinlik kartına dokunuş → `EventDetailScreen` | `Hepsi tek akışta.` |
-| 4–6 | Katıl → "Katıldın" durumu | `UniVerse` |
+| Saniye | Görüntü                                                 | Metin (gömülü altyazı)      |
+| ------ | ------------------------------------------------------- | --------------------------- |
+| 0–2    | Telefon eli, `HomeScreen` etkinlik akışı yukarı kayıyor | `Kampüste bu hafta ne var?` |
+| 2–4    | Bir etkinlik kartına dokunuş → `EventDetailScreen`      | `Hepsi tek akışta.`         |
+| 4–6    | Katıl → "Katıldın" durumu                               | `UniVerse`                  |
 
 ### 15 saniyelik akış
 
-| Saniye | Sahne | Metin |
-|---|---|---|
-| 0–3 | Etkinlik akışı kayıyor | `Kampüste bu hafta ne var?` |
-| 3–6 | Kaynak filtresi `following` seçiliyor | `Takip ettiğin kulüpler` |
-| 6–9 | Etkinlik detayı, tarih ve konum | `Tarih, yer, kim gidiyor` |
-| 9–12 | Katıl → durum değişimi | `Katıl.` |
-| 12–15 | `PrivacySettingsScreen`, kapanış | `Konum izni istemiyoruz. UniVerse.` |
+| Saniye | Sahne                                 | Metin                               |
+| ------ | ------------------------------------- | ----------------------------------- |
+| 0–3    | Etkinlik akışı kayıyor                | `Kampüste bu hafta ne var?`         |
+| 3–6    | Kaynak filtresi `following` seçiliyor | `Takip ettiğin kulüpler`            |
+| 6–9    | Etkinlik detayı, tarih ve konum       | `Tarih, yer, kim gidiyor`           |
+| 9–12   | Katıl → durum değişimi                | `Katıl.`                            |
+| 12–15  | `PrivacySettingsScreen`, kapanış      | `Konum izni istemiyoruz. UniVerse.` |
 
 ### Statik / carousel
 
-| Kare | Görsel | Metin |
-|---|---|---|
-| 1 | `HomeScreen` etkinlik akışı | `Kampüsteki etkinlikler tek akışta` |
-| 2 | `EventDetailScreen` | `Tarih, yer ve katılım aynı ekranda` |
-| 3 | `PrivacySettingsScreen` | `Konum izni istemiyoruz` |
+| Kare | Görsel                      | Metin                                |
+| ---- | --------------------------- | ------------------------------------ |
+| 1    | `HomeScreen` etkinlik akışı | `Kampüsteki etkinlikler tek akışta`  |
+| 2    | `EventDetailScreen`         | `Tarih, yer ve katılım aynı ekranda` |
+| 3    | `PrivacySettingsScreen`     | `Konum izni istemiyoruz`             |
 
 **Caption:** `Kampüsündeki etkinlikleri tek yerde gör. Konum izni istemiyoruz.`
 **CTA:** `İndir ve kampüsünü aç.`
@@ -67,29 +67,29 @@
 
 ### 6 saniyelik hook
 
-| Saniye | Görüntü | Metin |
-|---|---|---|
-| 0–2 | `CreateEventScreen` formu dolduruluyor | `Etkinliği bir kere yaz.` |
-| 2–4 | Görünürlük seçimi: herkese açık / yalnız üyeler | `Kime görüneceğini seç.` |
-| 4–6 | Yayımlandı → akışta görünüyor | `Yayımla.` |
+| Saniye | Görüntü                                         | Metin                     |
+| ------ | ----------------------------------------------- | ------------------------- |
+| 0–2    | `CreateEventScreen` formu dolduruluyor          | `Etkinliği bir kere yaz.` |
+| 2–4    | Görünürlük seçimi: herkese açık / yalnız üyeler | `Kime görüneceğini seç.`  |
+| 4–6    | Yayımlandı → akışta görünüyor                   | `Yayımla.`                |
 
 ### 15 saniyelik akış
 
-| Saniye | Sahne | Metin |
-|---|---|---|
-| 0–3 | Boş `CreateEventScreen` | `Etkinliği bir kere yaz` |
-| 3–6 | Başlık, tarih, konum dolduruluyor | `Tarih, yer, açıklama` |
-| 6–9 | Görünürlük: `Yalnız üyeler` seçiliyor | `Kime görüneceğini sen seç` |
-| 9–12 | Yayımlandı, katılımcı listesi | `Kimin geldiğini gör` |
-| 12–15 | `AlbumViewScreen` fotoğraf ızgarası | `Fotoğraflar etkinliğin albümünde kalır. UniVerse.` |
+| Saniye | Sahne                                 | Metin                                               |
+| ------ | ------------------------------------- | --------------------------------------------------- |
+| 0–3    | Boş `CreateEventScreen`               | `Etkinliği bir kere yaz`                            |
+| 3–6    | Başlık, tarih, konum dolduruluyor     | `Tarih, yer, açıklama`                              |
+| 6–9    | Görünürlük: `Yalnız üyeler` seçiliyor | `Kime görüneceğini sen seç`                         |
+| 9–12   | Yayımlandı, katılımcı listesi         | `Kimin geldiğini gör`                               |
+| 12–15  | `AlbumViewScreen` fotoğraf ızgarası   | `Fotoğraflar etkinliğin albümünde kalır. UniVerse.` |
 
 ### Statik / carousel
 
-| Kare | Görsel | Metin |
-|---|---|---|
-| 1 | `CreateEventScreen` | `Etkinliği bir kere yaz` |
-| 2 | Görünürlük seçimi | `Herkese açık ya da yalnız üyelere` |
-| 3 | `AlbumViewScreen` | `Fotoğraflar etkinliğin albümünde kalır` |
+| Kare | Görsel              | Metin                                    |
+| ---- | ------------------- | ---------------------------------------- |
+| 1    | `CreateEventScreen` | `Etkinliği bir kere yaz`                 |
+| 2    | Görünürlük seçimi   | `Herkese açık ya da yalnız üyelere`      |
+| 3    | `AlbumViewScreen`   | `Fotoğraflar etkinliğin albümünde kalır` |
 
 **Caption:** `Kulübünün etkinliğini yayımla, katılımı gör, fotoğrafları aynı yerde sakla.`
 **CTA:** `Kulüp hesabı aç.`
@@ -107,21 +107,21 @@
 
 ### 6 saniyelik hook
 
-| Saniye | Görüntü | Metin |
-|---|---|---|
-| 0–2 | Store sayfasındaki izin listesi ekran kaydı | `İzin listesine bak.` |
-| 2–4 | Liste: kamera, mikrofon, galeri, bildirim | `Dört izin.` |
-| 4–6 | `PrivacySettingsScreen` | `Konum yok. UniVerse.` |
+| Saniye | Görüntü                                     | Metin                  |
+| ------ | ------------------------------------------- | ---------------------- |
+| 0–2    | Store sayfasındaki izin listesi ekran kaydı | `İzin listesine bak.`  |
+| 2–4    | Liste: kamera, mikrofon, galeri, bildirim   | `Dört izin.`           |
+| 4–6    | `PrivacySettingsScreen`                     | `Konum yok. UniVerse.` |
 
 ### 15 saniyelik akış
 
-| Saniye | Sahne | Metin |
-|---|---|---|
-| 0–3 | Store izin listesi | `Bir uygulamayı indirmeden önce izin listesine bak` |
-| 3–7 | Dört izin tek tek vurgulanıyor | `Kamera. Mikrofon. Galeri. Bildirim.` |
-| 7–10 | Konum satırının olmadığı gösteriliyor | `Konum izni istemiyoruz` |
-| 10–13 | `PrivacySettingsScreen` iki anahtar | `Hesabını gizle, e-postanı ayrıca sakla` |
-| 13–15 | Logo | `UniVerse` |
+| Saniye | Sahne                                 | Metin                                               |
+| ------ | ------------------------------------- | --------------------------------------------------- |
+| 0–3    | Store izin listesi                    | `Bir uygulamayı indirmeden önce izin listesine bak` |
+| 3–7    | Dört izin tek tek vurgulanıyor        | `Kamera. Mikrofon. Galeri. Bildirim.`               |
+| 7–10   | Konum satırının olmadığı gösteriliyor | `Konum izni istemiyoruz`                            |
+| 10–13  | `PrivacySettingsScreen` iki anahtar   | `Hesabını gizle, e-postanı ayrıca sakla`            |
+| 13–15  | Logo                                  | `UniVerse`                                          |
 
 ### Statik
 
@@ -140,11 +140,11 @@ Tek kare: solda dört izin ikonu, sağda üstü çizili konum ikonu.
 
 Ücretli bütçe yoksa aynı üç açı organik olarak çalışır:
 
-| Açı | Organik biçim | Emek |
-|---|---|---|
-| 1 | Kendi kampüsünde çekilmiş 15 sn ekran kaydı + kısa metin gönderisi | Düşük |
-| 2 | Kulüp yöneticilerine birebir gösterim; ekran kaydını doğrudan paylaşma | Orta |
-| 3 | "İzin listesine bak" gönderisi — paylaşılabilir tek kare | Düşük |
+| Açı | Organik biçim                                                          | Emek  |
+| --- | ---------------------------------------------------------------------- | ----- |
+| 1   | Kendi kampüsünde çekilmiş 15 sn ekran kaydı + kısa metin gönderisi     | Düşük |
+| 2   | Kulüp yöneticilerine birebir gösterim; ekran kaydını doğrudan paylaşma | Orta  |
+| 3   | "İzin listesine bak" gönderisi — paylaşılabilir tek kare               | Düşük |
 
 Micro-creator iş birliği yapılırsa: creator ürünü **gerçekten kullanmadan** "kullanıyorum" demez. Ödeme yapıldıysa gönderi ilgili platformun iş birliği etiketiyle yayımlanır.
 

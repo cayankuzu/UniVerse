@@ -4,16 +4,16 @@ Bu klasör uygulamaya **hiçbir özellik eklemez**. Var olan 24 ekranın anlatt�
 
 ## Okuma sırası
 
-| # | Dosya | Ne için |
-|---|---|---|
-| 1 | [`claims-register.md`](claims-register.md) | **Önce bu.** Yayınlanabilir her cümlenin kaynağı. Buradaki kaydı olmayan iddia hiçbir yerde kullanılmaz. |
-| 2 | [`positioning-and-messaging.md`](positioning-and-messaging.md) | Tek değer önerisi, üç destek, güven mesajı, segmentler ve JTBD |
-| 3 | [`store-listing-tr.md`](store-listing-tr.md) | App Store ve Play metinleri, anahtar kelimeler, gizlilik beyanları |
-| 4 | [`screenshot-storyboard.md`](screenshot-storyboard.md) | Store görselleri ve video önizleme — piksel ölçüleri dâhil |
-| 5 | [`ad-creative-briefs.md`](ad-creative-briefs.md) | Üç doğrulanabilir reklam açısı, hook ve varyantlar |
-| 6 | [`go-to-market-plan.md`](go-to-market-plan.md) | Kanallar, faz kapıları, kampanya adlandırma |
-| 7 | [`measurement-plan.md`](measurement-plan.md) | Funnel olayları, kalite kilidi, ölçümün bilinen sınırları |
-| 8 | [`pitch-deck-outline-tr.md`](pitch-deck-outline-tr.md) | Sunum iskeleti ve tasarım sözleşmesi |
+| #   | Dosya                                                          | Ne için                                                                                                  |
+| --- | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| 1   | [`claims-register.md`](claims-register.md)                     | **Önce bu.** Yayınlanabilir her cümlenin kaynağı. Buradaki kaydı olmayan iddia hiçbir yerde kullanılmaz. |
+| 2   | [`positioning-and-messaging.md`](positioning-and-messaging.md) | Tek değer önerisi, üç destek, güven mesajı, segmentler ve JTBD                                           |
+| 3   | [`store-listing-tr.md`](store-listing-tr.md)                   | App Store ve Play metinleri, anahtar kelimeler, gizlilik beyanları                                       |
+| 4   | [`screenshot-storyboard.md`](screenshot-storyboard.md)         | Store görselleri ve video önizleme — piksel ölçüleri dâhil                                               |
+| 5   | [`ad-creative-briefs.md`](ad-creative-briefs.md)               | Üç doğrulanabilir reklam açısı, hook ve varyantlar                                                       |
+| 6   | [`go-to-market-plan.md`](go-to-market-plan.md)                 | Kanallar, faz kapıları, kampanya adlandırma                                                              |
+| 7   | [`measurement-plan.md`](measurement-plan.md)                   | Funnel olayları, kalite kilidi, ölçümün bilinen sınırları                                                |
+| 8   | [`pitch-deck-outline-tr.md`](pitch-deck-outline-tr.md)         | Sunum iskeleti ve tasarım sözleşmesi                                                                     |
 
 ## Değişmez kurallar
 

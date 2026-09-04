@@ -14,6 +14,7 @@
 ```
 UniVerse
 ```
+
 8 karakter. Alt başlık için 22 karakter serbest kalıyor ama ada anahtar kelime doldurma **yapılmaz** — marka adı tek başına durur.
 
 ### Alt başlık / Subtitle (30 karakter)
@@ -21,6 +22,7 @@ UniVerse
 ```
 Kampüs etkinlik ve kulüpleri
 ```
+
 28 karakter. `etkinlik` ve `kulüp` en yüksek niyetli iki kelime; ikisi de uygulama içi copy ile aynı terim.
 
 ### Promosyon metni (170 karakter — sürüm çıkmadan güncellenebilir)
@@ -29,6 +31,7 @@ Kampüs etkinlik ve kulüpleri
 Üniversitendeki kulüpleri ve yaklaşan etkinlikleri tek yerde gör. Etkinliğin
 albümü, yorumları ve beğenileri aynı ekranda kalır. Konum izni istemiyoruz.
 ```
+
 150 karakter. İlk cümle işlev (F-03), ikincisi fark (F-06), üçüncüsü güven (P-01).
 
 ### Anahtar kelime alanı (100 karakter, virgülle, boşluksuz)
@@ -36,7 +39,9 @@ albümü, yorumları ve beğenileri aynı ekranda kalır. Konum izni istemiyoruz
 ```
 kampüs,üniversite,kulüp,etkinlik,öğrenci,bölüm,albüm,duyuru,topluluk,fakülte
 ```
+
 76 karakter. Kurallar:
+
 - Ad ve alt başlıktaki kelimeler burada **tekrarlanmaz** (Apple ikisini birleştirir).
 - Rakip marka adı yok.
 - Çoğul/tekil ikilisi yazılmaz; Apple kökten eşleştirir.
@@ -85,19 +90,19 @@ GİZLİLİK
 
 Gerçek veri akışıyla eşleşmelidir. `network-and-data-inventory.md` ile birlikte doldurulur.
 
-| Apple kategorisi | Beyan | Gerekçe / kanıt |
-|---|---|---|
-| Contact Info → Email | Toplanır, hesaba bağlı | Kayıt akışı; `profiles` |
-| Contact Info → Name | Toplanır, hesaba bağlı | Profil adı |
-| User Content → Photos or Videos | Toplanır, hesaba bağlı | `album_photos`, `media_assets` |
-| User Content → Other User Content | Toplanır, hesaba bağlı | Yorumlar |
-| Identifiers → User ID | Toplanır, hesaba bağlı | `profiles.id` |
-| Diagnostics → Crash Data | Toplanır, hesaba bağlı değil | Sentry |
-| Diagnostics → Performance Data | Toplanır, hesaba bağlı değil | `client_telemetry_events` |
-| **Location** | **Toplanmaz** | Konum izni yok — P-01 |
-| **Contacts** | **Toplanmaz** | Rehber izni yok |
-| **Search History** | **Toplanmaz** | Arama sorgusu kalıcı saklanmıyor |
-| Tracking | **Yok** | Üçüncü taraf reklam SDK'sı yok |
+| Apple kategorisi                  | Beyan                        | Gerekçe / kanıt                  |
+| --------------------------------- | ---------------------------- | -------------------------------- |
+| Contact Info → Email              | Toplanır, hesaba bağlı       | Kayıt akışı; `profiles`          |
+| Contact Info → Name               | Toplanır, hesaba bağlı       | Profil adı                       |
+| User Content → Photos or Videos   | Toplanır, hesaba bağlı       | `album_photos`, `media_assets`   |
+| User Content → Other User Content | Toplanır, hesaba bağlı       | Yorumlar                         |
+| Identifiers → User ID             | Toplanır, hesaba bağlı       | `profiles.id`                    |
+| Diagnostics → Crash Data          | Toplanır, hesaba bağlı değil | Sentry                           |
+| Diagnostics → Performance Data    | Toplanır, hesaba bağlı değil | `client_telemetry_events`        |
+| **Location**                      | **Toplanmaz**                | Konum izni yok — P-01            |
+| **Contacts**                      | **Toplanmaz**                | Rehber izni yok                  |
+| **Search History**                | **Toplanmaz**                | Arama sorgusu kalıcı saklanmıyor |
+| Tracking                          | **Yok**                      | Üçüncü taraf reklam SDK'sı yok   |
 
 ---
 
@@ -114,6 +119,7 @@ UniVerse
 ```
 Kampüsündeki kulüpleri, etkinlikleri ve öğrencileri tek yerde bul.
 ```
+
 66 karakter. Play'de kısa açıklama sıralamaya girer; üç birincil kelime (`kulüp`, `etkinlik`, `öğrenci`) burada.
 
 ### Tam açıklama (4000 karakter)
@@ -172,17 +178,17 @@ UniVerse Türkçe çalışır.
 
 ### Play Data Safety formu
 
-| Play alanı | Beyan | Gerekçe |
-|---|---|---|
-| Konum (yaklaşık/kesin) | **Hayır** | `androidPermissions` içinde konum izni yok — P-01 |
-| Kişisel bilgi → E-posta, ad | Evet, toplanır · şifreli aktarım · silinebilir | Kayıt akışı, `delete_own_account` |
-| Fotoğraf ve video | Evet, toplanır · şifreli aktarım · silinebilir | `album_photos` |
-| Ses | Hayır (kayıt saklanmaz) | Mikrofon yalnız video çekiminde kullanılır |
-| Uygulama etkinliği → Uygulama içi arama geçmişi | **Hayır** | Sorgu kalıcı saklanmıyor |
-| Uygulama bilgileri ve performansı → Çökme günlükleri, tanılama | Evet · hesaba bağlı değil | Sentry, `client_telemetry_events` |
-| Kişiler | **Hayır** | Rehber izni yok |
-| Veri paylaşımı (üçüncü taraf) | **Hayır** | Reklam/attribution SDK'sı yok |
-| Veri silme talebi | Evet, uygulama içinden | `delete_own_account` RPC |
+| Play alanı                                                     | Beyan                                          | Gerekçe                                           |
+| -------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------------------- |
+| Konum (yaklaşık/kesin)                                         | **Hayır**                                      | `androidPermissions` içinde konum izni yok — P-01 |
+| Kişisel bilgi → E-posta, ad                                    | Evet, toplanır · şifreli aktarım · silinebilir | Kayıt akışı, `delete_own_account`                 |
+| Fotoğraf ve video                                              | Evet, toplanır · şifreli aktarım · silinebilir | `album_photos`                                    |
+| Ses                                                            | Hayır (kayıt saklanmaz)                        | Mikrofon yalnız video çekiminde kullanılır        |
+| Uygulama etkinliği → Uygulama içi arama geçmişi                | **Hayır**                                      | Sorgu kalıcı saklanmıyor                          |
+| Uygulama bilgileri ve performansı → Çökme günlükleri, tanılama | Evet · hesaba bağlı değil                      | Sentry, `client_telemetry_events`                 |
+| Kişiler                                                        | **Hayır**                                      | Rehber izni yok                                   |
+| Veri paylaşımı (üçüncü taraf)                                  | **Hayır**                                      | Reklam/attribution SDK'sı yok                     |
+| Veri silme talebi                                              | Evet, uygulama içinden                         | `delete_own_account` RPC                          |
 
 ### İçerik derecelendirmesi ve UGC beyanı
 

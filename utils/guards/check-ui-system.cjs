@@ -241,9 +241,7 @@ const typographyBlock = tokensSource.match(/typography:\s*\{([\s\S]*?)\n  \},/);
 if (!typographyBlock) {
   failures.push("Could not read the typography scale out of tokens.ts.");
 } else {
-  for (const [, name, size] of typographyBlock[1].matchAll(
-    /^\s*(\w+):\s*(\d+),/gm,
-  )) {
+  for (const [, name, size] of typographyBlock[1].matchAll(/^\s*(\w+):\s*(\d+),/gm)) {
     if (Number(size) < MIN_FONT_SIZE) {
       failures.push(
         `typography.${name} is ${size}px, below the ${MIN_FONT_SIZE}px legibility floor.`,
