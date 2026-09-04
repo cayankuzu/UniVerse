@@ -36,7 +36,7 @@ export function StudentRegistrationBasicStep({
           error={errors.name?.message}
           fieldName="name"
           label="Ad Soyad"
-          placeholder="Adin ve Soyadin"
+          placeholder="Adın ve soyadın"
           value={values.name}
           onChangeText={(value) => setField("name", value)}
         />
