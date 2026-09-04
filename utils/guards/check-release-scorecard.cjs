@@ -102,16 +102,48 @@ const headCommit = execFileSync("git", ["rev-parse", "HEAD"], {
   cwd: ROOT,
   encoding: "utf8",
 }).trim();
-const isScorecardCommit = execFileSync(
-  "git",
-  ["log", "-1", "--format=%H", "--", "quality/release-scorecard.json"],
-  { cwd: ROOT, encoding: "utf8" },
-).trim();
 
-if (candidateCommit !== headCommit && candidateCommit !== isScorecardCommit) {
+function git(args) {
+  return execFileSync("git", args, { cwd: ROOT, encoding: "utf8" }).trim();
+}
+
+// The scorecard cannot name the commit that contains it, so binding it to HEAD exactly would be
+// unsatisfiable. What actually matters is that it still describes this code: the candidate must be
+// reachable from HEAD, and no shipped or validating file may have changed since. Documentation may
+// move on without invalidating the assessment.
+const CODE_PATHS = [
+  "src",
+  "supabase",
+  "infra",
+  "utils",
+  "scripts",
+  "app.config.js",
+  "package.json",
+  "package-lock.json",
+];
+
+let reachable = false;
+try {
+  git(["merge-base", "--is-ancestor", candidateCommit, headCommit]);
+  reachable = true;
+} catch {
+  reachable = false;
+}
+if (!reachable) {
   fail(
-    `Scorecard is bound to ${candidateCommit.slice(0, 12)} but HEAD is ${headCommit.slice(0, 12)} ` +
-      "and that is not the commit that last touched the scorecard. Regenerate it for this candidate.",
+    `Scorecard candidate ${candidateCommit.slice(0, 12)} is not reachable from HEAD ` +
+      `${headCommit.slice(0, 12)}. Regenerate it for this branch.`,
+  );
+}
+
+const changedSince = git(["diff", "--name-only", candidateCommit, headCommit, "--", ...CODE_PATHS])
+  .split(/\r?\n/)
+  .filter(Boolean);
+if (changedSince.length > 0) {
+  fail(
+    `Scorecard is bound to ${candidateCommit.slice(0, 12)} but ${changedSince.length} code file(s) ` +
+      `changed since then (e.g. ${changedSince.slice(0, 3).join(", ")}). ` +
+      "Regenerate it so the assessment describes the code it is filed against.",
   );
 }
 
