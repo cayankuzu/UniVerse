@@ -39,10 +39,10 @@ candidate.
 - No Docker was used. Isolated Supabase migration/RLS validation, credentialed k6, iOS signing/device
   coverage, provider inspection, and rollout/rollback rehearsals remain external evidence gaps below.
 
-## Containerized same-SHA verification (2026-09-03)
+## Containerized same-SHA verification (2026-09-04)
 
-Candidate commit: `79805fbb567d58ff99742884a0881181ff86e0ac`
-Tree: `be15793c717114bfeac979afed77a48fb1704a45` (clean worktree)
+Candidate commit: `c647336957c66d682d25fe4a468202ce3a09ece7`
+Tree: `5c06108e68a40a6b4b6faeab426e37f29ff06edd` (clean worktree)
 
 The Docker validation environment now produces an aggregate evidence manifest bound to that
 commit and tree. `artifacts/docker/evidence-manifest.json` lists 8 artifacts, each with its
@@ -139,6 +139,11 @@ as part of the evidence manifest; this summary is not a substitute for that mach
 | E8   | Observed Worker and OTA staged rollout, component-independent rollback, previous/embedded update, and final signed GO/NO-GO record       |
 
 ## 35-area status
+
+The machine-readable form of this table is
+[quality/release-scorecard.json](../quality/release-scorecard.json). `npm run guard:release-scorecard`
+refuses a score unless the area is `RUNTIME_VERIFIED` with no outstanding evidence, so the
+`Unscored`/`NO-GO` state below is enforced rather than asserted.
 
 |   # | Area                   | Baseline | Hardening / automated repository evidence                                                           | Runtime/operational evidence gap | Remaining risk                                                                 | Final    | Decision |
 | --: | ---------------------- | -------- | --------------------------------------------------------------------------------------------------- | -------------------------------- | ------------------------------------------------------------------------------ | -------- | -------- |
