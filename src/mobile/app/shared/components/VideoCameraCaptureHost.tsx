@@ -489,7 +489,7 @@ const styles = StyleSheet.create({
     fontVariant: ["tabular-nums"],
     fontWeight: "700",
   },
-  timerWarning: { color: tokens.colors.red },
+  timerWarning: { color: tokens.colors.danger },
   topBar: {
     alignItems: "center",
     flexDirection: "row",

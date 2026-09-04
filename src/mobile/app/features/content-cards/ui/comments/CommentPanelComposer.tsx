@@ -85,6 +85,7 @@ export function CommentPanelComposer({
           <Pressable
             accessibilityLabel={`Hızlı tepki: ${reaction}`}
             accessibilityRole="button"
+            hitSlop={tokens.hitSlop.sm}
             key={reaction}
             onPress={() => void onQuickReaction(reaction)}
             style={{
@@ -196,6 +197,7 @@ export function CommentPanelComposer({
           accessibilityLabel="Yorumu gönder"
           accessibilityRole="button"
           accessibilityState={{ disabled: !canSend }}
+          hitSlop={tokens.hitSlop.sm}
           onPress={() => void onSubmit()}
           disabled={!canSend}
           style={{

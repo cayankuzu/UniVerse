@@ -50,7 +50,7 @@ export function WelcomeScreen({ navigation }: Props) {
     <View style={{ flex: 1, backgroundColor: tokens.colors.surface }}>
       <StatusBar backgroundColor={tokens.colors.primary} style="light" />
       <LinearGradient
-        colors={[tokens.colors.primary, tokens.colors.primaryLight, tokens.colors.primaryDark]}
+        colors={[tokens.colors.primaryLight, tokens.colors.primary, tokens.colors.primaryDark]}
         style={{
           paddingHorizontal: tokens.spacing.xl,
           paddingTop: insets.top + 36,
@@ -111,7 +111,7 @@ export function WelcomeScreen({ navigation }: Props) {
           <Text
             style={{
               marginTop: tokens.spacing.xsMinus,
-              color: tokens.colors.primarySoft,
+              color: tokens.colors.primarySofter,
               fontSize: tokens.typography.body,
               fontWeight: "500",
               textAlign: "center",

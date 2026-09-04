@@ -1,7 +1,7 @@
 import { CommentPanel } from "../comments/CommentPanel";
 import { UserListSheet } from "../comments/UserListSheet";
 import { EventDetailImagePreviewModal } from "./EventDetailImagePreviewModal";
-import { EventDetailLocationModal } from "./EventDetailLocationModal";
+import { EventLocationModal } from "../shared/EventLocationModal";
 import { EventDetailReportModal } from "./EventDetailReportModal";
 import type { CommentItem, EventWithMeta, SearchUserResult } from "../../data";
 import { DangerConfirmSheet, type OverflowActionItem } from "../../../../shared/components";
@@ -223,7 +223,7 @@ export function EventDetailInteractions({
       ) : null}
 
       {showLocationModal ? (
-        <EventDetailLocationModal
+        <EventLocationModal
           copiedField={copiedField}
           event={event}
           modalBottomPadding={modalBottomPadding}

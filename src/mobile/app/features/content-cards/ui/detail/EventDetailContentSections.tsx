@@ -134,7 +134,10 @@ export function EventDetailAttendanceBar(props: {
     <View style={{ marginTop: tokens.spacing.sm }}>
       <Pressable
         accessibilityLabel="Etkinlik katılımcılarını aç"
+        accessibilityRole="button"
+        accessibilityState={{ disabled: !props.enabled }}
         disabled={!props.enabled}
+        hitSlop={tokens.hitSlop.md}
         onPress={props.onPress}
         style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.xs }}
       >

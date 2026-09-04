@@ -107,7 +107,7 @@ function UserRow({
               <Lock size={tokens.typography.tiny} color={tokens.colors.warningIcon} />
               <Text
                 style={{
-                  color: tokens.colors.warningIcon,
+                  color: tokens.colors.warning,
                   fontSize: tokens.typography.tiny,
                   fontWeight: tokens.fontWeight.bold,
                 }}

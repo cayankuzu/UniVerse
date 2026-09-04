@@ -64,7 +64,6 @@ function isSensitiveAsyncStorageKey(key: string) {
 
 export async function clearSensitiveClientState(options?: {
   clearPushRegistration?: boolean;
-  keepUiPrefs?: boolean;
   reason?: SensitiveClientStateClearReason;
 }) {
   queryClient.clear();

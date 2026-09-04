@@ -15,7 +15,7 @@ type Props = {
 };
 
 const MENU_ACTIONS = [
-  { key: "report", label: "Şikâyet Et", icon: <Flag size={16} color={tokens.colors.amber} /> },
+  { key: "report", label: "Şikâyet Et", icon: <Flag size={16} color={tokens.colors.warning} /> },
   { key: "block", label: "", icon: <Ban size={16} color={tokens.colors.danger} /> },
 ] as const;
 

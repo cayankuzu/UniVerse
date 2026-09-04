@@ -175,7 +175,7 @@ export function RegistrationFieldError({ message }: FieldErrorProps) {
   return (
     <Text
       style={{
-        color: tokens.colors.red,
+        color: tokens.colors.danger,
         fontSize: tokens.typography.caption,
         marginTop: tokens.spacing.xxs,
       }}

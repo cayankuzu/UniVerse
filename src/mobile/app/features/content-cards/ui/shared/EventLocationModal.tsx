@@ -1,6 +1,5 @@
-import React from "react";
-import { AppText as Text } from "../../../../shared/components/AppText";
 import { Pressable, View } from "react-native";
+import { AppText as Text } from "../../../../shared/components/AppText";
 import { Check, Copy } from "lucide-react-native";
 import type { EventWithMeta } from "../../data";
 import { AppModalHost } from "../../../../shared/components";
@@ -15,7 +14,7 @@ type Props = {
   visible: boolean;
 };
 
-export function EventCardLocationModal({
+export function EventLocationModal({
   copiedField,
   event,
   modalBottomPadding,
@@ -138,6 +137,7 @@ function CopyIconButton({ copied, disabled, onPress }: CopyIconButtonProps) {
       accessibilityRole="button"
       accessibilityLabel={copied ? "Kopyalandı" : "Kopyala"}
       accessibilityState={{ disabled }}
+      hitSlop={tokens.hitSlop.md}
       style={{
         width: 28,
         height: 28,
