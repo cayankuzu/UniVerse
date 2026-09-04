@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/cayankuzu/UniVerse/quality/evidence-manifest.schema.json",
+  "title": "UniVerse release evidence manifest",
+  "description": "Shape of an evidence manifest that binds validation artifacts to one immutable commit. Produced by npm run docker:evidence and validated by npm run guard:release-scorecard.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "git", "artifacts"],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "git": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sha", "treeSha", "dirty"],
+      "properties": {
+        "sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$",
+          "description": "Commit the artifacts were produced from."
+        },
+        "treeSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$",
+          "description": "Tree object, so a rewritten commit with identical content is still detectable."
+        },
+        "dirty": {
+          "const": false,
+          "description": "Evidence from a dirty worktree is not release evidence."
+        }
+      }
+    },
+    "github": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actions"],
+      "properties": {
+        "actions": { "type": "boolean" },
+        "eventName": { "type": ["string", "null"] },
+        "job": { "type": ["string", "null"] },
+        "ref": { "type": ["string", "null"] },
+        "runAttempt": { "type": ["string", "number", "null"] },
+        "runId": { "type": ["string", "number", "null"] },
+        "sha": { "type": ["string", "null"] },
+        "workflow": { "type": ["string", "null"] }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Every artifact carries its own checksum so the manifest cannot outlive its inputs.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["file", "bytes", "sha256"],
+        "properties": {
+          "file": { "type": "string", "minLength": 1 },
+          "bytes": { "type": "integer", "minimum": 0 },
+          "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        }
+      }
+    }
+  }
+}
