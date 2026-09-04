@@ -46,7 +46,7 @@ export function ProfileAlbumOwnerFilterBar({ value, onChange }: Props) {
             <Text
               style={{
                 color: active ? tokens.colors.primary : tokens.colors.muted,
-                fontSize: tokens.typography.tiny,
+                fontSize: tokens.typography.caption,
                 fontWeight: tokens.fontWeight.bold,
               }}
             >

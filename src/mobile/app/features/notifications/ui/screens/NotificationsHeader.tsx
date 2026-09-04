@@ -88,7 +88,7 @@ export const NotificationsHeader = React.memo(function NotificationsHeader({
               <Text
                 style={{
                   color: tokens.colors.surface,
-                  fontSize: tokens.typography.tiny,
+                  fontSize: tokens.typography.caption,
                   fontWeight: "800",
                   textAlign: "center",
                 }}

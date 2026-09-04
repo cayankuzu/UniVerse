@@ -70,7 +70,7 @@ export function NotificationsFollowRequestsCard({
           <Text
             style={{
               color: tokens.colors.primaryDark,
-              fontSize: tokens.typography.tiny,
+              fontSize: tokens.typography.caption,
               fontWeight: "800",
             }}
           >

@@ -48,7 +48,7 @@ export function HomeFilterPanel({
       <Text
         style={{
           color: tokens.colors.muted,
-          fontSize: tokens.typography.tiny,
+          fontSize: tokens.typography.caption,
           fontWeight: tokens.fontWeight.bold,
         }}
       >
@@ -84,7 +84,7 @@ export function HomeFilterPanel({
               <Text
                 style={{
                   color: active ? tokens.colors.primary : tokens.colors.muted,
-                  fontSize: tokens.typography.tiny,
+                  fontSize: tokens.typography.caption,
                   fontWeight: tokens.fontWeight.bold,
                 }}
               >
@@ -98,7 +98,7 @@ export function HomeFilterPanel({
       <Text
         style={{
           color: tokens.colors.muted,
-          fontSize: tokens.typography.tiny,
+          fontSize: tokens.typography.caption,
           fontWeight: tokens.fontWeight.bold,
         }}
       >
@@ -138,7 +138,7 @@ export function HomeFilterPanel({
               <Text
                 style={{
                   color: active ? tokens.colors.primary : tokens.colors.muted,
-                  fontSize: tokens.typography.tiny,
+                  fontSize: tokens.typography.caption,
                   fontWeight: tokens.fontWeight.bold,
                 }}
               >
@@ -152,7 +152,7 @@ export function HomeFilterPanel({
       <Text
         style={{
           color: tokens.colors.muted,
-          fontSize: tokens.typography.tiny,
+          fontSize: tokens.typography.caption,
           fontWeight: tokens.fontWeight.bold,
         }}
       >
@@ -186,7 +186,7 @@ export function HomeFilterPanel({
               <Text
                 style={{
                   color: active ? tokens.colors.primary : tokens.colors.muted,
-                  fontSize: tokens.typography.tiny,
+                  fontSize: tokens.typography.caption,
                   fontWeight: tokens.fontWeight.bold,
                 }}
               >

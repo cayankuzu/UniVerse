@@ -104,11 +104,11 @@ function UserRow({
                 marginTop: tokens.spacing.micro,
               }}
             >
-              <Lock size={tokens.typography.tiny} color={tokens.colors.warningIcon} />
+              <Lock size={tokens.typography.caption} color={tokens.colors.warningIcon} />
               <Text
                 style={{
                   color: tokens.colors.warning,
-                  fontSize: tokens.typography.tiny,
+                  fontSize: tokens.typography.caption,
                   fontWeight: tokens.fontWeight.bold,
                 }}
               >
@@ -120,7 +120,7 @@ function UserRow({
             <Text
               style={{
                 color: tokens.colors.muted,
-                fontSize: tokens.typography.tiny,
+                fontSize: tokens.typography.caption,
                 marginTop: tokens.spacing.hairline,
               }}
             >

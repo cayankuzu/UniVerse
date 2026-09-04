@@ -228,7 +228,7 @@ export function CommentPanelComposer({
           style={{
             color: tokens.colors.danger,
             flex: 1,
-            fontSize: tokens.typography.tiny,
+            fontSize: tokens.typography.caption,
             fontWeight: tokens.fontWeight.bold,
           }}
         >
@@ -237,7 +237,7 @@ export function CommentPanelComposer({
         <Text
           style={{
             color: remaining <= 0 ? tokens.colors.dangerDark : tokens.colors.mutedFg,
-            fontSize: tokens.typography.tiny,
+            fontSize: tokens.typography.caption,
             fontWeight: tokens.fontWeight.bold,
           }}
         >

@@ -124,7 +124,7 @@ export const DiscoveryEventGridCard = React.memo(function DiscoveryEventGridCard
           color: DISCOVERY_GRID_CARD_COLORS.text,
           fontSize: tokens.typography.caption,
           fontWeight: tokens.fontWeight.bold,
-          lineHeight: tokens.lineHeight.tiny,
+          lineHeight: tokens.lineHeight.caption,
         }}
         numberOfLines={2}
       >

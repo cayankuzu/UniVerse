@@ -293,9 +293,9 @@ export function MediaViewerModal({
               <Text
                 style={{
                   color: tokens.colors.surface,
-                  fontSize: tokens.typography.tiny,
+                  fontSize: tokens.typography.caption,
                   fontWeight: tokens.fontWeight.bold,
-                  lineHeight: tokens.lineHeight.tiny,
+                  lineHeight: tokens.lineHeight.caption,
                 }}
                 numberOfLines={2}
               >

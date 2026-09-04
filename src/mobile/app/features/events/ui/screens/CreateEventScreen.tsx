@@ -182,7 +182,7 @@ export function CreateEventScreen({ navigation }: Props) {
             paddingTop: tokens.spacing.compact,
           }}
         >
-          <Text style={{ color: tokens.colors.muted, fontSize: tokens.typography.micro }}>
+          <Text style={{ color: tokens.colors.muted, fontSize: tokens.typography.caption }}>
             {CREATE_EVENT_STEP_LABELS[step - 1]}
           </Text>
           {visibleSubmitError ? (

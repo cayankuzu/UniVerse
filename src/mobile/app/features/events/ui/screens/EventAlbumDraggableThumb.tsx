@@ -106,7 +106,7 @@ export function EventAlbumDraggableThumb({
         <Text
           style={{
             color: tokens.colors.surface,
-            fontSize: tokens.typography.nano,
+            fontSize: tokens.typography.caption,
             fontWeight: tokens.fontWeight.bold,
           }}
         >

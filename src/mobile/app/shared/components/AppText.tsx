@@ -52,8 +52,8 @@ const variantStyles: Record<AppTextVariant, TextStyle> = {
   },
   badge: {
     fontFamily: tokens.fontFamily.bold,
-    fontSize: tokens.typography.tiny,
-    lineHeight: tokens.lineHeight.micro,
+    fontSize: tokens.typography.caption,
+    lineHeight: tokens.lineHeight.caption,
   },
 };
 

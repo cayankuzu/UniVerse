@@ -54,7 +54,7 @@ function VisibilityOptionRow(props: {
         <Text
           style={{
             color: tokens.colors.muted,
-            fontSize: tokens.typography.tiny,
+            fontSize: tokens.typography.caption,
             lineHeight: tokens.lineHeight.compact,
           }}
         >

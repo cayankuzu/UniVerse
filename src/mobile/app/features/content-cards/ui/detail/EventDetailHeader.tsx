@@ -99,7 +99,7 @@ export function EventDetailHeader({ event, onPress }: EventDetailHeaderProps) {
           {!!dateLabel && (
             <Text
               style={{
-                fontSize: tokens.typography.micro,
+                fontSize: tokens.typography.caption,
                 color: tokens.colors.mutedFg,
                 fontWeight: tokens.fontWeight.semibold,
               }}
@@ -110,7 +110,7 @@ export function EventDetailHeader({ event, onPress }: EventDetailHeaderProps) {
           {!!timeLabel && (
             <Text
               style={{
-                fontSize: tokens.typography.micro,
+                fontSize: tokens.typography.caption,
                 color: tokens.colors.mutedFg,
                 fontWeight: tokens.fontWeight.semibold,
               }}

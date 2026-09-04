@@ -33,11 +33,11 @@ export function Badge({ label, variant = "default" }: Props) {
     >
       <Text
         style={{
-          fontSize: tokens.typography.tiny,
+          fontSize: tokens.typography.caption,
           fontWeight: tokens.fontWeight.semibold,
           color: s.text,
           fontVariant: ["tabular-nums"],
-          lineHeight: tokens.lineHeight.tiny,
+          lineHeight: tokens.lineHeight.caption,
         }}
       >
         {label}

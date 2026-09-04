@@ -79,7 +79,7 @@ export function AppErrorBoundary({ children }: AppErrorBoundaryProps) {
             <Text
               style={{
                 color: tokens.colors.muted,
-                fontSize: tokens.typography.tiny,
+                fontSize: tokens.typography.caption,
                 textAlign: "center",
               }}
             >
@@ -90,7 +90,7 @@ export function AppErrorBoundary({ children }: AppErrorBoundaryProps) {
             <Text
               style={{
                 color: tokens.colors.dark600,
-                fontSize: tokens.typography.tiny,
+                fontSize: tokens.typography.caption,
                 textAlign: "center",
               }}
             >

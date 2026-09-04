@@ -72,7 +72,7 @@ export function ProfileTabsBar({
               <Text
                 style={{
                   color: active ? tokens.colors.primary : tokens.colors.mutedFg,
-                  fontSize: tokens.typography.micro,
+                  fontSize: tokens.typography.caption,
                   fontWeight: tokens.fontWeight.bold,
                 }}
               >
@@ -97,7 +97,7 @@ export function ProfileTabsBar({
                 <Text
                   style={{
                     color: active ? tokens.colors.primary : tokens.colors.mutedFg,
-                    fontSize: tokens.typography.nano,
+                    fontSize: tokens.typography.caption,
                     fontWeight: tokens.fontWeight.bold,
                   }}
                 >

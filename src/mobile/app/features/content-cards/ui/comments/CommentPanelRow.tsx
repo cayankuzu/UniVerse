@@ -177,7 +177,7 @@ export function CommentPanelRow({
                 <Text
                   style={{
                     color: tokens.colors.primaryDark,
-                    fontSize: tokens.typography.nano,
+                    fontSize: tokens.typography.caption,
                     fontWeight: tokens.fontWeight.extrabold,
                   }}
                 >

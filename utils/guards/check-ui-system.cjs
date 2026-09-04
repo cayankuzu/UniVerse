@@ -228,6 +228,30 @@ requireText(
   failures,
 );
 
+// The raw-font-size rule above pushes every screen through the token scale,
+// but nothing checked the scale itself: five tiers once sat between 8px and
+// 10px and shipped to ~300 call sites. 11 is the floor both platforms treat as
+// the smallest legible size.
+const MIN_FONT_SIZE = 11;
+const tokensSource = fs.readFileSync(
+  path.join(MOBILE_ROOT, "shared", "theme", "tokens.ts"),
+  "utf8",
+);
+const typographyBlock = tokensSource.match(/typography:\s*\{([\s\S]*?)\n  \},/);
+if (!typographyBlock) {
+  failures.push("Could not read the typography scale out of tokens.ts.");
+} else {
+  for (const [, name, size] of typographyBlock[1].matchAll(
+    /^\s*(\w+):\s*(\d+),/gm,
+  )) {
+    if (Number(size) < MIN_FONT_SIZE) {
+      failures.push(
+        `typography.${name} is ${size}px, below the ${MIN_FONT_SIZE}px legibility floor.`,
+      );
+    }
+  }
+}
+
 if (failures.length > 0) {
   console.error(`[ui-system] FAIL: ${failures.length} violation(s).`);
   for (const failure of failures) console.error(`- ${failure}`);

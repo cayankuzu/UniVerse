@@ -62,9 +62,9 @@ export function AppNetworkStatusBanner() {
           <Text
             style={{
               color: tokens.colors.warningText,
-              fontSize: tokens.typography.tiny,
+              fontSize: tokens.typography.caption,
               fontWeight: tokens.fontWeight.medium,
-              lineHeight: tokens.lineHeight.tiny,
+              lineHeight: tokens.lineHeight.caption,
             }}
           >
             Kayıtlı içerikleri kullanmaya devam edebilirsin.

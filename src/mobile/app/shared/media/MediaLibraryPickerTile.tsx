@@ -168,7 +168,7 @@ export function MediaTile({
         <Text
           style={{
             color: tokens.colors.surface,
-            fontSize: tokens.typography.tiny,
+            fontSize: tokens.typography.caption,
             fontWeight: "800",
           }}
         >
@@ -194,7 +194,7 @@ export function MediaTile({
           <Text
             style={{
               color: tokens.colors.surface,
-              fontSize: tokens.typography.tiny,
+              fontSize: tokens.typography.caption,
               fontWeight: "800",
             }}
           >
@@ -221,7 +221,7 @@ export function MediaTile({
           <Text
             style={{
               color: tokens.colors.surface,
-              fontSize: tokens.typography.tiny,
+              fontSize: tokens.typography.caption,
               fontWeight: "800",
             }}
           >

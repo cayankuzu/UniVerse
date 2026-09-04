@@ -191,7 +191,7 @@ export function AlbumMediaCarousel({
           <Text
             style={{
               color: tokens.colors.onMedia,
-              fontSize: tokens.typography.micro,
+              fontSize: tokens.typography.caption,
               fontWeight: "700",
               backgroundColor: withAlpha(tokens.colors.foreground, 0.62),
               paddingHorizontal: tokens.spacing.xs,
@@ -230,7 +230,7 @@ export function AlbumMediaCarousel({
               <Text
                 style={{
                   color: tokens.colors.onMedia,
-                  fontSize: tokens.typography.micro,
+                  fontSize: tokens.typography.caption,
                   fontWeight: "800",
                 }}
               >
@@ -254,7 +254,7 @@ export function AlbumMediaCarousel({
               <Text
                 style={{
                   color: tokens.colors.onMedia,
-                  fontSize: tokens.typography.micro,
+                  fontSize: tokens.typography.caption,
                   fontWeight: "800",
                 }}
               >

@@ -169,7 +169,7 @@ export function PrivacySettingsToggleCard({
             style={{
               color: statusText,
               fontSize: tokens.typography.caption,
-              lineHeight: tokens.lineHeight.tiny,
+              lineHeight: tokens.lineHeight.caption,
             }}
           >
             {stateDetail}

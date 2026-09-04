@@ -124,7 +124,7 @@ export function AppActivityBanner({ actions, hint, percent, stage, title, tone }
               style={{
                 flex: 1,
                 color: colors.stage,
-                fontSize: tokens.typography.tiny,
+                fontSize: tokens.typography.caption,
                 fontWeight: tokens.fontWeight.bold,
               }}
             >
@@ -133,7 +133,7 @@ export function AppActivityBanner({ actions, hint, percent, stage, title, tone }
             <Text
               style={{
                 color: tokens.colors.muted,
-                fontSize: tokens.typography.micro,
+                fontSize: tokens.typography.caption,
                 fontWeight: tokens.fontWeight.bold,
               }}
             >
@@ -168,8 +168,8 @@ export function AppActivityBanner({ actions, hint, percent, stage, title, tone }
         <Text
           style={{
             color: tokens.colors.muted,
-            fontSize: tokens.typography.micro,
-            lineHeight: tokens.lineHeight.tiny,
+            fontSize: tokens.typography.caption,
+            lineHeight: tokens.lineHeight.caption,
           }}
         >
           {hint}

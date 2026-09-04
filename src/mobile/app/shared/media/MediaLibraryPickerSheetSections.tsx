@@ -146,7 +146,7 @@ export function MediaLibraryPickerSelectionSummary(props: { selectedCount: numbe
         style={{
           flex: 1,
           color: tokens.colors.muted,
-          fontSize: tokens.typography.tiny,
+          fontSize: tokens.typography.caption,
           lineHeight: tokens.spacing.md,
         }}
       >

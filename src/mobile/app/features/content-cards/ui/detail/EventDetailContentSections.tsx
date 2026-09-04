@@ -53,20 +53,20 @@ export function EventDetailInfoSlides({ slides }: { slides: DetailSlideItem[] })
             <View style={{ flexShrink: 1 }}>
               <Text
                 style={{
-                  fontSize: tokens.typography.tiny,
+                  fontSize: tokens.typography.caption,
                   fontWeight: tokens.fontWeight.bold,
                   color: slide.textColor,
-                  lineHeight: tokens.lineHeight.tiny,
+                  lineHeight: tokens.lineHeight.caption,
                 }}
               >
                 {slide.label}
               </Text>
               <Text
                 style={{
-                  fontSize: tokens.typography.nano,
+                  fontSize: tokens.typography.caption,
                   color: tokens.colors.mutedFg,
                   marginTop: tokens.spacing.hairline,
-                  lineHeight: tokens.lineHeight.nano,
+                  lineHeight: tokens.lineHeight.caption,
                 }}
               >
                 {slide.sub}
@@ -106,7 +106,7 @@ export function EventDetailMetaChips({ chips }: { chips: DetailMetaChip[] }) {
         >
           <Text
             style={{
-              fontSize: tokens.typography.micro,
+              fontSize: tokens.typography.caption,
               fontWeight: tokens.fontWeight.bold,
               color: chip.kind === "type" ? tokens.colors.orangeText : tokens.colors.violetDark,
               lineHeight: tokens.typography.caption,
@@ -192,10 +192,10 @@ export function EventDetailAttendanceBar(props: {
             gap: tokens.spacing.xxs,
           }}
         >
-          <AccessIcon size={tokens.typography.micro} color={props.accessChip.color} />
+          <AccessIcon size={tokens.typography.caption} color={props.accessChip.color} />
           <Text
             style={{
-              fontSize: tokens.typography.micro,
+              fontSize: tokens.typography.caption,
               fontWeight: tokens.fontWeight.bold,
               color: props.accessChip.color,
             }}

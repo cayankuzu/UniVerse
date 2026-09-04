@@ -78,7 +78,7 @@ export function AlbumDetailHeader({
           {photo.name}
         </Text>
         <Text
-          style={{ color: tokens.colors.muted, fontSize: tokens.typography.tiny }}
+          style={{ color: tokens.colors.muted, fontSize: tokens.typography.caption }}
           numberOfLines={1}
         >
           {resolveAlbumUniversity(photo)}
@@ -95,7 +95,7 @@ export function AlbumDetailHeader({
           {!!dateLabel && (
             <Text
               style={{
-                fontSize: tokens.typography.micro,
+                fontSize: tokens.typography.caption,
                 color: tokens.colors.mutedFg,
                 fontWeight: tokens.fontWeight.semibold,
               }}
@@ -106,7 +106,7 @@ export function AlbumDetailHeader({
           {!!timeLabel && (
             <Text
               style={{
-                fontSize: tokens.typography.micro,
+                fontSize: tokens.typography.caption,
                 color: tokens.colors.mutedFg,
                 fontWeight: tokens.fontWeight.semibold,
               }}
