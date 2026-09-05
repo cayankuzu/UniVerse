@@ -188,7 +188,37 @@ Guard'ların gerçekten yakaladığı doğrulandı: bir `hitSlop` geçici olarak
 
 ---
 
-## 9. Kapsam dışı bırakılanlar
+## 9. Cihaz turuna bırakılan ölçüm: alt boşluk
+
+Yedi ekran hem `SafeAreaView edges={["bottom"]}` hem de içerik `paddingBottom` içinde
+`insets.bottom` kullanıyor: `VerifyEmailScreen`, `CreateEventScreen`, `NotificationsScreen`,
+`BlockedUsersScreen`, `PermissionsSettingsScreen`, `PrivacySettingsScreen`, `SettingsScreen`.
+
+`useBottomNavPadding` de `getMainBottomTabHeight(insets.bottom)` üzerinden inset'i **üçüncü kez**
+sayıyor. Üstelik `shouldShowRootTabs` alt sekme çubuğunu yalnız Home/Search/Profile'da gösteriyor;
+bu yedi ekranda çubuk yok, ama yeri ayrılıyor.
+
+Çentikli bir iPhone'da (inset 34pt) `SettingsScreen` için kabaca:
+
+```
+SafeAreaView(bottom)            34pt
++ contentContainer paddingBottom max(109, 54) = 109pt
+= 143pt
+```
+
+**Neden bu turda değiştirilmedi:** Bu bir `contentContainerStyle.paddingBottom`; içerik kısa olduğunda
+liste kaymadığı için kullanıcı bunu boş alan olarak görmeyebilir. Gerçek etkisi yalnız cihazda
+ölçülür. Boşluğu cihaza bakmadan daraltmak, düzeltmekten çok bozma riski taşır — ve bu, ürünü
+"daha doğru" değil "farklı" yapardı.
+
+**Cihaz turunda ölçülecek:** yukarıdaki yedi ekranda son öğe ile ekran altı arasındaki mesafe;
+çentikli ve çentiksiz birer cihazda; alt sekme çubuğunun görünmediği doğrulanarak. Ölçüm fazlalığı
+doğrularsa düzeltme `useBottomNavPadding` çağrısını sekme çubuğunun gerçekten görünür olduğu
+ekranlarla sınırlamaktır — yeni bir bileşen veya yeni bir düzen değil.
+
+---
+
+## 10. Kapsam dışı bırakılanlar
 
 Dürüstlük gereği açıkça yazılır:
 

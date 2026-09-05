@@ -268,8 +268,8 @@
     },
     "navigation": {
       "deepLinks": ["AuthCallback:auth/callback", "ResetPassword:reset-password"],
-      "modalMountCount": 59,
-      "modalMountSha256": "826ded6926052898b0eb9a15625481cffcd86e2750456d04d3ef063b07716c73",
+      "modalMountCount": 58,
+      "modalMountSha256": "7db3f3241f2bd0867028292402b560f368b7c04a93c44a477e1039689380aae6",
       "rootLeafRoutes": [
         "AlbumView",
         "AuthCallback",

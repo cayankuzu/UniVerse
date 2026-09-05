@@ -95,10 +95,14 @@ was masking two real container-only failures before this candidate.
 | --------------------------------------------------------- | ---------: | ---------------------: | ---------------- |
 | Leaf routes / screens                                     |    24 / 24 |                24 / 24 | Same             |
 | Navigator tabs / visible bottom keys                      |      3 / 4 |                  3 / 4 | Same             |
-| Deep-link mappings / modal-wrapper mounts                 |     2 / 59 |                 2 / 59 | Same fingerprint |
+| Deep-link mappings / modal-wrapper mounts                 |     2 / 58 |                 2 / 58 | Same fingerprint |
 | Notification types / filters / Android channels           | 11 / 5 / 1 |             11 / 5 / 1 | Same             |
 | Runtime permission keys / settings groups / settings CTAs |  4 / 3 / 7 |              4 / 3 / 7 | Same             |
 | Product-domain tables / Storage buckets                   |     16 / 1 |                 16 / 1 | Same             |
+
+The modal-mount baseline moved from 59 to 58 because two byte-identical event location modals became
+one shared component; both call sites still render it, so no surface a person can reach changed. The
+review is in [no-new-feature-audit.md](no-new-feature-audit.md).
 
 The one additional migration table, `cloudflare_origin_request_nonces`, is an RLS-forced internal
 replay ledger and not a product domain. The reports migration adds only optional idempotency columns
