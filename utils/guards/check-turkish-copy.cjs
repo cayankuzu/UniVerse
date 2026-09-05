@@ -72,6 +72,15 @@ const REQUIRES_DIACRITIC = new Set([
   "yukari",
   "yukle",
   "yukleniyor",
+  // Found ASCII-folded in shipped copy on 2026-09-04, in positions the old
+  // JSX-attribute-only scan could not see.
+  "cik",
+  "kapatilsin",
+  "kirpilamadi",
+  "kirpilamaz",
+  "secilemedi",
+  "secilmedi",
+  "uni",
 ]);
 
 function fail(message) {
@@ -98,10 +107,24 @@ function collectSourceFiles(directory, collected = []) {
   return collected;
 }
 
-const DISPLAY_STRING = new RegExp(
-  `\\b(${DISPLAY_ATTRIBUTES.join("|")})\\s*=\\s*"([^"]{2,200})"`,
-  "g",
-);
+// Copy reaches a person three ways: as a JSX attribute, as the value of a
+// copy-shaped object key (`title:`, `confirmLabel:` …), and as the argument of
+// a sink that puts a string on screen. Scanning only the first missed the
+// destructive-confirm titles and the media error messages. ASCII matchers
+// against backend messages stay out of scope: they never sit in these
+// positions.
+const COPY_KEYS = [...DISPLAY_ATTRIBUTES, "cancelLabel", "confirmLabel", "retryLabel"];
+const COPY_SINKS = [
+  "setErrorMessage",
+  "setSubmitError",
+  "setWarningMessage",
+  "showAlbumUploadAlert",
+];
+const DISPLAY_PATTERNS = [
+  new RegExp(`\\b(${COPY_KEYS.join("|")})\\s*=\\s*"([^"]{2,200})"`, "g"),
+  new RegExp(`\\b(${COPY_KEYS.join("|")})\\s*:\\s*"([^"]{2,200})"`, "g"),
+  new RegExp(`\\b(${COPY_SINKS.join("|")})\\(\\s*"([^"]{2,200})"`, "g"),
+];
 
 const files = SCAN_ROOTS.flatMap((root) => collectSourceFiles(path.join(ROOT, root)));
 if (files.length === 0) {
@@ -113,7 +136,7 @@ for (const file of files) {
   const relativePath = path.relative(ROOT, file).replaceAll("\\", "/");
   const lines = fs.readFileSync(file, "utf8").split(/\r?\n/);
   lines.forEach((line, index) => {
-    for (const match of line.matchAll(DISPLAY_STRING)) {
+    for (const match of DISPLAY_PATTERNS.flatMap((pattern) => [...line.matchAll(pattern)])) {
       const [, attribute, value] = match;
       // Example emails, usernames, and hosts are deliberately ASCII; they are identifiers, not prose.
       if (/[@_]|\/\/|\.[a-z]{2,}(\s|$)/i.test(value)) continue;

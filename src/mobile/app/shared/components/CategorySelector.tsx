@@ -8,6 +8,7 @@ import { TEXT_LIMITS } from "../../shared/validation/textLimits";
 import { AppModalSheet } from "./AppModalSheet";
 import { useKeyboardSafeField, useKeyboardSafeFormActions } from "./KeyboardSafeForm";
 import { formatTurkishDisplayText } from "../i18n/turkishDisplay";
+import { useLiveRegionAnnouncement } from "../hooks/useLiveRegionAnnouncement";
 
 interface CategorySelectorProps {
   errorText?: string;
@@ -95,6 +96,9 @@ export function CategorySelector({
   const resolvedError = errorText || limitError;
   const helperText = resolvedError || supportingText || "";
   const isInvalid = Boolean(resolvedError);
+  // Selection-limit and validation errors are the only feedback this control
+  // gives; accessibilityLiveRegion below covers TalkBack alone.
+  useLiveRegionAnnouncement(resolvedError);
 
   return (
     <View

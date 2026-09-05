@@ -4,6 +4,7 @@ import type { RefObject } from "react";
 import { Pressable, TextInput, View } from "react-native";
 import { AppScrollView as ScrollView, Avatar } from "../../../../shared/components";
 import { tokens } from "../../../../shared/theme";
+import { useLiveRegionAnnouncement } from "../../../../shared/hooks/useLiveRegionAnnouncement";
 import { TEXT_LIMITS } from "../../../../shared/validation/textLimits";
 import type { CommentItem } from "../../data";
 
@@ -58,6 +59,8 @@ export function CommentPanelComposer({
   text,
 }: Props) {
   const remaining = TEXT_LIMITS.comment.body - text.length;
+  // A failed send only shows this line; VoiceOver needs it spoken.
+  useLiveRegionAnnouncement(submitError);
 
   return (
     <View

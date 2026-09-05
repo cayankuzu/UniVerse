@@ -2,6 +2,7 @@ import { Calendar, Clock } from "lucide-react-native";
 import { AppText as Text } from "../../../../shared/components/AppText";
 import { Pressable, View } from "react-native";
 import { tokens } from "../../../../shared/theme";
+import { useLiveRegionAnnouncement } from "../../../../shared/hooks/useLiveRegionAnnouncement";
 import { useKeyboardSafeField, useKeyboardSafeFormActions } from "../../../../shared/components";
 import { useEffect, useRef } from "react";
 
@@ -28,6 +29,8 @@ export function CreateEventSchedulePickerField({
   const keyboardField = useKeyboardSafeField(fieldName);
   const keyboardActions = useKeyboardSafeFormActions();
   const isInvalid = Boolean(errorText);
+  // Date validation failures are easy to miss without an announcement.
+  useLiveRegionAnnouncement(isInvalid ? errorText : null);
 
   useEffect(() => {
     if (!fieldName) return undefined;

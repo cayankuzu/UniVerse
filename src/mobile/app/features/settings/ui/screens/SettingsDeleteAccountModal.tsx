@@ -5,6 +5,7 @@ import { ActivityIndicator, Pressable, View, useWindowDimensions } from "react-n
 import { AppModalHost } from "../../../../shared/components";
 import { t } from "../../../../shared/i18n";
 import { tokens, withAlpha } from "../../../../shared/theme";
+import { useLiveRegionAnnouncement } from "../../../../shared/hooks/useLiveRegionAnnouncement";
 
 interface SettingsDeleteAccountModalProps {
   bottomInset: number;
@@ -23,6 +24,8 @@ export function SettingsDeleteAccountModal({
   onConfirm,
   visible,
 }: SettingsDeleteAccountModalProps) {
+  // Account deletion is irreversible; a silent failure is the worst outcome.
+  useLiveRegionAnnouncement(errorMessage);
   const { fontScale, width } = useWindowDimensions();
   const title = t("settings.deleteAccount.title");
   const warning = t("settings.deleteAccount.warning");

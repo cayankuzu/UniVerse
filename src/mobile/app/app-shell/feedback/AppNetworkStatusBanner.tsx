@@ -7,17 +7,24 @@ import {
   getNetworkQuality,
   subscribeNetworkQuality,
 } from "../../data/projections/networkAwareBudget";
+import { useLiveRegionAnnouncement } from "../../shared/hooks/useLiveRegionAnnouncement";
 import { tokens } from "../../shared/theme";
 
 function useNetworkQuality() {
   return useSyncExternalStore(subscribeNetworkQuality, getNetworkQuality, getNetworkQuality);
 }
 
+const OFFLINE_TITLE = "Çevrimdışısın";
+const OFFLINE_DETAIL = "Kayıtlı içerikleri kullanmaya devam edebilirsin.";
+
 export function AppNetworkStatusBanner() {
   const quality = useNetworkQuality();
   const insets = useSafeAreaInsets();
+  const offline = quality === "offline";
+  // accessibilityLiveRegion below covers TalkBack; VoiceOver needs this.
+  useLiveRegionAnnouncement(offline ? `${OFFLINE_TITLE}. ${OFFLINE_DETAIL}` : null);
 
-  if (quality !== "offline") return null;
+  if (!offline) return null;
 
   return (
     <View
@@ -57,7 +64,7 @@ export function AppNetworkStatusBanner() {
               fontWeight: tokens.fontWeight.extrabold,
             }}
           >
-            Çevrimdışısın
+            {OFFLINE_TITLE}
           </Text>
           <Text
             style={{
@@ -67,7 +74,7 @@ export function AppNetworkStatusBanner() {
               lineHeight: tokens.lineHeight.caption,
             }}
           >
-            Kayıtlı içerikleri kullanmaya devam edebilirsin.
+            {OFFLINE_DETAIL}
           </Text>
         </View>
       </View>

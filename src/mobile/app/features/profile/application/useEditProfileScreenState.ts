@@ -61,7 +61,7 @@ export function useEditProfileScreenState(params: UseEditProfileScreenStateParam
     }
     showConfirmAlert({
       cancelLabel: "Vazgeç",
-      confirmLabel: "Cik",
+      confirmLabel: "Çık",
       destructive: true,
       message: "Kaydedilmeyen profil değişiklikleri silinecek.",
       onConfirm: leaveScreen,

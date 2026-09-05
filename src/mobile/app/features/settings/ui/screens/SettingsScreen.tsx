@@ -12,6 +12,7 @@ import { BackHeader } from "../../../../shared/components";
 import { t } from "../../../../shared/i18n";
 import { useBottomNavPadding } from "../../../../shared/layout/bottomNavSpacing";
 import { tokens } from "../../../../shared/theme";
+import { useLiveRegionAnnouncement } from "../../../../shared/hooks/useLiveRegionAnnouncement";
 import { useSettingsScreenState } from "../../application/useSettingsScreenState";
 import { SettingsDeleteAccountModal } from "./SettingsDeleteAccountModal";
 import { SettingsSectionGroup } from "./SettingsSectionGroup";
@@ -46,6 +47,10 @@ export function SettingsScreen({ navigation }: Props) {
     logout,
     resetToWelcome: () => safeResetToRoute(navigation, "Welcome"),
   });
+
+  // The error card below relies on accessibilityLiveRegion, which VoiceOver
+  // ignores. Only announce while the card is actually on screen.
+  useLiveRegionAnnouncement(operationError && !showDeleteConfirm ? operationError : null);
   const handlePressItem = React.useCallback(
     (item: SettingsActionCardData) => {
       if (item.action === "logout") {

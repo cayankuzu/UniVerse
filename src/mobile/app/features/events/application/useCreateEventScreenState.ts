@@ -67,11 +67,11 @@ export function useCreateEventScreenState(params: {
     }
     showConfirmAlert({
       cancelLabel: "Vazgeç",
-      confirmLabel: "Cik",
+      confirmLabel: "Çık",
       destructive: true,
       message: "Kaydedilmeyen etkinlik taslağı silinecek.",
       onConfirm: leaveScreen,
-      title: "Taslak kapatilsin mi?",
+      title: "Taslak kapatılsın mı?",
     });
   }, [hasUnsavedChanges, leaveScreen, setStep, step]);
 

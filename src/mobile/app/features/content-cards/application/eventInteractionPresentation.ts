@@ -132,7 +132,7 @@ export function getJoinButtonLabel(
     case "FOLLOW_REQUIRED":
       return "Takip Gerekli";
     case "UNIVERSITY_REQUIRED":
-      return "Uni Gerekli";
+      return "Üni Gerekli";
     case "UNAUTHORIZED":
       return "Giriş Gerekli";
     case "BLOCKED":

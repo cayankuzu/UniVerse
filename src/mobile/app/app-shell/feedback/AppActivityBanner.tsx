@@ -3,6 +3,7 @@ import { AppText as Text } from "../../shared/components/AppText";
 import { ActivityIndicator, View } from "react-native";
 import type { OverflowActionItem } from "../../shared/components";
 import { OverflowActionMenu } from "../../shared/components";
+import { useLiveRegionAnnouncement } from "../../shared/hooks/useLiveRegionAnnouncement";
 import { tokens, withAlpha } from "../../shared/theme";
 
 export type AppActivityBannerTone = "error" | "info" | "success";
@@ -52,6 +53,9 @@ export function AppActivityBanner({ actions, hint, percent, stage, title, tone }
   const accessibilityLabel = [title, stage, hint, `${normalizedPercent}%`]
     .filter(Boolean)
     .join(". ");
+  // VoiceOver ignores accessibilityLiveRegion. Announce stage changes, not the
+  // percent: an upload ticking 1..100 would talk over everything else.
+  useLiveRegionAnnouncement([title, stage, hint].filter(Boolean).join(". "));
 
   return (
     <View

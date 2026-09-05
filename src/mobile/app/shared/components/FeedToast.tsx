@@ -4,6 +4,7 @@ import { AppText as Text } from "./AppText";
 import { useFloatingBottomMargin } from "../layout/bottomNavSpacing";
 import { tokens, withAlpha } from "../../shared/theme";
 import { InstantPressable } from "./InstantPressable";
+import { useLiveRegionAnnouncement } from "../hooks/useLiveRegionAnnouncement";
 
 export type FeedToastTone = "error" | "info" | "success" | "warning";
 
@@ -32,6 +33,10 @@ export function FeedToast({
   tone = "warning",
 }: Props) {
   const floatingBottom = useFloatingBottomMargin(tokens.spacing.md, 28);
+  // The toast is the app's main transient feedback surface, and
+  // accessibilityLiveRegion below only reaches TalkBack.
+  useLiveRegionAnnouncement(message);
+
   if (!message) return null;
   const toneConfig = resolveTone(tone);
   const Icon = toneConfig.icon;
