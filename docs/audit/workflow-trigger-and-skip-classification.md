@@ -60,10 +60,13 @@ Dördü de `pull_request` ile tetiklenen workflow'lardan gelir. `cloudflare-prod
 
 **Yerel doğrulama (2026-09-04, gitleaks 8.30.1):**
 
-| Tarama                              | Sonuç                                        |
-| ----------------------------------- | -------------------------------------------- |
-| `gitleaks git . --log-opts="--all"` | 16 commit tarandı, ~8.95 MB, **sızıntı yok** |
-| `gitleaks dir .`                    | ~2.12 GB tarandı, **sızıntı yok**            |
+| Tarama                              | Sonuç                                  |
+| ----------------------------------- | -------------------------------------- |
+| `gitleaks git . --log-opts="--all"` | tüm geçmiş tarandı, **sızıntı yok**    |
+| `gitleaks dir .`                    | çalışma ağacı tarandı, **sızıntı yok** |
+
+Commit sayısı ve taranan bayt her koşuda değişir; burada kaydedilen sonuç "sızıntı yok"tur.
+Sayısal ayrıntı, aynı SHA'ya bağlı CI koşusunun kendi çıktısından okunur.
 
 Bu yerel sonuç remote CI sonucunun yerine geçmez; PR koşusu aynı SHA'da yeşile döndüğünde run ID'si `docs/release-readiness.md` içine yazılır.
 
