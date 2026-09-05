@@ -49,16 +49,43 @@ test("rejects malformed JSON and a non-full candidate SHA", () => {
   );
 });
 
-test("rejects missing or duplicated exact required check names", () => {
+test("rejects a missing required check name", () => {
   const missing = response();
   missing.check_runs.pop();
   missing.total_count -= 1;
   assert.throws(() => validateRequiredChecks(missing, CANDIDATE_SHA), /required check is missing/u);
+});
 
+// A branch that is both pushed to and open as a pull request runs the same
+// workflow twice, so one name legitimately appears more than once on a SHA.
+test("accepts a duplicated required check name when every run agrees", () => {
   const duplicate = response();
   duplicate.check_runs.push(passingRun(REQUIRED_CHECK_NAMES[0]));
   duplicate.total_count += 1;
-  assert.throws(() => validateRequiredChecks(duplicate, CANDIDATE_SHA), /ambiguous/u);
+
+  const result = validateRequiredChecks(duplicate, CANDIDATE_SHA);
+  assert.equal(result.checks[REQUIRED_CHECK_NAMES[0]].runCount, 2);
+  assert.equal(result.checks[REQUIRED_CHECK_NAMES[1]].runCount, 1);
+});
+
+test("rejects a duplicated required check name when one of its runs failed", () => {
+  const disagreeing = response();
+  disagreeing.check_runs.push(passingRun(REQUIRED_CHECK_NAMES[0], { conclusion: "failure" }));
+  disagreeing.total_count += 1;
+  assert.throws(
+    () => validateRequiredChecks(disagreeing, CANDIDATE_SHA),
+    /not completed successfully/u,
+  );
+
+  const stillRunning = response();
+  stillRunning.check_runs.push(
+    passingRun(REQUIRED_CHECK_NAMES[0], { conclusion: null, status: "in_progress" }),
+  );
+  stillRunning.total_count += 1;
+  assert.throws(
+    () => validateRequiredChecks(stillRunning, CANDIDATE_SHA),
+    /not completed successfully/u,
+  );
 });
 
 test("rejects a wrong SHA, app, status, or conclusion", () => {

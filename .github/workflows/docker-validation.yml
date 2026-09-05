@@ -4,10 +4,14 @@ on:
   # `docker-validate-immutable` is a required branch-protection context, so every PR must create it.
   # A path-filtered required PR workflow can remain permanently pending on unrelated changes.
   pull_request:
+  # Push is deliberately limited to main. A branch listed here that also has an
+  # open PR fires both triggers and produces two check runs with this same name
+  # on one SHA, which validate-github-required-checks.cjs refuses as ambiguous --
+  # correctly, since two runs of a name can disagree. The pull_request trigger
+  # already guarantees the context exists on every PR.
   push:
     branches:
       - main
-      - "chore/aaa-mvp-hardening-docker-cloudflare-ota-push"
   workflow_dispatch:
 
 permissions:

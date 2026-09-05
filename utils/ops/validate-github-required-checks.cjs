@@ -67,32 +67,35 @@ function validateRequiredChecks(rawOrValue, candidateSha) {
     if (matches.length === 0) {
       throw new Error(`required check is missing: ${expectedName}.`);
     }
-    if (matches.length !== 1) {
-      throw new Error(
-        `required check is ambiguous because its exact name is duplicated: ${expectedName}.`,
-      );
+
+    // One name can legitimately appear more than once on a SHA: a branch that is
+    // both pushed to and open as a pull request fires a workflow twice. That is
+    // only ambiguous when the runs disagree, so every instance is checked and a
+    // name is satisfied only if all of them pass. A single failure among many
+    // successes still fails the gate.
+    for (const run of matches) {
+      if (!run || typeof run !== "object" || Array.isArray(run)) {
+        throw new Error(`required check is not a record: ${expectedName}.`);
+      }
+      if (run.head_sha !== candidateSha) {
+        throw new Error(`required check head_sha mismatch: ${expectedName}.`);
+      }
+      if (run.app?.id !== GITHUB_ACTIONS_APP_ID) {
+        throw new Error(
+          `required check was not produced by the GitHub Actions app: ${expectedName}.`,
+        );
+      }
+      if (run.status !== "completed" || run.conclusion !== "success") {
+        throw new Error(`required check is not completed successfully: ${expectedName}.`);
+      }
     }
 
     const run = matches[0];
-    if (!run || typeof run !== "object" || Array.isArray(run)) {
-      throw new Error(`required check is not a record: ${expectedName}.`);
-    }
-    if (run.head_sha !== candidateSha) {
-      throw new Error(`required check head_sha mismatch: ${expectedName}.`);
-    }
-    if (run.app?.id !== GITHUB_ACTIONS_APP_ID) {
-      throw new Error(
-        `required check was not produced by the GitHub Actions app: ${expectedName}.`,
-      );
-    }
-    if (run.status !== "completed" || run.conclusion !== "success") {
-      throw new Error(`required check is not completed successfully: ${expectedName}.`);
-    }
-
     validated[expectedName] = {
       appId: run.app.id,
       conclusion: run.conclusion,
       headSha: run.head_sha,
+      runCount: matches.length,
       status: run.status,
     };
   }

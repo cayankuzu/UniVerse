@@ -69,6 +69,32 @@ were not the same quality gate. The image is repinned to `node:22.23.2` by diges
 additionally fails closed when a staged contract test reads a file the image does not copy, which
 was masking two real container-only failures before this candidate.
 
+### Remote CI verification for this candidate
+
+Pushed to `chore/aaa-mvp-hardening-docker-cloudflare-ota-push` (PR #1 -> `main`) at
+`1b168cfd68e9413264d1c68a193c1940e5755286`. All four required contexts passed on that SHA:
+
+| Required check              | Run                                                                           | Result          |
+| --------------------------- | ----------------------------------------------------------------------------- | --------------- |
+| `internal-verify`           | [33957677241](https://github.com/cayankuzu/UniVerse/actions/runs/33957677241) | success (3m36s) |
+| `secret-scan`               | [33957677241](https://github.com/cayankuzu/UniVerse/actions/runs/33957677241) | success (15s)   |
+| `sast`                      | [33957677241](https://github.com/cayankuzu/UniVerse/actions/runs/33957677241) | success (13s)   |
+| `docker-validate-immutable` | [33957677202](https://github.com/cayankuzu/UniVerse/actions/runs/33957677202) | success (4m25s) |
+
+`secret-scan` is the gate that was failing before this candidate, and its log shows all three scans
+running rather than the action aborting: the pinned gitleaks `8.28.0` passes its SHA-256 check, the
+action scans the event's 18 commits, `security:secrets:history` scans 27 commits across full history,
+and `security:secrets` scans the working tree. All report no leaks.
+
+`npm run guard:github-required-checks` validates this SHA against the live check-runs API and returns
+`OK: 4 checks passed`. `cloudflare-preview / deploy-preview` reports `skipping` because it needs
+provider secrets; it is not a required context. `cloudflare-production` and both `eas-update-*`
+workflows are `workflow_dispatch`-only and are classified in
+[audit/workflow-trigger-and-skip-classification.md](audit/workflow-trigger-and-skip-classification.md).
+
+This is remote CI evidence only. It is not signed-artifact, device, provider or store evidence, so
+the decision above is unchanged.
+
 ### Local repository verification for this candidate
 
 - `npm run check` (typecheck, all guards, Worker types/tests) passed.
