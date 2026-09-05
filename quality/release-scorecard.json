@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "candidate": {
-    "commit": "b327d02e02dad40b5b50d103eb1833b259e3c5bc",
+    "commit": "568fea0f99c55ae5268aa155bc7b4fd6c69ca880",
     "version": "1.0.134",
     "runtimeVersion": "1.0.134"
   },
@@ -190,7 +190,7 @@
     {
       "id": 18,
       "name": "CI/CD",
-      "repositoryHardening": "Fail-closed checks and separate Cloudflare/EAS preview/production workflows",
+      "repositoryHardening": "Required same-SHA contexts (internal-verify, secret-scan, sast, docker-validate-immutable) all pass on the candidate and the aggregator validates them against the live check-runs API; docker-validation no longer double-fires on a PR branch.",
       "evidenceLevel": "AUTOMATED",
       "missingEvidence": ["E1"],
       "remainingRisk": "GitHub protection, real run IDs, provider approvals and rollback not proven",
