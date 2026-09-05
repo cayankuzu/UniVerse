@@ -71,8 +71,9 @@ was masking two real container-only failures before this candidate.
 
 ### Remote CI verification for this candidate
 
-Pushed to `chore/aaa-mvp-hardening-docker-cloudflare-ota-push` (PR #1 -> `main`) at
-`1b168cfd68e9413264d1c68a193c1940e5755286`. All four required contexts passed on that SHA:
+Pushed to `chore/aaa-mvp-hardening-docker-cloudflare-ota-push` (PR #1 -> `main`). All four required
+contexts passed on `1b168cfd68e9413264d1c68a193c1940e5755286` and again on
+`128e1acd2dd2d3f38958b833bf24f7d98576c0cc`, which carries the aggregator fix:
 
 | Required check              | Run                                                                           | Result          |
 | --------------------------- | ----------------------------------------------------------------------------- | --------------- |
@@ -86,8 +87,27 @@ running rather than the action aborting: the pinned gitleaks `8.28.0` passes its
 action scans the event's 18 commits, `security:secrets:history` scans 27 commits across full history,
 and `security:secrets` scans the working tree. All report no leaks.
 
-`npm run guard:github-required-checks` validates this SHA against the live check-runs API and returns
-`OK: 4 checks passed`. `cloudflare-preview / deploy-preview` reports `skipping` because it needs
+Branch protection on `main` was verified live on 2026-09-05 and matches the four contexts the
+aggregator requires:
+
+| Control                  | State                                                                                                                       |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| Required contexts        | `internal-verify`, `secret-scan`, `sast`, `docker-validate-immutable`, all pinned to the GitHub Actions app, `strict: true` |
+| Pull request reviews     | 1 approval, stale approvals dismissed, last-push approval required                                                          |
+| Force push / deletion    | both blocked                                                                                                                |
+| Linear history           | required                                                                                                                    |
+| Conversation resolution  | required                                                                                                                    |
+| Admin enforcement        | enabled                                                                                                                     |
+| `production` environment | protected by required reviewers and a branch policy                                                                         |
+
+One reviewer rather than two is deliberate for a single-maintainer project. The open half of
+[MANUAL_STEPS](MANUAL_STEPS.md) §1 is the provider credentials, not the protection.
+
+`npm run guard:github-required-checks` validates against the live check-runs API and returns
+`OK: 4 checks passed` for both SHAs. The first needed the duplicate-tolerance fix to be validated at
+all: `docker-validation` fired on both `push` and `pull_request` there, producing seven check runs
+with `docker-validate-immutable` twice. On `128e1ac` the trigger fix leaves six runs, each name
+appearing exactly once. `cloudflare-preview / deploy-preview` reports `skipping` because it needs
 provider secrets; it is not a required context. `cloudflare-production` and both `eas-update-*`
 workflows are `workflow_dispatch`-only and are classified in
 [audit/workflow-trigger-and-skip-classification.md](audit/workflow-trigger-and-skip-classification.md).
