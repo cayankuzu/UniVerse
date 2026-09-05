@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "candidate": {
-    "commit": "a8005fd43374049cb40a245b80a57cad161aed28",
+    "commit": "b327d02e02dad40b5b50d103eb1833b259e3c5bc",
     "version": "1.0.134",
     "runtimeVersion": "1.0.134"
   },
@@ -250,7 +250,7 @@
     {
       "id": 24,
       "name": "Store readiness",
-      "repositoryHardening": "Store/rehearsal checklists and frozen identities exist, and docs/marketing carries a claims register that binds every publishable sentence to a file in this repository.",
+      "repositoryHardening": "Store/rehearsal checklists and frozen identities exist, and docs/marketing carries a claims register that binds every publishable sentence to a file in this repository, enforced by check-marketing-claims.cjs.",
       "evidenceLevel": "AUTOMATED",
       "missingEvidence": ["E2", "E3", "E7"],
       "remainingRisk": "Signed artifacts, internal tracks, privacy/UGC forms and review absent",
