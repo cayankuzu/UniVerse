@@ -32,7 +32,7 @@ Kampüs etkinlik ve kulüpleri
 albümü, yorumları ve beğenileri aynı ekranda kalır. Konum izni istemiyoruz.
 ```
 
-150 karakter. İlk cümle işlev (F-03), ikincisi fark (F-06), üçüncüsü güven (P-01).
+152 karakter. İlk cümle işlev (F-03), ikincisi fark (F-06), üçüncüsü güven (P-01).
 
 ### Anahtar kelime alanı (100 karakter, virgülle, boşluksuz)
 
