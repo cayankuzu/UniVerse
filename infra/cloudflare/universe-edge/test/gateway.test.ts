@@ -148,6 +148,40 @@ describe("selective edge gateway", () => {
     expect(await response.json()).toMatchObject({ code: "invalid_origin_health" });
   });
 
+  it("rejects streamed oversized health responses without awaiting stalled cancellation", async () => {
+    let cancelCalled = false;
+    const fetcher: typeof fetch = vi.fn(
+      async () =>
+        new Response(
+          new ReadableStream<Uint8Array>({
+            cancel() {
+              cancelCalled = true;
+              return new Promise<void>(() => undefined);
+            },
+            start(controller) {
+              controller.enqueue(new Uint8Array(4097));
+            },
+          }),
+          { headers: { "content-type": "application/json" } },
+        ),
+    );
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    const outcome = await Promise.race([
+      createGateway(dependencies(fetcher)).fetch(
+        new Request("https://edge.example.com/health"),
+        buildEnv(),
+      ),
+      new Promise<"timeout">((resolve) => {
+        timeoutId = setTimeout(() => resolve("timeout"), 500);
+      }),
+    ]);
+    if (timeoutId) clearTimeout(timeoutId);
+    if (outcome === "timeout") throw new Error("oversized health response handling timed out");
+    expect(outcome.status).toBe(503);
+    expect(await outcome.json()).toMatchObject({ code: "invalid_origin_health" });
+    expect(cancelCalled).toBe(true);
+  });
+
   it("returns 404 for every route outside the explicit matrix", async () => {
     const gateway = createGateway();
     const response = await gateway.fetch(
@@ -235,6 +269,24 @@ describe("selective edge gateway", () => {
       buildEnv(),
     );
     expect(tooLarge.status).toBe(413);
+
+    const streamedTooLarge = await gateway.fetch(
+      new Request("https://edge.example.com/reports", {
+        body: new ReadableStream<Uint8Array>({
+          start(controller) {
+            controller.enqueue(new Uint8Array(4097));
+            controller.close();
+          },
+        }),
+        headers: {
+          authorization: "Bearer valid-token",
+          "content-type": "application/json",
+        },
+        method: "POST",
+      }),
+      buildEnv(),
+    );
+    expect(streamedTooLarge.status).toBe(413);
 
     const wrongType = await gateway.fetch(
       new Request("https://edge.example.com/auth/register-direct", {
@@ -355,6 +407,21 @@ describe("selective edge gateway", () => {
     expect(fetcher).not.toHaveBeenCalled();
   });
 
+  it("fails closed when a route's configured rate-limit binding is unavailable", async () => {
+    const fetcher: typeof fetch = vi.fn(async () => Response.json({ success: true }));
+    const response = await createGateway(dependencies(fetcher)).fetch(
+      new Request("https://edge.example.com/reports", {
+        body: JSON.stringify(reportBody()),
+        headers: { authorization: "Bearer user-jwt", "content-type": "application/json" },
+        method: "POST",
+      }),
+      buildEnv({ REPORT_RATE_LIMITER: undefined }),
+    );
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({ code: "configuration_error" });
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
   it("applies a separate actor budget after successful authentication", async () => {
     const fetcher: typeof fetch = vi.fn(async () => Response.json({ success: true }));
     const verifyJwt = vi.fn(async () => ({ subject: SUBJECT }));
@@ -470,6 +537,59 @@ describe("selective edge gateway", () => {
     );
   });
 
+  it("keeps the upstream timeout active while consuming the response body", async () => {
+    const fetcher: typeof fetch = vi.fn(async (_input, init) => {
+      const signal = init?.signal;
+      return new Response(
+        new ReadableStream<Uint8Array>({
+          start(controller) {
+            const abort = () =>
+              controller.error(signal?.reason ?? new DOMException("Aborted", "AbortError"));
+            if (signal?.aborted) abort();
+            else signal?.addEventListener("abort", abort, { once: true });
+          },
+        }),
+        { headers: { "content-type": "application/json" } },
+      );
+    });
+    const response = await createGateway(dependencies(fetcher)).fetch(
+      new Request("https://edge.example.com/reports", {
+        body: JSON.stringify(reportBody()),
+        headers: { authorization: "Bearer user-jwt", "content-type": "application/json" },
+        method: "POST",
+      }),
+      buildEnv({ UPSTREAM_TIMEOUT_MS: "1000" }),
+    );
+    expect(response.status).toBe(504);
+    expect(await response.json()).toMatchObject({ code: "origin_timeout" });
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+
+  it("rejects streamed origin responses above the global response budget", async () => {
+    const fetcher: typeof fetch = vi.fn(
+      async () =>
+        new Response(
+          new ReadableStream<Uint8Array>({
+            start(controller) {
+              controller.enqueue(new Uint8Array(512 * 1024 + 1));
+            },
+          }),
+          { headers: { "content-type": "application/json" } },
+        ),
+    );
+    const response = await createGateway(dependencies(fetcher)).fetch(
+      new Request("https://edge.example.com/reports", {
+        body: JSON.stringify(reportBody()),
+        headers: { authorization: "Bearer user-jwt", "content-type": "application/json" },
+        method: "POST",
+      }),
+      buildEnv(),
+    );
+    expect(response.status).toBe(502);
+    expect(await response.json()).toMatchObject({ code: "origin_response_too_large" });
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+
   it("strips origin cookies and overwrites every cache policy", async () => {
     const fetcher: typeof fetch = vi.fn(async () =>
       Response.json(
@@ -495,7 +615,18 @@ describe("selective edge gateway", () => {
     expect(response.headers.get("cache-control")).toBe("private, no-store, max-age=0");
   });
 
-  it("fails closed for placeholder preview origins and weak secrets", () => {
+  it("fails closed for placeholder non-production origins and weak secrets", () => {
+    expect(() =>
+      readGatewayConfig(
+        buildEnv({
+          ENVIRONMENT: "development",
+          JWT_ISSUER: "https://development-project-ref.invalid/auth/v1",
+          ORIGIN_BASE_URL:
+            "https://development-project-ref.invalid/functions/v1/server/make-server-e3557d40",
+          SUPABASE_URL: "https://development-project-ref.invalid",
+        }),
+      ),
+    ).toThrow();
     expect(() =>
       readGatewayConfig(
         buildEnv({
@@ -508,6 +639,24 @@ describe("selective edge gateway", () => {
       ),
     ).toThrow();
     expect(() => readGatewayConfig(buildEnv({ ORIGIN_HMAC_SECRET: "too-short" }))).toThrow();
+  });
+
+  it("requires canonical Supabase and exact origin function paths", () => {
+    for (const overrides of [
+      { SUPABASE_URL: "https://project.supabase.co/other" },
+      {
+        ORIGIN_BASE_URL:
+          "https://project.supabase.co/functions/v1/server/make-server-e3557d40?redirect=true",
+      },
+      { ORIGIN_BASE_URL: "https://project.supabase.co/functions/v1/server/other" },
+    ]) {
+      expect(() => readGatewayConfig(buildEnv(overrides))).toThrow();
+    }
+    expect(
+      readGatewayConfig(
+        buildEnv({ ALLOWED_ORIGINS: "https://APP.EXAMPLE.TEST:443/" }),
+      ).allowedOrigins.has("https://app.example.test"),
+    ).toBe(true);
   });
 
   it("replaces malformed request IDs instead of reflecting them", async () => {

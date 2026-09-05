@@ -25,4 +25,19 @@ describe("statically allowlisted Expo public environment", () => {
 
     expect(readStringEnv("EXPO_PUBLIC_NOT_ALLOWLISTED", "safe-default")).toBe("safe-default");
   });
+
+  it("fails closed for invalid or mismatched app environments", () => {
+    const { normalizeAppEnvironment } = require("./runtime") as typeof import("./runtime");
+
+    expect(normalizeAppEnvironment(undefined, undefined)).toBe("development");
+    expect(normalizeAppEnvironment(undefined, "development")).toBe("development");
+    expect(normalizeAppEnvironment("preview", "preview")).toBe("preview");
+    expect(() => normalizeAppEnvironment("prod", "production")).toThrow(
+      "Invalid EXPO_PUBLIC_APP_ENV",
+    );
+    expect(() => normalizeAppEnvironment(undefined, "production")).toThrow(
+      "EXPO_PUBLIC_APP_ENV is required",
+    );
+    expect(() => normalizeAppEnvironment("preview", "production")).toThrow("must match");
+  });
 });

@@ -6,6 +6,7 @@ coverage/
 .expo-export-test/
 __expo_ref__/
 supabase/.temp/
+supabase/.branches/
 android/.gradle*/
 android/.gradle-user-home*/
 android/.kotlin/
@@ -22,6 +23,7 @@ android/app/*.keystore
 .maestro-output/
 .maestro-debug/
 /artifacts/ui-validation/
+/artifacts/docker/
 .temp/
 .eslintcache
 .DS_Store

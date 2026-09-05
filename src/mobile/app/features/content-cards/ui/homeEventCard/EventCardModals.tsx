@@ -5,7 +5,7 @@ import { DangerConfirmSheet, type OverflowActionItem } from "../../../../shared/
 import { downloadMediaToGallery } from "../../../../shared/media/downloadMediaToGallery";
 import { isVideoMediaUri } from "../../../../shared/media/mediaVideoUtils";
 import { EventCardImagePreviewModal } from "./EventCardImagePreviewModal";
-import { EventCardLocationModal } from "./EventCardLocationModal";
+import { EventLocationModal } from "../shared/EventLocationModal";
 import { EventCardReportModal } from "./EventCardReportModal";
 import { EventCardUserListModal } from "./EventCardUserListModal";
 import { reportEvent } from "../../data";
@@ -213,7 +213,7 @@ export function EventCardModals({
         emptyText="Henüz katılımcı yok."
       />
 
-      <EventCardLocationModal
+      <EventLocationModal
         copiedField={copiedField}
         event={event}
         modalBottomPadding={modalBottomPadding}

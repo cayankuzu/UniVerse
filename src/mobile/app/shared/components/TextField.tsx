@@ -22,6 +22,7 @@ import {
   TextInput,
   type TextInputProps as PaperTextInputProps,
 } from "react-native-paper";
+import { useLiveRegionAnnouncement } from "../hooks/useLiveRegionAnnouncement";
 import { tokens } from "../../shared/theme";
 import { useKeyboardSafeField, useKeyboardSafeFormActions } from "./KeyboardSafeForm";
 
@@ -102,6 +103,11 @@ export const TextField = forwardRef<NativeTextInput, Props>(
       (resolvedStatus === "valid" ? resolvedValidText : undefined) ||
       resolvedSupportingText ||
       "";
+    // The helper line is the only place a validation failure shows, and its
+    // accessibilityLiveRegion reaches TalkBack alone. Announce only the states
+    // the live region itself announces, so a valid field stays quiet.
+    useLiveRegionAnnouncement(isInvalid || resolvedStatus === "validating" ? helperMessage : null);
+
     const outlineColor = useMemo(() => {
       if (isInvalid) return tokens.colors.danger;
       if (resolvedStatus === "valid") return tokens.colors.successText;

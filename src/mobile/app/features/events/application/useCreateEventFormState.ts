@@ -97,7 +97,7 @@ export function useCreateEventFormState() {
   const cropCoverImage = useCallback(async () => {
     if (!coverImageUri || cropPending) return;
     if (isVideoMediaUri(coverImageUri)) {
-      setSubmitError("Video kirpilamaz.");
+      setSubmitError("Video kırpılamaz.");
       return;
     }
 
@@ -122,7 +122,7 @@ export function useCreateEventFormState() {
     } catch (error) {
       debugWarn("MEDIA/EVENT_COVER", "crop-failed", { error, uri: coverImageUri });
       setSubmitError(
-        String((error as { message?: string } | null)?.message || "Medya kirpilamadi."),
+        String((error as { message?: string } | null)?.message || "Medya kırpılamadı."),
       );
     } finally {
       setCropPending(false);
@@ -157,7 +157,7 @@ export function useCreateEventFormState() {
         }
       } catch (error) {
         setSubmitError(
-          String((error as { message?: string } | null)?.message || "Medyalar secilemedi."),
+          String((error as { message?: string } | null)?.message || "Medyalar seçilemedi."),
         );
       }
     },

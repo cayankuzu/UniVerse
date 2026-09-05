@@ -5,6 +5,13 @@ const iosPrebuild = require("./config/ios-prebuild.json");
 
 const APP_ENV = process.env.EXPO_PUBLIC_APP_ENV || "development";
 const RELEASE_CHANNEL = process.env.EXPO_PUBLIC_RELEASE_CHANNEL || APP_ENV;
+const RELEASE_ENVIRONMENTS = new Set(["development", "preview", "production"]);
+if (!RELEASE_ENVIRONMENTS.has(APP_ENV)) {
+  throw new Error("[app.config] EXPO_PUBLIC_APP_ENV must be development, preview, or production.");
+}
+if (!RELEASE_ENVIRONMENTS.has(RELEASE_CHANNEL) || RELEASE_CHANNEL !== APP_ENV) {
+  throw new Error("[app.config] EXPO_PUBLIC_RELEASE_CHANNEL must match EXPO_PUBLIC_APP_ENV.");
+}
 const EAS_BUILD_PLATFORM = (process.env.EAS_BUILD_PLATFORM || "").trim().toLowerCase();
 const GENERATE_IOS_NATIVE_CONFIG = EAS_BUILD_PLATFORM === "ios";
 const APP_SCHEME =

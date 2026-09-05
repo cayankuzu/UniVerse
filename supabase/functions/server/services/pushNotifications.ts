@@ -41,6 +41,9 @@ export type ExpoPushTicket = {
   message?: string;
   status: "error" | "ok";
   ticketId?: string;
+  retryAfterSeconds?: number;
+  transportError?: string;
+  transportStatus?: number;
 };
 
 export type ExpoPushBatchResult = {
@@ -56,29 +59,24 @@ const EXPO_PUSH_API_URL = "https://exp.host/--/api/v2/push/send";
 const EXPO_PUSH_TOKEN_PATTERN = /^(ExponentPushToken|ExpoPushToken)\[[^\]]+\]$/;
 const EXPO_PROJECT_ID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const PUSH_INSTALLATION_ID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const EXPO_PUSH_BATCH_LIMIT = 100;
 const EXPO_PUSH_BATCH_DELAY_MS = 60;
+// A consumed database lease is renewed for 30 seconds immediately before provider I/O. Keep the
+// complete HTTP request (including response body parsing) comfortably below that boundary.
+const EXPO_PUSH_REQUEST_TIMEOUT_MS = 8_000;
+const EXPO_RETRY_AFTER_MAX_SECONDS = 15 * 60;
 
-function clampText(value: string, maxLength: number) {
+function normalizeRetryAfterSeconds(value: string | null) {
   const normalized = String(value || "").trim();
-  return normalized.length > maxLength ? normalized.slice(0, maxLength) : normalized;
-}
-
-function normalizePushText(value: unknown) {
-  return String(value || "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function isDuplicatePushSegment(left: string, right: string) {
-  if (!left || !right) return false;
-  return left.localeCompare(right, undefined, { sensitivity: "accent" }) === 0;
-}
-
-function withActorPrefix(actorDisplayName: string, message: string) {
-  if (!actorDisplayName) return message;
-  if (!message) return actorDisplayName;
-  return `${actorDisplayName} ${message}`;
+  if (!normalized) return undefined;
+  const numericSeconds = Number(normalized);
+  const seconds = Number.isFinite(numericSeconds)
+    ? Math.ceil(numericSeconds)
+    : Math.ceil((Date.parse(normalized) - Date.now()) / 1000);
+  if (!Number.isFinite(seconds) || seconds <= 0) return undefined;
+  return Math.min(EXPO_RETRY_AFTER_MAX_SECONDS, seconds);
 }
 
 function normalizeExpoPushTicket(value: unknown): ExpoPushTicket {
@@ -89,7 +87,15 @@ function normalizeExpoPushTicket(value: unknown): ExpoPushTicket {
     };
   }
   const item = value as Record<string, unknown>;
-  const status = item.status === "ok" ? "ok" : "error";
+  const ticketId = String(item.id || "").trim();
+  if (item.status === "ok" && !ticketId) {
+    return {
+      errorCode: "MalformedExpoTicket",
+      message: "expo-ok-ticket-missing-id",
+      status: "error",
+    };
+  }
+  const status = item.status === "ok" && ticketId ? "ok" : "error";
   return {
     errorCode:
       item.details && typeof item.details === "object"
@@ -97,7 +103,7 @@ function normalizeExpoPushTicket(value: unknown): ExpoPushTicket {
         : undefined,
     message: String(item.message || "").trim() || undefined,
     status,
-    ticketId: status === "ok" ? String(item.id || "").trim() || undefined : undefined,
+    ticketId: status === "ok" ? ticketId : undefined,
   };
 }
 
@@ -119,114 +125,26 @@ function normalizeExpoRequestError(value: unknown, status: number) {
   };
 }
 
-export function buildPushBody(notification: NotificationDispatchRecord) {
-  const type = normalizePushText(notification.type);
-  const message = normalizePushText(notification.message);
-  const detail = normalizePushText(notification.detail);
-
-  if (detail && !isDuplicatePushSegment(message, detail)) {
-    switch (type) {
-      case "comment":
-        return clampText(`Yorum: ${detail}`, 250);
-      case "like":
-        return clampText(`Icerik: ${detail}`, 250);
-      case "event":
-      case "join":
-      case "join_request":
-      case "join_accepted":
-      case "join_rejected":
-        return clampText(`Etkinlik: ${detail}`, 250);
-      default:
-        if (message) {
-          return clampText(`${message}: ${detail}`, 250);
-        }
-        return clampText(detail, 250);
-    }
-  }
-
-  if (message) {
-    return clampText(message, 250);
-  }
-
+export function buildPushBody(_notification: NotificationDispatchRecord) {
+  // A token can be reassigned after the final database check but before the provider accepts the
+  // request. Never put actor/content data on the lock screen; the authenticated projection is the
+  // only source for notification details after the app opens.
   return "Yeni bir bildirimin var.";
 }
 
 export function buildPushData(
   notification: NotificationDispatchRecord,
-  actor?: Pick<PushActorProfile, "username"> | null,
+  _actor?: Pick<PushActorProfile, "username"> | null,
 ) {
-  const data: Record<string, string> = {
-    notificationId: String(notification.id || "").trim(),
-  };
-  const type = String(notification.type || "").trim();
-  if (type) data.type = type;
-  const eventId = String(notification.event_id || "").trim();
-  if (eventId) data.eventId = eventId;
-  const photoId = String(notification.photo_id || "").trim();
-  if (photoId) data.photoId = photoId;
-  const targetProfileId = String(notification.target_profile_id || "").trim();
-  if (targetProfileId) data.targetProfileId = targetProfileId;
-  const fromUsername = String(actor?.username || "").trim();
-  if (fromUsername) data.fromUsername = fromUsername;
-  data.targetType = photoId ? "album" : eventId ? "event" : "profile";
-  return data;
+  return { notificationId: String(notification.id || "").trim() };
 }
 
 export function buildPushTitle(
-  type: string,
-  actor: PushActorProfile | null,
-  notification?: Pick<NotificationDispatchRecord, "message"> | null,
+  _type: string,
+  _actor: PushActorProfile | null,
+  _notification?: Pick<NotificationDispatchRecord, "message"> | null,
 ) {
-  const actorDisplayName = clampText(
-    normalizePushText(actor?.name || actor?.club_name || actor?.username || ""),
-    80,
-  );
-  const message = normalizePushText(notification?.message);
-  if (
-    actorDisplayName &&
-    message &&
-    (type === "comment" ||
-      type === "join" ||
-      type === "join_accepted" ||
-      type === "join_rejected" ||
-      type === "join_request" ||
-      type === "follow" ||
-      type === "follow_accepted" ||
-      type === "follow_request" ||
-      type === "like" ||
-      type === "event")
-  ) {
-    return clampText(withActorPrefix(actorDisplayName, message), 120);
-  }
-  if (actorDisplayName) {
-    return actorDisplayName;
-  }
-  switch (type) {
-    case "comment":
-      return "Yeni yorum";
-    case "event":
-      return "Etkinlik bildirimi";
-    case "join":
-      return "Etkinlige katilim";
-    case "join_accepted":
-      return "Katilim onaylandi";
-    case "join_rejected":
-      return "Katilim reddedildi";
-    case "join_request":
-      return "Yeni katilim istegi";
-    case "follow":
-      return "Yeni takipci";
-    case "follow_accepted":
-      return "Takip istegi kabul edildi";
-    case "follow_request":
-      return "Yeni takip istegi";
-    case "like":
-      return "Yeni begeni";
-    case "system":
-      return DEFAULT_PUSH_TITLE;
-    default:
-      return DEFAULT_PUSH_TITLE;
-  }
+  return DEFAULT_PUSH_TITLE;
 }
 
 export function isPushEnabled(preferences: unknown) {
@@ -252,6 +170,11 @@ export function normalizePushAppEnv(value: unknown): PushAppEnv | null {
 export function normalizeExpoProjectId(value: unknown) {
   const normalized = String(value || "").trim();
   return EXPO_PROJECT_ID_PATTERN.test(normalized) ? normalized.toLowerCase() : null;
+}
+
+export function normalizePushInstallationId(value: unknown) {
+  const normalized = String(value || "").trim();
+  return PUSH_INSTALLATION_ID_PATTERN.test(normalized) ? normalized.toLowerCase() : null;
 }
 
 export function normalizePushPlatform(value: unknown): PushPlatform | null {
@@ -292,16 +215,20 @@ export function validateExpoPushToken(value: unknown) {
 export function isRetryablePushTicketError(ticket: ExpoPushTicket, transportError?: string) {
   const message = `${String(ticket.message || "")} ${String(transportError || "")}`.toLowerCase();
   const errorCode = String(ticket.errorCode || "").toLowerCase();
+  if (ticket.retryAfterSeconds && ticket.retryAfterSeconds > 0) return true;
   if (!message && !errorCode) return false;
   if (isRecoverableInactiveTokenError(ticket)) return false;
   return (
     errorCode === "messageratetexceeded" ||
+    errorCode === "malformedexpoticket" ||
     message.includes("429") ||
     message.includes("network") ||
     message.includes("rate") ||
     message.includes("service unavailable") ||
     message.includes("timeout") ||
     message.includes("time out") ||
+    message.includes("missing-expo-ticket") ||
+    message.includes("expo-ok-ticket-missing-id") ||
     message.includes("too many requests") ||
     message.includes("unavailable")
   );
@@ -328,41 +255,58 @@ export async function sendExpoPushBatch(messages: ExpoPushMessage[]): Promise<Ex
     headers.set("authorization", `Bearer ${EXPO_ACCESS_TOKEN}`);
   }
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), EXPO_PUSH_REQUEST_TIMEOUT_MS);
   try {
     const response = await fetch(EXPO_PUSH_API_URL, {
       body: JSON.stringify(messages),
       headers,
       method: "POST",
+      signal: controller.signal,
     });
     const raw = await response.json().catch(() => null);
     const rawTickets = Array.isArray((raw as { data?: unknown })?.data)
       ? (raw as { data: unknown[] }).data
       : [];
     const requestError = response.ok ? null : normalizeExpoRequestError(raw, response.status);
-    const tickets = messages.map((_, index) =>
-      normalizeExpoPushTicket(
+    const transportError = response.ok ? undefined : `http-${response.status}`;
+    const retryAfterSeconds = normalizeRetryAfterSeconds(response.headers.get("retry-after"));
+    const tickets = messages.map((_, index) => {
+      const ticket = normalizeExpoPushTicket(
         rawTickets[index] || {
           details: requestError?.errorCode ? { error: requestError.errorCode } : undefined,
           message: response.ok ? "missing-expo-ticket" : requestError?.message,
         },
-      ),
-    );
+      );
+      return {
+        ...ticket,
+        ...(transportError ? { transportError, transportStatus: response.status } : {}),
+        ...(retryAfterSeconds ? { retryAfterSeconds } : {}),
+      } satisfies ExpoPushTicket;
+    });
     return {
       raw,
       tickets,
-      transportError: response.ok ? undefined : `http-${response.status}`,
+      transportError,
       transportStatus: response.status,
     };
   } catch (error) {
-    const message = String((error as { message?: string })?.message || error || "push-send-failed");
+    const message = controller.signal.aborted
+      ? "provider-timeout"
+      : `provider-network-error:${String(
+          (error as { message?: string })?.message || error || "push-send-failed",
+        ).slice(0, 300)}`;
     return {
       raw: null,
       tickets: messages.map(() => ({
         message,
         status: "error",
+        transportError: message,
       })),
       transportError: message,
     };
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
@@ -429,15 +373,17 @@ export async function sendExpoPushBatchesByProject(
   const transportErrors: string[] = [];
   let transportStatus: number | undefined;
 
-  for (const [groupKey, group] of groups) {
-    const result = await sendExpoPushBatches(group.map((item) => item.message));
-    raw.push({ groupKey, response: result.raw });
-    group.forEach((item, groupIndex) => {
-      tickets[item.index] = result.tickets[groupIndex] || tickets[item.index];
-    });
-    if (result.transportError) transportErrors.push(result.transportError);
-    if (typeof result.transportStatus === "number") transportStatus = result.transportStatus;
-  }
+  await Promise.all(
+    Array.from(groups.entries()).map(async ([groupKey, group]) => {
+      const result = await sendExpoPushBatches(group.map((item) => item.message));
+      raw.push({ groupKey, response: result.raw });
+      group.forEach((item, groupIndex) => {
+        tickets[item.index] = result.tickets[groupIndex] || tickets[item.index];
+      });
+      if (result.transportError) transportErrors.push(result.transportError);
+      if (typeof result.transportStatus === "number") transportStatus = result.transportStatus;
+    }),
+  );
 
   return {
     raw,

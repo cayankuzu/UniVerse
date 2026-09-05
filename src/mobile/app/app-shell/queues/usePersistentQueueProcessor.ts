@@ -45,6 +45,11 @@ export function usePersistentQueueProcessor(params: PersistentQueueProcessorPara
   useEffect(() => {
     if (!ownerId) return;
 
+    // Every async hop below can outlive this effect (unmount or owner switch).
+    // `disposed` is the generation token: once cleanup flips it, no continuation
+    // may schedule work or emit telemetry for the owner this closure captured.
+    let disposed = false;
+
     const clearFallbackTimer = () => {
       if (!fallbackTimerRef.current) return;
       clearTimeout(fallbackTimerRef.current);
@@ -61,14 +66,16 @@ export function usePersistentQueueProcessor(params: PersistentQueueProcessorPara
 
     const scheduleFallbackResume = async () => {
       clearFallbackTimer();
+      if (disposed) return;
       const stats = await readStats().catch(() => null);
-      if (!stats?.pendingCount) return;
+      if (disposed || !stats?.pendingCount) return;
       fallbackTimerRef.current = setTimeout(() => {
         void scheduleResume();
       }, pendingResumeDelayMs);
     };
 
     const resumeQueue = (allowInactive = false) => {
+      if (disposed) return null;
       if (!allowInactive && appStateRef.current !== "active") return resumeInFlightRef.current;
       if (resumeInFlightRef.current) return resumeInFlightRef.current;
       clearFallbackTimer();
@@ -100,8 +107,12 @@ export function usePersistentQueueProcessor(params: PersistentQueueProcessorPara
         .then(resume)
         .finally(async () => {
           if (resumeInFlightRef.current === resumePromise) resumeInFlightRef.current = null;
+          if (disposed) return;
           await readStats()
-            .then((stats) => reportBacklog(stats, "resume-finished", true))
+            .then((stats) => {
+              if (disposed) return;
+              reportBacklog(stats, "resume-finished", true);
+            })
             .catch(() => undefined);
           await scheduleFallbackResume();
         });
@@ -110,6 +121,7 @@ export function usePersistentQueueProcessor(params: PersistentQueueProcessorPara
     };
 
     const scheduleResume = (options?: { allowInactive?: boolean; baseDelayMs?: number }) => {
+      if (disposed) return null;
       if (resumeInFlightRef.current) return resumeInFlightRef.current;
       const allowInactive = options?.allowInactive ?? false;
       const delayMs =
@@ -130,6 +142,7 @@ export function usePersistentQueueProcessor(params: PersistentQueueProcessorPara
       scheduledResumeAtRef.current = targetAt;
       resumeTimerRef.current = scheduleQueueProcessorResume({
         callback: () => {
+          if (disposed) return;
           const nextAllowInactive = scheduledAllowInactiveRef.current;
           clearResumeTimer();
           void resumeQueue(nextAllowInactive);
@@ -151,6 +164,7 @@ export function usePersistentQueueProcessor(params: PersistentQueueProcessorPara
     });
 
     return () => {
+      disposed = true;
       clearFallbackTimer();
       clearResumeTimer();
       unsubscribeSignal();

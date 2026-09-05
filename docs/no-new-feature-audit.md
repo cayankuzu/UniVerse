@@ -3,7 +3,7 @@
 ## Decision
 
 The repository feature baseline is frozen at commit
-`227329989bd937faff48c54291aeefc8b3942515`. The current protected source inventory matches that
+`1caace7fa52dd56e8fd968983b1b1a1ea36da7cd`. The current protected source inventory matches that
 baseline: no screen, route, tab, modal mount, settings group/CTA, notification type/category, native
 permission/entitlement, Storage bucket, product table, public product HTTP route, or content/filter
 type was added or removed by the feature-freeze machinery.
@@ -11,35 +11,57 @@ type was added or removed by the feature-freeze machinery.
 This is repository evidence only. It does not replace a signed-artifact, staging, or real-device
 release decision.
 
+## Reviewed baseline change: modal-wrapper mounts 59 -> 58
+
+`EventDetailLocationModal.tsx` and `EventCardLocationModal.tsx` were byte-identical apart from their
+component name, their import order, and one label that rendered at 9px in one file and 10px in the
+other. They are now a single `EventLocationModal`.
+
+Both call sites are unchanged: `EventDetailInteractions` and `EventCardModals` each still render the
+modal, so at runtime the same two surfaces open the same sheet as before. What dropped by one is the
+static count of `<AppModalHost` occurrences in source, because two copies of the same implementation
+became one.
+
+The guard is right to stop on this — a falling mount count could just as easily mean a modal was
+deleted — so it is recorded here rather than waved through. Every user-visible number is unchanged
+and the guard confirms it on every run:
+
+```
+routes=24 screens=24 visibleTabs=4 notificationTypes=11
+devicePermissions=4 settingsGroups=3 settingsItems=7 httpRoutes=51
+```
+
+Reviewed 2026-09-05. Rollback: restore the two files and set `modalMountCount` back to 59.
+
 ## Baseline versus guarded source
 
-| Protected surface                     | Baseline | Guarded source | Result                      |
-| ------------------------------------- | -------: | -------------: | --------------------------- |
-| Leaf navigation routes                |       24 |             24 | Same                        |
-| Public screen entrypoints             |       24 |             24 | Same                        |
-| Navigator tab routes                  |        3 |              3 | Same                        |
-| Visible bottom-bar keys               |        4 |              4 | Same                        |
-| Deep-link route mappings              |        2 |              2 | Same                        |
-| Production modal-wrapper mounts       |       59 |             59 | Same fingerprint            |
-| Notification types                    |       11 |             11 | Same                        |
-| PostgreSQL notification enum types    |       11 |             11 | Same                        |
-| Notification filter categories        |        5 |              5 | Same                        |
-| Android notification channels         |        1 |              1 | Same                        |
-| Runtime device permission keys        |        4 |              4 | Same                        |
-| Android manifest permissions          |        9 |              9 | Same                        |
-| iOS entitlement keys in source config |        0 |              0 | Same                        |
-| Settings groups                       |        3 |              3 | Same                        |
-| Main settings item/CTA keys           |        7 |              7 | Same                        |
-| Privacy switches                      |        2 |              2 | Same                        |
-| Edge Function domains                 |        1 |              1 | Same                        |
-| Defined server HTTP route literals    |       51 |             51 | Same                        |
-| Mobile RPC names                      |       19 |             19 | Same                        |
-| Migration-created tables              |       33 |             34 | Same protected; +1 internal |
-| Product-domain tables                 |       16 |             16 | Same                        |
-| Storage buckets                       |        1 |              1 | Same                        |
-| Visible catalog domains               |        7 |              7 | Same fingerprints           |
-| User-facing message keys              |      486 |            486 | Same SHA-256 fingerprint    |
-| Forbidden product-panel hits          |        0 |              0 | Same                        |
+| Protected surface                     | Baseline | Guarded source | Result                       |
+| ------------------------------------- | -------: | -------------: | ---------------------------- |
+| Leaf navigation routes                |       24 |             24 | Same                         |
+| Public screen entrypoints             |       24 |             24 | Same                         |
+| Navigator tab routes                  |        3 |              3 | Same                         |
+| Visible bottom-bar keys               |        4 |              4 | Same                         |
+| Deep-link route mappings              |        2 |              2 | Same                         |
+| Production modal-wrapper mounts       |       58 |             58 | Same fingerprint (see below) |
+| Notification types                    |       11 |             11 | Same                         |
+| PostgreSQL notification enum types    |       11 |             11 | Same                         |
+| Notification filter categories        |        5 |              5 | Same                         |
+| Android notification channels         |        1 |              1 | Same                         |
+| Runtime device permission keys        |        4 |              4 | Same                         |
+| Android manifest permissions          |        9 |              9 | Same                         |
+| iOS entitlement keys in source config |        0 |              0 | Same                         |
+| Settings groups                       |        3 |              3 | Same                         |
+| Main settings item/CTA keys           |        7 |              7 | Same                         |
+| Privacy switches                      |        2 |              2 | Same                         |
+| Edge Function domains                 |        1 |              1 | Same                         |
+| Defined server HTTP route literals    |       51 |             51 | Same                         |
+| Mobile RPC names                      |       19 |             19 | Same                         |
+| Migration-created tables              |       34 |             35 | Same protected; +1 internal  |
+| Product-domain tables                 |       16 |             16 | Same                         |
+| Storage buckets                       |        1 |              1 | Same                         |
+| Visible catalog domains               |        7 |              7 | Same fingerprints            |
+| User-facing message keys              |      486 |            486 | Same SHA-256 fingerprint     |
+| Forbidden product-panel hits          |        0 |              0 | Same                         |
 
 The visible bottom-bar count includes the existing club-only `create` action. It is not a fourth tab
 navigator. The 51 HTTP route literals include 12 rollback-only compat routes and four conditional or
@@ -104,7 +126,7 @@ The Node self-test covers four cases:
 3. narrowly named ops/audit/OTA additions are accepted and reported as allowlisted;
 4. removing or remapping an existing screen/API route is rejected.
 
-Focused run on 2026-08-30:
+Focused run on 2026-08-31:
 
 ```text
 node --test ./utils/guards/check-no-new-product-surface.test.cjs
@@ -112,8 +134,8 @@ node --test ./utils/guards/check-no-new-product-surface.test.cjs
 
 node ./utils/guards/check-no-new-product-surface.cjs
 # [feature-freeze] PASS routes=24 screens=24 visibleTabs=4 notificationTypes=11
-# devicePermissions=4 settingsGroups=3 settingsItems=7 httpRoutes=51 databaseTables=34
-# database.allTables: allowed internal addition "public.cloudflare_origin_request_nonces"
+# devicePermissions=4 settingsGroups=3 settingsItems=7 httpRoutes=51 databaseTables=35
+# database.allTables: allowed internal addition "public.internal_push_installation_state"
 ```
 
 ## Audit limitations

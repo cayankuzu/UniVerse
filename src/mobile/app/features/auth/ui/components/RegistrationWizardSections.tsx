@@ -13,6 +13,7 @@ import {
 import { AuthBrandFooter } from "./AuthBrandFooter";
 import { AuthStepProgress } from "./AuthStepProgress";
 import { ImagePickerField } from "./ImagePickerField";
+import { useLiveRegionAnnouncement } from "../../../../shared/hooks/useLiveRegionAnnouncement";
 import { tokens } from "../../../../shared/theme";
 
 type RegistrationScreenLayoutProps = {
@@ -175,7 +176,7 @@ export function RegistrationFieldError({ message }: FieldErrorProps) {
   return (
     <Text
       style={{
-        color: tokens.colors.red,
+        color: tokens.colors.danger,
         fontSize: tokens.typography.caption,
         marginTop: tokens.spacing.xxs,
       }}
@@ -213,6 +214,8 @@ export function RegistrationProfileMediaFields({
   );
 }
 
+const PASSWORD_VALID_ANNOUNCEMENT = "Şifre kurala uygun.";
+
 export function RegistrationPasswordField({
   onPasswordChange,
   password,
@@ -221,6 +224,11 @@ export function RegistrationPasswordField({
   const issues = getPasswordPolicyIssues(password);
   const touched = password.length > 0;
   const isValid = touched && issues.length === 0;
+  // The rule list below is an Android live region that changes on every
+  // keystroke. Replaying that through announceForAccessibility would talk over
+  // the typing itself, so VoiceOver hears only the transition that unblocks the
+  // form; the individual rules stay readable by navigating to them.
+  useLiveRegionAnnouncement(isValid ? PASSWORD_VALID_ANNOUNCEMENT : null);
 
   return (
     <>
@@ -235,7 +243,7 @@ export function RegistrationPasswordField({
           status={passwordError ? "invalid" : isValid ? "valid" : "idle"}
           supportingText={`Şifre ${PASSWORD_POLICY.minLength}-${PASSWORD_POLICY.maxLength} karakter olmalı.`}
           secureTextEntry
-          validText="Şifre kurala uygun."
+          validText={PASSWORD_VALID_ANNOUNCEMENT}
           value={password}
         />
       </View>

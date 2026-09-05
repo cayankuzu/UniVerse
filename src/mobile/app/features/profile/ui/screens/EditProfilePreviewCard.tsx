@@ -93,7 +93,7 @@ export function EditProfilePreviewCard({
           <Text
             style={{
               color: tokens.colors.primary,
-              fontSize: tokens.typography.micro,
+              fontSize: tokens.typography.caption,
               fontWeight: tokens.fontWeight.bold,
             }}
           >
@@ -186,7 +186,7 @@ export function EditProfilePreviewCard({
           >
             <Mail size={tokens.iconSize.xs} color={tokens.colors.mutedFg} strokeWidth={2.1} />
             <Text
-              style={{ color: tokens.colors.muted, fontSize: tokens.typography.tiny }}
+              style={{ color: tokens.colors.muted, fontSize: tokens.typography.caption }}
               numberOfLines={1}
             >
               {email}
@@ -219,7 +219,7 @@ export function EditProfilePreviewCard({
           {accountType === "student" && department ? (
             <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.xxs }}>
               <BookOpen size={tokens.iconSize.xs} color={tokens.colors.mutedFg} strokeWidth={2} />
-              <Text style={{ color: tokens.colors.muted, fontSize: tokens.typography.tiny }}>
+              <Text style={{ color: tokens.colors.muted, fontSize: tokens.typography.caption }}>
                 {department}
                 {gradeYear ? ` - ${gradeYear}` : ""}
               </Text>
@@ -229,7 +229,7 @@ export function EditProfilePreviewCard({
             <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.xxs }}>
               <MapPin size={tokens.iconSize.xs} color={tokens.colors.mutedFg} strokeWidth={2} />
               <Text
-                style={{ color: tokens.colors.muted, fontSize: tokens.typography.tiny }}
+                style={{ color: tokens.colors.muted, fontSize: tokens.typography.caption }}
                 numberOfLines={1}
               >
                 {university}
@@ -262,7 +262,7 @@ export function EditProfilePreviewCard({
             <Text
               style={{
                 color: tokens.colors.mutedFg,
-                fontSize: tokens.typography.micro,
+                fontSize: tokens.typography.caption,
                 fontWeight: tokens.fontWeight.semibold,
               }}
             >
@@ -291,7 +291,7 @@ export function EditProfilePreviewCard({
             <Text
               style={{
                 color: tokens.colors.mutedFg,
-                fontSize: tokens.typography.micro,
+                fontSize: tokens.typography.caption,
                 fontWeight: tokens.fontWeight.semibold,
               }}
             >
@@ -322,7 +322,7 @@ export function EditProfilePreviewCard({
                 <Text
                   style={{
                     color: tokens.colors.primary,
-                    fontSize: tokens.typography.micro,
+                    fontSize: tokens.typography.caption,
                     fontWeight: tokens.fontWeight.bold,
                   }}
                 >
@@ -370,7 +370,7 @@ export function EditProfilePreviewCard({
                   <Text
                     style={{
                       color: idx === 0 ? tokens.colors.primary : tokens.colors.mutedFg,
-                      fontSize: tokens.typography.micro,
+                      fontSize: tokens.typography.caption,
                       fontWeight: tokens.fontWeight.bold,
                     }}
                   >
@@ -402,10 +402,10 @@ export function EditProfilePreviewCard({
                 gap: tokens.spacing.xxs,
               }}
             >
-              <Text style={{ color: tokens.colors.mutedFg, fontSize: tokens.typography.tiny }}>
+              <Text style={{ color: tokens.colors.mutedFg, fontSize: tokens.typography.caption }}>
                 {t("profile.preview.contentPlaceholder")}
               </Text>
-              <ChevronRight size={tokens.typography.tiny} color={tokens.colors.mutedFg} />
+              <ChevronRight size={tokens.typography.caption} color={tokens.colors.mutedFg} />
             </View>
           </View>
         </View>

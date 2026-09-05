@@ -22,6 +22,15 @@ Bu klasor production hardening oncesi calistirilacak SQL dogrulama paketlerini i
   Domain table/view varligi, projection signature standardizasyonu, projection source kolonlari, `updated_by` trigger coverage ve zorunlu index seti audit'i
 - `09_cloudflare_origin_replay_security.sql`
   Cloudflare origin nonce tablosu/RPC RLS-grant sozlesmesi ve tek-kullanim replay reddi dogrulamasi
+- `10_push_installation_account_switch.sql`
+  Push token RPC grant/RLS/search-path sozlesmesi; generation siralamasi, register/logout ve A/B
+  account-switch yarislari, tokenless tombstone, owner mismatch, legacy nullable registration,
+  profile-delete cascade temizligi ve nil UUID reddi (sentetik transaction/rollback)
+- `11_push_delivery_privacy_lease.sql`
+  Push claim/consume RPC grant ve search-path sozlesmesi; recipient/env/token revision baglama,
+  token A'dan B'ye claim oncesi ve consume sonrasi reassignment lease invalidation'i ve kullanici
+  basina 64 kalici installation state siniri
+  (sentetik transaction/rollback)
 
 ## Calistirma
 
@@ -38,6 +47,8 @@ Onerilen sira:
 7. `07_client_mutation_idempotency.sql`
 8. `08_database_architecture_audit.sql`
 9. `09_cloudflare_origin_replay_security.sql`
+10. `10_push_installation_account_switch.sql`
+11. `11_push_delivery_privacy_lease.sql`
 
 ## Beklenen Cikti
 
@@ -50,6 +61,15 @@ Onerilen sira:
 - duplicate `client_mutation_id` replay sorgulari ayni mutation icin ikinci yan etkiyi uretmemeli
 - database architecture audit script'i projection signature, trigger ve index coverage eksigi bulmamali
 - Cloudflare origin replay testi ilk nonce claim'ini kabul edip ayni nonce'i ikinci kez reddetmeli; public/anon/auth erisimi kapali kalmali
+- push installation testi anon/auth execute izni olmadigini, yalniz service-role RPC iznini ve ayni
+  installation kapsaminda yalniz en yeni generation sahibi user/token kaydinin aktif kaldigini;
+  gecikmis register/logout isteklerinin yeni hesabi ezemedigini ve hesap silmede internal state'in
+  cascade ile temizlendigini gostermeli. Test kendi sentetik profillerini transaction icinde olusturur
+  ve sonunda rollback yapar; staging verisine bagli `skipped` sonucu yoktur.
+- push delivery privacy testi claim ve consume anlarinda recipient/env/aktif sahip/token revision
+  eslesmesini, A lease'inin B hesap reassignment'inda gecersizlesmesini ve provider onayi gelmemis
+  consume kaydinin sonraki reassignment ile kapatilmasini; 65. installation state'in reddedilmesini
+  gostermeli.
 
 ## Notlar
 

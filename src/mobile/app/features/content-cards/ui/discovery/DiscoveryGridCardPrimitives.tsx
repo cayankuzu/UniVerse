@@ -56,11 +56,11 @@ export function AccessChip({ label, kind }: { label: string; kind: EventAccessKi
         paddingVertical: tokens.spacing.xxs,
       }}
     >
-      <visual.Icon size={tokens.typography.micro} color={visual.color} />
+      <visual.Icon size={tokens.typography.caption} color={visual.color} />
       <Text
         style={{
           color: visual.color,
-          fontSize: tokens.typography.micro,
+          fontSize: tokens.typography.caption,
           fontWeight: tokens.fontWeight.bold,
           lineHeight: tokens.typography.caption,
         }}
@@ -101,7 +101,7 @@ export function VisibilityChip({ label, type }: { label: string; type: "club" | 
       <Text
         style={{
           color: visual.color,
-          fontSize: tokens.typography.micro,
+          fontSize: tokens.typography.caption,
           fontWeight: tokens.fontWeight.bold,
           lineHeight: tokens.typography.caption,
         }}
@@ -138,9 +138,9 @@ export function OwnerRow({
         <Text
           style={{
             color: tokens.colors.foreground,
-            fontSize: tokens.typography.tiny,
+            fontSize: tokens.typography.caption,
             fontWeight: tokens.fontWeight.bold,
-            lineHeight: tokens.lineHeight.micro,
+            lineHeight: tokens.lineHeight.caption,
           }}
           numberOfLines={1}
         >
@@ -149,8 +149,8 @@ export function OwnerRow({
         <Text
           style={{
             color: tokens.colors.muted,
-            fontSize: tokens.typography.micro,
-            lineHeight: tokens.lineHeight.nano,
+            fontSize: tokens.typography.caption,
+            lineHeight: tokens.lineHeight.caption,
           }}
           numberOfLines={1}
         >

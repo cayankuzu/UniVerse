@@ -15,7 +15,7 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3
 const REQUEST_ID_PATTERN = /^[A-Za-z0-9._:-]{1,128}$/;
 export const ORIGIN_SIGNATURE_VERSION = "2";
 const textEncoder = new TextEncoder();
-const remoteJwkSetsByFetcher = new WeakMap<object, Map<string, JWTVerifyGetKey>>();
+const remoteJwkSetsByFetcher = new WeakMap<typeof fetch, Map<string, JWTVerifyGetKey>>();
 
 class AuthProviderUnavailableError extends Error {
   constructor() {
@@ -50,11 +50,10 @@ function isRemoteJwksUnavailable(error: unknown): boolean {
 
 function getRemoteJwkSet(config: JwtVerificationConfig, fetcher: typeof fetch): JWTVerifyGetKey {
   const jwksUrl = `${config.supabaseUrl}/auth/v1/.well-known/jwks.json`;
-  const fetcherKey = fetcher as unknown as object;
-  let keySetsByUrl = remoteJwkSetsByFetcher.get(fetcherKey);
+  let keySetsByUrl = remoteJwkSetsByFetcher.get(fetcher);
   if (!keySetsByUrl) {
     keySetsByUrl = new Map();
-    remoteJwkSetsByFetcher.set(fetcherKey, keySetsByUrl);
+    remoteJwkSetsByFetcher.set(fetcher, keySetsByUrl);
   }
   const cached = keySetsByUrl.get(jwksUrl);
   if (cached) return cached;
@@ -67,10 +66,15 @@ function getRemoteJwkSet(config: JwtVerificationConfig, fetcher: typeof fetch): 
       throw new AuthProviderUnavailableError();
     }
     if (response.status !== 200) {
-      void response.body?.cancel().catch(() => undefined);
+      if (response.body) void response.body.cancel("unexpected JWKS status").catch(() => undefined);
       throw new AuthProviderUnavailableError();
     }
-    return response;
+    try {
+      const jwks = await readBoundedResponseJson(response);
+      return Response.json(jwks);
+    } catch {
+      throw new AuthProviderUnavailableError();
+    }
   };
   const keySet = createRemoteJWKSet(new URL(jwksUrl), {
     cacheMaxAge: 10 * 60_000,
@@ -159,39 +163,49 @@ export async function verifyLegacySupabaseJwt(
 ): Promise<VerifiedIdentity> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 3500);
-  let response: Response;
   try {
-    response = await fetcher(`${config.supabaseUrl}/auth/v1/user`, {
+    const response = await fetcher(`${config.supabaseUrl}/auth/v1/user`, {
       headers: {
         apikey: config.publishableKey,
         authorization: `Bearer ${token}`,
       },
       signal: controller.signal,
     });
-  } catch {
+    if ([400, 401, 403].includes(response.status)) {
+      if (response.body) void response.body.cancel("rejected auth response").catch(() => undefined);
+      throw new GatewayError("invalid_token", 401, "Oturum doğrulanamadı.");
+    }
+    if (!response.ok) {
+      if (response.body) void response.body.cancel("unexpected auth status").catch(() => undefined);
+      throw new GatewayError("auth_unavailable", 503, "Kimlik doğrulama kullanılamıyor.");
+    }
+    let authUser: unknown;
+    try {
+      authUser = await readBoundedResponseJson(response);
+    } catch {
+      throw new GatewayError("auth_unavailable", 503, "Kimlik doğrulama kullanılamıyor.");
+    }
+    let claims: JWTPayload;
+    try {
+      claims = decodeJwt(token);
+    } catch {
+      throw new GatewayError("invalid_token", 401, "Oturum doğrulanamadı.");
+    }
+    const identity = validateClaims(claims, config);
+    const authUserId =
+      authUser && typeof authUser === "object" && "id" in authUser
+        ? String(authUser.id || "").trim()
+        : "";
+    if (authUserId !== identity.subject) {
+      throw new GatewayError("invalid_token_subject", 401, "Oturum doğrulanamadı.");
+    }
+    return identity;
+  } catch (error) {
+    if (error instanceof GatewayError) throw error;
     throw new GatewayError("auth_unavailable", 503, "Kimlik doğrulama kullanılamıyor.");
   } finally {
     clearTimeout(timeout);
   }
-  if ([400, 401, 403].includes(response.status)) {
-    throw new GatewayError("invalid_token", 401, "Oturum doğrulanamadı.");
-  }
-  if (!response.ok) {
-    void response.body?.cancel().catch(() => undefined);
-    throw new GatewayError("auth_unavailable", 503, "Kimlik doğrulama kullanılamıyor.");
-  }
-  const authUser = (await readBoundedResponseJson(response)) as { id?: unknown };
-  let claims: JWTPayload;
-  try {
-    claims = decodeJwt(token);
-  } catch {
-    throw new GatewayError("invalid_token", 401, "Oturum doğrulanamadı.");
-  }
-  const identity = validateClaims(claims, config);
-  if (String(authUser?.id || "").trim() !== identity.subject) {
-    throw new GatewayError("invalid_token_subject", 401, "Oturum doğrulanamadı.");
-  }
-  return identity;
 }
 
 export async function verifySupabaseJwt(

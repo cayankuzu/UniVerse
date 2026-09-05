@@ -6,6 +6,7 @@ const PUSH_DISPATCH_CLAIM_SECONDS = 90;
 const PUSH_DISPATCH_MAX_ATTEMPTS = 6;
 const PUSH_DISPATCH_RETRY_BASE_SECONDS = 5;
 const PUSH_DISPATCH_RETRY_MAX_SECONDS = 120;
+const PUSH_DISPATCH_RETRY_AFTER_MAX_SECONDS = 15 * 60;
 
 type QueueRow = {
   attempt_count?: number | null;
@@ -17,11 +18,22 @@ export interface ClaimedPushDispatchEntry {
   notificationId: string;
 }
 
-function clampRetryDelaySeconds(attemptCount: number) {
-  return Math.min(
+function clampRetryDelaySeconds(attemptCount: number, retryAfterSeconds?: number) {
+  const exponentialDelay = Math.min(
     PUSH_DISPATCH_RETRY_MAX_SECONDS,
     PUSH_DISPATCH_RETRY_BASE_SECONDS * Math.max(1, 2 ** Math.max(0, attemptCount)),
   );
+  const randomValue = new Uint32Array(1);
+  crypto.getRandomValues(randomValue);
+  const jitterMultiplier = 0.5 + randomValue[0] / 2 ** 32;
+  const jitteredDelay = Math.max(1, Math.ceil(exponentialDelay * jitterMultiplier));
+  const providerDelay = Number.isFinite(retryAfterSeconds)
+    ? Math.min(
+        PUSH_DISPATCH_RETRY_AFTER_MAX_SECONDS,
+        Math.max(0, Math.ceil(retryAfterSeconds || 0)),
+      )
+    : 0;
+  return Math.max(jitteredDelay, providerDelay);
 }
 
 export async function enqueueNotificationPushDispatch(
@@ -39,6 +51,7 @@ export async function enqueueNotificationPushDispatch(
       status: "pending",
     },
     {
+      ignoreDuplicates: true,
       onConflict: "notification_id",
     },
   );
@@ -137,7 +150,7 @@ export async function completeNotificationPushDispatchBatch(params: {
 export async function retryNotificationPushDispatchBatch(params: {
   adminSupabase: SupabaseClient;
   claimToken: string;
-  entries: Array<ClaimedPushDispatchEntry & { errorMessage: string }>;
+  entries: Array<ClaimedPushDispatchEntry & { errorMessage: string; retryAfterSeconds?: number }>;
 }) {
   if (params.entries.length === 0) return null;
 
@@ -147,7 +160,9 @@ export async function retryNotificationPushDispatchBatch(params: {
       const exhausted = nextAttemptCount >= PUSH_DISPATCH_MAX_ATTEMPTS;
       const availableAt = exhausted
         ? new Date().toISOString()
-        : new Date(Date.now() + clampRetryDelaySeconds(entry.attemptCount) * 1000).toISOString();
+        : new Date(
+            Date.now() + clampRetryDelaySeconds(entry.attemptCount, entry.retryAfterSeconds) * 1000,
+          ).toISOString();
       const { error } = await params.adminSupabase
         .from("notification_push_dispatch_queue")
         .update({

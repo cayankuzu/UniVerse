@@ -30,9 +30,12 @@ per-attempt HMAC v2 signing, opaque network-key binding and safe header forwardi
 
 ## Required configuration
 
-Non-secret variables are declared per environment in `wrangler.jsonc`. Preview deliberately uses
-`.invalid` upstream placeholders and therefore fails closed until an operator supplies the real
-isolated preview Supabase project values.
+Non-secret variables are declared per environment in `wrangler.jsonc`. Development and preview
+deliberately use `.invalid` upstream placeholders, so neither can accidentally reach production.
+Local development must override `SUPABASE_URL`, `JWT_ISSUER`, and `ORIGIN_BASE_URL` with one
+isolated non-production Supabase project (for example with repeated `wrangler dev --var` flags).
+Preview remains fail closed until its isolated project values are supplied through deployment
+configuration.
 
 Required Cloudflare secrets, independently provisioned for preview and production:
 
@@ -50,8 +53,11 @@ comma-separated origin list; native clients may legitimately omit `Origin`.
 3. Set origin verification to `observe`, exercise all selected routes and inspect sanitized logs.
    Confirm that signed calls use distinct origin network budgets for distinct test networks and
    that a retried GET presents a new nonce/signature while retaining the same opaque network key.
-4. Set `EXPO_PUBLIC_CLOUDFLARE_GATEWAY_URL` only in preview and complete the existing-flow smoke
-   matrix.
+4. Set the isolated preview origin in `EXPO_PUBLIC_CLOUDFLARE_GATEWAY_URL` and the distinct
+   production origin in `EXPO_PUBLIC_CLOUDFLARE_PRODUCTION_GATEWAY_URL` as its deny target, then
+   complete the existing-flow smoke matrix. Missing, non-HTTPS, non-origin, or equal values fail
+   closed. Production cutover requires `EXPO_PUBLIC_CLOUDFLARE_GATEWAY_URL` to exactly match that
+   declared production origin.
 5. Upload a production Worker version, then use the protected production workflow for
    `5% -> 25% -> 50% -> 100%` traffic steps.
 6. After old-client usage and rollback evidence are attached, change origin verification from

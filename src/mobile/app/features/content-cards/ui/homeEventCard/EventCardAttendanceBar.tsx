@@ -39,6 +39,9 @@ export function EventCardAttendanceBar({
       <View>
         <Pressable
           accessibilityLabel="Etkinlik katılımcılarını aç"
+          accessibilityRole="button"
+          accessibilityState={{ disabled: !onPressAttendees }}
+          hitSlop={tokens.hitSlop.md}
           onPress={onPressAttendees}
           disabled={!onPressAttendees}
           style={{

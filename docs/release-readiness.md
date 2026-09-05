@@ -1,7 +1,8 @@
 # AAA-MVP release readiness
 
-Updated: 2026-08-31
-Baseline commit: `227329989bd937faff48c54291aeefc8b3942515`
+Updated: 2026-09-05
+Baseline commit: `1caace7fa52dd56e8fd968983b1b1a1ea36da7cd`
+Scorecard candidate: `a8005fd43374049cb40a245b80a57cad161aed28`
 Target version/runtime: `1.0.134` / `1.0.134`
 
 ## Current decision
@@ -39,16 +40,120 @@ candidate.
 - No Docker was used. Isolated Supabase migration/RLS validation, credentialed k6, iOS signing/device
   coverage, provider inspection, and rollout/rollback rehearsals remain external evidence gaps below.
 
+## Containerized same-SHA verification (2026-09-04)
+
+Candidate commit: `c647336957c66d682d25fe4a468202ce3a09ece7`
+Tree: `5c06108e68a40a6b4b6faeab426e37f29ff06edd` (clean worktree)
+
+The Docker validation environment now produces an aggregate evidence manifest bound to that
+commit and tree. `artifacts/docker/evidence-manifest.json` lists 8 artifacts, each with its
+SHA-256, and the writer refuses to aggregate anything produced from a different or dirty tree.
+
+| Profile      | What actually ran                                                                                                                                                                                                    | Bound artifact             |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| `test`       | Supabase CLI 2.116.0 local stack, clean migration replay, DB lint, SQL validation pack, pgTAP RLS contracts, disposable-schema dump/restore probe, origin/report/push contracts, Worker tests/types/Wrangler dry-run | `test-evidence.json`       |
+| `resilience` | Toxiproxy 2.12.0 baseline, 254 ms latency, peer reset, provider outage, and recovery                                                                                                                                 | `resilience-evidence.json` |
+| `load`       | k6 smoke and sustained scenarios against the synthetic RPC envelope, verifying scripts and semantic thresholds only                                                                                                  | `load-evidence.json`       |
+| `security`   | Hadolint, CycloneDX SBOM, and Trivy image scan failing closed on fixable HIGH/CRITICAL                                                                                                                               | `security-evidence.json`   |
+
+This closes the _isolated_ part of E4 for migration replay, DB lint, RLS/IDOR personas, and
+dump/restore. It does **not** close E4 for credentialed staging: the load profile is explicitly a
+script/threshold check against a synthetic upstream, not capacity evidence, and provider PITR and
+Storage restore remain external. The remaining E-codes are unchanged.
+
+### Toolchain parity
+
+The tooling image previously ran Node 26 while every workflow ran Node 22, so the container and CI
+were not the same quality gate. The image is repinned to `node:22.23.2` by digest and
+`npm run guard:toolchain-parity` fails closed on divergence. `npm run guard:docker-test-manifest`
+additionally fails closed when a staged contract test reads a file the image does not copy, which
+was masking two real container-only failures before this candidate.
+
+### Remote CI verification for this candidate
+
+Pushed to `chore/aaa-mvp-hardening-docker-cloudflare-ota-push` (PR #1 -> `main`). All four required
+contexts passed on `1b168cfd68e9413264d1c68a193c1940e5755286` and again on
+`128e1acd2dd2d3f38958b833bf24f7d98576c0cc`, which carries the aggregator fix:
+
+| Required check              | Run                                                                           | Result          |
+| --------------------------- | ----------------------------------------------------------------------------- | --------------- |
+| `internal-verify`           | [33957677241](https://github.com/cayankuzu/UniVerse/actions/runs/33957677241) | success (3m36s) |
+| `secret-scan`               | [33957677241](https://github.com/cayankuzu/UniVerse/actions/runs/33957677241) | success (15s)   |
+| `sast`                      | [33957677241](https://github.com/cayankuzu/UniVerse/actions/runs/33957677241) | success (13s)   |
+| `docker-validate-immutable` | [33957677202](https://github.com/cayankuzu/UniVerse/actions/runs/33957677202) | success (4m25s) |
+
+`secret-scan` is the gate that was failing before this candidate, and its log shows all three scans
+running rather than the action aborting: the pinned gitleaks `8.28.0` passes its SHA-256 check, the
+action scans the event's 18 commits, `security:secrets:history` scans 27 commits across full history,
+and `security:secrets` scans the working tree. All report no leaks.
+
+Branch protection on `main` was verified live on 2026-09-05 and matches the four contexts the
+aggregator requires:
+
+| Control                  | State                                                                                                                       |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| Required contexts        | `internal-verify`, `secret-scan`, `sast`, `docker-validate-immutable`, all pinned to the GitHub Actions app, `strict: true` |
+| Pull request reviews     | 1 approval, stale approvals dismissed, last-push approval required                                                          |
+| Force push / deletion    | both blocked                                                                                                                |
+| Linear history           | required                                                                                                                    |
+| Conversation resolution  | required                                                                                                                    |
+| Admin enforcement        | enabled                                                                                                                     |
+| `production` environment | protected by required reviewers and a branch policy                                                                         |
+
+One reviewer rather than two is deliberate for a single-maintainer project. The open half of
+[MANUAL_STEPS](MANUAL_STEPS.md) §1 is the provider credentials, not the protection.
+
+`npm run guard:github-required-checks` validates against the live check-runs API and returns
+`OK: 4 checks passed` for both SHAs. The first needed the duplicate-tolerance fix to be validated at
+all: `docker-validation` fired on both `push` and `pull_request` there, producing seven check runs
+with `docker-validate-immutable` twice. On `128e1ac` the trigger fix leaves six runs, each name
+appearing exactly once. `cloudflare-preview / deploy-preview` reports `skipping` because it needs
+provider secrets; it is not a required context. `cloudflare-production` and both `eas-update-*`
+workflows are `workflow_dispatch`-only and are classified in
+[audit/workflow-trigger-and-skip-classification.md](audit/workflow-trigger-and-skip-classification.md).
+
+This is remote CI evidence only. It is not signed-artifact, device, provider or store evidence, so
+the decision above is unchanged.
+
+### Local repository verification for this candidate
+
+- `npm run check` (typecheck, all guards, Worker types/tests) passed.
+- ESLint zero-warning and full-tree Prettier passed.
+- Jest passed 322 suites and 1118 tests.
+- Three accessibility gates were added and pass: `guard:text-contrast` (WCAG AA text and graphic
+  contrast against every light layer a screen can put behind copy), `guard:touch-targets` (44dp
+  effective target and an accessibility role on every sized pressable), and
+  `guard:live-region-parity` (an `accessibilityLiveRegion` may not ship without the iOS
+  announcement that VoiceOver needs). Each was verified by reintroducing the defect it targets.
+- Semgrep reports 0 findings and Gitleaks reports no leaks on the current tree or across full
+  history (22 commits, ~9.15 MB). Semgrep was **not** clean when this candidate branch was picked
+  up: it reported 7 blocking findings, all taint false positives in build-time guard scripts, and
+  all present at `093d47e`. The scope exclusion and its reasoning are in
+  [dependency-security-exceptions.md](dependency-security-exceptions.md); no rule was disabled and
+  no product path was excluded.
+- `npm run guard:dependency-audit` passed with four approved advisories. `browserslist` was upgraded
+  to a genuinely patched release rather than accepted; see
+  [dependency-security-exceptions.md](dependency-security-exceptions.md).
+- `npm run guard:expo-doctor` passes on the CI Node 22 toolchain. On a Node 26 workstation two
+  legacy-package probes abort because `npm explain` now exits non-zero for absent packages; that is
+  an environment deviation, not a project finding, and is the reason the toolchain is pinned.
+- `npm run guard:k6-env` still fails closed because `K6_SUPABASE_URL` and `K6_SUPABASE_ANON_KEY`
+  are unset. That is the intended block: credentialed staging load remains an external gate.
+
 ## Feature-freeze comparison
 
 | Protected surface                                         |   Baseline | Current guarded source | Result           |
 | --------------------------------------------------------- | ---------: | ---------------------: | ---------------- |
 | Leaf routes / screens                                     |    24 / 24 |                24 / 24 | Same             |
 | Navigator tabs / visible bottom keys                      |      3 / 4 |                  3 / 4 | Same             |
-| Deep-link mappings / modal-wrapper mounts                 |     2 / 59 |                 2 / 59 | Same fingerprint |
+| Deep-link mappings / modal-wrapper mounts                 |     2 / 58 |                 2 / 58 | Same fingerprint |
 | Notification types / filters / Android channels           | 11 / 5 / 1 |             11 / 5 / 1 | Same             |
 | Runtime permission keys / settings groups / settings CTAs |  4 / 3 / 7 |              4 / 3 / 7 | Same             |
 | Product-domain tables / Storage buckets                   |     16 / 1 |                 16 / 1 | Same             |
+
+The modal-mount baseline moved from 59 to 58 because two byte-identical event location modals became
+one shared component; both call sites still render it, so no surface a person can reach changed. The
+review is in [no-new-feature-audit.md](no-new-feature-audit.md).
 
 The one additional migration table, `cloudflare_origin_request_nonces`, is an RLS-forced internal
 replay ledger and not a product domain. The reports migration adds only optional idempotency columns
@@ -96,18 +201,23 @@ as part of the evidence manifest; this summary is not a substitute for that mach
 
 ## 35-area status
 
+The machine-readable form of this table is
+[quality/release-scorecard.json](../quality/release-scorecard.json). `npm run guard:release-scorecard`
+refuses a score unless the area is `RUNTIME_VERIFIED` with no outstanding evidence, so the
+`Unscored`/`NO-GO` state below is enforced rather than asserted.
+
 |   # | Area                   | Baseline | Hardening / automated repository evidence                                                           | Runtime/operational evidence gap | Remaining risk                                                                 | Final    | Decision |
 | --: | ---------------------- | -------- | --------------------------------------------------------------------------------------------------- | -------------------------------- | ------------------------------------------------------------------------------ | -------- | -------- |
-|   1 | UI/UX                  | Unscored | Existing screens/states and UI guard remain; no redesign/product expansion                          | E1, E3                           | Visual/state regression on supported devices                                   | Unscored | NO-GO    |
+|   1 | UI/UX                  | Unscored | Existing screens/states and UI guard remain; contrast and touch-target gates added                  | E1, E3                           | Visual/state regression on supported devices                                   | Unscored | NO-GO    |
 |   2 | Multi-device           | Unscored | Responsive source/checklists exist                                                                  | E2, E3                           | Small/large, low/mid, Android/iOS matrix absent                                | Unscored | NO-GO    |
 |   3 | Performance            | Unscored | Projection-first reads, bounded network/queues and performance guards remain                        | E3, E4, E6                       | No same-device cold/warm, p95, FPS, memory/network baseline                    | Unscored | NO-GO    |
 |   4 | Security/privacy       | Unscored | RLS contracts, redaction, threat model, JWT/HMAC/replay and secret/SAST gates exist                 | E1, E4-E7                        | Provider secrets, adversarial staging, PII/incident and store privacy unproven | Unscored | NO-GO    |
 |   5 | Architecture           | Unscored | Layer guard; Supabase source of truth; projection-first and rollback-compatible matrix              | E1, E4, E5                       | Deployed contract/cutover parity not observed                                  | Unscored | NO-GO    |
-|   6 | DRY                    | Unscored | Shared transport, queue engine, UI primitives and narrow gateway modules are reused                 | E1                               | No final duplicate/complexity report bound to candidate                        | Unscored | NO-GO    |
+|   6 | DRY                    | Unscored | Shared transport, queue engine, UI primitives and one shared event location modal are reused        | E1                               | No final duplicate/complexity report bound to candidate                        | Unscored | NO-GO    |
 |   7 | Hardcode/config        | Unscored | Central release/public-env schema; environment-separated Worker/EAS config; preview fails closed    | E1, E5, E7                       | Provider values/secrets and stable domain not provisioned                      | Unscored | NO-GO    |
 |   8 | State                  | Unscored | Owner-scoped cache, optimistic rollback, persistent queue/stale-claim tests exist                   | E1, E3, E4                       | Two-device/race/process-death behavior incomplete                              | Unscored | NO-GO    |
 |   9 | Network/API            | Unscored | Timeout/abort/body-once/auth refresh; exact gateway contract, request ID, no mutation retry         | E1, E4-E6                        | Real 429/outage/latency and origin parity not observed                         | Unscored | NO-GO    |
-|  10 | Accessibility          | Unscored | Shared roles/labels/hit targets and source guards/checklists exist                                  | E3                               | VoiceOver/TalkBack, 200% font, keyboard, contrast/reduce-motion signoff absent | Unscored | NO-GO    |
+|  10 | Accessibility          | Unscored | Shared roles/labels/hit targets, contrast/touch/live-region parity guards and checklists exist      | E3                               | VoiceOver/TalkBack, 200% font, keyboard, contrast/reduce-motion signoff absent | Unscored | NO-GO    |
 |  11 | Scale                  | Unscored | k6/SQL validation contracts and distributed limiter configuration exist                             | E4, E5                           | Missing staging credentials/results, plans, pool/lock/limiter behavior         | Unscored | NO-GO    |
 |  12 | Resilience             | Unscored | Persistent retries/dead-letter/stale recovery plus offline and OTA rollback runbooks                | E3-E6, E8                        | Provider outage, restore, process kill and rollback drills absent              | Unscored | NO-GO    |
 |  13 | Tests                  | Unscored | Local final run passed 319 suites/1036 tests plus contract, Worker, and guard suites                | E1, E3-E5                        | No immutable CI bundle, DB/RLS runtime or two-platform mobile E2E evidence     | Unscored | NO-GO    |

@@ -7,6 +7,7 @@ import { tokens } from "../../shared/theme";
 import { t } from "../../shared/i18n";
 import { AppButton } from "./AppButton";
 import { EmptyState } from "./EmptyState";
+import { useLiveRegionAnnouncement } from "../hooks/useLiveRegionAnnouncement";
 
 interface AsyncStateProps {
   loading: boolean;
@@ -33,6 +34,10 @@ export function AsyncState({
   retryLabel = "Tekrar dene",
   children,
 }: AsyncStateProps) {
+  // Mirrors the accessibilityLiveRegion props below onto VoiceOver, which
+  // ignores them.
+  useLiveRegionAnnouncement(error || (loading ? t("common.loading") : null));
+
   if (loading) {
     if (loadingFallback) {
       return <>{loadingFallback}</>;

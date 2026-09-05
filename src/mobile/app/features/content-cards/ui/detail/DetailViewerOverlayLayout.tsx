@@ -54,6 +54,7 @@ export function DetailViewerOverlayLayout<T extends { id: string }>(
               onPress={props.onClose}
               accessibilityRole="button"
               accessibilityLabel="Geri dön"
+              hitSlop={tokens.hitSlop.sm}
               style={{
                 width: 36,
                 height: 36,
@@ -82,6 +83,7 @@ export function DetailViewerOverlayLayout<T extends { id: string }>(
               onPress={props.onClose}
               accessibilityRole="button"
               accessibilityLabel="Kapat"
+              hitSlop={tokens.hitSlop.sm}
               style={{
                 width: 32,
                 height: 32,

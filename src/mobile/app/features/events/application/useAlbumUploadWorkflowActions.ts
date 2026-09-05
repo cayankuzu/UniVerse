@@ -246,7 +246,7 @@ export function useAlbumUploadWorkflowActions({
     async (index: number, uri: string) => {
       if (!uri || cropPending) return;
       if (isVideoMediaUri(uri)) {
-        showAlbumUploadAlert("Video kirpilamaz.", setWarningMessage);
+        showAlbumUploadAlert("Video kırpılamaz.", setWarningMessage);
         return;
       }
       setCropPending(true);

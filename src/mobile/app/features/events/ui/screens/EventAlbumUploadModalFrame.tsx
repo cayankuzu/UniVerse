@@ -164,7 +164,7 @@ export function EventAlbumUploadModalFrame({
                     <Text
                       style={{
                         color: tokens.colors.primary,
-                        fontSize: tokens.typography.tiny,
+                        fontSize: tokens.typography.caption,
                         fontWeight: tokens.fontWeight.extrabold,
                       }}
                     >
@@ -185,7 +185,7 @@ export function EventAlbumUploadModalFrame({
                     <Text
                       style={{
                         color: tokens.colors.primaryDark,
-                        fontSize: tokens.typography.tiny,
+                        fontSize: tokens.typography.caption,
                         fontWeight: tokens.fontWeight.bold,
                       }}
                     >
@@ -203,7 +203,7 @@ export function EventAlbumUploadModalFrame({
                     <Text
                       style={{
                         color: tokens.colors.warning,
-                        fontSize: tokens.typography.tiny,
+                        fontSize: tokens.typography.caption,
                         fontWeight: tokens.fontWeight.bold,
                       }}
                     >

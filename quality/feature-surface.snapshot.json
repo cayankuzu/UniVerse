@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "capturedFromCommit": "227329989bd937faff48c54291aeefc8b3942515",
+  "capturedFromCommit": "1caace7fa52dd56e8fd968983b1b1a1ea36da7cd",
   "purpose": "Feature-freeze baseline. Changes require an explicit product-scope decision and contract review.",
   "protectedSurface": {
     "api": {
@@ -156,6 +156,7 @@
         "public.blocks",
         "public.client_mutation_receipts",
         "public.client_telemetry_events",
+        "public.cloudflare_origin_request_nonces",
         "public.club_memberships",
         "public.event_album_summary_cache",
         "public.event_attendees",
@@ -267,8 +268,8 @@
     },
     "navigation": {
       "deepLinks": ["AuthCallback:auth/callback", "ResetPassword:reset-password"],
-      "modalMountCount": 59,
-      "modalMountSha256": "826ded6926052898b0eb9a15625481cffcd86e2750456d04d3ef063b07716c73",
+      "modalMountCount": 58,
+      "modalMountSha256": "7db3f3241f2bd0867028292402b560f368b7c04a93c44a477e1039689380aae6",
       "rootLeafRoutes": [
         "AlbumView",
         "AuthCallback",

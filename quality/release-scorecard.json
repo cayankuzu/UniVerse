@@ -1,0 +1,371 @@
+{
+  "schemaVersion": 1,
+  "candidate": {
+    "commit": "568fea0f99c55ae5268aa155bc7b4fd6c69ca880",
+    "version": "1.0.134",
+    "runtimeVersion": "1.0.134"
+  },
+  "scoringRule": "score may only be set once evidenceLevel is RUNTIME_VERIFIED and missingEvidence is empty; a score of 9.80 or higher additionally requires decision GO. Enforced by npm run guard:release-scorecard.",
+  "evidenceCodes": {
+    "E1": "Clean immutable candidate plus final check/lint/format/tests/coverage/SAST/secret-scan/SBOM outputs",
+    "E2": "Signed Android and iOS artifacts, checksums, signing continuity, symbols, published-binary OTA inspection",
+    "E3": "Real Android+iOS device matrix: P0 E2E, accessibility, startup/FPS/memory, offline/process death, push/deep links, battery",
+    "E4": "Isolated staging migration replay, DB lint, RLS/IDOR personas, concurrency/query plans, k6/pool/lock, backup/PITR and Storage restore",
+    "E5": "Cloudflare/Supabase provider state: zone/DNS/WAF/secrets, preview traffic, origin observe/enforce, leakage tests and rollback run",
+    "E6": "Sentry/Cloudflare/Supabase dashboards: release health, symbolication, PII sample, SLO baseline, alerts and incident drill",
+    "E7": "GitHub environment protection, least-privilege credential review, TestFlight/Internal Track, privacy/UGC/store forms",
+    "E8": "Observed Worker and OTA staged rollout, component-independent rollback, previous/embedded update, signed GO/NO-GO record"
+  },
+  "areas": [
+    {
+      "id": 1,
+      "name": "UI/UX",
+      "repositoryHardening": "Existing screens/states and UI guard remain; no redesign/product expansion. check-text-contrast.cjs and check-touch-targets.cjs now gate WCAG AA text/graphic contrast and 44dp effective targets across every screen.",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E1", "E3"],
+      "remainingRisk": "Visual/state regression on supported devices",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 2,
+      "name": "Multi-device",
+      "repositoryHardening": "Responsive source/checklists exist",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E2", "E3"],
+      "remainingRisk": "Small/large, low/mid, Android/iOS matrix absent",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 3,
+      "name": "Performance",
+      "repositoryHardening": "Projection-first reads, bounded network/queues and performance guards remain",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E3", "E4", "E6"],
+      "remainingRisk": "No same-device cold/warm, p95, FPS, memory/network baseline",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 4,
+      "name": "Security/privacy",
+      "repositoryHardening": "RLS contracts, redaction, threat model, JWT/HMAC/replay and secret/SAST gates exist. secret-scan now actually runs (GITHUB_TOKEN plus a pinned full-history gitleaks), and pushLockScreenPrivacy.contract.test.mjs pins the generic push payload the PUBLIC lock-screen channel depends on.",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E1"],
+      "remainingRisk": "Provider secrets, adversarial staging, PII/incident and store privacy unproven",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 5,
+      "name": "Architecture",
+      "repositoryHardening": "Layer guard; Supabase source of truth; projection-first and rollback-compatible matrix",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E1", "E4", "E5"],
+      "remainingRisk": "Deployed contract/cutover parity not observed",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 6,
+      "name": "DRY",
+      "repositoryHardening": "Shared transport, queue engine, UI primitives and narrow gateway modules are reused; the two byte-identical event location modals are one shared component.",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E1"],
+      "remainingRisk": "No final duplicate/complexity report bound to candidate",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 7,
+      "name": "Hardcode/config",
+      "repositoryHardening": "Central release/public-env schema; environment-separated Worker/EAS config; preview fails closed",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E1", "E5", "E7"],
+      "remainingRisk": "Provider values/secrets and stable domain not provisioned",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 8,
+      "name": "State",
+      "repositoryHardening": "Owner-scoped cache, optimistic rollback, persistent queue/stale-claim tests exist",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E1", "E3", "E4"],
+      "remainingRisk": "Two-device/race/process-death behavior incomplete",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 9,
+      "name": "Network/API",
+      "repositoryHardening": "Timeout/abort/body-once/auth refresh; exact gateway contract, request ID, no mutation retry",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E1"],
+      "remainingRisk": "Real 429/outage/latency and origin parity not observed",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 10,
+      "name": "Accessibility",
+      "repositoryHardening": "Shared roles/labels/hit targets and source guards/checklists exist. useLiveRegionAnnouncement gives VoiceOver the announcements accessibilityLiveRegion only delivered to TalkBack, and check-live-region-parity.cjs keeps the two in step.",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E3"],
+      "remainingRisk": "VoiceOver/TalkBack, 200% font, keyboard, contrast/reduce-motion signoff absent",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 11,
+      "name": "Scale",
+      "repositoryHardening": "k6/SQL validation contracts and distributed limiter configuration exist",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E4", "E5"],
+      "remainingRisk": "Missing staging credentials/results, plans, pool/lock/limiter behavior",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 12,
+      "name": "Resilience",
+      "repositoryHardening": "Persistent retries/dead-letter/stale recovery plus offline and OTA rollback runbooks",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E8"],
+      "remainingRisk": "Provider outage, restore, process kill and rollback drills absent",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 13,
+      "name": "Tests",
+      "repositoryHardening": "Local final run passed 322 suites/1118 tests plus contract, Worker, and guard suites.",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E1"],
+      "remainingRisk": "No immutable CI bundle, DB/RLS runtime or two-platform mobile E2E evidence",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 14,
+      "name": "Localization",
+      "repositoryHardening": "UTF-8/mojibake guard and frozen existing-language surface. The Turkish copy guard now also reads copy-shaped object keys and error sinks, not only JSX attributes.",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E1", "E3", "E7"],
+      "remainingRisk": "Device truncation/copy/legal locale review absent",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 15,
+      "name": "Offline",
+      "repositoryHardening": "Bounded persisted query/queue contracts and owner purge; see offline contract",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E3", "E4"],
+      "remainingRisk": "24-hour replay, reinstall/user-switch, process kill and conflict matrix absent",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 16,
+      "name": "Push/deep link",
+      "repositoryHardening": "Frozen notification types; project-partitioned tokens/receipts and trusted auth-link state",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E3", "E6", "E7"],
+      "remainingRisk": "Foreground/background/terminated, upgrade and provider lifecycle absent",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 17,
+      "name": "Observability",
+      "repositoryHardening": "Release/runtime/channel tags, telemetry bounds and PII redaction exist",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E5", "E6"],
+      "remainingRisk": "No live correlation, retention review, baseline SLO, alert or dashboard proof",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 18,
+      "name": "CI/CD",
+      "repositoryHardening": "Required same-SHA contexts (internal-verify, secret-scan, sast, docker-validate-immutable) all pass on the candidate and the aggregator validates them against the live check-runs API; docker-validation no longer double-fires on a PR branch.",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E1"],
+      "remainingRisk": "GitHub protection, real run IDs, provider approvals and rollback not proven",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 19,
+      "name": "Documentation",
+      "repositoryHardening": "Architecture, contracts, threat/OTA/rollback/manual/evidence docs updated, plus the workflow trigger classification and the UI/UX accessibility findings under docs/audit.",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E1"],
+      "remainingRisk": "Operational owner review and executed evidence links absent",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 20,
+      "name": "Domain logic",
+      "repositoryHardening": "Existing social/content/privacy/idempotency tests retained; no new domain",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E1", "E3", "E4"],
+      "remainingRisk": "Full invariant/property/adversarial concurrency matrix absent",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 21,
+      "name": "Dependencies",
+      "repositoryHardening": "Root/Worker lockfiles and audit/security policy; controlled narrow additions",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E1", "E7"],
+      "remainingRisk": "Same-SHA audit/license/SBOM/provenance outputs; exceptions expire 2026-09-30",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 22,
+      "name": "Battery/resources",
+      "repositoryHardening": "Bounded prefetch/realtime/background/queue work in source",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E3", "E6"],
+      "remainingRisk": "Physical-device battery, thermal, media and background measurement absent",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 23,
+      "name": "Platform compatibility",
+      "repositoryHardening": "Release/native parity and Expo Doctor gates; Android OTA source config exists",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": [],
+      "remainingRisk": "Signed entitlement/permission/update inspection on both platforms absent",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 24,
+      "name": "Store readiness",
+      "repositoryHardening": "Store/rehearsal checklists and frozen identities exist, and docs/marketing carries a claims register that binds every publishable sentence to a file in this repository, enforced by check-marketing-claims.cjs.",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E2", "E3", "E7"],
+      "remainingRisk": "Signed artifacts, internal tracks, privacy/UGC forms and review absent",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 25,
+      "name": "Operational maturity",
+      "repositoryHardening": "Runbooks, evidence layout, risk/owner/manual sequence exist",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": [],
+      "remainingRisk": "RPO/RTO, alerts, incident/restore/canary/approval not executed",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 26,
+      "name": "Readability",
+      "repositoryHardening": "Mobile 500-line guard currently reports no violation; narrow typed modules",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E1"],
+      "remainingRisk": "Final complexity/naming review and guard output absent",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 27,
+      "name": "General maturity",
+      "repositoryHardening": "Repo hardening and rollback paths implemented",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": [],
+      "remainingRisk": "No live P0/P1 closure, canary, health or rollback proof",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 28,
+      "name": "Code architecture",
+      "repositoryHardening": "`app-shell/data/features/platform/shared` direction and projection ownership guarded",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E1", "E4"],
+      "remainingRisk": "Final boundary result and deployed data-contract parity absent",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 29,
+      "name": "Code quality",
+      "repositoryHardening": "Strict TypeScript/lint/format/static-analysis gates and redacted error boundaries",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E1"],
+      "remainingRisk": "Final zero-warning/full-tree/same-SHA outputs absent",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 30,
+      "name": "KISS",
+      "repositoryHardening": "One narrow Worker; no cache/KV/D1/R2/Queue/DO/Pages or second data store",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E4", "E5"],
+      "remainingRisk": "Real benefit/cost/latency and provider-operability not measured",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 31,
+      "name": "Code hardcode",
+      "repositoryHardening": "Release/runtime, API bases, route matrix, limits and flags are centralized",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E1", "E5", "E7"],
+      "remainingRisk": "Stable root domain and reviewed provider values unresolved",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 32,
+      "name": "Reuse",
+      "repositoryHardening": "Existing transport, storage, query, queue, telemetry and UI systems reused",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E1", "E3"],
+      "remainingRisk": "Final UI/runtime regression and duplicate analysis absent",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 33,
+      "name": "Code performance",
+      "repositoryHardening": "Hot paths use projections, bounded request pool/cache and serialized queue/storage work",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E3", "E4", "E6"],
+      "remainingRisk": "Profiling/query/upload regression budgets not measured on candidate",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 34,
+      "name": "Testability",
+      "repositoryHardening": "Deterministic guards, injected Worker dependencies, contract/fault tests and synthetic staging plan",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E1"],
+      "remainingRisk": "Provider/device fault injection and final artifact outputs absent",
+      "score": null,
+      "decision": "NO-GO"
+    },
+    {
+      "id": 35,
+      "name": "Extensibility",
+      "repositoryHardening": "Versioned runtime/contracts, fail-closed classifier, explicit route policy and feature freeze",
+      "evidenceLevel": "AUTOMATED",
+      "missingEvidence": ["E2", "E4", "E5", "E8"],
+      "remainingRisk": "Old-binary compatibility and rollback window not proven",
+      "score": null,
+      "decision": "NO-GO"
+    }
+  ]
+}

@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     backgroundColor: withAlpha(tokens.colors.foreground, 0.62),
     borderRadius: tokens.radius.pill,
     color: tokens.colors.onMedia,
-    fontSize: tokens.typography.micro,
+    fontSize: tokens.typography.caption,
     fontWeight: "700",
     paddingHorizontal: tokens.spacing.xs,
     paddingVertical: tokens.spacing.xxs,

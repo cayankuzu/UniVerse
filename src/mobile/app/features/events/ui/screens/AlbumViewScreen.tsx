@@ -61,14 +61,14 @@ export function AlbumViewScreen({ route, navigation }: Props) {
     }
     showConfirmAlert({
       cancelLabel: "Vazgeç",
-      confirmLabel: "Cik",
+      confirmLabel: "Çık",
       destructive: true,
       message: "Seçili medya ve yazdığın alanlar silinecek.",
       onConfirm: () => {
         state.resetUploadState();
         state.setShowAddPhoto(false);
       },
-      title: "Taslak kapatilsin mi?",
+      title: "Taslak kapatılsın mı?",
     });
   };
 

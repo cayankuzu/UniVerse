@@ -139,7 +139,7 @@ export function AlbumCardFooter({
           />
           <Text
             style={{
-              fontSize: tokens.typography.tiny,
+              fontSize: tokens.typography.caption,
               fontWeight: tokens.fontWeight.bold,
               color: eventDisabled ? tokens.colors.mutedFg : tokens.colors.primary,
             }}

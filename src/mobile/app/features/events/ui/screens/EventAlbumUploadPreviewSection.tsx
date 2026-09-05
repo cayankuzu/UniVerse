@@ -341,7 +341,7 @@ export function EventAlbumUploadPreviewSection({
               <Text
                 style={{
                   color: tokens.colors.surface,
-                  fontSize: tokens.typography.tiny,
+                  fontSize: tokens.typography.caption,
                   fontWeight: tokens.fontWeight.bold,
                 }}
               >
@@ -363,7 +363,7 @@ export function EventAlbumUploadPreviewSection({
                 <Text
                   style={{
                     color: tokens.colors.surface,
-                    fontSize: tokens.typography.tiny,
+                    fontSize: tokens.typography.caption,
                     fontWeight: tokens.fontWeight.bold,
                   }}
                 >
@@ -477,7 +477,7 @@ export function EventAlbumUploadPreviewSection({
           </ScrollView>
         </View>
       ) : null}
-      <Text style={{ color: tokens.colors.muted, fontSize: tokens.typography.tiny }}>
+      <Text style={{ color: tokens.colors.muted, fontSize: tokens.typography.caption }}>
         {cropPending
           ? "Kırpma hazırlanıyor. İşlem bitene kadar seçimi kilitli tutuyoruz."
           : "Bir medyaya uzun basarak onu seç, sonra başka bir medyaya dokunarak yer değiştir."}

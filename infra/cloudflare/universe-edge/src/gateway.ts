@@ -1,4 +1,4 @@
-import { parseAndNormalizeJsonBody, readBoundedRequestBody, readBoundedResponseJson } from "./body";
+import { parseAndNormalizeJsonBody, readBoundedRequestBody, readBoundedResponseBody } from "./body";
 import { asGatewayError, GatewayError } from "./errors";
 import {
   findRoutePolicy,
@@ -44,6 +44,17 @@ const defaultDependencies: GatewayDependencies = {
   verifyJwt: verifySupabaseJwt,
 };
 
+const MAX_HEALTH_ORIGIN_RESPONSE_BYTES = 4_096;
+const MAX_ORIGIN_RESPONSE_BYTES = 512 * 1_024;
+const ORIGIN_FUNCTION_PATH = "/functions/v1/server/make-server-e3557d40";
+
+type BufferedOriginResponse = {
+  body: Uint8Array;
+  headers: Headers;
+  status: number;
+  statusText: string;
+};
+
 function configError(): GatewayError {
   return new GatewayError("configuration_error", 503, "Edge gateway yapılandırması eksik.");
 }
@@ -74,7 +85,14 @@ export function readGatewayConfig(env: Env): GatewayConfig {
   const supabaseUrl = parseHttpsUrl(env.SUPABASE_URL, environment);
   const originBaseUrl = parseHttpsUrl(env.ORIGIN_BASE_URL, environment);
   const issuer = parseHttpsUrl(env.JWT_ISSUER, environment);
-  if (originBaseUrl.origin !== supabaseUrl.origin) throw configError();
+  if (supabaseUrl.pathname !== "/" || supabaseUrl.search) throw configError();
+  if (
+    originBaseUrl.origin !== supabaseUrl.origin ||
+    originBaseUrl.pathname.replace(/\/+$/, "") !== ORIGIN_FUNCTION_PATH ||
+    originBaseUrl.search
+  ) {
+    throw configError();
+  }
   if (issuer.toString().replace(/\/$/, "") !== `${supabaseUrl.origin}/auth/v1`) throw configError();
 
   const timeoutMs = Number(env.UPSTREAM_TIMEOUT_MS);
@@ -97,17 +115,18 @@ export function readGatewayConfig(env: Env): GatewayConfig {
     .map((value) => value.trim())
     .filter(Boolean);
   if (origins.includes("*")) throw configError();
-  for (const origin of origins) {
+  const canonicalOrigins = origins.map((origin) => {
     const parsed = parseHttpsUrl(origin, environment);
     if (parsed.pathname !== "/" || parsed.search) throw configError();
-  }
+    return parsed.origin;
+  });
 
   return {
-    allowedOrigins: new Set(origins.map((origin) => origin.replace(/\/$/, ""))),
+    allowedOrigins: new Set(canonicalOrigins),
     audience: String(env.JWT_AUDIENCE || "").trim(),
     environment,
     issuer: issuer.toString().replace(/\/$/, ""),
-    originBaseUrl: originBaseUrl.toString().replace(/\/$/, ""),
+    originBaseUrl: `${originBaseUrl.origin}${ORIGIN_FUNCTION_PATH}`,
     originHmacSecret,
     publishableKey,
     rateLimitSalt,
@@ -194,10 +213,15 @@ function preflightResponse(request: Request, policy: RoutePolicy, config: Gatewa
 }
 
 function getRateLimitBinding(env: Env, policy: RateLimitPolicy): RateLimit | null {
-  if (policy === "auth") return env.AUTH_RATE_LIMITER;
-  if (policy === "report") return env.REPORT_RATE_LIMITER;
-  if (policy === "upload") return env.UPLOAD_RATE_LIMITER;
-  return null;
+  if (policy === "none") return null;
+  const limiter =
+    policy === "auth"
+      ? env.AUTH_RATE_LIMITER
+      : policy === "report"
+        ? env.REPORT_RATE_LIMITER
+        : env.UPLOAD_RATE_LIMITER;
+  if (!limiter || typeof limiter.limit !== "function") throw configError();
+  return limiter;
 }
 
 function anonymousRateIdentifier(policy: RoutePolicy, url: URL, parsedBody: unknown): string {
@@ -309,7 +333,7 @@ async function fetchOrigin(params: {
   method: string;
   policy: RoutePolicy;
   upstreamUrl: string;
-}): Promise<Response> {
+}): Promise<BufferedOriginResponse> {
   const maxAttempts = params.policy.retryGet && params.method === "GET" ? 2 : 1;
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     const timestamp = String(Math.floor(params.dependencies.now() / 1000));
@@ -333,6 +357,7 @@ async function fetchOrigin(params: {
     headers.set("x-universe-edge-timestamp", timestamp);
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), params.config.timeoutMs);
+    let shouldRetry = false;
     try {
       const response = await params.dependencies.fetcher(params.upstreamUrl, {
         body: params.body.byteLength > 0 ? params.body.slice().buffer : undefined,
@@ -342,38 +367,69 @@ async function fetchOrigin(params: {
         signal: controller.signal,
       });
       if (attempt + 1 < maxAttempts && [502, 503, 504].includes(response.status)) {
-        await response.body?.cancel();
-        await sleepBeforeRetry(attempt);
-        continue;
+        if (response.body) {
+          void response.body.cancel("retryable origin response").catch(() => undefined);
+        }
+        shouldRetry = true;
+      } else {
+        const maxResponseBytes =
+          params.policy.id === "health"
+            ? MAX_HEALTH_ORIGIN_RESPONSE_BYTES
+            : MAX_ORIGIN_RESPONSE_BYTES;
+        let body: Uint8Array;
+        try {
+          body = await readBoundedResponseBody(response, maxResponseBytes);
+        } catch (error) {
+          if (error instanceof GatewayError && error.code === "body_too_large") {
+            controller.abort("origin response limit exceeded");
+            throw params.policy.id === "health"
+              ? invalidOriginHealth()
+              : new GatewayError(
+                  "origin_response_too_large",
+                  502,
+                  "Backend yanıtı izin verilen boyutu aşıyor.",
+                );
+          }
+          throw error;
+        }
+        return {
+          body,
+          headers: new Headers(response.headers),
+          status: response.status,
+          statusText: response.statusText,
+        };
       }
-      return response;
     } catch (error) {
+      if (error instanceof GatewayError) throw error;
       if (attempt + 1 < maxAttempts) {
-        await sleepBeforeRetry(attempt);
-        continue;
+        shouldRetry = true;
+      } else {
+        const errorName = String((error as { name?: unknown })?.name || "");
+        const timedOut =
+          controller.signal.aborted || errorName === "AbortError" || errorName === "TimeoutError";
+        throw new GatewayError(
+          timedOut ? "origin_timeout" : "origin_unavailable",
+          timedOut ? 504 : 503,
+          "Backend şu anda kullanılamıyor.",
+        );
       }
-      const timedOut = (error as { name?: unknown })?.name === "AbortError";
-      throw new GatewayError(
-        timedOut ? "origin_timeout" : "origin_unavailable",
-        timedOut ? 504 : 503,
-        "Backend şu anda kullanılamıyor.",
-      );
     } finally {
       clearTimeout(timeout);
     }
+    if (shouldRetry) await sleepBeforeRetry(attempt);
   }
   throw new GatewayError("origin_unavailable", 503, "Backend şu anda kullanılamıyor.");
 }
 
-function buildOriginResponse(response: Response): Response {
+function buildOriginResponse(response: BufferedOriginResponse): Response {
   const headers = new Headers();
-  for (const header of ["content-language", "content-length", "content-type", "retry-after"]) {
+  for (const header of ["content-language", "content-type", "retry-after"]) {
     const value = response.headers.get(header);
     if (value) headers.set(header, value);
   }
   const originRequestId = response.headers.get("x-request-id");
   if (originRequestId) headers.set("x-origin-request-id", originRequestId.slice(0, 128));
-  return new Response(response.body, {
+  return new Response(response.body.byteLength > 0 ? response.body.slice().buffer : null, {
     headers,
     status: response.status,
     statusText: response.statusText,
@@ -392,14 +448,18 @@ function invalidOriginHealth(): GatewayError {
   return new GatewayError("invalid_origin_health", 503, "Backend sağlık yanıtı doğrulanamadı.");
 }
 
-async function verifyOriginHealthContract(response: Response): Promise<void> {
+function verifyOriginHealthContract(response: BufferedOriginResponse): void {
   const contentType = String(response.headers.get("content-type") || "").toLowerCase();
-  if (!response.ok || !contentType.startsWith("application/json")) {
+  if (
+    response.status < 200 ||
+    response.status >= 300 ||
+    !contentType.startsWith("application/json")
+  ) {
     throw invalidOriginHealth();
   }
   let payload: unknown;
   try {
-    payload = await readBoundedResponseJson(response, 4096);
+    payload = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(response.body));
   } catch {
     throw invalidOriginHealth();
   }
@@ -433,8 +493,8 @@ function readWorkerVersionMetadata(env: Env): { id: string; tag: string } {
   return { id: metadata.id, tag: metadata.tag };
 }
 
-async function buildHealthResponse(response: Response, env: Env): Promise<Response> {
-  await verifyOriginHealthContract(response);
+function buildHealthResponse(response: BufferedOriginResponse, env: Env): Response {
+  verifyOriginHealthContract(response);
   const version = readWorkerVersionMetadata(env);
   const originResponse = buildOriginResponse(response);
   const headers = new Headers(originResponse.headers);

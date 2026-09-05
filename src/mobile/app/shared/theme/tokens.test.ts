@@ -31,12 +31,61 @@ describe("UI tokens", () => {
     expect(tokens.iconSize.xl).toBe(18);
   });
 
-  it("keeps semantic text colors above WCAG normal-text contrast on white", () => {
-    expect(contrast(tokens.colors.foreground, tokens.colors.surface)).toBeGreaterThanOrEqual(4.5);
-    expect(contrast(tokens.colors.muted, tokens.colors.surface)).toBeGreaterThanOrEqual(4.5);
-    expect(contrast(tokens.colors.primary, tokens.colors.surface)).toBeGreaterThanOrEqual(4.5);
-    expect(contrast(tokens.colors.danger, tokens.colors.surface)).toBeGreaterThanOrEqual(4.5);
-    expect(contrast(tokens.colors.successText, tokens.colors.surface)).toBeGreaterThanOrEqual(4.5);
+  // A screen can put any of these three layers behind body copy, so a text token
+  // is only safe when its *worst* pairing clears AA. Anything below stays an
+  // icon-weight token and check-text-contrast.cjs keeps it out of copy.
+  const LIGHT_LAYERS = [
+    tokens.colors.surface,
+    tokens.colors.background,
+    tokens.colors.surfaceVariant,
+  ] as const;
+
+  function worstContrast(foreground: string) {
+    return Math.min(...LIGHT_LAYERS.map((layer) => contrast(foreground, layer)));
+  }
+
+  it.each([
+    ["foreground", tokens.colors.foreground],
+    ["text", tokens.colors.text],
+    ["textStrong", tokens.colors.textStrong],
+    ["textSecondary", tokens.colors.textSecondary],
+    ["muted", tokens.colors.muted],
+    ["mutedFg", tokens.colors.mutedFg],
+    ["textSubtle", tokens.colors.textSubtle],
+    ["iconMuted", tokens.colors.iconMuted],
+    ["neutralText", tokens.colors.neutralText],
+    ["primary", tokens.colors.primary],
+    ["primaryDark", tokens.colors.primaryDark],
+    ["primaryDeep", tokens.colors.primaryDeep],
+    ["danger", tokens.colors.danger],
+    ["dangerDark", tokens.colors.dangerDark],
+    ["dangerIcon", tokens.colors.dangerIcon],
+    ["warning", tokens.colors.warning],
+    ["warningText", tokens.colors.warningText],
+    ["success", tokens.colors.success],
+    ["successText", tokens.colors.successText],
+    ["successDark", tokens.colors.successDark],
+    ["blueText", tokens.colors.blueText],
+    ["blueStrong", tokens.colors.blueStrong],
+    ["orangeDeep", tokens.colors.orangeDeep],
+  ])("keeps %s above WCAG AA normal-text contrast on every light layer", (_name, value) => {
+    expect(worstContrast(value)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it.each([
+    ["warningIcon", tokens.colors.warningIcon],
+    ["successIcon", tokens.colors.successIcon],
+    ["violet", tokens.colors.violet],
+    ["primaryLight", tokens.colors.primaryLight],
+  ])("keeps the %s glyph above WCAG AA graphics contrast on every light layer", (_name, value) => {
+    expect(worstContrast(value)).toBeGreaterThanOrEqual(3);
+  });
+
+  it("keeps the welcome hero slogan readable on the lightest gradient stop", () => {
+    expect(contrast(tokens.colors.primarySofter, tokens.colors.primary)).toBeGreaterThanOrEqual(
+      4.5,
+    );
+    expect(contrast(tokens.colors.surface, tokens.colors.primary)).toBeGreaterThanOrEqual(4.5);
   });
 
   it("defines complete typography metrics for reusable UI roles", () => {

@@ -158,7 +158,7 @@ export function SearchTopPanel({
                     <Text
                       style={{
                         color: tokens.colors.surface,
-                        fontSize: tokens.typography.overline,
+                        fontSize: tokens.typography.caption,
                         fontWeight: tokens.fontWeight.bold,
                       }}
                     >

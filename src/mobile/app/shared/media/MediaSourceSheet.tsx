@@ -75,8 +75,8 @@ function SourceCard({
         <Text
           style={{
             color: tokens.colors.muted,
-            fontSize: tokens.typography.tiny,
-            lineHeight: tokens.lineHeight.micro,
+            fontSize: tokens.typography.caption,
+            lineHeight: tokens.lineHeight.caption,
           }}
         >
           {hint}
@@ -87,7 +87,7 @@ function SourceCard({
         <Text
           style={{
             color: disabled ? tokens.colors.muted : tokens.colors.primary,
-            fontSize: tokens.typography.tiny,
+            fontSize: tokens.typography.caption,
             fontWeight: "700",
           }}
         >
@@ -295,7 +295,7 @@ export function MediaSourceSheet({
                 style={{
                   flex: 1,
                   color: tokens.colors.muted,
-                  fontSize: tokens.typography.tiny,
+                  fontSize: tokens.typography.caption,
                   lineHeight: tokens.lineHeight.compact,
                 }}
               >

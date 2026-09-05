@@ -72,7 +72,7 @@ export function ImagePickerField({ label, uri, onPick, variant, accent }: ImageP
             <Text
               style={{
                 color: tokens.colors.surface,
-                fontSize: tokens.typography.tiny,
+                fontSize: tokens.typography.caption,
                 fontWeight: "600",
               }}
             >

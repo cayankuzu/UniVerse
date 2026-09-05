@@ -273,7 +273,7 @@ export function EventCardFooter({
                           style={{
                             fontSize: tokens.typography.caption,
                             fontWeight: tokens.fontWeight.bold,
-                            color: tokens.colors.successIcon,
+                            color: tokens.colors.successText,
                           }}
                         >
                           Katıldın

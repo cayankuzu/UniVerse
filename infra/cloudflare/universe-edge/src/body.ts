@@ -3,21 +3,24 @@ import { GatewayError } from "./errors";
 
 const textEncoder = new TextEncoder();
 
-export async function readBoundedRequestBody(
-  request: Request,
+async function readBoundedBodyStream(
+  body: ReadableStream<Uint8Array> | null,
+  declaredLengthHeader: string | null,
   maxBytes: number,
 ): Promise<Uint8Array> {
-  const declaredLength = Number(request.headers.get("content-length") || "0");
+  const declaredLength = Number(declaredLengthHeader || "0");
   if (Number.isFinite(declaredLength) && declaredLength > maxBytes) {
+    if (body) void body.cancel("body limit exceeded").catch(() => undefined);
     throw new GatewayError("body_too_large", 413, "İstek gövdesi çok büyük.");
   }
 
-  if (!request.body) return new Uint8Array();
+  if (!body) return new Uint8Array();
   if (maxBytes === 0) {
+    void body.cancel("body not allowed").catch(() => undefined);
     throw new GatewayError("body_not_allowed", 400, "Bu istek gövde kabul etmiyor.");
   }
 
-  const reader = request.body.getReader();
+  const reader = body.getReader();
   const chunks: Uint8Array[] = [];
   let totalBytes = 0;
   let streamComplete = false;
@@ -29,7 +32,7 @@ export async function readBoundedRequestBody(
       if (!value) continue;
       totalBytes += value.byteLength;
       if (totalBytes > maxBytes) {
-        await reader.cancel("request body limit exceeded");
+        void reader.cancel("body limit exceeded").catch(() => undefined);
         throw new GatewayError("body_too_large", 413, "İstek gövdesi çok büyük.");
       }
       chunks.push(value);
@@ -38,13 +41,27 @@ export async function readBoundedRequestBody(
     reader.releaseLock();
   }
 
-  const body = new Uint8Array(totalBytes);
+  const bytes = new Uint8Array(totalBytes);
   let offset = 0;
   for (const chunk of chunks) {
-    body.set(chunk, offset);
+    bytes.set(chunk, offset);
     offset += chunk.byteLength;
   }
-  return body;
+  return bytes;
+}
+
+export async function readBoundedResponseBody(
+  response: Response,
+  maxBytes = 65_536,
+): Promise<Uint8Array> {
+  return readBoundedBodyStream(response.body, response.headers.get("content-length"), maxBytes);
+}
+
+export async function readBoundedRequestBody(
+  request: Request,
+  maxBytes: number,
+): Promise<Uint8Array> {
+  return readBoundedBodyStream(request.body, request.headers.get("content-length"), maxBytes);
 }
 
 export function parseAndNormalizeJsonBody(
@@ -78,17 +95,9 @@ export function parseAndNormalizeJsonBody(
 
 export async function readBoundedResponseJson(
   response: Response,
-  maxBytes = 65_536,
+  options: { maxBytes?: number } = {},
 ): Promise<unknown> {
-  const clone = response.clone();
-  const bytes = await readBoundedRequestBody(
-    new Request("https://response.invalid", {
-      body: clone.body,
-      headers: clone.headers,
-      method: "POST",
-    }),
-    maxBytes,
-  );
+  const bytes = await readBoundedResponseBody(response, options.maxBytes);
   try {
     return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
   } catch {

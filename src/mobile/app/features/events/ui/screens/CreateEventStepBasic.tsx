@@ -185,7 +185,7 @@ export function CreateEventStepBasic({
                       <Text
                         style={{
                           color: tokens.colors.surface,
-                          fontSize: tokens.typography.tiny,
+                          fontSize: tokens.typography.caption,
                           fontWeight: tokens.fontWeight.bold,
                         }}
                       >
@@ -215,7 +215,7 @@ export function CreateEventStepBasic({
                     <Text
                       style={{
                         color: tokens.colors.surface,
-                        fontSize: tokens.typography.tiny,
+                        fontSize: tokens.typography.caption,
                         fontWeight: tokens.fontWeight.bold,
                       }}
                     >
@@ -236,7 +236,7 @@ export function CreateEventStepBasic({
                 >
                   {t("events.create.basic.pickCover")}
                 </Text>
-                <Text style={{ color: tokens.colors.muted, fontSize: tokens.typography.tiny }}>
+                <Text style={{ color: tokens.colors.muted, fontSize: tokens.typography.caption }}>
                   {t("events.create.basic.aspectHint")}
                 </Text>
               </View>

@@ -31,8 +31,11 @@
     "check:types": "tsc --noEmit",
     "guard:max-lines": "node ./utils/guards/check-max-lines.cjs",
     "guard:architecture-boundaries": "node ./utils/guards/check-architecture-boundaries.cjs",
+    "guard:duplicate-modules": "node ./utils/guards/check-duplicate-modules.cjs",
     "guard:cloudflare-origin-contract": "node --test ./supabase/functions/server/services/cloudflareOriginVerification.test.mjs ./supabase/functions/server/services/cloudflareOriginSecurityContract.test.mjs",
     "guard:report-idempotency": "node --test ./supabase/functions/server/services/reportIdempotency.test.mjs ./supabase/functions/server/services/moderationReportPrivacyContract.test.mjs",
+    "guard:push-installation-contract": "node --test ./supabase/functions/server/services/pushInstallationAccountSwitch.contract.test.mjs",
+    "guard:push-lockscreen-privacy": "node --test ./supabase/functions/server/services/pushLockScreenPrivacy.contract.test.mjs",
     "guard:no-new-product-surface": "node ./utils/guards/check-no-new-product-surface.cjs",
     "guard:no-new-product-surface:self-test": "node --test ./utils/guards/check-no-new-product-surface.test.cjs",
     "guard:ota-diff": "node ./utils/guards/classify-ota-diff.cjs",
@@ -42,6 +45,10 @@
     "guard:runtime-hygiene": "node ./utils/guards/check-runtime-hygiene.cjs",
     "guard:performance-contract": "node ./utils/guards/check-performance-contract.cjs",
     "guard:ui-system": "node ./utils/guards/check-ui-system.cjs",
+    "guard:text-contrast": "node ./utils/guards/check-text-contrast.cjs",
+    "guard:touch-targets": "node ./utils/guards/check-touch-targets.cjs",
+    "guard:live-region-parity": "node ./utils/guards/check-live-region-parity.cjs",
+    "guard:marketing-claims": "node ./utils/guards/check-marketing-claims.cjs",
     "guard:server-route-size": "node ./utils/guards/check-server-route-size.cjs",
     "guard:security-mobile": "node ./utils/guards/check-security-mobile.cjs",
     "guard:secure-upload": "node ./utils/guards/check-secure-upload-state-machine.cjs",
@@ -51,7 +58,12 @@
     "guard:loadtest-contracts": "node ./utils/guards/check-loadtest-contracts.cjs",
     "guard:deterministic-tests": "node ./utils/guards/check-deterministic-tests.cjs",
     "guard:release-config-parity": "node ./utils/guards/check-release-config-parity.cjs",
+    "guard:toolchain-parity": "node ./utils/guards/check-toolchain-parity.cjs",
+    "guard:docker-test-manifest": "node ./utils/guards/check-docker-test-manifest.cjs",
+    "guard:github-required-checks:self-test": "node --test ./utils/ops/validate-github-required-checks.test.cjs",
     "guard:release-readiness-docs": "node ./utils/guards/check-release-readiness-docs.cjs",
+    "guard:release-scorecard": "node ./utils/guards/check-release-scorecard.cjs",
+    "guard:evidence-manifest": "node ./utils/guards/check-evidence-manifest.cjs",
     "guard:release-sentry-env": "node ./utils/guards/check-release-sentry-env.cjs",
     "guard:release-sentry-healthcheck": "node ./utils/guards/check-release-sentry-healthcheck.cjs",
     "guard:release-native-symbols": "node ./utils/guards/check-release-native-symbols.cjs",
@@ -61,9 +73,19 @@
     "guard:dependency-audit": "node ./utils/guards/run-npm-audit.cjs",
     "guard:native-config-materialize": "node ./utils/guards/check-materialize-native-config.cjs",
     "guard:utf8": "node ./utils/guards/check-utf8-mojibake.cjs",
+    "guard:turkish-copy": "node ./utils/guards/check-turkish-copy.cjs",
     "cloudflare:check": "npm ci --prefix infra/cloudflare/universe-edge && npm run types:check --prefix infra/cloudflare/universe-edge && npm run typecheck --prefix infra/cloudflare/universe-edge && npm run test --prefix infra/cloudflare/universe-edge",
     "cloudflare:deploy:dry-run": "npm run deploy:dry-run --prefix infra/cloudflare/universe-edge",
-    "check": "npm run check:types && npm run guard:max-lines && npm run guard:architecture-boundaries && npm run guard:no-new-product-surface:self-test && npm run guard:no-new-product-surface && npm run guard:ota-diff:self-test && npm run guard:cloudflare-origin-contract && npm run guard:report-idempotency && npm run guard:no-legacy-hooks && npm run guard:no-onboarding-leak && npm run guard:runtime-hygiene && npm run guard:performance-contract && npm run guard:ui-system && npm run guard:server-route-size && npm run guard:security-mobile && npm run guard:secure-upload && npm run guard:diff-coverage:self-test && npm run guard:native-config-materialize && npm run guard:release-config-parity && npm run guard:loadtest-contracts && npm run guard:deterministic-tests && npm run guard:utf8 && npm run cloudflare:check",
+    "docker:config": "docker compose --project-directory . -f infra/docker/compose.yaml --profile test --profile resilience --profile load --profile security config --quiet",
+    "docker:up:test": "node ./infra/docker/scripts/run-test-profile.mjs --up-only",
+    "docker:test": "node ./infra/docker/scripts/run-test-profile.mjs",
+    "docker:resilience": "node ./infra/docker/scripts/run-resilience-profile.mjs",
+    "docker:load": "node ./infra/docker/scripts/run-load-profile.mjs",
+    "docker:security": "node ./infra/docker/scripts/run-security-profile.mjs",
+    "docker:evidence": "node ./infra/docker/scripts/write-evidence-manifest.mjs",
+    "docker:down": "node ./infra/docker/scripts/cleanup.mjs",
+    "docker:clean": "node ./infra/docker/scripts/cleanup.mjs",
+    "check": "npm run check:types && npm run guard:max-lines && npm run guard:architecture-boundaries && npm run guard:duplicate-modules && npm run guard:no-new-product-surface:self-test && npm run guard:no-new-product-surface && npm run guard:ota-diff:self-test && npm run guard:github-required-checks:self-test && npm run guard:cloudflare-origin-contract && npm run guard:report-idempotency && npm run guard:push-installation-contract && npm run guard:push-lockscreen-privacy && npm run guard:no-legacy-hooks && npm run guard:no-onboarding-leak && npm run guard:runtime-hygiene && npm run guard:performance-contract && npm run guard:ui-system && npm run guard:text-contrast && npm run guard:touch-targets && npm run guard:live-region-parity && npm run guard:marketing-claims && npm run guard:server-route-size && npm run guard:security-mobile && npm run guard:secure-upload && npm run guard:diff-coverage:self-test && npm run guard:native-config-materialize && npm run guard:release-config-parity && npm run guard:release-scorecard && npm run guard:evidence-manifest && npm run guard:toolchain-parity && npm run guard:docker-test-manifest && npm run guard:loadtest-contracts && npm run guard:deterministic-tests && npm run guard:utf8 && npm run guard:turkish-copy && npm run cloudflare:check",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --cache --cache-location .eslintcache --max-warnings=0",
     "format:check": "node ./utils/guards/check-prettier-changed.cjs",
     "format:check:all": "node ./utils/guards/check-prettier-all.cjs",
@@ -121,6 +143,7 @@
     "expo-camera": "~55.0.23",
     "expo-clipboard": "~55.0.17",
     "expo-constants": "~55.0.17",
+    "expo-crypto": "~55.0.19",
     "expo-dev-client": "~55.0.40",
     "expo-file-system": "~55.0.26",
     "expo-font": "~55.0.8",
@@ -177,33 +200,34 @@
     "typescript": "~5.9.2"
   },
   "overrides": {
-    "minimatch@3.1.5": {
-      "brace-expansion": "1.1.18"
-    },
-    "minimatch@10.2.4": {
-      "brace-expansion": "5.0.9"
-    },
-    "anymatch": {
-      "picomatch": "^2.3.2"
-    },
     "@expo/cli": {
       "picomatch": "^4.0.4"
     },
     "@expo/metro-config": {
       "picomatch": "^4.0.4"
     },
+    "@tootallnate/once": "^3.0.1",
     "@xmldom/xmldom": "^0.8.13",
+    "anymatch": {
+      "picomatch": "^2.3.2"
+    },
+    "browserslist": "^4.28.8",
     "jest-util": {
       "picomatch": "^2.3.2"
     },
+    "js-yaml": "4.3.1",
     "micromatch": {
       "picomatch": "^2.3.2"
     },
+    "minimatch@10.2.4": {
+      "brace-expansion": "5.0.9"
+    },
+    "minimatch@3.1.5": {
+      "brace-expansion": "1.1.18"
+    },
     "postcss": "^8.5.12",
     "shell-quote": "^1.8.4",
-    "js-yaml": "4.3.1",
     "undici": "6.28.0",
-    "@tootallnate/once": "^3.0.1",
     "uuid": "^11.1.1",
     "ws": "^8.18.3",
     "yaml": "^2.8.3"

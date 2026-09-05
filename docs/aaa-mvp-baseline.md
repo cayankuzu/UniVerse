@@ -1,8 +1,8 @@
 # AAA-MVP baseline
 
-Updated: 2026-08-30
-Baseline commit: `227329989bd937faff48c54291aeefc8b3942515`
-Working branch: `chore/aaa-mvp-feature-freeze-cloudflare-ota`
+Updated: 2026-08-31
+Baseline commit: `1caace7fa52dd56e8fd968983b1b1a1ea36da7cd`
+Working branch: `chore/aaa-mvp-hardening-docker-cloudflare-ota-push`
 
 ## Evidence boundary
 
@@ -13,8 +13,8 @@ under one immutable candidate SHA before it can be release evidence.
 
 The only checked-in release-evidence bundle predates this candidate: it is for version `1.0.109` at
 commit `28e4bcb8ec53df7eb13b354bf718b12d358c2acd`. Root EAS logs refer to versions `1.0.104` and
-`1.0.105`. They establish neither the baseline `1.0.133` artifact state nor the candidate
-`1.0.134` artifact, runtime, device, signing, OTA, or rollout status. Files under `artifacts/` are
+`1.0.105`. They establish neither the baseline/candidate `1.0.134` artifact, runtime, device,
+signing, OTA, or rollout status. Files under `artifacts/` are
 likewise historical unless their manifest proves the same candidate SHA.
 
 ## Repository identity and product surface
@@ -22,14 +22,14 @@ likewise historical unless their manifest proves the same candidate SHA.
 | Fact                   | Baseline                                                                                 |
 | ---------------------- | ---------------------------------------------------------------------------------------- |
 | Expo / React Native    | Expo SDK `55`; React Native `0.83.10`                                                    |
-| App / runtime version  | `1.0.133` / `1.0.133`, sourced from `config/app-release.json`                            |
-| Android / iOS identity | `com.ogrencisosyalagi.app`; Android version code `133`; iOS build `133`                  |
+| App / runtime version  | `1.0.134` / `1.0.134`, sourced from `config/app-release.json`                            |
+| Android / iOS identity | `com.ogrencisosyalagi.app`; Android version code `134`; iOS build `134`                  |
 | EAS project            | owner `cayanns-team`, slug `universe`, project ID `c7565eaa-d013-430f-9576-217c4beefa3f` |
 | Native source          | committed `android/`; no committed `ios/` tree                                           |
 | User-facing navigation | 24 leaf routes/screens, 3 navigator tabs, 4 visible bottom-bar keys                      |
 | Other frozen surfaces  | 2 deep-link mappings, 59 modal-wrapper mounts, 11 notification types, 3 settings groups  |
 | Data/API surface       | 19 mobile RPC names, 16 product-domain tables, one private Storage bucket                |
-| Mobile code guard      | 1,229 `.ts`/`.tsx` files under `src/mobile`; zero files over 500 lines at inventory time |
+| Mobile code guard      | 1,233 `.ts`/`.tsx` files under `src/mobile`; zero files over 500 lines at inventory time |
 
 The authoritative itemized surface is [existing-feature-contract.md](existing-feature-contract.md),
 with the machine snapshot in `quality/feature-surface.snapshot.json`. The final surface comparison is
@@ -52,11 +52,17 @@ CTA, notification type, product table, admin panel, or native capability.
 - Native auth/session and persistent mutation/upload queue payloads use SecureStore-backed storage.
   The bounded projection/query snapshot uses AsyncStorage, excludes named sensitive fields, and has
   a 24-hour maximum age and 512 KiB limit.
-- Shared edge cache was absent. No Cloudflare Worker, KV, D1, R2, Queue, Durable Object, or Pages
-  implementation existed at the baseline.
+- A narrow Cloudflare Worker already existed for the selected high-risk route matrix. It had no
+  KV, D1, R2, Queue, Durable Object, Pages, or shared response cache, and it did not replace
+  Supabase as source of truth. The hardening target was its environment isolation, bounded
+  transport, JWT/origin validation, provider evidence, and rollback contract rather than a second
+  gateway implementation.
+- No repository-controlled `infra/docker` validation layer or root Compose profile existed. The
+  mobile runtime was not containerized and remains outside Docker; the added layer is limited to
+  deterministic backend, migration, Worker, resilience, load-script, SBOM, and image scanning.
 
-The hardening program therefore preserves the primary data path and adds only a selective gateway
-for an explicit high-risk route matrix. See [network-and-data-inventory.md](network-and-data-inventory.md)
+The hardening program therefore preserves the primary data path and strengthens only that existing
+selective gateway and its explicit high-risk route matrix. See [network-and-data-inventory.md](network-and-data-inventory.md)
 and [cloudflare-architecture.md](cloudflare-architecture.md).
 
 ## Baseline validation run
@@ -74,14 +80,15 @@ condition only; they are not final same-SHA evidence.
 | Device automation      | No attached Android device/emulator established; ADB absent from this shell PATH | Maestro/runtime/accessibility evidence unavailable                                               |
 | iOS                    | No committed `ios/` tree and this is a Windows host                              | No IPA archive, TestFlight, signing, entitlement, or device evidence                             |
 
-At current inventory time the shared implementation tree contains 323 focused test files across the
-mobile, utilities, Supabase contract tests, and Worker tests, and 59 ordered SQL migrations including
-the new replay-protection migration. File count is inventory, not proof that the final suite passed.
+At baseline inventory time the tree contains 333 `*.test.*`/`*.spec.*` files across the mobile,
+utilities, Supabase contract tests, and Worker tests, and 60 ordered SQL migrations, including the
+replay-protection and report-idempotency migrations already present at the baseline SHA. File count
+is inventory, not proof that the final suite passed.
 
 ## OTA and artifact baseline
 
 Source configuration shows Android updates enabled with update URL
-`https://u.expo.dev/c7565eaa-d013-430f-9576-217c4beefa3f` and runtime `1.0.133`. This proves only
+`https://u.expo.dev/c7565eaa-d013-430f-9576-217c4beefa3f` and runtime `1.0.134`. This proves only
 source intent. No current published AAB/APK/IPA was found in `artifacts/` or `release-evidence/`, and
 there is no published-binary inspection report for Android or iOS.
 

@@ -142,6 +142,43 @@ describe("usePersistentQueueProcessor", () => {
     expect(mockRemoveAppStateListener).toHaveBeenCalled();
   });
 
+  it("schedules no work for the previous owner after unmount mid-resume", async () => {
+    let resolveResume: (() => void) | undefined;
+    const resume = jest.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveResume = resolve;
+        }),
+    );
+    const readStats = jest.fn(async () => pendingStats);
+    const { unmount } = renderProcessor({ readStats, resume });
+
+    await act(async () => {
+      latestScheduledTask().callback();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(resume).toHaveBeenCalledTimes(1);
+
+    unmount();
+    const scheduleCountAtUnmount = mockScheduleQueueProcessorResume.mock.calls.length;
+    mockLogEvent.mockClear();
+
+    await act(async () => {
+      resolveResume?.();
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+      jest.advanceTimersByTime(1_000);
+      await Promise.resolve();
+    });
+
+    expect(resume).toHaveBeenCalledTimes(1);
+    expect(mockScheduleQueueProcessorResume).toHaveBeenCalledTimes(scheduleCountAtUnmount);
+    expect(mockLogEvent).not.toHaveBeenCalled();
+  });
+
   it("coalesces resume signals while a resume is in flight", async () => {
     let resolveResume: (() => void) | undefined;
     const resume = jest.fn(

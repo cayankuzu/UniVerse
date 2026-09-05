@@ -214,7 +214,7 @@ export const DiscoveryAlbumGridCard = React.memo(function DiscoveryAlbumGridCard
                   <Text
                     style={{
                       color: tokens.colors.surface,
-                      fontSize: tokens.typography.overline,
+                      fontSize: tokens.typography.caption,
                       fontWeight: tokens.fontWeight.bold,
                     }}
                   >
@@ -234,7 +234,7 @@ export const DiscoveryAlbumGridCard = React.memo(function DiscoveryAlbumGridCard
                   <Text
                     style={{
                       color: tokens.colors.surface,
-                      fontSize: tokens.typography.overline,
+                      fontSize: tokens.typography.caption,
                       fontWeight: tokens.fontWeight.bold,
                     }}
                   >
@@ -254,7 +254,7 @@ export const DiscoveryAlbumGridCard = React.memo(function DiscoveryAlbumGridCard
           color: DISCOVERY_GRID_CARD_COLORS.text,
           fontSize: tokens.typography.caption,
           fontWeight: tokens.fontWeight.bold,
-          lineHeight: tokens.lineHeight.tiny,
+          lineHeight: tokens.lineHeight.caption,
         }}
         numberOfLines={2}
       >
@@ -266,8 +266,8 @@ export const DiscoveryAlbumGridCard = React.memo(function DiscoveryAlbumGridCard
             marginTop: tokens.spacing.micro,
             paddingHorizontal: tokens.spacing.xs,
             color: DISCOVERY_GRID_CARD_COLORS.muted,
-            fontSize: tokens.typography.micro,
-            lineHeight: tokens.lineHeight.nano,
+            fontSize: tokens.typography.caption,
+            lineHeight: tokens.lineHeight.caption,
           }}
           numberOfLines={1}
         >

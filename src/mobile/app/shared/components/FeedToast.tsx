@@ -4,6 +4,7 @@ import { AppText as Text } from "./AppText";
 import { useFloatingBottomMargin } from "../layout/bottomNavSpacing";
 import { tokens, withAlpha } from "../../shared/theme";
 import { InstantPressable } from "./InstantPressable";
+import { useLiveRegionAnnouncement } from "../hooks/useLiveRegionAnnouncement";
 
 export type FeedToastTone = "error" | "info" | "success" | "warning";
 
@@ -15,11 +16,13 @@ interface Props {
   tone?: FeedToastTone;
 }
 
+// The toast sits on a near-opaque dark slab, so each accent is picked to clear
+// AA against that slab rather than against the light screen behind it.
 function resolveTone(tone: FeedToastTone) {
-  if (tone === "error") return { color: tokens.colors.dangerSurface, icon: AlertCircle };
-  if (tone === "success") return { color: tokens.colors.successBorder, icon: CheckCircle2 };
-  if (tone === "info") return { color: tokens.colors.blueSubtle, icon: Info };
-  return { color: tokens.colors.amber, icon: AlertTriangle };
+  if (tone === "error") return { accent: tokens.colors.dangerSurface, icon: AlertCircle };
+  if (tone === "success") return { accent: tokens.colors.successBorder, icon: CheckCircle2 };
+  if (tone === "info") return { accent: tokens.colors.blueSubtle, icon: Info };
+  return { accent: tokens.colors.amber, icon: AlertTriangle };
 }
 
 export function FeedToast({
@@ -30,6 +33,10 @@ export function FeedToast({
   tone = "warning",
 }: Props) {
   const floatingBottom = useFloatingBottomMargin(tokens.spacing.md, 28);
+  // The toast is the app's main transient feedback surface, and
+  // accessibilityLiveRegion below only reaches TalkBack.
+  useLiveRegionAnnouncement(message);
+
   if (!message) return null;
   const toneConfig = resolveTone(tone);
   const Icon = toneConfig.icon;
@@ -67,7 +74,7 @@ export function FeedToast({
           shadowRadius: 18,
         }}
       >
-        <Icon size={tokens.iconSize.md} color={toneConfig.color} />
+        <Icon size={tokens.iconSize.md} color={toneConfig.accent} />
         <Text
           style={{
             color: tokens.colors.surface,
@@ -94,7 +101,7 @@ export function FeedToast({
           >
             <Text
               style={{
-                color: toneConfig.color,
+                color: toneConfig.accent,
                 fontSize: tokens.typography.caption,
                 fontWeight: tokens.fontWeight.extrabold,
               }}

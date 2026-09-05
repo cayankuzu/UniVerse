@@ -4,6 +4,7 @@ import type { RefObject } from "react";
 import { Pressable, TextInput, View } from "react-native";
 import { AppScrollView as ScrollView, Avatar } from "../../../../shared/components";
 import { tokens } from "../../../../shared/theme";
+import { useLiveRegionAnnouncement } from "../../../../shared/hooks/useLiveRegionAnnouncement";
 import { TEXT_LIMITS } from "../../../../shared/validation/textLimits";
 import type { CommentItem } from "../../data";
 
@@ -58,6 +59,8 @@ export function CommentPanelComposer({
   text,
 }: Props) {
   const remaining = TEXT_LIMITS.comment.body - text.length;
+  // A failed send only shows this line; VoiceOver needs it spoken.
+  useLiveRegionAnnouncement(submitError);
 
   return (
     <View
@@ -85,6 +88,7 @@ export function CommentPanelComposer({
           <Pressable
             accessibilityLabel={`Hızlı tepki: ${reaction}`}
             accessibilityRole="button"
+            hitSlop={tokens.hitSlop.sm}
             key={reaction}
             onPress={() => void onQuickReaction(reaction)}
             style={{
@@ -196,6 +200,7 @@ export function CommentPanelComposer({
           accessibilityLabel="Yorumu gönder"
           accessibilityRole="button"
           accessibilityState={{ disabled: !canSend }}
+          hitSlop={tokens.hitSlop.sm}
           onPress={() => void onSubmit()}
           disabled={!canSend}
           style={{
@@ -226,7 +231,7 @@ export function CommentPanelComposer({
           style={{
             color: tokens.colors.danger,
             flex: 1,
-            fontSize: tokens.typography.tiny,
+            fontSize: tokens.typography.caption,
             fontWeight: tokens.fontWeight.bold,
           }}
         >
@@ -235,7 +240,7 @@ export function CommentPanelComposer({
         <Text
           style={{
             color: remaining <= 0 ? tokens.colors.dangerDark : tokens.colors.mutedFg,
-            fontSize: tokens.typography.tiny,
+            fontSize: tokens.typography.caption,
             fontWeight: tokens.fontWeight.bold,
           }}
         >

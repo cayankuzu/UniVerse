@@ -79,7 +79,7 @@ export function AccountPreviewCard({
           }}
         >
           <UserCircle size={12} color={accent} />
-          <Text style={{ fontSize: tokens.typography.tiny, fontWeight: "700", color: accent }}>
+          <Text style={{ fontSize: tokens.typography.caption, fontWeight: "700", color: accent }}>
             {labelValue}
           </Text>
         </View>
@@ -246,7 +246,7 @@ export function AccountPreviewCard({
             <Text
               style={{
                 color: tokens.colors.mutedFg,
-                fontSize: tokens.typography.tiny,
+                fontSize: tokens.typography.caption,
                 fontWeight: "700",
               }}
             >
@@ -275,7 +275,7 @@ export function AccountPreviewCard({
             <Text
               style={{
                 color: tokens.colors.mutedFg,
-                fontSize: tokens.typography.tiny,
+                fontSize: tokens.typography.caption,
                 fontWeight: "700",
               }}
             >
@@ -304,7 +304,7 @@ export function AccountPreviewCard({
                 }}
               >
                 <Text
-                  style={{ fontSize: tokens.typography.tiny, fontWeight: "700", color: accent }}
+                  style={{ fontSize: tokens.typography.caption, fontWeight: "700", color: accent }}
                 >
                   {category}
                 </Text>

@@ -170,9 +170,9 @@ export const MainBottomTabs = memo(function MainBottomTabs({
                   numberOfLines={2}
                   style={{
                     color: isActive ? tokens.colors.primary : tokens.colors.iconMuted,
-                    fontSize: tokens.typography.tiny,
+                    fontSize: tokens.typography.caption,
                     fontWeight: isActive ? tokens.fontWeight.bold : tokens.fontWeight.medium,
-                    lineHeight: tokens.lineHeight.nano,
+                    lineHeight: tokens.lineHeight.caption,
                     textAlign: "center",
                   }}
                 >

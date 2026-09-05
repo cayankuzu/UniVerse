@@ -190,6 +190,19 @@ describe("edge security primitives", () => {
     ).rejects.toMatchObject({ code: "invalid_token", status: 401 });
   });
 
+  it("bounds remote JWKS bodies and fails closed on oversized responses", async () => {
+    const trusted = await asymmetricFixture("oversized-key");
+    const oversizedFetcher: typeof fetch = vi.fn(
+      async () =>
+        new Response("x".repeat(65_537), {
+          headers: { "content-type": "application/json" },
+        }),
+    );
+    await expect(
+      verifyAsymmetricSupabaseJwt(trusted.token, CONFIG, undefined, oversizedFetcher),
+    ).rejects.toMatchObject({ code: "auth_unavailable", status: 503 });
+  });
+
   it("validates legacy HS256 tokens through the Supabase Auth server", async () => {
     const nowSeconds = Math.floor(Date.now() / 1000);
     const secret = new TextEncoder().encode("legacy-test-signing-secret-with-32-bytes");
@@ -226,6 +239,18 @@ describe("edge security primitives", () => {
       code: "invalid_token_subject",
       status: 401,
     });
+  });
+
+  it("maps oversized legacy Auth bodies to provider unavailability", async () => {
+    const oversizedFetcher: typeof fetch = vi.fn(
+      async () =>
+        new Response("x".repeat(65_537), {
+          headers: { "content-type": "application/json" },
+        }),
+    );
+    await expect(
+      verifyLegacySupabaseJwt("opaque-token", CONFIG, oversizedFetcher),
+    ).rejects.toMatchObject({ code: "auth_unavailable", status: 503 });
   });
 
   it("distinguishes invalid legacy credentials from Auth provider outages", async () => {

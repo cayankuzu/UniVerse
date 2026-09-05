@@ -38,7 +38,7 @@ export function EventPendingActions({ status }: Props) {
           <Text
             style={{
               color: tokens.colors.onMedia,
-              fontSize: tokens.typography.tiny,
+              fontSize: tokens.typography.caption,
               fontWeight: "700",
             }}
           >

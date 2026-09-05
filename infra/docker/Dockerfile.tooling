@@ -1,0 +1,69 @@
+# syntax=docker/dockerfile:1.7
+
+ARG NODE_IMAGE=node:22.23.2-bookworm-slim@sha256:83f487e0a63425e5b4d146fb5e5be574bcbe1b7b843d3ebafdd95eaf7767a7e5
+ARG K6_IMAGE=grafana/k6:1.3.0@sha256:3ddc8b1a33a2c3d8edc6e99b6a762ae36cba08788463458f5e6a7703e14eb77d
+
+# The ARG default is pinned by both version and immutable digest; Hadolint cannot resolve ARG values.
+# hadolint ignore=DL3006
+FROM ${NODE_IMAGE} AS tooling-dependencies
+
+WORKDIR /workspace
+
+COPY infra/cloudflare/universe-edge/package.json infra/cloudflare/universe-edge/package-lock.json ./infra/cloudflare/universe-edge/
+RUN --mount=type=cache,target=/root/.npm,sharing=locked \
+    npm ci --prefix infra/cloudflare/universe-edge --no-audit --no-fund
+RUN npm sbom --prefix infra/cloudflare/universe-edge \
+    --sbom-format=cyclonedx > /workspace/tooling-sbom.cdx.json
+
+# hadolint ignore=DL3006
+FROM ${NODE_IMAGE} AS tooling
+
+ARG GIT_SHA=unknown
+LABEL org.opencontainers.image.source="https://github.com/cayankuzu/UniVerse" \
+      org.opencontainers.image.revision="${GIT_SHA}" \
+      org.opencontainers.image.title="UniVerse deterministic validation tooling"
+
+ENV CI=true \
+    NODE_ENV=test \
+    XDG_CACHE_HOME=/tmp/cache \
+    XDG_CONFIG_HOME=/tmp/config
+
+WORKDIR /workspace
+COPY --from=tooling-dependencies --chown=node:node /workspace/infra/cloudflare/universe-edge/node_modules ./infra/cloudflare/universe-edge/node_modules
+COPY --from=tooling-dependencies --chown=node:node /workspace/tooling-sbom.cdx.json /usr/share/universe/tooling-sbom.cdx.json
+COPY --chown=node:node package.json ./
+COPY --chown=node:node load-tests/common.js load-tests/mixed-1000.js load-tests/smoke.js load-tests/sustained.js ./load-tests/
+COPY --chown=node:node utils/guards/check-loadtest-contracts.cjs ./utils/guards/
+COPY --chown=node:node infra/docker/scripts/container-test.mjs infra/docker/scripts/resilience-check.mjs ./infra/docker/scripts/
+COPY --chown=node:node infra/docker/mocks/upstream.mjs ./infra/docker/mocks/
+COPY --chown=node:node infra/cloudflare/universe-edge/package.json infra/cloudflare/universe-edge/package-lock.json infra/cloudflare/universe-edge/tsconfig.json infra/cloudflare/universe-edge/vitest.config.ts infra/cloudflare/universe-edge/worker-configuration.d.ts infra/cloudflare/universe-edge/wrangler.jsonc ./infra/cloudflare/universe-edge/
+COPY --chown=node:node infra/cloudflare/universe-edge/src/body.ts infra/cloudflare/universe-edge/src/errors.ts infra/cloudflare/universe-edge/src/gateway.ts infra/cloudflare/universe-edge/src/index.ts infra/cloudflare/universe-edge/src/routePolicy.ts infra/cloudflare/universe-edge/src/schemas.ts infra/cloudflare/universe-edge/src/security.ts ./infra/cloudflare/universe-edge/src/
+COPY --chown=node:node infra/cloudflare/universe-edge/test/gateway.test.ts infra/cloudflare/universe-edge/test/security.test.ts ./infra/cloudflare/universe-edge/test/
+COPY --chown=node:node supabase/functions/server/index.ts supabase/functions/server/rateLimit.ts supabase/functions/server/routeRegistry.ts supabase/functions/server/runtime.ts ./supabase/functions/server/
+COPY --chown=node:node supabase/functions/server/routes/discovery.reportRoutes.ts supabase/functions/server/routes/push.ts ./supabase/functions/server/routes/
+COPY --chown=node:node supabase/functions/server/services/cloudflareOriginSecurityContract.test.mjs supabase/functions/server/services/cloudflareOriginVerification.test.mjs supabase/functions/server/services/cloudflareOriginVerification.ts supabase/functions/server/services/moderationReportDelivery.ts supabase/functions/server/services/moderationReportPrivacyContract.test.mjs supabase/functions/server/services/moderationReports.ts supabase/functions/server/services/pushDispatchProcessor.ts supabase/functions/server/services/pushDispatchQueue.ts supabase/functions/server/services/pushInstallationAccountSwitch.contract.test.mjs supabase/functions/server/services/pushNotifications.ts supabase/functions/server/services/pushReceiptProcessor.ts supabase/functions/server/services/reportIdempotency.test.mjs supabase/functions/server/services/reportIdempotency.ts supabase/functions/server/services/verifiedClientNetwork.ts ./supabase/functions/server/services/
+COPY --chown=node:node supabase/migrations/20260830150000_cloudflare_origin_replay_protection.sql supabase/migrations/20260831090000_report_submission_idempotency.sql supabase/migrations/20260831163000_push_installation_account_switch_hardening.sql supabase/migrations/20260831173000_push_delivery_privacy_leases.sql ./supabase/migrations/
+COPY --chown=node:node supabase/validation/10_push_installation_account_switch.sql supabase/validation/11_push_delivery_privacy_lease.sql ./supabase/validation/
+COPY --chown=node:node src/mobile/app/data/normalizers/reports.ts ./src/mobile/app/data/normalizers/
+COPY --chown=node:node src/mobile/app/data/notifications/notifications.push.ts ./src/mobile/app/data/notifications/
+COPY --chown=node:node src/mobile/app/app-shell/bridges/usePushRegistrationSync.ts ./src/mobile/app/app-shell/bridges/
+RUN secret_path="$(find /workspace -path '*/node_modules' -prune -o \( -type d -iname '.secrets' -o -type f \( -iname '.env*' -o -iname '.npmrc' -o -iname '.dev.vars*' -o -iname '*.cer' -o -iname '*.crt' -o -iname '*.der' -o -iname '*.jks' -o -iname '*.key' -o -iname '*.keystore' -o -iname '*.mobileprovision' -o -iname '*.p8' -o -iname '*.p12' -o -iname '*.pem' -o -iname '*.pfx' -o -iname '*.pkcs12' -o -iname '*firebase*adminsdk*.json' -o -iname '*service*account*.json' -o -iname 'credentials.json' -o -iname 'google-services.json' -o -iname 'GoogleService-Info.plist' \) \) -print -quit)" && \
+    test -z "$secret_path" && \
+    rm -f /workspace/tsconfig.json /usr/local/bin/npm /usr/local/bin/npx && \
+    rm -rf /usr/local/lib/node_modules/npm
+
+USER node
+CMD ["node", "infra/docker/scripts/container-test.mjs"]
+
+# hadolint ignore=DL3006
+FROM ${K6_IMAGE} AS load
+
+ARG GIT_SHA=unknown
+LABEL org.opencontainers.image.source="https://github.com/cayankuzu/UniVerse" \
+      org.opencontainers.image.revision="${GIT_SHA}" \
+      org.opencontainers.image.title="UniVerse deterministic k6 validation"
+
+WORKDIR /work
+COPY --chown=12345:12345 load-tests ./load-tests
+USER 12345
+ENTRYPOINT ["k6"]

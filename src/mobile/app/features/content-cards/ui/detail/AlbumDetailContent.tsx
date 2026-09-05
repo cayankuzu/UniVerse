@@ -19,7 +19,7 @@ function AlbumMetaChip(props: { border: string; color: string; label: string; su
         paddingVertical: tokens.spacing.xxs,
       }}
     >
-      <Text style={{ color: props.color, fontSize: tokens.typography.micro, fontWeight: "700" }}>
+      <Text style={{ color: props.color, fontSize: tokens.typography.caption, fontWeight: "700" }}>
         {props.label}
       </Text>
     </View>

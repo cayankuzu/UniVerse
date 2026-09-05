@@ -59,7 +59,7 @@ test("allows only narrowly named internal hardening additions", () => {
   current.api.httpRoutes.push("POST /make-server-e3557d40/ops/replay-outbox");
   current.api.rpcNames.push("event_mutation_audit");
   current.database.allTables.push("public.ops_release_evidence");
-  current.database.allTables.push("public.cloudflare_origin_request_nonces");
+  current.database.allTables.push("public.delivery_provider_receipts");
   current.native.expoPluginIds.push("expo-updates");
 
   const result = compareFeatureSurface(snapshot, current);

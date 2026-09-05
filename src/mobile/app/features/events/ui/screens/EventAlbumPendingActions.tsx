@@ -88,9 +88,9 @@ export function EventAlbumPendingActions({ pending, onRemove, onRetry }: Props) 
           <Text
             style={{
               color: tokens.colors.surface,
-              fontSize: tokens.typography.micro,
+              fontSize: tokens.typography.caption,
               fontWeight: tokens.fontWeight.medium,
-              lineHeight: tokens.lineHeight.micro,
+              lineHeight: tokens.lineHeight.caption,
             }}
           >
             {errorMessage}
@@ -121,7 +121,7 @@ export function EventAlbumPendingActions({ pending, onRemove, onRetry }: Props) 
               <Text
                 style={{
                   color: tokens.colors.surface,
-                  fontSize: tokens.typography.tiny,
+                  fontSize: tokens.typography.caption,
                   fontWeight: tokens.fontWeight.bold,
                 }}
               >
@@ -143,7 +143,7 @@ export function EventAlbumPendingActions({ pending, onRemove, onRetry }: Props) 
             <Text
               style={{
                 color: tokens.colors.surface,
-                fontSize: tokens.typography.tiny,
+                fontSize: tokens.typography.caption,
                 fontWeight: tokens.fontWeight.bold,
               }}
             >
@@ -178,7 +178,7 @@ export function EventAlbumPendingActions({ pending, onRemove, onRetry }: Props) 
               <Text
                 style={{
                   color: tokens.colors.surface,
-                  fontSize: tokens.typography.tiny,
+                  fontSize: tokens.typography.caption,
                   fontWeight: tokens.fontWeight.bold,
                 }}
               >
@@ -200,7 +200,7 @@ export function EventAlbumPendingActions({ pending, onRemove, onRetry }: Props) 
             <Text
               style={{
                 color: tokens.colors.surface,
-                fontSize: tokens.typography.tiny,
+                fontSize: tokens.typography.caption,
                 fontWeight: tokens.fontWeight.bold,
               }}
             >

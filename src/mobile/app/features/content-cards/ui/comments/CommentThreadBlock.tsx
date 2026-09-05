@@ -103,6 +103,7 @@ export function CommentThreadBlock({
           accessibilityRole="button"
           accessibilityLabel={isExpanded ? "Yanıtları gizle" : `${hiddenCount} yanıtı göster`}
           accessibilityState={{ expanded: isExpanded }}
+          hitSlop={tokens.hitSlop.sm}
           style={{
             alignSelf: "flex-start",
             marginLeft: 58,

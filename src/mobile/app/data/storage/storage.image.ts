@@ -256,7 +256,7 @@ export async function normalizeStorageUploadFile(
 ): Promise<StorageUploadFile> {
   const normalizedUri = normalizeStorageText(file.uri);
   if (!normalizedUri) {
-    throw new Error("Dosya secilmedi.");
+    throw new Error("Dosya seçilmedi.");
   }
 
   if (isVideoUploadFile(file)) {

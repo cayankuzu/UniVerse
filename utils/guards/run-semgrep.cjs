@@ -61,8 +61,13 @@ const SEMGREP_TARGETS = [
 ].filter((target) => fs.existsSync(target));
 
 const SEMGREP_STAGE_PREFIX = "universe-semgrep-";
+// Supabase CLI writes local-stack state (including the well-known demo service keys) into
+// supabase/.temp and supabase/.branches. Git ignores both; keep them out of the scan stage so
+// local runs match CI instead of tripping on generated files.
 const COPY_EXCLUDED_NAMES = new Set([
+  ".branches",
   ".git",
+  ".temp",
   "android",
   "artifacts",
   "assets",

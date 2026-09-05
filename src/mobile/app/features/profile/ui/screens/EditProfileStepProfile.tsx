@@ -84,7 +84,7 @@ export function EditProfileStepProfile({
                 <Text
                   style={{
                     color: tokens.colors.surface,
-                    fontSize: tokens.typography.tiny,
+                    fontSize: tokens.typography.caption,
                     fontWeight: tokens.fontWeight.bold,
                   }}
                 >

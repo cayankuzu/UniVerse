@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { AppText as Text } from "./AppText";
+import { useLiveRegionAnnouncement } from "../hooks/useLiveRegionAnnouncement";
 import { FlatList, Pressable, TextInput, View, useWindowDimensions } from "react-native";
 import { CheckCircle, ChevronDown, Circle, Search, SearchX } from "lucide-react-native";
 import { tokens } from "../../shared/theme";
@@ -63,6 +64,8 @@ export const SelectField = React.memo(function SelectField({
   const selected = value.trim();
   const isInvalid = Boolean(errorText);
   const helperText = errorText || supportingText || "";
+  // accessibilityLiveRegion below is Android-only; announce for VoiceOver too.
+  useLiveRegionAnnouncement(isInvalid ? errorText : null);
   const borderColor = isInvalid ? tokens.colors.danger : tokens.colors.border;
   const listMaxHeight = Math.max(180, Math.min(420, height * (fontScale >= 1.4 ? 0.34 : 0.42)));
   const closeSheet = useCallback(() => {

@@ -6,7 +6,10 @@ import { useAuth } from "../auth";
 import { debugLog, debugWarn } from "../../platform/logging/logger";
 import { isHttpRequestError } from "../../platform/api/core";
 import { supabase } from "../../platform/supabase";
-import { NotificationPushAPI } from "../../features/notifications/public/push";
+import {
+  bestEffortUnregisterStoredPushToken,
+  NotificationPushAPI,
+} from "../../features/notifications/public/push";
 import { subscribeNotificationPermissionGranted } from "../../platform/notifications/notificationPermission";
 import { getStableQueueJitterMs } from "../queues/queueResumeScheduler";
 import {
@@ -32,6 +35,8 @@ export function usePushRegistrationSync() {
   const lastSyncAttemptAtRef = useRef(0);
   const lastAuthRejectAtRef = useRef(0);
   const userId = String(userData.id || "").trim();
+  const activeUserIdRef = useRef("");
+  activeUserIdRef.current = isLoggedIn ? userId : "";
 
   useEffect(() => {
     if (!isLoggedIn || !userId) {
@@ -45,17 +50,24 @@ export function usePushRegistrationSync() {
   useEffect(() => {
     if (!isLoggedIn || !userId) return;
     if (shouldSkipPushRegistration(APP_ENV)) {
-      void NotificationPushAPI.getStoredRegistration().then((stored) => {
-        if (!stored?.expoPushToken) return;
-        void NotificationPushAPI.unregisterToken(stored.expoPushToken).catch(() => undefined);
-        void NotificationPushAPI.clearStoredRegistration().catch(() => undefined);
-      });
+      const disabledController =
+        typeof AbortController === "undefined" ? null : new AbortController();
+      void bestEffortUnregisterStoredPushToken({ signal: disabledController?.signal }).then(
+        (result) => {
+          if (result.status !== "retained") return;
+          debugWarn("PUSH", "push-unregister-retry-required", {
+            appEnv: APP_ENV,
+            reason: result.reason,
+            userId,
+          });
+        },
+      );
       debugLog("PUSH", "push-registration-skipped", {
         appEnv: APP_ENV,
         reason: "local-runtime-disabled",
         userId,
       });
-      return;
+      return () => disabledController?.abort();
     }
     const platform = resolvePushPlatform();
     if (!platform) return;
@@ -64,6 +76,15 @@ export function usePushRegistrationSync() {
     let retryCount = 0;
     let pendingTimeout: ReturnType<typeof setTimeout> | null = null;
     let scheduledSyncAt: number | null = null;
+    const requestController = typeof AbortController === "undefined" ? null : new AbortController();
+
+    const isCurrentEffect = () =>
+      !disposed && activeUserIdRef.current === userId && requestController?.signal.aborted !== true;
+
+    const isCurrentReservation = async (reservation: {
+      generation: number;
+      installationId: string;
+    }) => isCurrentEffect() && (await NotificationPushAPI.isGenerationCurrent(reservation));
 
     const hasFreshRegistration = () =>
       Boolean(lastSyncedRegistrationKeyRef.current) &&
@@ -71,21 +92,25 @@ export function usePushRegistrationSync() {
 
     const syncPushRegistration = async () => {
       await ensureAndroidNotificationChannel();
+      if (!isCurrentEffect()) return false;
       const stored = await NotificationPushAPI.getStoredRegistration();
+      if (!isCurrentEffect()) return false;
       const permissions = await Notifications.getPermissionsAsync();
+      if (!isCurrentEffect()) return false;
       if (!hasNotificationPermission(permissions)) {
         if (stored?.userId === userId) {
-          try {
-            await NotificationPushAPI.unregisterToken(stored.expoPushToken);
-            await NotificationPushAPI.clearStoredRegistration();
-            lastSyncedRegistrationKeyRef.current = "";
-          } catch (error) {
+          const cleanup = await bestEffortUnregisterStoredPushToken({
+            signal: requestController?.signal,
+          });
+          if (!isCurrentEffect()) return false;
+          if (cleanup.status === "retained") {
             debugWarn("PUSH", "push-unregister-retry-required", {
-              message: String((error as { message?: string })?.message || error || ""),
+              reason: cleanup.reason,
               userId,
             });
             return false;
           }
+          lastSyncedRegistrationKeyRef.current = "";
         }
         return "permission-missing" as const;
       }
@@ -101,12 +126,15 @@ export function usePushRegistrationSync() {
       const expoPushToken = String(
         (await Notifications.getExpoPushTokenAsync({ projectId })).data || "",
       ).trim();
+      if (!isCurrentEffect()) return false;
       if (!expoPushToken) {
         debugWarn("PUSH", "expo-push-token-empty");
         return false;
       }
 
-      const registrationKey = `${userId}:${APP_ENV}:${platform}:${projectId}:${expoPushToken}`;
+      const installationId = await NotificationPushAPI.getInstallationId();
+      if (!isCurrentEffect()) return false;
+      const registrationKey = `${userId}:${APP_ENV}:${platform}:${projectId}:${installationId}:${expoPushToken}`;
       if (lastSyncedRegistrationKeyRef.current === registrationKey) {
         return true;
       }
@@ -114,12 +142,14 @@ export function usePushRegistrationSync() {
       const {
         data: { session: currentSession },
       } = await supabase.auth.getSession();
+      if (!isCurrentEffect()) return false;
       const tokenExpiresAt = currentSession?.expires_at ?? 0;
       const isTokenExpiredOrMissing =
         !currentSession?.access_token || tokenExpiresAt * 1000 <= Date.now() + 30_000;
       if (isTokenExpiredOrMissing) {
         debugLog("PUSH", "push-pre-refresh", { userId, tokenExpiresAt });
         const { error: refreshError } = await supabase.auth.refreshSession();
+        if (!isCurrentEffect()) return false;
         if (refreshError) {
           debugWarn("PUSH", "push-session-refresh-failed", {
             message: refreshError.message,
@@ -133,6 +163,7 @@ export function usePushRegistrationSync() {
         data: { user: authUser },
         error: authUserError,
       } = await supabase.auth.getUser();
+      if (!isCurrentEffect()) return false;
       if (authUserError || !authUser?.id || authUser.id !== userId) {
         debugWarn("PUSH", "push-auth-user-unverified", {
           authUserId: authUser?.id || null,
@@ -142,19 +173,46 @@ export function usePushRegistrationSync() {
         return false;
       }
 
-      await NotificationPushAPI.registerToken({
+      const reservation = await NotificationPushAPI.reserveGeneration({
         appEnv: APP_ENV,
         expoProjectId: projectId,
-        expoPushToken,
         platform,
       });
-      await NotificationPushAPI.rememberRegistration({
+      if (!(await isCurrentReservation(reservation))) return false;
+
+      const response = await NotificationPushAPI.registerToken(
+        {
+          ...reservation,
+          expoProjectId: projectId,
+          expoPushToken,
+        },
+        { signal: requestController?.signal },
+      );
+      if (!isCurrentEffect()) return false;
+      const normalizedResponse = NotificationPushAPI.normalizeMutationResponse(response);
+      if (!normalizedResponse) return false;
+      await NotificationPushAPI.observeServerGeneration(
+        reservation.installationId,
+        normalizedResponse.currentGeneration,
+      );
+      if (!isCurrentEffect()) return false;
+      const confirmedResponse = NotificationPushAPI.requireConfirmedMutation(
+        normalizedResponse,
+        reservation.generation,
+      );
+      if (!confirmedResponse) return false;
+      if (!(await isCurrentReservation(reservation))) return false;
+
+      const remembered = await NotificationPushAPI.rememberRegistration({
         appEnv: APP_ENV,
         expoProjectId: projectId,
         expoPushToken,
+        generation: reservation.generation,
+        installationId: reservation.installationId,
         platform,
         userId,
       });
+      if (!remembered || !(await isCurrentReservation(reservation))) return false;
       lastSyncedRegistrationKeyRef.current = registrationKey;
       lastSuccessfulSyncAtRef.current = Date.now();
       debugLog("PUSH", "push-registration-synced", {
@@ -280,6 +338,7 @@ export function usePushRegistrationSync() {
 
     return () => {
       disposed = true;
+      requestController?.abort();
       if (pendingTimeout) clearTimeout(pendingTimeout);
       unsubscribePermission();
       pushTokenSubscription.remove();
