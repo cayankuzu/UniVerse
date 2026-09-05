@@ -64,13 +64,21 @@ Bu bölüm UniVerse'in en güçlü ve en kolay doğrulanabilir farkıdır. Her s
 
 ## 4. Teknik kalite iddiaları
 
-| #    | İddia                                                  | Durum  | Kanıt                                                                                               | İzin verilen ifade                             |
-| ---- | ------------------------------------------------------ | ------ | --------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| T-01 | Çevrimdışı yazılan işlem bağlantı dönünce gönderilir.  | ONAYLI | `mutationActionQueue.ts`, `uploadQueue.ts`, `usePersistentQueueProcessor.ts` ve testleri            | "Bağlantın kesilirse işlemin kuyrukta bekler." |
-| T-02 | Arayüz WCAG AA metin kontrastını her yüzeyde karşılar. | ONAYLI | `utils/guards/check-text-contrast.cjs` (PASS) · `tokens.test.ts` 31 test                            | "Yazılar her ekranda okunaklı kontrastta."     |
-| T-03 | Dokunma hedefleri 44dp etkin alanı karşılar.           | ONAYLI | `utils/guards/check-touch-targets.cjs` (PASS)                                                       | "Küçük görünen düğmeler bile rahat basılır."   |
-| T-04 | Ekran okuyucu ile uçtan uca kullanım                   | TASLAK | Statik kanıt var; VoiceOver/TalkBack cihaz turu `docs/push-real-device-matrix.md` ile mühürlenmeli. | — (cihaz kanıtı gelene kadar yayınlanmaz)      |
-| T-05 | "Hızlı" / "anlık" performans                           | TASLAK | `docs/performance-verification-checklist.md` doldurulmadan ölçüm iddiası yok.                       | —                                              |
+| #    | İddia                                                            | Durum  | Kanıt                                                                                                               | İzin verilen ifade                                         |
+| ---- | ---------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| T-01 | Çevrimdışı yazılan işlem bağlantı dönünce gönderilir.            | ONAYLI | `mutationActionQueue.ts`, `uploadQueue.ts`, `usePersistentQueueProcessor.ts` ve testleri                            | "Bağlantın kesilirse işlemin kuyrukta bekler."             |
+| T-02 | Arayüz WCAG AA metin kontrastını her yüzeyde karşılar.           | ONAYLI | `utils/guards/check-text-contrast.cjs` (PASS) · `tokens.test.ts` 31 test                                            | "Yazılar her ekranda okunaklı kontrastta."                 |
+| T-03 | Dokunma hedefleri 44dp etkin alanı karşılar.                     | ONAYLI | `utils/guards/check-touch-targets.cjs` (PASS)                                                                       | "Küçük görünen düğmeler bile rahat basılır."               |
+| T-04 | Ekran okuyucu ile uçtan uca kullanım                             | TASLAK | Statik kanıt var; VoiceOver/TalkBack cihaz turu `docs/push-real-device-matrix.md` ile mühürlenmeli.                 | — (cihaz kanıtı gelene kadar yayınlanmaz)                  |
+| T-06 | Hata ve durum değişiklikleri iki platformda da sesli bildirilir. | ONAYLI | `useLiveRegionAnnouncement` + `utils/guards/check-live-region-parity.cjs` (PASS, 12 yüzey) · 6 birim testi          | "Hata ve durum değişikliklerini ekran okuyucu da duyurur." |
+| T-07 | Kullanıcıya görünen Türkçe metinler diakritiklerini korur.       | ONAYLI | `utils/guards/check-turkish-copy.cjs` (PASS, 909 modül) — JSX attribute, kopya object key'i ve hata sink'i kapsanır | "Uygulamanın Türkçesi doğru yazılmıştır."                  |
+| T-05 | "Hızlı" / "anlık" performans                                     | TASLAK | `docs/performance-verification-checklist.md` doldurulmadan ölçüm iddiası yok.                                       | —                                                          |
+
+### T-04 ile T-06 arasındaki fark
+
+T-06, duyurunun **kodda var olduğunu** söyler ve makine ile doğrulanır. T-04, bir kullanıcının
+ekran okuyucuyla baştan sona gerçekten iş yapabildiğini söyler ve bunu yalnız cihaz turu kanıtlar.
+İkincisi kanıtlanmadan T-06'yı "uygulama ekran okuyucuyla tam uyumlu" diye genişletmek yasaktır.
 
 ## 5. Gözden geçirme ritmi
 
