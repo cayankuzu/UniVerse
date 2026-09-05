@@ -432,6 +432,25 @@ creation is not required; re-verify it against the final immutable SHA before re
   reason to invent a new screen.
 - **Owner / evidence:** Privacy/Legal + Store owners / `09-store-privacy/`.
 
+## 15b. Publish store copy and capture screenshots from the candidate build
+
+- [ ] **Why:** the store listing text, screenshots, and preview video cannot be produced from the
+      repository. They need the installed candidate build and a store account.
+- **Where:** App Store Connect and Play Console listing surfaces only. No new product UI, page, or
+  marketing surface is added under this task.
+- **Values:** the exact Turkish text in `docs/marketing/store-listing-tr.md`, the frame order,
+  pixel sizes, and safe areas in `docs/marketing/screenshot-storyboard.md`.
+- **Verify:** every published sentence maps to an `ONAYLI` row in
+  `docs/marketing/claims-register.md`. No `TASLAK` row appears in shipped copy — today that means
+  T-04 (screen-reader journey) and T-05 (performance) stay out of the listing. Every screenshot is a
+  real capture of the candidate build, and no frame shows a control, badge, count, or state the build
+  does not have.
+- **Safe result:** the privacy declarations match `docs/network-and-data-inventory.md` line for line,
+  including the absence of location, contacts, and third-party sharing.
+- **Rollback:** return the listing to draft. A claim without evidence is a release block, not a
+  reason to add a feature that would justify it.
+- **Owner / evidence:** Store owner / `09-store-privacy/`.
+
 ## 16. Prove backup, PITR, and restore
 
 - [ ] **Why:** configured backups are not a restore. PostgreSQL PITR also does not automatically

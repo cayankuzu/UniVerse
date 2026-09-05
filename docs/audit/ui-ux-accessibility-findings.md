@@ -105,24 +105,90 @@ Tek `EventLocationModal` bileşenine indirildi; okunaklı olan punto (`caption`)
 
 ---
 
-## 6. Doğrulama
+## 6. Ekran okuyucu duyuruları — iOS sessizliği
 
-| Kapı                              | Sonuç                                                             |
-| --------------------------------- | ----------------------------------------------------------------- |
-| `npm run guard:text-contrast`     | PASS — her metin ve ikon eşiğini geçiyor                          |
-| `npm run guard:touch-targets`     | PASS — boyutu yazılı her pressable rol ve 44dp etkin alan taşıyor |
-| `npm run guard:ui-system`         | PASS                                                              |
-| `npm run guard:duplicate-modules` | PASS — 1032 modül                                                 |
-| `npm run check:types`             | PASS                                                              |
-| `npm run lint`                    | PASS (0 uyarı)                                                    |
-| `npm run format:check:all`        | PASS                                                              |
-| `npm run test:ci`                 | 321 suite / 1112 test PASS                                        |
+`accessibilityLiveRegion` React Native'de **yalnız Android** propudur. On iki yüzey değişikliğini
+duyurmak için tek başına buna güveniyordu; iOS'ta hiçbiri konuşmuyordu:
 
-Guard'ların gerçekten yakaladığı doğrulandı: bir `hitSlop` geçici olarak kaldırıldığında `check-touch-targets` `DetailViewerOverlayLayout.tsx:53`'ü bildirdi; kontrast token'ı geri alındığında `check-text-contrast` ilgili satırları listeledi.
+| Yüzey                                          | Ne duyurulmuyordu                     |
+| ---------------------------------------------- | ------------------------------------- |
+| `AppNetworkStatusBanner`                       | Çevrimdışına düşme                    |
+| `FeedToast`                                    | Uygulamanın ana geçici geri bildirimi |
+| `AppActivityBanner`                            | Yükleme aşaması ve hatası             |
+| `AsyncState`                                   | Yükleniyor ve hata durumu             |
+| `TextField`, `SelectField`                     | Doğrulama hatası                      |
+| `CategorySelector`                             | Seçim limiti ve doğrulama hatası      |
+| `CommentPanelComposer`                         | Yorum gönderilemedi                   |
+| `CreateEventSchedulePickerField`               | Geçersiz tarih                        |
+| `SettingsScreen`, `SettingsDeleteAccountModal` | Hesap silme hatası                    |
+| `RegistrationWizardSections`                   | Şifre kural durumu                    |
+
+`useLiveRegionAnnouncement` iOS yarısını kapatıyor. Metin **gerçekten değiştiğinde** duyurur — aynı
+mesajla yeniden render sessiz kalır — ve Android'de hiçbir şey yapmaz, çünkü orada live region zaten
+konuşuyor; iki kez okunması gürültü olurdu.
+
+İki yüzey bilinçli olarak bire bir aynalamıyor ve bunu kodda söylüyor:
+
+- **Yükleme çubuğu** yüzdeyi değil aşamayı duyurur. 1'den 100'e sayan bir yükleme her şeyin üstüne konuşurdu.
+- **Şifre kural listesi** yalnız geçerliliğe geçişi duyurur. Beş kuralı her tuş vuruşunda tekrarlamak,
+  yazmanın kendisini bastırırdı; kurallar tek tek gezinerek okunabilir durumda kalıyor.
+
+`check-live-region-parity.cjs` bu propu kullanıp hook'u kullanmayan bir dosyada kırmızı yanıyor.
 
 ---
 
-## 7. Kapsam dışı bırakılanlar
+## 7. Türkçe kopya doğruluğu
+
+Dokuz kullanıcı-görünür metin diakritiklerini kaybetmişti; hepsi **onay ve hata** yüzeylerinde,
+yani kullanıcının en çok dikkat ettiği yerlerde:
+
+| Yer                                                                                   | Önce                      | Sonra                     |
+| ------------------------------------------------------------------------------------- | ------------------------- | ------------------------- |
+| `useCreateEventScreenState.ts`, `AlbumViewScreen.tsx`, `useEditProfileScreenState.ts` | `"Cik"`                   | `"Çık"`                   |
+| `useCreateEventScreenState.ts`, `AlbumViewScreen.tsx`                                 | `"Taslak kapatilsin mi?"` | `"Taslak kapatılsın mı?"` |
+| `useCreateEventFormState.ts`                                                          | `"Medya kirpilamadi."`    | `"Medya kırpılamadı."`    |
+| `useCreateEventFormState.ts`                                                          | `"Medyalar secilemedi."`  | `"Medyalar seçilemedi."`  |
+| `useCreateEventFormState.ts`, `useAlbumUploadWorkflowActions.ts`                      | `"Video kirpilamaz."`     | `"Video kırpılamaz."`     |
+| `storage.image.ts`                                                                    | `"Dosya secilmedi."`      | `"Dosya seçilmedi."`      |
+| `eventInteractionPresentation.ts`                                                     | `"Uni Gerekli"`           | `"Üni Gerekli"`           |
+
+Hepsinin komşusu zaten doğruydu — aynı diyalogun `message` satırı "taslağı" yazıyordu, aynı switch'in
+diğer dalları "Giriş Gerekli" ve "Erişim Yok" idi. Yani bunlar tercih değil, gözden kaçmış satırlardı.
+
+**Neden guard yakalamamıştı:** `check-turkish-copy.cjs` yalnız JSX attribute'larına bakıyordu.
+Artık kopya taşıyan object key'lerini (`title:`, `confirmLabel:` …) ve metni ekrana koyan hata
+sink'lerini de okuyor. Bu genişletme dokuzuncu hatayı kendisi buldu.
+
+ASCII'ye katlanmış **backend hata eşleştiricileri** (`"fotograf boyutu cok buyuk"`) kapsam dışında
+kalmaya devam ediyor: onlar okunacak metin değil, karşılaştırılacak değer.
+
+**Kapsam dışı:** `shared/catalog/categories.ts` içindeki bazı katalog değerleri de ASCII katlanmış
+("Gomulu Sistemler", "Elektrik Muhendisligi"). Bunlar **kalıcı veri**; kullanıcı satırlarında ve
+`feature-surface.snapshot.json` içindeki `valueSha256` alanında referanslanıyor. Yeniden adlandırmak
+mevcut kayıtları öksüz bırakır, dolayısıyla ayrı bir veri taşıma kararıdır — kopya düzeltmesi değil.
+
+---
+
+## 8. Doğrulama
+
+| Kapı                               | Sonuç                                                             |
+| ---------------------------------- | ----------------------------------------------------------------- |
+| `npm run guard:text-contrast`      | PASS — her metin ve ikon eşiğini geçiyor                          |
+| `npm run guard:touch-targets`      | PASS — boyutu yazılı her pressable rol ve 44dp etkin alan taşıyor |
+| `npm run guard:ui-system`          | PASS                                                              |
+| `npm run guard:duplicate-modules`  | PASS — 1034 modül                                                 |
+| `npm run check:types`              | PASS                                                              |
+| `npm run lint`                     | PASS (0 uyarı)                                                    |
+| `npm run format:check:all`         | PASS                                                              |
+| `npm run guard:live-region-parity` | PASS — 12 live-region yüzeyi VoiceOver için de duyuruyor          |
+| `npm run guard:turkish-copy`       | PASS — 909 modül                                                  |
+| `npm run test:ci`                  | 322 suite / 1118 test PASS                                        |
+
+Guard'ların gerçekten yakaladığı doğrulandı: bir `hitSlop` geçici olarak kaldırıldığında `check-touch-targets` `DetailViewerOverlayLayout.tsx:53`'ü bildirdi; kontrast token'ı geri alındığında `check-text-contrast` ilgili satırları listeledi; `AsyncState`'ten hook çıkarıldığında `check-live-region-parity` onu bildirdi.
+
+---
+
+## 9. Kapsam dışı bırakılanlar
 
 Dürüstlük gereği açıkça yazılır:
 

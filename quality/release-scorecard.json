@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "candidate": {
-    "commit": "26af17f48d94c7b19ac2707a965025cf5e2144d7",
+    "commit": "a8005fd43374049cb40a245b80a57cad161aed28",
     "version": "1.0.134",
     "runtimeVersion": "1.0.134"
   },
@@ -20,7 +20,7 @@
     {
       "id": 1,
       "name": "UI/UX",
-      "repositoryHardening": "Existing screens/states and UI guard remain; no redesign/product expansion",
+      "repositoryHardening": "Existing screens/states and UI guard remain; no redesign/product expansion. check-text-contrast.cjs and check-touch-targets.cjs now gate WCAG AA text/graphic contrast and 44dp effective targets across every screen.",
       "evidenceLevel": "AUTOMATED",
       "missingEvidence": ["E1", "E3"],
       "remainingRisk": "Visual/state regression on supported devices",
@@ -50,7 +50,7 @@
     {
       "id": 4,
       "name": "Security/privacy",
-      "repositoryHardening": "RLS contracts, redaction, threat model, JWT/HMAC/replay and secret/SAST gates exist",
+      "repositoryHardening": "RLS contracts, redaction, threat model, JWT/HMAC/replay and secret/SAST gates exist. secret-scan now actually runs (GITHUB_TOKEN plus a pinned full-history gitleaks), and pushLockScreenPrivacy.contract.test.mjs pins the generic push payload the PUBLIC lock-screen channel depends on.",
       "evidenceLevel": "AUTOMATED",
       "missingEvidence": ["E1"],
       "remainingRisk": "Provider secrets, adversarial staging, PII/incident and store privacy unproven",
@@ -70,7 +70,7 @@
     {
       "id": 6,
       "name": "DRY",
-      "repositoryHardening": "Shared transport, queue engine, UI primitives and narrow gateway modules are reused",
+      "repositoryHardening": "Shared transport, queue engine, UI primitives and narrow gateway modules are reused; the two byte-identical event location modals are one shared component.",
       "evidenceLevel": "AUTOMATED",
       "missingEvidence": ["E1"],
       "remainingRisk": "No final duplicate/complexity report bound to candidate",
@@ -110,7 +110,7 @@
     {
       "id": 10,
       "name": "Accessibility",
-      "repositoryHardening": "Shared roles/labels/hit targets and source guards/checklists exist",
+      "repositoryHardening": "Shared roles/labels/hit targets and source guards/checklists exist. useLiveRegionAnnouncement gives VoiceOver the announcements accessibilityLiveRegion only delivered to TalkBack, and check-live-region-parity.cjs keeps the two in step.",
       "evidenceLevel": "AUTOMATED",
       "missingEvidence": ["E3"],
       "remainingRisk": "VoiceOver/TalkBack, 200% font, keyboard, contrast/reduce-motion signoff absent",
@@ -140,7 +140,7 @@
     {
       "id": 13,
       "name": "Tests",
-      "repositoryHardening": "Local final run passed 319 suites/1036 tests plus contract, Worker, and guard suites",
+      "repositoryHardening": "Local final run passed 322 suites/1118 tests plus contract, Worker, and guard suites.",
       "evidenceLevel": "AUTOMATED",
       "missingEvidence": ["E1"],
       "remainingRisk": "No immutable CI bundle, DB/RLS runtime or two-platform mobile E2E evidence",
@@ -150,7 +150,7 @@
     {
       "id": 14,
       "name": "Localization",
-      "repositoryHardening": "UTF-8/mojibake guard and frozen existing-language surface",
+      "repositoryHardening": "UTF-8/mojibake guard and frozen existing-language surface. The Turkish copy guard now also reads copy-shaped object keys and error sinks, not only JSX attributes.",
       "evidenceLevel": "AUTOMATED",
       "missingEvidence": ["E1", "E3", "E7"],
       "remainingRisk": "Device truncation/copy/legal locale review absent",
@@ -200,7 +200,7 @@
     {
       "id": 19,
       "name": "Documentation",
-      "repositoryHardening": "Architecture, contracts, threat/OTA/rollback/manual/evidence docs updated",
+      "repositoryHardening": "Architecture, contracts, threat/OTA/rollback/manual/evidence docs updated, plus the workflow trigger classification and the UI/UX accessibility findings under docs/audit.",
       "evidenceLevel": "AUTOMATED",
       "missingEvidence": ["E1"],
       "remainingRisk": "Operational owner review and executed evidence links absent",
@@ -250,7 +250,7 @@
     {
       "id": 24,
       "name": "Store readiness",
-      "repositoryHardening": "Store/rehearsal checklists and frozen identities exist",
+      "repositoryHardening": "Store/rehearsal checklists and frozen identities exist, and docs/marketing carries a claims register that binds every publishable sentence to a file in this repository.",
       "evidenceLevel": "AUTOMATED",
       "missingEvidence": ["E2", "E3", "E7"],
       "remainingRisk": "Signed artifacts, internal tracks, privacy/UGC forms and review absent",

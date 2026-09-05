@@ -1,7 +1,8 @@
 # AAA-MVP release readiness
 
-Updated: 2026-08-31
+Updated: 2026-09-05
 Baseline commit: `1caace7fa52dd56e8fd968983b1b1a1ea36da7cd`
+Scorecard candidate: `a8005fd43374049cb40a245b80a57cad161aed28`
 Target version/runtime: `1.0.134` / `1.0.134`
 
 ## Current decision
@@ -72,7 +73,12 @@ was masking two real container-only failures before this candidate.
 
 - `npm run check` (typecheck, all guards, Worker types/tests) passed.
 - ESLint zero-warning and full-tree Prettier passed.
-- Jest passed 321 suites and 1084 tests; changed-line coverage was 93.22% (330/354) against a 90% gate.
+- Jest passed 322 suites and 1118 tests.
+- Three accessibility gates were added and pass: `guard:text-contrast` (WCAG AA text and graphic
+  contrast against every light layer a screen can put behind copy), `guard:touch-targets` (44dp
+  effective target and an accessibility role on every sized pressable), and
+  `guard:live-region-parity` (an `accessibilityLiveRegion` may not ship without the iOS
+  announcement that VoiceOver needs). Each was verified by reintroducing the defect it targets.
 - Semgrep reported 0 findings; Gitleaks reported no leaks on the current tree and across full history.
 - `npm run guard:dependency-audit` passed with four approved advisories. `browserslist` was upgraded
   to a genuinely patched release rather than accepted; see
@@ -147,16 +153,16 @@ refuses a score unless the area is `RUNTIME_VERIFIED` with no outstanding eviden
 
 |   # | Area                   | Baseline | Hardening / automated repository evidence                                                           | Runtime/operational evidence gap | Remaining risk                                                                 | Final    | Decision |
 | --: | ---------------------- | -------- | --------------------------------------------------------------------------------------------------- | -------------------------------- | ------------------------------------------------------------------------------ | -------- | -------- |
-|   1 | UI/UX                  | Unscored | Existing screens/states and UI guard remain; no redesign/product expansion                          | E1, E3                           | Visual/state regression on supported devices                                   | Unscored | NO-GO    |
+|   1 | UI/UX                  | Unscored | Existing screens/states and UI guard remain; contrast and touch-target gates added                  | E1, E3                           | Visual/state regression on supported devices                                   | Unscored | NO-GO    |
 |   2 | Multi-device           | Unscored | Responsive source/checklists exist                                                                  | E2, E3                           | Small/large, low/mid, Android/iOS matrix absent                                | Unscored | NO-GO    |
 |   3 | Performance            | Unscored | Projection-first reads, bounded network/queues and performance guards remain                        | E3, E4, E6                       | No same-device cold/warm, p95, FPS, memory/network baseline                    | Unscored | NO-GO    |
 |   4 | Security/privacy       | Unscored | RLS contracts, redaction, threat model, JWT/HMAC/replay and secret/SAST gates exist                 | E1, E4-E7                        | Provider secrets, adversarial staging, PII/incident and store privacy unproven | Unscored | NO-GO    |
 |   5 | Architecture           | Unscored | Layer guard; Supabase source of truth; projection-first and rollback-compatible matrix              | E1, E4, E5                       | Deployed contract/cutover parity not observed                                  | Unscored | NO-GO    |
-|   6 | DRY                    | Unscored | Shared transport, queue engine, UI primitives and narrow gateway modules are reused                 | E1                               | No final duplicate/complexity report bound to candidate                        | Unscored | NO-GO    |
+|   6 | DRY                    | Unscored | Shared transport, queue engine, UI primitives and one shared event location modal are reused        | E1                               | No final duplicate/complexity report bound to candidate                        | Unscored | NO-GO    |
 |   7 | Hardcode/config        | Unscored | Central release/public-env schema; environment-separated Worker/EAS config; preview fails closed    | E1, E5, E7                       | Provider values/secrets and stable domain not provisioned                      | Unscored | NO-GO    |
 |   8 | State                  | Unscored | Owner-scoped cache, optimistic rollback, persistent queue/stale-claim tests exist                   | E1, E3, E4                       | Two-device/race/process-death behavior incomplete                              | Unscored | NO-GO    |
 |   9 | Network/API            | Unscored | Timeout/abort/body-once/auth refresh; exact gateway contract, request ID, no mutation retry         | E1, E4-E6                        | Real 429/outage/latency and origin parity not observed                         | Unscored | NO-GO    |
-|  10 | Accessibility          | Unscored | Shared roles/labels/hit targets and source guards/checklists exist                                  | E3                               | VoiceOver/TalkBack, 200% font, keyboard, contrast/reduce-motion signoff absent | Unscored | NO-GO    |
+|  10 | Accessibility          | Unscored | Shared roles/labels/hit targets, contrast/touch/live-region parity guards and checklists exist      | E3                               | VoiceOver/TalkBack, 200% font, keyboard, contrast/reduce-motion signoff absent | Unscored | NO-GO    |
 |  11 | Scale                  | Unscored | k6/SQL validation contracts and distributed limiter configuration exist                             | E4, E5                           | Missing staging credentials/results, plans, pool/lock/limiter behavior         | Unscored | NO-GO    |
 |  12 | Resilience             | Unscored | Persistent retries/dead-letter/stale recovery plus offline and OTA rollback runbooks                | E3-E6, E8                        | Provider outage, restore, process kill and rollback drills absent              | Unscored | NO-GO    |
 |  13 | Tests                  | Unscored | Local final run passed 319 suites/1036 tests plus contract, Worker, and guard suites                | E1, E3-E5                        | No immutable CI bundle, DB/RLS runtime or two-platform mobile E2E evidence     | Unscored | NO-GO    |
