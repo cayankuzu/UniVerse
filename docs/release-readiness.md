@@ -79,7 +79,12 @@ was masking two real container-only failures before this candidate.
   effective target and an accessibility role on every sized pressable), and
   `guard:live-region-parity` (an `accessibilityLiveRegion` may not ship without the iOS
   announcement that VoiceOver needs). Each was verified by reintroducing the defect it targets.
-- Semgrep reported 0 findings; Gitleaks reported no leaks on the current tree and across full history.
+- Semgrep reports 0 findings and Gitleaks reports no leaks on the current tree or across full
+  history (22 commits, ~9.15 MB). Semgrep was **not** clean when this candidate branch was picked
+  up: it reported 7 blocking findings, all taint false positives in build-time guard scripts, and
+  all present at `093d47e`. The scope exclusion and its reasoning are in
+  [dependency-security-exceptions.md](dependency-security-exceptions.md); no rule was disabled and
+  no product path was excluded.
 - `npm run guard:dependency-audit` passed with four approved advisories. `browserslist` was upgraded
   to a genuinely patched release rather than accepted; see
   [dependency-security-exceptions.md](dependency-security-exceptions.md).

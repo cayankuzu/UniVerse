@@ -34,3 +34,21 @@ The mitigation is enforced, not just documented:
 Repository write access, pull-request review, and CI timeouts are the compensating controls for the
 build-only entries. Remove each exception immediately when an installable patched release appears.
 The gate fails on expiry, stale exceptions, or any unapproved advisory.
+
+## SAST scope exclusions
+
+`npm run security:sast` is a release gate, so every finding it reports has to be real. Eleven
+build-time guard scripts under `utils/guards/` are excluded in `.semgrepignore` because they trip
+taint rules that cannot apply to them:
+
+| Rule                                                                        | Why it fires                                                                                                            | Why it cannot be exploited                                                                                                                                                                                  |
+| --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `javascript.lang.security.audit.path-traversal.path-join-resolve-traversal` | Each guard walks a directory tree with `path.join(directory, entry.name)`, and the walker's root arrives as a parameter | The roots are module constants pointing inside this repository. The scripts run on a developer machine or a CI runner, take no argument, and read no request, environment value or file the caller chooses. |
+| `javascript.lang.security.audit.detect-non-literal-regexp`                  | `check-evidence-manifest.cjs` compiles `new RegExp(schema.pattern)`                                                     | The pattern comes from `quality/evidence-manifest.schema.json`, a file in this repository under review like any other source file.                                                                          |
+
+Scope is per file, never per rule or per directory: every rule stays armed everywhere else, and all
+product code under `src/`, `supabase/` and `infra/` is scanned unchanged. `npm run guard:secure-upload`
+independently fails if `.semgrepignore` ever grows an entry that would hide `AndroidManifest.xml`
+from native SAST.
+
+Reviewed 2026-09-05. Owner: Mobile Platform.

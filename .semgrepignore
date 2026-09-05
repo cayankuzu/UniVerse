@@ -11,10 +11,17 @@ GoogleService-Info.plist
 android/app/google-services.json
 android/keystore.properties
 android/keystores/
+# Build-time guards that walk this repository's own directories with constant
+# roots. They never see user input, so path-join and non-literal-regexp taint
+# findings on them are false positives. Product code under src/ and supabase/
+# stays fully scanned; see docs/dependency-security-exceptions.md.
+utils/guards/check-duplicate-modules.cjs
+utils/guards/check-evidence-manifest.cjs
 utils/guards/check-max-lines.cjs
 utils/guards/check-onboarding-mock.cjs
 utils/guards/check-release-toolchain.cjs
 utils/guards/check-runtime-hygiene.cjs
+utils/guards/check-turkish-copy.cjs
 utils/guards/check-server-route-size.cjs
 utils/guards/check-utf8-mojibake.cjs
 utils/guards/run-expo-doctor.cjs
